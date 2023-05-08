@@ -1,0 +1,16 @@
+{
+  "name": "mongo_migrations",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "status": "migrate-mongo status",
+    "up": "migrate-mongo up",
+    "down": "migrate-mongo down"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "migrate-mongo": "^9.0.0"
+  }
+}

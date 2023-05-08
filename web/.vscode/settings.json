@@ -1,0 +1,16 @@
+{
+	"files.exclude": {
+		"dist/": true
+	},
+	"editor.tabSize": 2,
+	"editor.defaultFormatter": "dbaeumer.vscode-eslint",
+	"editor.formatOnSave": true,
+	"typescript.preferences.importModuleSpecifier": "relative",
+	"eslint.format.enable": true,
+	"[json]": {
+		"editor.defaultFormatter": "esbenp.prettier-vscode"
+	},
+	"files.watcherExclude": {
+		"storage/**": true
+	},
+}
