@@ -226,7 +226,7 @@ export class UserService {
   }
 
   /** **************************************************
-   * CHATBOT MONTLY USAGE RELATED
+   * CHATBOT MONTHLY USAGE RELATED
    *************************************************** */
 
   async getUserMonthlyUsageData(
