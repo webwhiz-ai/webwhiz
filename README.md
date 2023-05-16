@@ -1,4 +1,4 @@
-# 💫 WebWhiz
+# WebWhiz
 
 Train ChatGPT on Your Website Data and Build an AI Chatbot that can instantly answer your customers queries.
 
@@ -49,10 +49,10 @@ Tokens are a unit of measurement used to calculate the amount of text data that 
 ### ***Can I train custom data?***
 Yes, you can train custom data by simply pasting content to WebWhiz
 
-## 🤷‍♂️ Can I bring my own open ai Key ❓
+### ***Can I bring my own open ai Key***
 Not at the moment, but, it will be possible in a couple of days.
 
-### What is the maximum size of context?
+### ***What is the maximum size of context?***
 WebWhiz have any limitations on the size of context. However, please note that the number of pages you can crawl may be limited based on the plan you choose. Please refer to our plans page to learn more about the specific limitations of each plan.
 
 ## 📑 License
