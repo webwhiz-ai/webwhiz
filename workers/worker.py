@@ -14,7 +14,8 @@ load_dotenv()
 
 # Redis related
 REDIS_HOST = os.getenv("REDIS_HOST") or "localhost"
-r = redis.Redis(host=REDIS_HOST, port=6379)
+REDIS_PORT = int(os.getenv("REDIS_PORT")) or 6379
+r = redis.Redis(host=REDIS_HOST, port=REDIS_PORT)
 
 # Mongodb Related
 MONGO_URI = os.getenv("MONGO_URI") or "mongodb://localhost:27017/"

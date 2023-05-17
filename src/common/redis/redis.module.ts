@@ -11,7 +11,10 @@ export const REDIS = 'REDIS';
       inject: [AppConfigService],
       useFactory: (appConfig: AppConfigService): Redis => {
         try {
-          const client = new Redis();
+          const client = new Redis(
+            appConfig.get('redisPort'),
+            appConfig.get('redisHost'),
+          );
           return client;
         } catch (e) {
           throw e;
