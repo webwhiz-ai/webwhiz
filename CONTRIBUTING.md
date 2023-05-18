@@ -61,6 +61,8 @@ source venv/bin/activate
 pip install -r requirements.txt
 
 # Run application with pm2
+cd ..
+yarn run build
 npm install -g pm2 # Use sudo if required
 pm2 start ecosystem.config.js
 ```
