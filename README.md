@@ -128,4 +128,6 @@ pm2 start ecosystem.config.js
 
 This will start the backend http server, the js worker and the python worker
 
+Also, please note that we are currently working on a docker-compose based setup, which will help you run WebWhiz with just a few commands.
+
 If you face any issues, reach out to hi@webwhiz.ai
