@@ -1,0 +1,54 @@
+.nestedForm {
+    position: relative;
+}
+.questionDeleteBtn {
+    position: absolute !important;
+    right: 0;
+    top: 0;
+    z-index: 9;
+}
+
+
+
+
+.poweredBy {
+    background-color: rgb(0, 0, 0, 0.06);
+    padding: 8px 10px;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    cursor: pointer;
+    color: #656565;
+    box-shadow: 0px 1px 1px 0px inset rgba(0, 0, 0, 0.12);
+    text-decoration: none;
+}
+.chatSampleMessages {
+    padding: 5px 10px;
+    margin-right: -5px;
+    margin-bottom: -5px;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+.chatSampleMessage {
+    font-size: 12px;
+    border-radius: 6px;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    margin-right: 5px;
+    margin-bottom: 5px;
+    cursor: pointer;
+    padding: 5px 8px;
+    transition: all 0.2s ease-in-out;
+    color: #333;
+    box-shadow: 0px 1px 1px 0px rgba(0, 0, 0, 0.08);
+}
+
+.chatSampleMessage:hover {
+    background-color: rgba(0, 0, 0, 0.04);
+    box-shadow: 0px 1px 2px 1px rgba(0, 0, 0, 0.08);
+}
+.chatSampleMessage:active {
+    box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.08) inset;
+}

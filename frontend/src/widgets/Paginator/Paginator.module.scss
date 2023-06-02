@@ -1,0 +1,39 @@
+
+.pagination {
+    display: flex;
+    list-style: none;
+    padding: 10px 10px;
+}
+
+.page, .previous, .next, .break {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    border-radius: 6px;
+    color: #333;
+    margin: 0 4px;
+    font-size: 14px;
+    font-weight: 500;
+    &.active {
+        color: #000;
+        box-shadow: 0px 0px 3px 0px inset rgba(0, 0, 0, 0.18);
+        background-color: rgba(0, 0, 0, 0.03);
+    }
+}
+
+.page, .break {
+    width: 26px;
+    height: 26px;
+}
+.previous, .next {
+    padding: 0 10px;
+}
+.previous {
+    margin-left: 0;
+    margin-right: 10px;
+}
+.next {
+    margin-right: 0;
+    margin-left: 10px;
+}

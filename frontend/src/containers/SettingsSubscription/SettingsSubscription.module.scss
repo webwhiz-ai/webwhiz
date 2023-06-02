@@ -1,0 +1,96 @@
+.pricingBlock {
+    padding: 40px 30px;
+    border: 2px solid var(--chakra-colors-blue-500);
+    border-radius: 16px;
+    text-align: left;
+    width: 25%;
+    &.highlight {
+        background: var(--chakra-colors-blue-500);
+        border: 2px solid var(--chakra-colors-blue-500);
+        box-sizing: border-box;
+        color: #FFF;
+        box-shadow: 0px 8px 40px 2px rgb(0 73 163 / 20%);
+    }
+    .highlightButton {
+        background-color: #FFF;
+        color: var(--chakra-colors-blue-500);
+    }
+    .pricingFactor {
+        position: relative;
+        top: -9px;
+        font-size: 16px;
+        left: 0;
+        margin-right: -4px;
+    }
+    .pricingBaseAmount {
+        font-weight: 900;
+        font-size: 16px;
+        line-height: 40px;
+        margin-left: 10px;
+
+        letter-spacing: 0.01em;
+        text-decoration-line: line-through;
+
+        color: var(--chakra-colors-blue-500);
+    }
+}
+.features {
+    list-style-type: none;
+    padding-left: 0;
+    font-size: 16px;
+    margin-bottom: 30px;
+    li {
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+    }
+}
+.pricingRange {
+    margin: 25px 0 25px 0;
+    font-weight: 600;
+    font-size: 52px;
+    line-height: 1.2;
+}
+.pricingPlan {
+    font-size: 19px;
+    font-weight: 400;
+    text-transform: uppercase;
+}
+.pricingDuration {
+    font-size: 16px;
+}
+.pricingDesc {
+    font-style: normal;
+    font-weight: normal;
+    font-size: 14px;
+    line-height: 20px;
+    color: #171923;
+    margin-bottom: 24px;
+}
+.pricingPromo {
+    padding: 18px 22px;
+    background: #FFFFFF;
+    border: 2px solid var(--chakra-colors-blue-500);
+    box-sizing: border-box;
+    border-radius: 8px;
+    color: var(--chakra-colors-blue-500);
+    margin-top: 12px;
+    font-size: 16px;
+}
+
+
+
+
+.mainHeading {
+    font-size: 48px;
+    margin-bottom: 20px;
+    font-weight: 600;
+}
+.subHeading {
+    font-size: 20px;
+    font-weight: 400;
+    margin-bottom: 0;
+    max-width: 570px;
+    color: #636363;
+    text-align: center;
+}

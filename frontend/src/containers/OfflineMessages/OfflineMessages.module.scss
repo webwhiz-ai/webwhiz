@@ -1,0 +1,104 @@
+.listCont {
+    width: 450px;
+}
+
+.active {
+    border-color: var(--chakra-colors-gray-900) !important;   
+    color: var(--chakra-colors-gray-900) !important;   
+}
+
+.chatDetailsCont {
+    padding: 30px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    max-width: 620px;
+    position: relative;
+}
+
+.pagination {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    z-index: 99;
+    background-color: #FFF;
+    border-top: 1px solid rgba(0, 0, 0, 0.12);
+    border-right: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+.listContInner {
+    border-right: 1px solid rgba(0, 0, 0, 0.12);
+    overflow-y: auto;
+    overflow-x: hidden;
+    height: 100%;
+    padding-bottom: 47px;
+}
+
+
+.listTab {
+    border-bottom: 0;
+    padding: 12px 20px;
+    cursor: pointer;
+    z-index: 9;
+    position: relative;
+    margin-right: -1px;
+    transition: color 0.2s ease-in-out;
+    &:hover {
+        color: var(--chakra-colors-gray-900);
+    }
+}
+.messageStart {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--chakra-colors-gray-600);
+}
+.messageTime {
+    font-size: 12px;
+    color: var(--chakra-colors-gray-500);
+    margin-bottom: 6px;
+}
+.activeList {
+    color: var(--chakra-colors-gray-900) !important;   
+    background-color: #faf9ff;
+    border-right: 3px solid var(--chakra-colors-blue-500);
+}
+
+.detailsItem {
+    border-radius: 6px;
+    line-height: 1.6;
+    font-size: 14px;
+    margin-bottom: 10px;
+    &.detailsItemMessage {
+        margin-top: 20px;
+        font-size: 16px;
+        line-height: 1.7;
+    }
+}
+.detailsItemInner {
+    
+    display: inline-block;
+}
+
+.loadingCont {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    top: 0;
+    background-color: rgba(255, 255, 255, 0.8);
+    align-items: center;
+    justify-content: center;
+    display: flex;
+    z-index: 999;
+}
+
+
+.detailsItemValue {
+    display: flex;
+    align-items: center;
+    color: var(--chakra-colors-gray-700);
+    svg {
+        color: var(--chakra-colors-gray-400);
+        margin-right: var(--chakra-space-2);
+    }
+}

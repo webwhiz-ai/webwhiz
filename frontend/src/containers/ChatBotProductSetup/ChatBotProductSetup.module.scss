@@ -1,0 +1,49 @@
+.urls {
+    cursor: pointer;
+    background-color: #FFF !important;
+    transition: background-color 0.2s ease-in-out;
+    position: relative; 
+    .urlSpinner {
+        position: absolute;
+        top: 0;
+        right: 0;
+        left: 0;
+        bottom: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: rgba(255, 255, 255, 0.8);
+        z-index: 9;
+    }
+    &:hover {
+        background-color: #f8f8f8 !important;
+        .urlBtn {
+            opacity: 1;
+        }
+    }
+    .urlBtn {
+        opacity: 0;
+        position: absolute;
+        right: 5px;
+        top: 5px;
+    }
+    &.firstUrl {
+        .urlBtn {
+            opacity: 1;
+        }
+    }
+}
+
+.crawlDataLoading {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9;
+    background-color: rgba(255, 255, 255, 0.6);
+}
+
