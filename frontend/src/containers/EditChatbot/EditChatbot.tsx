@@ -52,11 +52,11 @@ import { chatWidgetDefaultValues, getDomainFromUrl } from "../../utils/commonUti
 import { AddTrainingData } from "../AddTrainingData/AddTrainingData";
 import { AddTrainingDataForm } from "../AddTrainingDataForm/AddTrainingDataForm";
 import { NoDataSubscribeIcon } from "../../components/Icons/noData/NoDataSubscribeIcon";
-import { ChatSessions } from "../ChatSessions/ChatSessions";
-import { OfflineMessages } from "../OfflineMessages/OfflineMessages";
 import { SectionTitle } from "../../components/SectionTitle/SectionTitle";
 import { CurrentUser, User } from "../../services/appConfig";
-import { ChatBotCustomizeData, OfflineMessage, TrainingData, ChatSession, OfflineMessagePagination, ChatSessionPagination } from "../../types/knowledgebase.type";
+import { ChatBotCustomizeData, TrainingData, OfflineMessagePagination, ChatSessionPagination } from "../../types/knowledgebase.type";
+import { OfflineMessagesNew } from "../OfflineMessages/OfflineMessagesNew";
+import { ChatSessionsNew } from "../ChatSessions/ChatSessionsNew";
 export function validateEmailAddress(email: string) {
 	return email && !/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(email);
 }
@@ -172,35 +172,23 @@ const EditChatbot = (props: EditChatbotProps) => {
 		fetchData();
 	}, [props.match.params.chatbotId]);
 
-	const [chatSessions, setChatSessions] = React.useState<ChatSessionPagination>(
-		{
-			results: [] as ChatSession[],
-			pages: 0,
-		} as ChatSessionPagination
-	);
-	const [offlineMessages, setOfflineMessages] = React.useState<OfflineMessagePagination>(
-		{
-			results: [] as OfflineMessage[],
-			pages: 0,
-		} as OfflineMessagePagination
-	);
+	const [chatSessions, setChatSessions] = React.useState<ChatSessionPagination>();
+	const [offlineMessages, setOfflineMessages] = React.useState<OfflineMessagePagination>();
 
 	useEffect(() => {
 		async function fetchData() {
 			try {
 				const response = await getChatSessions(props.match.params.chatbotId, '1');
 				setChatSessions(response.data);
-				//setSelectedTrainingData(response.data[0] || {});
 			} catch (error) {
-				console.log("Unable to fetch chatbots", error);
+				console.log("Unable to fetch chatSessions", error);
 			} finally {
 			}
 			try {
 				const response = await getOfflineMessages(props.match.params.chatbotId, '1');
 				setOfflineMessages(response.data);
-				//setSelectedTrainingData(response.data[0] || {});
 			} catch (error) {
-				console.log("Unable to fetch chatbots", error);
+				console.log("Unable to fetch OfflineMessages", error);
 			} finally {
 			}
 		}
@@ -208,28 +196,26 @@ const EditChatbot = (props: EditChatbotProps) => {
 	}, [props.match.params.chatbotId]);
 
 
-	const handlePageClick = React.useCallback(async (event) => {
+	const handlePageClick = React.useCallback(async (selectedPage: number) => {
 		try {
 			setIsChatLoading(true);
-			const response = await getChatSessions(props.match.params.chatbotId, event.selected + 1);
+			const response = await getChatSessions(props.match.params.chatbotId, (selectedPage + 1).toString());
 			setChatSessions(response.data);
-			//setSelectedTrainingData(response.data[0] || {});
 		} catch (error) {
-			console.log("Unable to fetch chats", error);
+			console.log("Unable to fetch chatSessions", error);
 		} finally {
 			setIsChatLoading(false);
 		}
 	}, [props.match.params.chatbotId]);
 
 
-	const handleOfflinePageClick = React.useCallback(async (event) => {
+	const handleOfflinePageClick = React.useCallback(async (selectedPage: number) => {
 		try {
 			setIsChatLoading(true);
-			const response = await getOfflineMessages(props.match.params.chatbotId, event.selected + 1);
+			const response = await getOfflineMessages(props.match.params.chatbotId, (selectedPage + 1).toString());
 			setOfflineMessages(response.data);
-			//setSelectedTrainingData(response.data[0] || {});
 		} catch (error) {
-			console.log("Unable to fetch chats", error);
+			console.log("Unable to fetch offlineMeesages", error);
 		} finally {
 			setIsChatLoading(false);
 		}
@@ -731,7 +717,7 @@ const EditChatbot = (props: EditChatbotProps) => {
 				>
 					<SectionTitle title="Chat sessions" description="All the chat sessions with your customers." />
 					<Flex w="100%" className={styles.trainingDataCont}>
-						{chatSessions && <ChatSessions isChatLoading={isChatLoading} handlePageClick={handlePageClick} chatData={chatSessions} />}
+						{chatSessions && <ChatSessionsNew isChatListLoading={isChatLoading} onPageChange={handlePageClick} chatSessionsPage={chatSessions} />}
 					</Flex>
 				</Flex>
 				<Flex
@@ -744,7 +730,7 @@ const EditChatbot = (props: EditChatbotProps) => {
 				>
 					<SectionTitle title="Offline messages" description="Offline messages sent by your customers." />
 					<Flex w="100%" className={styles.trainingDataCont}>
-						{offlineMessages && <OfflineMessages isChatLoading={isChatLoading} handlePageClick={handleOfflinePageClick} chatData={offlineMessages} />}
+						{offlineMessages && offlineMessages.results && <OfflineMessagesNew isChatListLoading={isChatLoading} onPageChange={handleOfflinePageClick} chatSessionsPage={offlineMessages} />}
 					</Flex>
 				</Flex>
 				<Flex
