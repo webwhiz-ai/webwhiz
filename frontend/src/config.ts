@@ -1,2 +1,2 @@
-export const GOOGLE_AUTH_ID = '158883259855-qn8g2bi77kqo0igt20pi6jb58797upm5.apps.googleusercontent.com'
-export const baseURL = 'https://api.webwhiz.ai';
+export const GOOGLE_AUTH_ID = process.env.GOOGLE_AUTH_ID;
+export const baseURL = process.env.REACT_APP_BASE_URL;
