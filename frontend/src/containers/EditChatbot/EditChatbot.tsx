@@ -46,7 +46,7 @@ import { ChatBotsCustomize } from "../ChatBotsCustomize/ChatBotsCustomize";
 import { useLocation } from "react-router-dom";
 
 import styles from "./EditChatbot.module.scss";
-import { fetchKnowledgebaseCrawlData, customizeWidget, deleteTrainingData, fetcKnowledgebase, fetchKnowledgebaseDetails, generateEmbeddings, getTrainingData, getTrainingDataDetails, updateWebsiteData, getChatSessions, getOfflineMessages } from "../../services/knowledgebaseService";
+import { fetchKnowledgebaseCrawlData, customizeWidget, deleteTrainingData, fetcKnowledgebase, fetchKnowledgebaseDetails, generateEmbeddings, getTrainingData, getTrainingDataDetails, updateWebsiteData, getChatSessions, getOfflineMessages, updatePrompt } from "../../services/knowledgebaseService";
 import { ChatBot } from "../../components/ChatBot/ChatBot";
 import { chatWidgetDefaultValues, getDomainFromUrl } from "../../utils/commonUtils";
 import { AddTrainingData } from "../AddTrainingData/AddTrainingData";
@@ -665,26 +665,30 @@ const EditChatbot = (props: EditChatbotProps) => {
 						display: currentStep === "customize" ? "flex" : "none",
 					}}
 				>
-					<ChatBotsCustomize
-						onBackClick={() => {
-							history.push("/app/chat-bots/");
-						}}
-						isSubmitting={isSubmitting}
-						primaryButtonLabel="Update widget style"
-						defaultCustomizationValues={getDefaultCustomizationValues()}
-						onNextClick={async (formData: ChatBotCustomizeData) => {
-							console.log('formData', formData, chatBot)
+                    {
+                        chatBot._id && <ChatBotsCustomize
+                            onBackClick={() => {
+                                history.push("/app/chat-bots/");
+                            }}
+                            isSubmitting={isSubmitting}
+                            defaultPrompt={chatBot.prompt}
+                            primaryButtonLabel="Update widget style"
+                            defaultCustomizationValues={getDefaultCustomizationValues()}
+                            onNextClick={async (formData: ChatBotCustomizeData) => {
 
-							try {
-								setIsSubmitting(true)
-								await customizeWidget(chatBot._id, formData);
-							} catch (error) {
+                                try {
+                                    setIsSubmitting(true)
+                                    customizeWidget(chatBot._id, formData);
+                                    updatePrompt(chatBot._id, formData.prompt || '');
+                                } catch (error) {
 
-							} finally {
-								setIsSubmitting(false)
-							}
-						}}
-					/>
+                                } finally {
+                                    setIsSubmitting(false)
+                                }
+                            }}
+                        />
+                    }
+					
 				</Flex>
 				<Flex
 					direction="column"

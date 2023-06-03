@@ -80,6 +80,7 @@ export async function getDemoSesions(): Promise<AxiosResponse<Knowledgebase[]>> 
 		url: '/chatbot/demo_session',
 	});
 }
+
 export async function customizeWidget(id:string, data: ChatBotCustomizeData): Promise<AxiosResponse<Knowledgebase[]>> {
 	return await axios({
 		baseURL: baseURL,
@@ -88,6 +89,18 @@ export async function customizeWidget(id:string, data: ChatBotCustomizeData): Pr
 		url: `knowledgebase/${id}/chat_widget_data`,
 	});
 }
+
+export async function updatePrompt(id:string, prompt: string): Promise<AxiosResponse<Knowledgebase[]>> {
+	return await axios({
+		baseURL: baseURL,
+		method: 'put',
+		data: {
+			prompt: prompt
+		},
+		url: `knowledgebase/${id}/prompt`,
+	});
+}
+
 export async function updateWebsiteData(id:string, data: ChatBotCustomizeData): Promise<AxiosResponse<Knowledgebase[]>> {
 	return await axios({
 		baseURL: baseURL,

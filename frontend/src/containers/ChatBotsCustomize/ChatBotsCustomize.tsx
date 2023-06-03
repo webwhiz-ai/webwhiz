@@ -43,6 +43,7 @@ interface ChatBotsCustomizeProps {
 	primaryButtonLabel?: string;
 	isSubmitting?: boolean;
 	showheader?: boolean;
+    defaultPrompt?: string;
 	showTimeMessage?: boolean;
 }
 
@@ -50,6 +51,7 @@ export const ChatBotsCustomize = ({
 	onNextClick,
 	onBackClick,
 	defaultCustomizationValues,
+    defaultPrompt = '',
 	primaryButtonLabel = "Update widget style",
 	isSubmitting = false,
 }: ChatBotsCustomizeProps) => {
@@ -326,6 +328,29 @@ export const ChatBotsCustomize = ({
 														</Field>
 													</TabPanel>
 													<TabPanel pt="8">
+                                                        <Field type="text" name="prompt">
+															{({ field, form }: any) => (
+																<FormControl
+																	mb="6"
+																	isInvalid={
+																		form.errors.prompt && form.touched.prompt
+																	}
+																>
+																	<FormLabel fontSize="sm" htmlFor="prompt" color="gray.700" fontWeight="400" >
+																		Base Prompt
+																	</FormLabel>
+																	<Textarea
+																		{...field}
+																		rows={4}
+                                                                        defaultValue={defaultPrompt}
+																		placeholder="This is the base prompt that is used to give instructions to the chatbot. You can customize this prompt to fit your use case."
+																	/>
+																	<FormErrorMessage>
+																		{form.errors.prompt}
+																	</FormErrorMessage>
+																</FormControl>
+															)}
+														</Field>
 														<Field type="text" name="showReadMore">
 															{({ field, form }: any) => (
 																<FormControl mb="6">
