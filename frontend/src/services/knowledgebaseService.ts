@@ -1,6 +1,6 @@
 import axios, { AxiosResponse } from 'axios';
 import { baseURL } from '../config';
-import { ChatBotCustomizeData, ChatSession, ChatSessionDetail, CrawlDataDetail, CrawlDataListPagination, Knowledgebase, OfflineMessage, OfflineMessagePagination, TrainingData, TrainingDataDetail } from '../types/knowledgebase.type';
+import { ChatBotCustomizeData, ChatSessionDetail, CrawlDataDetail, CrawlDataListPagination, Knowledgebase, OfflineMessagePagination, TrainingData, TrainingDataDetail, ChatSessionPagination } from '../types/knowledgebase.type';
 export interface Product {
 	id: string;
 	name: string;
@@ -169,7 +169,7 @@ export async function getTrainingDataDetails(knowledgebaseId: string, id: string
 }
 
 
-export async function getChatSessions(id: string, page: string): Promise<AxiosResponse<ChatSession[]>> {
+export async function getChatSessions(id: string, page: string): Promise<AxiosResponse<ChatSessionPagination>> {
 	return await axios({
 		baseURL: baseURL,
 		method: 'get',

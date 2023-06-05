@@ -1,10 +1,9 @@
 import * as React from "react";
 import ReactPaginate from "react-paginate";
-
 import styles from "./Paginator.module.scss";
 
 interface PaginatorProps {
-	onPageChange: (event: any) => void;
+	onPageChange: (page: number) => void;
 	pageRangeDisplayed: number;
 	pageCount: number;
 }
@@ -15,6 +14,11 @@ export const Paginator = ({
 	pageRangeDisplayed,
 	pageCount
 }: PaginatorProps) => {
+
+	const handlePageChange = React.useCallback((selectedItem: { selected: number }) => {
+		onPageChange(selectedItem.selected);
+	}, [onPageChange]);
+
 	return (
 
 		<ReactPaginate
@@ -27,7 +31,7 @@ export const Paginator = ({
 			pageClassName={styles.page}
 			activeClassName={styles.active}
 			breakClassName={styles.break}
-			onPageChange={onPageChange}
+			onPageChange={handlePageChange}
 			pageRangeDisplayed={pageRangeDisplayed}
 			pageCount={pageCount}
 			previousLabel="previous"

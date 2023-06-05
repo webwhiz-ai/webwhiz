@@ -122,8 +122,8 @@ export interface UserData {
 
 export interface ChatSession {
     firstMessage: MessageList;
-    knowledgebaseId: string;
     startedAt: string;
+    updatedAt: string;
     userData: UserData;
     _id: string;
 }
