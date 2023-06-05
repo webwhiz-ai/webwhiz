@@ -15,6 +15,7 @@ export const OfflineMessageWindow = ({ offlineChatData }: OfflineMessageWindowPr
             h="100%"
             overflowX="hidden"
             overflowY="auto"
+            maxW="620px"
             position="relative"
             p={8}
         >

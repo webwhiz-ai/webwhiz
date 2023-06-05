@@ -20,7 +20,6 @@ export const ChatSessionsNew = ({ isChatListLoading, chatSessionsPage, onPageCha
     React.useEffect(() => {
         const firstMessageChat = chatSessionsPage.results.find((chatSession) => chatSession.firstMessage);
         setSelectedChat(firstMessageChat || chatSessionsPage.results[0]);
-        console.log("Selected chat", selectedChat)
     }, [chatSessionsPage])
 
     React.useEffect(() => {
@@ -30,7 +29,6 @@ export const ChatSessionsNew = ({ isChatListLoading, chatSessionsPage, onPageCha
             setIsChatLoading(true);
             try {
                 const response = await getChatSessionDetails(selectedChat._id);
-                console.log("response", response);
                 if (!ignore) setChatData(response.data);
             } catch (error) {
                 console.log("Unable to fetch deals", error);
@@ -43,7 +41,6 @@ export const ChatSessionsNew = ({ isChatListLoading, chatSessionsPage, onPageCha
     }, [chatSessionsPage.results.length, selectedChat]);
 
     const handleSelectChat = React.useCallback((chatSession: ChatSession) => {
-        console.log('handleSelectChat', chatSession);
         setSelectedChat(chatSession);
     }, []);
 

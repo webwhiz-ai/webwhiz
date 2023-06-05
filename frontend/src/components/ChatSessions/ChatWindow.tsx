@@ -14,6 +14,7 @@ export const ChatWindow = ({ messages, isMessagesLoading }: ChatWindowProps) => 
             w="calc(100% - 450px)"
             h="100%"
             overflowX="hidden"
+            maxW="620px"
             overflowY="auto"
             position="relative"
             p={4}
