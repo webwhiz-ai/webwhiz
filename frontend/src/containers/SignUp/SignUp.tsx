@@ -12,7 +12,6 @@ import {
 	useToast,
 } from '@chakra-ui/react';
 
-import { useGoogleLogin } from '@react-oauth/google';
 
 import { Field, Form, Formik } from 'formik';
 
@@ -25,8 +24,8 @@ import {
 	withRouter,
 } from 'react-router-dom';
 import { Logo } from '../../components/Logo/Logo';
-import GoogleLogin from 'react-google-login';
-import { GoogleIcon } from '../../components/Icons/Google';
+import { GOOGLE_AUTH_ID } from '../../config';
+import LoginWithGoogle from '../LoginWithGoogle/LoginWithGoogle';
 export function validateEmailAddress(email: string) {
 	return email && !/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(email);
 }
@@ -91,11 +90,6 @@ const SignUp = (props: SignUpProps) => {
 			isClosable: true,
 		});
 	}, [toast])
-
-	const googleSignUp = useGoogleLogin({
-		onSuccess: responseGoogleSuccess,
-		onError: responseGoogleFailure
-	});
 
 	return (
 		<Flex bg='white' h='100vh' direction='column'>
@@ -234,17 +228,9 @@ const SignUp = (props: SignUpProps) => {
 								>
 									Sign up for free
 								</Button>
-								<div className={styles.googleSingIn}>
-								
-
-
-
-									<Button onClick={() => googleSignUp()}
-											isFullWidth
-											size='lg'leftIcon={<GoogleIcon />}>
-											Sign up with Google
-										</Button>
-								</div>
+								{GOOGLE_AUTH_ID && <div className={styles.googleSingIn}>
+										<LoginWithGoogle buttonText='Sign up with Google' responseGoogleSuccess={responseGoogleSuccess} responseGoogleFailure={responseGoogleFailure}></LoginWithGoogle>
+									</div>}
 							</Form>
 						)}
 					</Formik>

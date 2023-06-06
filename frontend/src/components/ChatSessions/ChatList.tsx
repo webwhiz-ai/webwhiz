@@ -46,7 +46,6 @@ export const ChatList = ({ isChatListLoading, chatSessionsPage, selectedChat, on
                             .filter((chatSession: ChatSession) => chatSession.firstMessage)
                             .map((chatSession: ChatSession) => (
                                 <ChatListItem
-                                    {...console.log('selected', selectedChat)}
                                     key={chatSession._id}
                                     isSelected={selectedChat._id === chatSession._id}
                                     chatSessionData={chatSession}

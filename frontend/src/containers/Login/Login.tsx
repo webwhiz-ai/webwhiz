@@ -9,7 +9,6 @@ import {
 	Heading,
 	Input,
 	InputGroup,
-	InputRightElement,
 	Text,
 	useToast,
 } from '@chakra-ui/react';
@@ -27,9 +26,8 @@ import {
 } from 'react-router-dom';
 import { useState } from 'react';
 import { Logo } from '../../components/Logo/Logo';
-import GoogleLogin from 'react-google-login';
-import { GoogleIcon } from '../../components/Icons/Google';
-import { useGoogleLogin } from '@react-oauth/google';
+import LoginWithGoogle from '../LoginWithGoogle/LoginWithGoogle';
+import { GOOGLE_AUTH_ID } from '../../config';
 export function validateEmailAddress(email: string) {
 	return email && !/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(email);
 }
@@ -90,7 +88,7 @@ const Login = (props: LoginProps) => {
 	}, [props, toast])
 
 
-	
+
 	const responseGoogleFailure = React.useCallback((error) => {
 		let title = 'Oops! Something went wrong!';
 		toast({
@@ -99,11 +97,6 @@ const Login = (props: LoginProps) => {
 			isClosable: true,
 		});
 	}, [toast])
-
-	const googleSignIn = useGoogleLogin({
-		onSuccess: responseGoogleSuccess,
-		onError: responseGoogleFailure
-	});
 
 
 	if (isAuthenticated) {
@@ -232,7 +225,7 @@ const Login = (props: LoginProps) => {
 													id='password'
 													placeholder='********'
 												/>
-												
+
 											</InputGroup>
 											<FormErrorMessage>
 												{form.errors.password}
@@ -256,13 +249,9 @@ const Login = (props: LoginProps) => {
 								>
 									Sign in
 								</Button>
-								<div className={styles.googleSingIn}>
-										<Button onClick={() => googleSignIn()}
-											isFullWidth
-											size='lg'leftIcon={<GoogleIcon />}>
-											Sign in with Google
-										</Button>
-								</div>
+								{GOOGLE_AUTH_ID && <div className={styles.googleSingIn}>
+									<LoginWithGoogle buttonText='Sign in with Google' responseGoogleSuccess={responseGoogleSuccess} responseGoogleFailure={responseGoogleFailure}></LoginWithGoogle>
+								</div>}
 							</Form>
 						)}
 					</Formik>

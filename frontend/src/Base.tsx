@@ -81,11 +81,9 @@ export class Base extends React.Component<AppProps, AppState> {
 			isAuthenticated: false,
 		});
 	};
-	render() {
-		return (
-			<ChakraProvider theme={theme}>
-				<GoogleOAuthProvider clientId={GOOGLE_AUTH_ID}>
-					<Box>
+
+	getAppRoutes = () => {
+		return <Box>
 						<Grid minH='100vh'>
 							<Router>
 								<Switch>
@@ -121,7 +119,15 @@ export class Base extends React.Component<AppProps, AppState> {
 							</Router>
 						</Grid>
 					</Box>
-				</GoogleOAuthProvider>
+	}
+
+	render() {
+		return (
+			<ChakraProvider theme={theme}>
+				{GOOGLE_AUTH_ID ? <GoogleOAuthProvider clientId={GOOGLE_AUTH_ID}>
+					{this.getAppRoutes()}
+				</GoogleOAuthProvider> : this.getAppRoutes()}
+				
 			</ChakraProvider>
 		);
 	}
