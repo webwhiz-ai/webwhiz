@@ -5,15 +5,23 @@ import { AppConfigService } from '../config/appConfig.service';
 @Injectable()
 export class EmailService {
   private readonly logger: Logger;
+  private isSgInitialized: boolean;
 
   constructor(private appConfig: AppConfigService) {
     this.logger = new Logger(EmailService.name);
 
     const sendGridApiKey = this.appConfig.get('sendGridApiKey');
-    sgMail.setApiKey(sendGridApiKey);
+    if (!sendGridApiKey) {
+      this.isSgInitialized = false;
+    } else {
+      sgMail.setApiKey(sendGridApiKey);
+      this.isSgInitialized = true;
+    }
   }
 
   async sendWelcomeEmail(email: string, username?: string) {
+    if (!this.isSgInitialized) return;
+
     const msg = {
       to: email,
       from: { email: 'hi@webwhiz.ai', name: 'WebWhiz.ai' },
@@ -34,6 +42,8 @@ export class EmailService {
     queryText: string,
     queryName?: string,
   ) {
+    if (!this.isSgInitialized) return;
+
     const msg = {
       to: email,
       from: { email: 'hi@webwhiz.ai', name: 'WebWhiz.ai' },
@@ -52,6 +62,8 @@ export class EmailService {
   }
 
   async sendToken80ExhaustedEmail(email: string) {
+    if (!this.isSgInitialized) return;
+
     const msg = {
       to: email,
       from: { email: 'hi@webwhiz.ai', name: 'WebWhiz.ai' },
@@ -63,6 +75,8 @@ export class EmailService {
   }
 
   async sendToken100ExhaustedEmail(email: string) {
+    if (!this.isSgInitialized) return;
+
     const msg = {
       to: email,
       from: { email: 'hi@webwhiz.ai', name: 'WebWhiz.ai' },
