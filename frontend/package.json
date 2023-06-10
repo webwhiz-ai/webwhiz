@@ -33,6 +33,7 @@
     "react-select": "^5.1.0",
     "react-textarea-autosize": "^8.4.0",
     "recharts": "^2.1.8",
+    "sass": "^1.40.0",
     "save": "^2.4.0",
     "typescript": "^3.9.5",
     "web-vitals": "^0.2.2"
@@ -60,7 +61,6 @@
     ]
   },
   "devDependencies": {
-    "@types/react-router-dom": "^5.1.8",
-    "sass": "^1.40.0"
+    "@types/react-router-dom": "^5.1.8"
   }
 }

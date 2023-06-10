@@ -24,7 +24,8 @@ mongo = pymongo.MongoClient(MONGO_URI)
 db = mongo[MONGO_DBNAME]
 
 # Celery worker related
-app = Celery("cosine_similiary_worker", broker="redis://", backend="redis://")
+REDIS_CONN_STR = f"redis://{REDIS_HOST}:{REDIS_PORT}/"
+app = Celery("cosine_similiary_worker", broker=REDIS_CONN_STR, backend=REDIS_CONN_STR)
 app.conf.result_expires = 60
 
 

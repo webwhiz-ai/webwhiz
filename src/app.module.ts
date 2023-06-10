@@ -15,6 +15,7 @@ import { EmailModule } from './common/email/email.module';
 import * as Sentry from '@sentry/node';
 import '@sentry/tracing';
 import { ImportersModule } from './importers/importers.module';
+import { TaskModule } from './task/task.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { ImportersModule } from './importers/importers.module';
     RedisModule,
     MongoModule,
     CeleryClientModule,
+    TaskModule,
     OpenaiModule,
     KnowledgebaseModule,
     ImportersModule,

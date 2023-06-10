@@ -7,6 +7,7 @@ import { NewOfflineMsgDTO } from './offline-msg.dto';
 import { OfflineMessage, OFFLINE_MSG_COLLECTION } from './offline-msg.schema';
 import { EmailService } from '../../common/email/email.service';
 import { UserService } from '../../user/user.service';
+import { getLimitOffsetPaginatedResponse } from "src/common/utils";
 
 @Injectable()
 export class OfflineMsgService {
@@ -47,46 +48,35 @@ export class OfflineMsgService {
   async getPaginatedOfflineMsgsForKnowledgebase(
     kbId: ObjectId,
     pageSize: number,
-    before?: string,
-    after?: string,
-  ): Promise<OfflineMessage[]> {
+    page?: number
+  ) {
     const itemsPerPage = Math.min(pageSize, 50);
 
-    if (before) {
-      const msgs = await this.offlineMsgCollection
-        .find(
-          {
-            knowledgebaseId: kbId,
-            _id: { $gt: new ObjectId(before) },
-          },
-          { limit: itemsPerPage, sort: { _id: -1 } },
-        )
-        .toArray();
-      return msgs;
-    }
+    const projectionFields = {
+      _id: 1,
+      chatSessionId: 1,
+      name: 1,
+      email: 1,
+      message: 1,
+      url: 1,
+      createdAt: 1,
+    };
 
-    if (after) {
-      const msgs = await this.offlineMsgCollection
-        .find(
-          {
-            knowledgebaseId: kbId,
-            _id: { $lt: new ObjectId(after) },
-          },
-          { limit: itemsPerPage, sort: { _id: -1 } },
-        )
-        .toArray();
-      return msgs;
-    }
+    const filter = {
+      knowledgebaseId: kbId,
+    };
 
-    const msgs = await this.offlineMsgCollection
-      .find(
-        {
-          knowledgebaseId: kbId,
-        },
-        { limit: itemsPerPage, sort: { _id: -1 } },
-      )
-      .toArray();
-    return msgs;
+    const response = await getLimitOffsetPaginatedResponse(
+      this.offlineMsgCollection,
+      filter,
+      projectionFields,
+      "_id",
+      -1,
+      itemsPerPage,
+      page
+    );
+
+    return response;
   }
 
   /*********************************************************
@@ -138,21 +128,15 @@ export class OfflineMsgService {
     user: UserSparse,
     knowledgebaseId: string,
     pageSize: number,
-    before?: string,
-    after?: string,
+    page?: number
   ) {
     const kbId = new ObjectId(knowledgebaseId);
 
     const kb = await this.kbDbService.getKnowledgebaseById(kbId);
-    if (!user._id.equals(kb.owner)) {
-      throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
+    if (!kb || !user._id.equals(kb.owner)) {
+      throw new HttpException("Unauthorized", HttpStatus.UNAUTHORIZED);
     }
 
-    return this.getPaginatedOfflineMsgsForKnowledgebase(
-      kbId,
-      pageSize,
-      before,
-      after,
-    );
+    return this.getPaginatedOfflineMsgsForKnowledgebase(kbId, pageSize, page);
   }
 }

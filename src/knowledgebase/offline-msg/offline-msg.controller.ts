@@ -4,6 +4,7 @@ import {
   Get,
   HttpException,
   HttpStatus,
+  Param,
   Post,
   Query,
   Req,
@@ -23,13 +24,12 @@ export class OfflineMessageController {
     return this.offlineMsgService.createOfflineMessage(data);
   }
 
-  @Get('/')
+  @Get('/:kbId')
   async getOfflineMessagesList(
     @Req() req: RequestWithUser,
-    @Query('kbId') kbId: string,
+    @Param('kbId') kbId: string,
     @Query('page_size') pageSize: number,
-    @Query('before') before?: string,
-    @Query('after') after?: string,
+    @Query('page') page?: number,
   ) {
     const { user } = req;
 
@@ -41,8 +41,7 @@ export class OfflineMessageController {
       user,
       kbId,
       pageSize || 10,
-      before,
-      after,
+      page
     );
   }
 }

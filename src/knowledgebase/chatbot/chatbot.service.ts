@@ -8,20 +8,27 @@ import {
 import { Redis } from 'ioredis';
 import { ObjectId } from 'mongodb';
 import { endWith, map, of, skipLast } from 'rxjs';
+import {
+  CELERY_CLIENT,
+  CeleryClientQueue,
+  CeleryClientService,
+} from '../../common/celery/celery-client.module';
+import { EmailService } from '../../common/email/email.service';
 import { REDIS } from '../../common/redis/redis.module';
 import { SubscriptionPlanInfoService } from '../../subscription/subscription-plan.service';
+import { TaskType } from '../../task/task.schema';
+import { TaskService } from '../../task/task.service';
 import { UserSparse } from '../../user/user.schema';
 import { UserService } from '../../user/user.service';
+import { KnowledgebaseDbService } from '../knowledgebase-db.service';
+import { checkUserIsOwnerOfKb } from '../knowledgebase-utils';
 import {
   ChatQueryAnswer,
   ChatSession,
   KnowledgebaseStatus,
 } from '../knowledgebase.schema';
-import { KnowledgebaseDbService } from '../knowledgebase-db.service';
-import { OpenaiChatbotService } from './openaiChatbotService';
-import { checkUserIsOwnerOfKb } from '../knowledgebase-utils';
 import { PromptTestDTO } from './chatbot.dto';
-import { PromptService } from '../prompt/prompt.service';
+import { OpenaiChatbotService } from './openaiChatbotService';
 
 const CHAT_SESION_EXPIRY_TIME = 5 * 60;
 const CHUNK_FILTER_THRESHOLD = 0.3;
@@ -34,7 +41,9 @@ export class ChatbotService {
     private kbDbService: KnowledgebaseDbService,
     private openaiChatbotService: OpenaiChatbotService,
     private subPlanInfoService: SubscriptionPlanInfoService,
-    private promptService: PromptService,
+    private emailService: EmailService,
+    private taskService: TaskService,
+    @Inject(CELERY_CLIENT) private celeryClient: CeleryClientService,
     @Inject(REDIS) private redis: Redis,
   ) {}
 
@@ -92,6 +101,68 @@ export class ChatbotService {
     ]);
   }
 
+  /**
+   * Notify user of token limit exhaustion (at 80% and 100%)
+   * Has logic to not notify only one time per user / month
+   * @param userId
+   * @returns
+   */
+  public async notifyUserOfTokenLimitExhaustion(userId: ObjectId) {
+    //
+    // Check from the usage if the token is 80% exceeded or 100% exceeded
+    //
+
+    const monthUsageData = await this.userService.getUserMonthlyUsageData(
+      userId,
+    );
+
+    const subscriptionPlan = this.subPlanInfoService.getSubscriptionPlanInfo(
+      monthUsageData.activeSubscription,
+    );
+
+    // We are sure that this function will be invoked only if the token
+    // limit is exeeded for the current month, so no need of verifying
+    // if the monthUsage.month is current month
+
+    const maxTokens = subscriptionPlan.maxTokens;
+
+    let emailSendFn: (email: string) => Promise<any>;
+    let emailSendTaskName;
+
+    if (monthUsageData.monthUsage.count >= maxTokens) {
+      emailSendTaskName = `EMAIL_TOKEN_100_${userId}_${monthUsageData.monthUsage.month}`;
+      emailSendFn = this.emailService.sendToken100ExhaustedEmail;
+    } else if (monthUsageData.monthUsage.count >= 0.8 * maxTokens) {
+      emailSendTaskName = `EMAIL_TOKEN_80_${userId}_${monthUsageData.monthUsage.month}`;
+      emailSendFn = this.emailService.sendToken80ExhaustedEmail;
+    }
+
+    if (!(emailSendFn || emailSendTaskName)) return; // Something is wrong at the triggering side
+
+    // Check if an email has already been sent to the user
+    if ((await this.taskService.getTaskByName(emailSendTaskName)) !== null)
+      return;
+
+    // Send mail
+    const user = await this.userService.findUserByIdSparse(
+      userId.toHexString(),
+    );
+    console.log(`Sending mail to ${user.email}`);
+    await emailSendFn(user.email);
+
+    // Update task db to record that email has been sent
+    await this.taskService.insertTask({
+      name: emailSendTaskName,
+      type: TaskType.EMAIL,
+      payload: {
+        userId: user._id,
+        email: user.email,
+      },
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+  }
+
   private async isUseUnderUsageLimits(
     userId: ObjectId,
     maxUsage: number,
@@ -113,6 +184,12 @@ export class ChatbotService {
       // If the last monthusage was reported for current month and year
       // check the usage count
       if (year === currYear && month === currMonth) {
+        if (monthUsageData.monthUsage.count >= 0.8 * maxUsage) {
+          // Trigger notification to user about token limit
+          const client = this.celeryClient.get(CeleryClientQueue.CRAWLER);
+          const task = client.createTask('tasks.notify_token_limit');
+          await task.applyAsync([userId.toHexString()]);
+        }
         return monthUsageData.monthUsage.count < maxUsage;
       } else {
         // Else return true as this is the first call for current month
@@ -174,6 +251,7 @@ export class ChatbotService {
 
     // Get answer from chatgpt
     const prevMessages = sessionData.messages.slice(-2);
+
     const answer = await this.openaiChatbotService.getAiAnswer(
       sessionData.kbName,
       query,
@@ -211,6 +289,10 @@ export class ChatbotService {
    * @returns
    */
   async getAnswerStream(sessionId: string, query: string) {
+    //
+    // Checks and Validations
+    //
+
     const sessionData = await this.getChatSessionDataFromCache(sessionId);
     if (!sessionData) {
       throw new HttpException('Invalid Session Id', HttpStatus.NOT_FOUND);
@@ -234,6 +316,10 @@ export class ChatbotService {
       return of(answer);
     }
 
+    //
+    // Get top N matching chunks for current query
+    //
+
     const kbId = sessionData.knowledgebaseId;
 
     // Get top n chunks from knowledge base
@@ -242,6 +328,10 @@ export class ChatbotService {
       query,
       CHUNK_FILTER_THRESHOLD,
     );
+
+    //
+    // Get answer for query
+    //
 
     // Get answer from chatgpt
     const prevMessages = sessionData.messages.slice(-2);

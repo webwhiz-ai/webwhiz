@@ -19,6 +19,7 @@ import {
   ChunkStatus,
 } from '../knowledgebase.schema';
 import { PromptService } from '../prompt/prompt.service';
+import { DEFAULT_CHATGPT_PROMPT } from './openaiChatbot.constant';
 
 interface CosineSimilarityWorkerResponse {
   chunkId: {
@@ -31,9 +32,6 @@ interface ChunkForCompletion extends Chunk {
   content: string;
   score: number;
 }
-
-const DEFAULT_PROMPT =
-  '[{"role":"system","content":"You are a helpful chatbot who loves to help people! Your name is {{chatbotName}} and you are designed to respond only based on the given context, outputted in Markdown format.\\n\\nContext Sections:\\n---\\n{{ctx}}"},{"role":"assistant","content":"As an assistant, my responses will be based only on the given data."},{"role":"pastMessages","content":""},{"role":"user","content":"Remember to not provide any additional information or answer from outside the given data. If you can\'t answer from the given data reply with predefined message \\"{{defaultAnswer}}\\"."},{"role":"assistant","content":"Sure I won\'t provide any additional information"},{"role":"user","content":"{{query}}"}]';
 
 @Injectable()
 export class OpenaiChatbotService {
@@ -187,7 +185,7 @@ export class OpenaiChatbotService {
   ): ChatGptPromptMessages {
     // Defaults
     defaultAnswer = defaultAnswer || "I don't know how to answer that";
-    prompt = prompt || DEFAULT_PROMPT;
+    prompt = prompt || DEFAULT_CHATGPT_PROMPT;
 
     // First compile the prompt without ctx and pastMessages to get the number of tokens
     // that the ctx and passMessages can occupy together

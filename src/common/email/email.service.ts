@@ -50,4 +50,26 @@ export class EmailService {
     const res = await sgMail.send(msg);
     return res;
   }
+
+  async sendToken80ExhaustedEmail(email: string) {
+    const msg = {
+      to: email,
+      from: { email: 'hi@webwhiz.ai', name: 'WebWhiz.ai' },
+      templateId: 'd-8bcb4db974004aa080a4c06e011ddc8a',
+    };
+
+    const res = await sgMail.send(msg);
+    return res;
+  }
+
+  async sendToken100ExhaustedEmail(email: string) {
+    const msg = {
+      to: email,
+      from: { email: 'hi@webwhiz.ai', name: 'WebWhiz.ai' },
+      templateId: 'd-7d140563825745a2b4c8e02afab18aea',
+    };
+
+    const res = await sgMail.send(msg);
+    return res;
+  }
 }

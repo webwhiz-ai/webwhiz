@@ -22,6 +22,7 @@ import {
   KnowledgebaseStatus,
 } from './knowledgebase.schema';
 import { PromptService } from './prompt/prompt.service';
+import { DEFAULT_CHATGPT_PROMPT } from './chatbot/openaiChatbot.constant';
 
 @Injectable()
 export class KnowledgebaseService {
@@ -278,6 +279,25 @@ export class KnowledgebaseService {
     return this.subPlanInfoService.getSubscriptionPlanInfo(userPlan);
   }
 
+  private getBaseSystemMsgFromPrompt(prompt: string): string {
+    try {
+      const promptJson = JSON.parse(prompt);
+      const systemMsg = promptJson[0].content;
+      const baseMsg = systemMsg.split('\n\nContext Sections')[0];
+      return baseMsg;
+    } catch {
+      return undefined;
+    }
+  }
+
+  private constructPromptFromBaseSystemMsg(msg: string): string {
+    const prompt = JSON.parse(DEFAULT_CHATGPT_PROMPT);
+    const baseMsg: string[] = prompt[0].content.split('\n\nContext Sections');
+    baseMsg[0] = msg;
+    prompt[0].content = baseMsg.join('\n\nContext Sections');
+    return JSON.stringify(prompt);
+  }
+
   /**
    * Get all knowledgebases for user
    * @param user
@@ -296,6 +316,14 @@ export class KnowledgebaseService {
   async getKnowledgeBaseData(user: UserSparse, id: string) {
     const kb = await this.kbDbService.getKnowledgebaseById(new ObjectId(id));
     checkUserIsOwnerOfKb(user, kb);
+
+    // Set Default prompt if knowledgebase prompt is not defined
+    if (!kb.prompt) {
+      kb.prompt = DEFAULT_CHATGPT_PROMPT;
+    }
+
+    kb.prompt = this.getBaseSystemMsgFromPrompt(kb.prompt);
+
     return kb;
   }
 
@@ -396,6 +424,8 @@ export class KnowledgebaseService {
 
     const kb = await this.kbDbService.getKnowledgebaseById(kbId);
     checkUserIsOwnerOfKb(user, kb);
+
+    prompt = this.constructPromptFromBaseSystemMsg(prompt);
 
     await this.kbDbService.updateKnowledgebase(kbId, {
       prompt,

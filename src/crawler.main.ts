@@ -22,6 +22,10 @@ import {
   KnowledgebaseStatus,
 } from './knowledgebase/knowledgebase.schema';
 import { OpenaiModule } from './openai/openai.module';
+import { EmailModule } from './common/email/email.module';
+import { TaskModule } from './task/task.module';
+import { ChatbotService } from './knowledgebase/chatbot/chatbot.service';
+import { AppConfigService } from './common/config/appConfig.service';
 
 @Module({
   imports: [
@@ -30,6 +34,8 @@ import { OpenaiModule } from './openai/openai.module';
     OpenaiModule,
     KnowledgebaseModule,
     ImportersModule,
+    EmailModule,
+    TaskModule,
   ],
 })
 class CrawlerAppModule {}
@@ -68,15 +74,28 @@ async function processPage(
 async function bootstrap() {
   // Get required services from NestJs
   const app = await NestFactory.createApplicationContext(CrawlerAppModule);
+  const appConfigService = app.get(AppConfigService);
   const crawlerService = app.get(CrawlerService);
   const dataStoreService = app.get(DataStoreService);
   const inscriptisService = app.get(InscriptisImporterService);
   const kbDbService = app.get(KnowledgebaseDbService);
+  const chatbotService = app.get(ChatbotService);
   const logger = new Logger('CrawlerWorker');
 
   // Celery Worker Init
-  const worker = celery.createWorker('redis://', 'redis://', 'crawler');
-  const client = celery.createClient('redis://', 'redis://', 'crawler');
+  const redisConnectionStr = `redis://${appConfigService.get(
+    'redisHost',
+  )}:${appConfigService.get('redisPort')}/`;
+  const worker = celery.createWorker(
+    redisConnectionStr,
+    redisConnectionStr,
+    'crawler',
+  );
+  const client = celery.createClient(
+    redisConnectionStr,
+    redisConnectionStr,
+    'crawler',
+  );
 
   // Hack to decrease the TTL of the result
   (worker.backend as any).set = function (key: string, value: string) {
@@ -197,8 +216,14 @@ async function bootstrap() {
     }
   }
 
+  async function notifyTokenLimit(userId: string) {
+    const id = new ObjectId(userId);
+    await chatbotService.notifyUserOfTokenLimitExhaustion(id);
+  }
+
   worker.register('tasks.crawl', doCrawl);
   worker.register('tasks.gen_embeddings', generateEmbeddingsForKnowledgebase);
+  worker.register('tasks.notify_token_limit', notifyTokenLimit);
   worker.start();
 }
 

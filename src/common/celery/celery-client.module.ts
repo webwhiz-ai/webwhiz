@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { createClient } from 'celery-node';
+import { AppConfigService } from '../config/appConfig.service';
 
 export const CELERY_CLIENT = 'CELERY_CLIENT';
 
@@ -13,13 +14,21 @@ export enum CeleryClientQueue {
 export class CeleryClientService {
   private clientCache: Partial<Record<CeleryClientQueue, CeleryClient>>;
 
-  constructor() {
+  constructor(private appConfigService: AppConfigService) {
     this.clientCache = {};
   }
 
   get(queue: CeleryClientQueue): CeleryClient {
+    const redisConnectionStr = `redis://${this.appConfigService.get(
+      'redisHost',
+    )}:${this.appConfigService.get('redisPort')}/`;
+
     if (this.clientCache[queue] === undefined) {
-      this.clientCache[queue] = createClient('redis://', 'redis://', queue);
+      this.clientCache[queue] = createClient(
+        redisConnectionStr,
+        redisConnectionStr,
+        queue,
+      );
     }
     return this.clientCache[queue];
   }

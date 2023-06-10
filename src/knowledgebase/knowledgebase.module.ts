@@ -17,6 +17,7 @@ import { PromptsController } from './prompt/prompt.controller';
 import { PromptService } from './prompt/prompt.service';
 import { DataStoreService } from './datastore.service';
 import { EmailModule } from '../common/email/email.module';
+import { TaskModule } from '../task/task.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { EmailModule } from '../common/email/email.module';
     UserModule,
     SubscriptionModule,
     EmailModule,
+    TaskModule,
   ],
   controllers: [
     ChatbotController,

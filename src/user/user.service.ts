@@ -231,10 +231,10 @@ export class UserService {
 
   async getUserMonthlyUsageData(
     userId: ObjectId,
-  ): Promise<Pick<User, 'monthUsage'>> {
+  ): Promise<Pick<User, 'monthUsage' | 'activeSubscription'>> {
     const usageData = await this.userCollection.findOne(
       { _id: userId },
-      { projection: { monthUsage: 1 } },
+      { projection: { monthUsage: 1, activeSubscription: 1 } },
     );
 
     return usageData;

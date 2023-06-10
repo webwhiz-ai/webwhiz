@@ -19,10 +19,10 @@ export const subscriptionPlanData: Record<Subscription, SubscriptionPlanInfo> =
     [Subscription.FREE]: {
       name: 'FREE',
       type: SubscriptionType.MONTHLY,
-      maxChatbots: 0,
-      maxTokens: 0,
-      maxPages: 0,
-      maxChunksPerPage: 0,
+      maxChatbots: 1,
+      maxTokens: 10000,
+      maxPages: 25,
+      maxChunksPerPage: 50,
     },
     [Subscription.BASE_MONTHLY]: {
       name: 'Base',
