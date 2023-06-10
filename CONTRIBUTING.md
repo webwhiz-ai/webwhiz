@@ -4,6 +4,42 @@ Want to contribute to WebWhiz? Follow along to setup a local isntance of webwhiz
 
 # Self Hosting
 
+There are two ways to run Self Host / run webwhiz
+
+1. Docker - Easy
+2. Manual Setup - Involved (but provides more flexibility)
+
+## Docker
+
+Prerequisites
+
+- Docker & docker-compose
+
+Running Webwhiz with docker
+
+1. Clone the repo
+2. Edit the `.env.docker` file present in the root of the repo and add your `OPENAI_KEY` & `OPENAI_KEY_2`
+3. Use docker-compose to start the stack
+
+```bash
+# Bring up webwhiz
+# Once the building is done and webwhiz starts the UI will be available at
+# http://localhost:3030, backend is available at http://localhost:3000
+# To exit Press Ctrl-C
+docker-compose up
+
+# Alternatively Run webwhiz as a daemon
+docker-compose up -d
+
+# Stop Webwhiz
+docker-compose down
+
+# Force rebuild all containers (required only if some change is not picked up)
+sudo docker-compose up --build --force-recreate
+```
+
+## Manual
+
 WebWhiz is designed to be used as a production grade Chatbot that can be scaled up or down to handle any volume of data.
 
 WebWhiz consists of mainly 3 components
