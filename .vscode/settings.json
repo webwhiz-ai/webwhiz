@@ -1,7 +1,6 @@
 {
 	"files.exclude": {
 		"dist/": true,
-		"frontend/": true,
 	},
 	"editor.tabSize": 2,
 	"editor.defaultFormatter": "dbaeumer.vscode-eslint",
@@ -12,6 +11,7 @@
 		"editor.defaultFormatter": "esbenp.prettier-vscode"
 	},
 	"files.watcherExclude": {
+		"frontend/": true,
 		"storage/**": true
 	},
 }

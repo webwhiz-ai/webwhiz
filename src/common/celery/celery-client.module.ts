@@ -38,7 +38,10 @@ export class CeleryClientService {
   providers: [
     {
       provide: CELERY_CLIENT,
-      useClass: CeleryClientService,
+      useFactory: async (appConfig: AppConfigService) => {
+        return new CeleryClientService(appConfig);
+      },
+      inject: [AppConfigService],
     },
   ],
   exports: [CELERY_CLIENT],
