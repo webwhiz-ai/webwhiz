@@ -63,6 +63,40 @@ Webwhiz is open-source under the **GNU Affero General Public License Version 3 (
 
 ## Self Hosting
 
+1. Docker - Easy
+2. Manual Setup - Involved (but provides more flexibility)
+
+## Docker
+
+Prerequisites
+
+- Docker & docker-compose
+
+Running Webwhiz with docker
+
+1. Clone the repo
+2. Edit the `.env.docker` file present in the root of the repo and add your `OPENAI_KEY` & `OPENAI_KEY_2`
+3. Use docker-compose to start the stack
+
+```bash
+# Bring up webwhiz
+# Once the building is done and webwhiz starts the UI will be available at
+# http://localhost:3030, backend is available at http://localhost:3000
+# To exit Press Ctrl-C
+docker-compose up
+
+# Alternatively Run webwhiz as a daemon
+docker-compose up -d
+
+# Stop Webwhiz
+docker-compose down
+
+# Force rebuild all containers (required only if some change is not picked up)
+sudo docker-compose up --build --force-recreate
+```
+
+## Manual
+
 WebWhiz is designed to be used as a production grade Chatbot that can be scaled up or down to handle any volume of data.
 
 WebWhiz consists of mainly 3 components
@@ -127,7 +161,5 @@ pm2 start ecosystem.config.js
 ```
 
 This will start the backend http server, the js worker and the python worker
-
-Also, please note that we are currently working on a docker-compose based setup, which will help you run WebWhiz with just a few commands.
 
 If you face any issues, reach out to hi@webwhiz.ai
