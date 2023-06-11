@@ -61,12 +61,12 @@ Webwhiz is open-source under the **GNU Affero General Public License Version 3 (
 
 
 
-## Self Hosting
+## ☁️ Self Hosting
 
 1. Docker - Easy
 2. Manual Setup - Involved (but provides more flexibility)
 
-## Docker
+### 📦 Docker
 
 Prerequisites
 
@@ -95,7 +95,7 @@ docker-compose down
 sudo docker-compose up --build --force-recreate
 ```
 
-## Manual
+### 🛃 Manual
 
 WebWhiz is designed to be used as a production grade Chatbot that can be scaled up or down to handle any volume of data.
 
@@ -114,14 +114,14 @@ The backend server uses third part services (including OpenAI) for powering the 
 
 > NOTE: WebWhiz keeps embeddings in Redis to improve the performance of chatbot responses. For most organisations the chatbots created would be conatins data for a few hundren or thousands of pages, and Redis should work well while providing better performance. If you would like to use a dedicated vector database for searching relavant chunks please reach out to us.
 
-## Prerequisites
+#### Prerequisites
 
 - MongoDB v6
 - Redis v7
 - Node v18 + Yarn
 - Python v3.6+
 
-## Setting Enviornment Variables
+#### Setting Enviornment Variables
 
 1. Create a copy of the `.env.sample` file and rename as `.env`
 
@@ -139,7 +139,7 @@ The following variables as mandatory
 
 Set the value for the following variables - `MONGO_URI`, `MONGO_DBNAME`, `REDIS_HOST`, `REDIS_PORT`
 
-## Installing dependencies and running app
+#### Installing dependencies and running app
 
 From the root folder run the following commands
 
@@ -161,5 +161,25 @@ pm2 start ecosystem.config.js
 ```
 
 This will start the backend http server, the js worker and the python worker
+
+#### Frontend 
+
+Create `.env` file in the frontend folder and add the following variables 
+
+```bash
+REACT_APP_BASE_URL='https://api.website.com'
+GOOGLE_AUTH_ID='Only if you need google login'
+```
+
+From the frontend folder run the following commands to start the server
+```bash
+# Install dependencies
+npm install
+
+# Run front end app
+npm run start
+```
+
+Run `npm run build` to package the frontend app
 
 If you face any issues, reach out to hi@webwhiz.ai
