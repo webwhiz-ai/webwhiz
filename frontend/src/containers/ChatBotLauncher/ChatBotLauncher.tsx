@@ -1,8 +1,13 @@
 import * as React from 'react';
 
 import styles from './ChatBotLauncher.module.scss'
+export interface ChatBotLauncherProps {
+	backgroundColor:string,
+	fontColor:string,
+	
+}
 
-const ChatBotLauncher = ({backgroundColor, fontColor}) => {
+const ChatBotLauncher = ({backgroundColor, fontColor} :ChatBotLauncherProps) => {
   return (
 		 <div className={styles.chatLauncher}>
 		    <button className={styles.chatLauncherBtn} id="chatLauncherBtn" style={{backgroundColor: backgroundColor, color: fontColor }}>

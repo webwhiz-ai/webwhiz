@@ -448,7 +448,7 @@ export const ChatBotsCustomize = ({
 												</Box>
 											</div>
 										</div>
-										<ChatBotLauncher backgroundColor="black" fontColor="white" />
+										<ChatBotLauncher backgroundColor= { values.backgroundColor} fontColor= {values.fontColor} />
 									</div>
 								</Flex>
 

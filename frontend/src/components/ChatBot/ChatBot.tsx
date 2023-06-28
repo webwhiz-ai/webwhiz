@@ -176,7 +176,7 @@ export const ChatBot = ({
 					</svg></button>
 				</div>
 			</div>
-			{showLauncher && <ChatBotLauncher backgroundColor="red" fontColor="white" />}
+			{showLauncher && <ChatBotLauncher backgroundColor= {customStyle.backgroundColor} fontColor= {customStyle.fontColor} />}
 			
 		</div>
 	);
