@@ -1,0 +1,25 @@
+
+.chatLauncher {
+  margin-left: 40px;
+    margin-bottom: 20px;
+}
+.chatLauncherBtn {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 60px;
+    height: 60px;
+    background-color: rgb(255, 73, 128);
+    border: none;
+    border-radius: 50%;
+    font-size: 20px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+.chatLauncherBtn:hover {
+    cursor: pointer;
+}
+
+.chatLauncherBtn i {
+    font-size: 28px;
+}
