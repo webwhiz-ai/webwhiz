@@ -10,7 +10,7 @@ export interface User {
         maxPages :number
         maxTokens :number
         name : SubscriptionType
-        type: "MONTHLY"
+        type: "MONTHLY" | "YEARLY" | "LIFETIME"
     }
 }
 

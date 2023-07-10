@@ -70,7 +70,7 @@ export const App = (props: AppProps) => {
 			return <Box className={classNames(styles.usageCont, {
 				[styles.usageContExceeded]: isExceded,
 			})}>
-				<Heading className={styles.usagePlan} size="h4" color="gray.500">{(userData?.subscriptionData?.name || '').toLowerCase()} plan</Heading>
+				<Heading className={styles.usagePlan} size="h4" color="gray.500">{(userData?.subscriptionData?.name || '').toLowerCase().replace('app sumo', 'LTD')} plan</Heading>
 				<Box className={styles.usgaeNumbers}><Text as="span" fontWeight="bold">{Math.floor((userData.monthUsage.count / 1000))}K</Text> / {(userData?.subscriptionData?.maxTokens / 1000)}K</Box>
 				<Text className={styles.usageLabel} fontSize="sm">Monthly usage limits</Text>
 				<Progress className={styles.progressbar} w="100%" value={usage} size='sm' colorScheme={isExceded ? 'red': 'blue'} borderRadius="md" />

@@ -9,16 +9,17 @@ import {
     Text
 } from '@chakra-ui/react';
 import React from 'react';
-import { DiscoutData, SubscriptionData, SubscriptionTier, SubscriptionType } from '../../types/subscription.type';
+import { DiscoutData, SubscriptionData, SubscriptionDataLTD, SubscriptionTier, SubscriptionType, SubscriptionTypeLTD } from '../../types/subscription.type';
 import { CheckCircleBlueIconMd } from '../Icons/CheckCircleBlueIconMd';
 
 type PricingCardProps = {
     tier: SubscriptionTier;
     discountData?: DiscoutData;
-    subscriptionData: SubscriptionData
+    subscriptionData: SubscriptionData | SubscriptionDataLTD;
     isCurrentSubscription: boolean;
     userEmail: string;
     isPopular?: boolean;
+    showPricingBtn?: boolean;
 }
 
 const BASE_MONTHLY_PRICING = 19;
@@ -30,16 +31,43 @@ const PREMIUM_YEARLY_PRICING = 82;
 const ENTERPRICE_MONTHLY_PRICING = 349;
 const ENTERPRICE_YEARLY_PRICING = 291;
 
+const LIFETIME_PLAN1_PRICING = 59;
+const LIFETIME_PLAN2_PRICING = 118;
+const LIFETIME_PLAN3_PRICING = 177;
+
 export const PricingCard = ({
     tier,
     discountData,
     subscriptionData,
     isCurrentSubscription,
     userEmail,
-    isPopular
+    isPopular,
+    showPricingBtn = true
 }: PricingCardProps) => {
 
-    const getPricingMarkup = React.useCallback((type: SubscriptionType) => {
+    const getPricingMarkup = React.useCallback((type: SubscriptionType | SubscriptionTypeLTD) => {
+
+        let ltdPrice = 0;
+        switch (type) {
+            case 'AppSumo tier 1':
+                ltdPrice = LIFETIME_PLAN1_PRICING;
+                break;
+            case 'AppSumo tier 2':
+                ltdPrice = LIFETIME_PLAN2_PRICING;
+                break;
+            case 'AppSumo tier 3':
+                ltdPrice = LIFETIME_PLAN3_PRICING;
+                break;
+        }
+        if(type === 'AppSumo tier 1' || type === 'AppSumo tier 2'  || type === 'AppSumo tier 3' ) {
+            return <Flex align="baseline">
+                <Text fontSize="5xl" fontWeight="600">
+                    {ltdPrice}
+                </Text>
+                <Text ml={2}>/lifetime</Text>
+            </Flex>
+        }
+
         let basePrice = 0;
         if (tier === 'YEARLY') {
             switch (type) {
@@ -84,7 +112,7 @@ export const PricingCard = ({
         </Flex>
     }, [discountData, tier]);
 
-    const getPaymentLink = React.useCallback((type: SubscriptionType) => {
+    const getPaymentLink = React.useCallback(() => {
         const subscriptionLinks = {
             Standard: {
                 YEARLY: `https://webwhiz.lemonsqueezy.com/checkout/buy/07f55c4e-19ff-47e5-b2d0-6fad6a0172fa?checkout[email]=${userEmail}${discountData?.couponCode ? `&checkout[discount_code]=${discountData?.couponCode}` : ''}`,
@@ -106,6 +134,26 @@ export const PricingCard = ({
 
         return subscriptionLinks[subscriptionData.type][tier];
     }, [discountData?.couponCode, subscriptionData.type, tier, userEmail]);
+
+    const getPricingBtn = React.useCallback(() => {
+        if(!showPricingBtn) return null;
+        return <Box mt={6}>
+            <Link
+                href={(getPaymentLink())}
+                isExternal
+            >
+                <Button
+                    variant="solid"
+                    colorScheme={isPopular ? "white" : "blue"}
+                    background={isPopular ? "white" : "blue.500"}
+                    color={isPopular ? "blue.500" : "white"}
+                    w="100%"
+                >
+                    {isCurrentSubscription ? 'Current Plan' : 'Subscribe Now'}
+                </Button>
+            </Link>
+        </Box>
+    }, [getPaymentLink, isCurrentSubscription, isPopular, showPricingBtn])
 
     const getDiscountedPrice = (basePrice: number, discount: number = 0) => {
         return basePrice - (basePrice * discount) / 100;
@@ -144,22 +192,7 @@ export const PricingCard = ({
                     {subscriptionData.projectCount} projects
 				</ListItem>
             </List>
-            <Box mt={6}>
-                <Link
-                    href={(getPaymentLink(subscriptionData.type))}
-                    isExternal
-                >
-                    <Button
-                        variant="solid"
-                        colorScheme={isPopular ? "white" : "blue"}
-                        background={isPopular ? "white" : "blue.500"}
-                        color={isPopular ? "blue.500" : "white"}
-                        w="100%"
-                    >
-                        {isCurrentSubscription ? 'Current Plan' : 'Subscribe Now'}
-                    </Button>
-                </Link>
-            </Box>
-        </Box >
+            {getPricingBtn()}
+        </Box>
     )
 }

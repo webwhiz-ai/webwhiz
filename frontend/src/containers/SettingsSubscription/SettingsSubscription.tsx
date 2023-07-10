@@ -3,7 +3,7 @@ import { Box } from '@chakra-ui/react';
 import { FreeComponent } from '../../components/Pricing/FreeComponent';
 import { CurrentUser, User } from '../../services/appConfig';
 import { DiscoutData } from '../../types/subscription.type';
-import { PricingDiscounts } from '../../services/commonServices';
+import { PricingDiscounts, getPricingDiscounts } from '../../services/commonServices';
 
 
 export const SettingsSubscription = () => {
@@ -38,8 +38,9 @@ export const SettingsSubscription = () => {
     }, []);
 
     return (
-        <Box minW="1088px" p={8} pt={12} pb={1} backgroundColor="white" boxShadow="sm" borderRadius="md">
+        <Box pb="6">
             <FreeComponent
+                activeSubscriptionId={user.activeSubscription}
                 currentSubscription={user.subscriptionData}
                 discountData={discountData}
                 userEmail={user.email}
