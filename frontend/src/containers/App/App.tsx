@@ -31,6 +31,7 @@ import { getUserProfile } from "../../services/userServices";
 import { CurrentUser, User } from "../../services/appConfig";
 import { DemoChatbots } from "../DemoChatbots/DemoChatbots";
 import classNames  from "classnames";
+import { formatNumber } from "../../utils/commonUtils";
 interface AppProps {
 	onLoginOut: () => void;
 }
@@ -71,7 +72,7 @@ export const App = (props: AppProps) => {
 				[styles.usageContExceeded]: isExceded,
 			})}>
 				<Heading className={styles.usagePlan} size="h4" color="gray.500">{(userData?.subscriptionData?.name || '').toLowerCase().replace('app sumo', 'LTD')} plan</Heading>
-				<Box className={styles.usgaeNumbers}><Text as="span" fontWeight="bold">{Math.floor((userData.monthUsage.count / 1000))}K</Text> / {(userData?.subscriptionData?.maxTokens / 1000)}K</Box>
+				<Box className={styles.usgaeNumbers}><Text as="span" fontWeight="bold">{formatNumber(userData.monthUsage.count)}</Text> / {formatNumber(userData?.subscriptionData?.maxTokens)}</Box>
 				<Text className={styles.usageLabel} fontSize="sm">Monthly usage limits</Text>
 				<Progress className={styles.progressbar} w="100%" value={usage} size='sm' colorScheme={isExceded ? 'red': 'blue'} borderRadius="md" />
 				<Box w="100%" className={styles.usageUpgradeBtn}>
