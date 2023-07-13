@@ -1,0 +1,828 @@
+<html lang="en">
+
+<head>
+    <title>webWhiz Live Chat</title>
+    <base target="_parent">
+    <link rel="stylesheet" href="app.css">
+</head>
+
+<body>
+    <!--A chatbot markup with a launcher to open and close vhat widget-->
+    <div class="chat-wrap chat-wrap-ai-assistant" id="chat-wrap" style="opacity: 0">
+
+        <div class="chat-launcher" id="chat-launcher">
+            <button class="chat-launcher-btn" id="chat-launcher-btn">
+                <svg focusable="false" stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24"
+                    stroke-linecap="round" stroke-linejoin="round" height="1em" width="1em"
+                    xmlns="http://www.w3.org/2000/svg" style="
+            width: 38px;
+            height: 38px;
+        ">
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                    <path
+                        d="M5.821 4.91c3.898 -2.765 9.469 -2.539 13.073 .536c3.667 3.127 4.168 8.238 1.152 11.897c-2.842 3.447 -7.965 4.583 -12.231 2.805l-.232 -.101l-4.375 .931l-.075 .013l-.11 .009l-.113 -.004l-.044 -.005l-.11 -.02l-.105 -.034l-.1 -.044l-.076 -.042l-.108 -.077l-.081 -.074l-.073 -.083l-.053 -.075l-.065 -.115l-.042 -.106l-.031 -.113l-.013 -.075l-.009 -.11l.004 -.113l.005 -.044l.02 -.11l.022 -.072l1.15 -3.451l-.022 -.036c-2.21 -3.747 -1.209 -8.392 2.411 -11.118l.23 -.168z"
+                        stroke-width="0" fill="currentColor"></path>
+                </svg>
+            </button>
+        </div>
+        <div class="chat-widget">
+            <div class="chat-header">
+                <div class="chat-header-top">
+                    <div class="chat-tabs" id="chat-tabs">
+                        <button id="tab-ai-assistant">AI assistant</button>
+                        <button id="tab-offline-msg">Offline message</button>
+                        <div class="tabs-active" id="tabs-active"></div>
+                    </div>
+                    <div class="chat-actions" id="chat-actions">
+                        <button class="chat-minimize-btn chat-actions-btn" id="chat-minimize-btn">
+                            <svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24"
+                                stroke-linecap="round" stroke-linejoin="round" height="1em" width="1em"
+                                xmlns="http://www.w3.org/2000/svg" style="
+                                width: 22px;
+                                height: 22px;
+                            ">
+                                <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                                <path
+                                    d="M4 4m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z">
+                                </path>
+                                <path d="M9 4v16"></path>
+                                <path d="M14 10l2 2l-2 2"></path>
+                            </svg>
+                        </button>
+                        <button class="chat-maximize-btn chat-actions-btn" id="chat-maximize-btn">
+                            <svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24"
+                                stroke-linecap="round" stroke-linejoin="round" height="1em" width="1em"
+                                xmlns="http://www.w3.org/2000/svg" style="
+                        width: 22px;
+                        height: 22px;
+                    ">
+                                <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                                <path
+                                    d="M4 4m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z">
+                                </path>
+                                <path d="M15 4v16"></path>
+                                <path d="M10 10l-2 2l2 2"></path>
+                            </svg>
+                        </button>
+                        <button title="Clear chat history" class="chat-clear-session-btn chat-actions-btn" id="chat-clear-session-btn">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-refresh-ccw"><polyline points="1 4 1 10 7 10"></polyline><polyline points="23 20 23 14 17 14"></polyline><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"></path></svg>                             
+                        </button>
+                        <button class="chat-close-btn chat-actions-btn" id="chat-close-btn">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" class="feather feather-x">
+                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="ai-assistant-header">
+                    <h2 id="chat-heading">
+                        I'm your AI assistant
+                    </h2>
+                    <p id="chat-description">Ask me anything. I can answer same like chatGPT but with the data from this
+                        website</p>
+                </div>
+                <div class="offline-message-header">
+                    <h2 id="offline-message-heading">
+                        Offline message
+                    </h2>
+                    <p id="offline-message-description">Please fill out the form below and we will get back to you as
+                        soon as possible.</p>
+                </div>
+
+            </div>
+            <div id="chat-messages" class="chat-messages">
+                <div class="chat-message chatbot">
+                    <div class="chat-message-text">Hello! How can I assist you today?</div>
+                </div>
+            </div>
+            <div id="offline-message" class="offline-message">
+                <div class="form-group">
+                    <label for="offline-message-name">Name <span class="form-required">*</span></label>
+                    <input type="text" class="form-control" id="offline-message-name" placeholder="Enter your name">
+                    <!--Error message-->
+                    <div class="invalid-feedback" id="invalid-feedback-name">This field is required</div>
+
+                </div>
+                <div class="form-group">
+                    <label for="offline-message-email">Email <span class="form-required">*</span></label>
+                    <input type="text" class="form-control" id="offline-message-email" placeholder="Enter your email">
+                    <!--Error message-->
+                    <div class="invalid-feedback" id="invalid-feedback-email">This field is required</div>
+                    <div class="invalid-feedback" id="invalid-feedback-email-invalid">Please enter a valid email</div>
+
+                </div>
+                <div class="form-group">
+                    <label for="offline-message-message">Message <span class="form-required">*</span></label>
+                    <textarea class="form-control" rows="4" id="offline-message-message"
+                        placeholder="Enter your message"></textarea>
+                    <!--Error message-->
+                    <div class="invalid-feedback" id="invalid-feedback-message">This field is required</div>
+
+                </div>
+                <button class="btn btn-primary" loadingText="Submitting..." id="offline-message-submit"
+                    type="button">Submit</button>
+                <div class="message-feedback message-feedback-success" id="message-success">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path
+                            d="M9 11L11 13L15.5 8.5M11.9932 5.13581C9.9938 2.7984 6.65975 2.16964 4.15469 4.31001C1.64964 6.45038 1.29697 10.029 3.2642 12.5604C4.75009 14.4724 8.97129 18.311 10.948 20.0749C11.3114 20.3991 11.4931 20.5613 11.7058 20.6251C11.8905 20.6805 12.0958 20.6805 12.2805 20.6251C12.4932 20.5613 12.6749 20.3991 13.0383 20.0749C15.015 18.311 19.2362 14.4724 20.7221 12.5604C22.6893 10.029 22.3797 6.42787 19.8316 4.31001C17.2835 2.19216 13.9925 2.7984 11.9932 5.13581Z"
+                            stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        </path>
+                    </svg>
+
+                    Your message sent successfully!
+
+                    <button class="btn btn-primary" id="offline-message-success-close" type="button">Send Again</button>
+                </div>
+                <div class="message-feedback message-feedback-error" id="message-error">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path
+                            d="M16 16C16 16 14.5 14 12 14C9.5 14 8 16 8 16M17 9.24C16.605 9.725 16.065 10 15.5 10C14.935 10 14.41 9.725 14 9.24M10 9.24C9.605 9.725 9.065 10 8.5 10C7.935 10 7.41 9.725 7 9.24M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
+                            stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+
+                    Oops! Something went wrong
+
+                    <button class="btn btn-primary" id="offline-message-error-close" type="button">Try Again</button>
+                </div>
+            </div>
+            <div class="chat-sample-messages hide-sample-messages" id="chat-sample-messages">
+            </div>
+            <form id="chat-form" class="chat-input-wrap">
+                <textarea rows='1' class="chat-input textarea js-auto-size" id="chat-input"
+                    placeholder="Type your message"></textarea>
+                <button class="chat-submit-btn" type="submit"><svg width="16" height="16" fill="none"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <path fill-rule="evenodd" clip-rule="evenodd"
+                            d="M4.394 14.7L13.75 9.3c1-.577 1-2.02 0-2.598L4.394 1.299a1.5 1.5 0 00-2.25 1.3v3.438l4.059 1.088c.494.132.494.833 0 .966l-4.06 1.087v4.224a1.5 1.5 0 002.25 1.299z"
+                            fill="currentColor"></path>
+                    </svg></button>
+            </form>
+            <a id="powered-by" class="powered-by" href="https://www.webwhiz.ai/" target="_blank">powered by webwhiz.ai</a>
+        </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/autosize.js/3.0.20/autosize.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.2.12/marked.min.js"></script>
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/default.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+
+
+
+    <script>
+        const STREAM_RESPONSE = true;
+
+        let origin = '';
+        let container = '';
+
+        let showReadMore = true;
+
+        
+        let sessionId = '';
+        
+        let messages = [];
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const knowledgebaseId = urlParams.get('kbId');
+        const baseURL = urlParams.get('baseUrl');
+
+        requestChatHistoryData();
+        requestSessionId();
+
+        const defaultWidgetData = {
+            backgroundColor: "#000",
+            fontColor: "#FFF",
+            borderRadius: "12px",
+            placement: "right"
+        }
+
+        const validateEmail = (email) => {
+            return String(email)
+                .toLowerCase()
+                .match(
+                    /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+                );
+        };
+
+        marked.setOptions({
+            highlight: function (code, lang) {
+                const language = hljs.getLanguage(lang) ? lang : 'plaintext';
+                const hl = hljs.highlight(code, { language: 'javascript' }).value;
+                return hl;
+            },
+            langPrefix: 'hljs language-', // highlight.js css expects a top-level 'hljs' class.
+        });
+
+        function escapeRegExp(string) {
+            return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
+        }
+        function replaceAll(str, find, replace) {
+            return str.replace(new RegExp(escapeRegExp(find), 'g'), replace);
+        }
+
+
+        autosize(document.querySelector('#chat-input'));
+
+        // toggle class on chat widget on chat-launcher-btn
+        const chatLauncherBtn = document.querySelector('.chat-launcher-btn');
+        const chatCloseBtn = document.querySelector('#chat-close-btn');
+        const chatMaximizeBtn = document.querySelector('#chat-maximize-btn');
+        const chatMinimizeBtn = document.querySelector('#chat-minimize-btn');
+        const chatClearHistoryBtn = document.querySelector('#chat-clear-session-btn');
+        const chatWidget = document.querySelector('.chat-wrap');
+        chatLauncherBtn.addEventListener('click', () => {
+            chatWidget.classList.add('widget-open');
+
+            notifyParentWidgetExpand();
+            setTimeout(() => {
+                const chatMessages = document.getElementById('chat-messages');
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+                document.getElementById('chat-input').focus();
+            }, 320);
+        });
+        chatCloseBtn.addEventListener('click', () => {
+            chatWidget.classList.remove('widget-open');
+            chatWidget.classList.remove('widget-maximize');
+            notifyParentWidgetCollapse();
+        });
+        chatMaximizeBtn.addEventListener('click', () => {
+            chatWidget.classList.toggle('widget-maximize');
+            notifyParentWidgetMaximize();
+        });
+        chatMinimizeBtn.addEventListener('click', () => {
+            chatWidget.classList.toggle('widget-maximize');
+            notifyParentWidgetMinimize();
+        });
+        chatClearHistoryBtn.addEventListener('click', () => {
+            const chatMessages = document.getElementById('chat-messages');
+            chatMessages.innerHTML = '';
+            sessionId = '';
+            messages = [];
+            notifyClearHistory();
+        });
+
+        async function getWidgetData() {
+            const response = await fetch(
+                `${baseURL}/knowledgebase/${knowledgebaseId}/chat_widget_data`,
+                {
+                    method: 'GET', // *GET, POST, PUT, DELETE, etc.
+                    headers: {
+                        Accept: 'application/json',
+                        'Content-Type': 'application/json',
+                    },
+                    referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+                    // body data type must match "Content-Type" header
+                }
+            );
+
+            if (response.status === 200) {
+                const releaseBody = await response.json();
+                const chatWidgeData = releaseBody.chatWidgeData || defaultWidgetData;
+                return chatWidgeData;
+            } else {
+                console.log('error');
+            }
+            //return response;
+        }
+
+        (async () => {
+            const data = await getWidgetData();
+            showReadMore = data.showReadMore;
+            requestMetaData();
+
+            const heading = document.getElementById('chat-heading');
+            const description = document.getElementById('chat-description');
+            const branding = document.getElementById('powered-by');
+
+            if(data.hideBranding) {
+                branding.style.display = 'none';
+            }
+
+            if (data.heading) {
+                heading.innerText = data.heading;
+            }
+            if (data.description) {
+                description.innerText = data.description;
+            }
+
+            if(data.offlineMessage) {
+                const chatWrap = document.getElementById('chat-wrap');
+                chatWrap.classList.add('has-offline-message');
+            }
+
+            var styleSheet = document.createElement('style');
+
+            const styles = `
+                .chat-widget { border-radius: ${data.borderRadius}!important}
+                .chat-header, .chat-loading-dot, .chat-launcher-btn { background-color: ${data.backgroundColor}!important}
+                .chat-wrap {
+                    opacity: 1 !important;
+                }
+                .chat-launcher-btn {
+                    color: ${data.fontColor}!important
+                }
+                .chat-header, .chat-tabs button, .btn-primary {color: ${data.fontColor}!important}
+                .tabs-active, .btn-primary {background-color: ${data.backgroundColor}!important}
+                .chat-submit-btn svg, .message-feedback {
+                    color: ${data.backgroundColor}!important
+                }
+                .chat-message.user .chat-message-text {background-color: ${data.backgroundColor}!important; color: ${data.fontColor}!important}
+            `
+
+            styleSheet.innerText = styles;
+
+
+            if (data.questionExamples && data.questionExamples.length > 0) {
+                const sampleMessages = document.getElementById('chat-sample-messages');
+                sampleMessages.classList.remove('hide-sample-messages');
+                data.questionExamples.forEach((message) => {
+                    const sampleMessage = document.createElement('div');
+                    sampleMessage.classList.add('chat-sample-message');
+                    sampleMessage.setAttribute('data-message', message.question);
+                    sampleMessage.innerText = message.label;
+                    sampleMessages.appendChild(sampleMessage);
+                });
+            }
+
+            document.getElementById('chat-sample-messages').addEventListener('click', (e) => {
+                if (e.target.classList.contains('chat-sample-message')) {
+                    const message = e.target.getAttribute('data-message') || e.target.innerText;
+                    document.getElementById('chat-input').value = message;
+                }
+            });
+
+            if (data.placement === 'left') {
+                notifyParentWidgetLeftPosition();
+                const chatLauncher = document.getElementById('chat-launcher');
+                chatLauncher.style.left = '20px';
+                chatLauncher.style.right = 'auto';
+            }
+
+            setTimeout(() => {
+                document.head.appendChild(styleSheet);
+            }, 400);
+
+
+        })();
+
+
+        async function createSession(userData) {
+            const response = await fetch(
+                `${baseURL}${'/chatbot/session?src=widget'}`,
+                {
+                    method: 'POST', // *GET, POST, PUT, DELETE, etc.
+                    headers: {
+                        Accept: 'application/json',
+                        'Content-Type': 'application/json',
+                    },
+                    referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+                    body: JSON.stringify({
+                        "knowledgebaseId": knowledgebaseId,
+                        userData: userData
+                    }), // body data type must match "Content-Type" header
+                }
+            );
+
+            if (response.status === 200) {
+                const result = await response.text()
+                return result;
+            } else {
+                console.log('error');
+            }
+            //return response;
+        }
+
+        async function getAnswer(sessionId, query) {
+            const response = await fetch(
+                `${baseURL}${'/chatbot/answer'}`,
+                {
+                    method: 'POST', // *GET, POST, PUT, DELETE, etc.
+                    headers: {
+                        Accept: 'application/json',
+                        'Content-Type': 'application/json',
+                    },
+                    referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+                    body: JSON.stringify({
+                        "sessionId": sessionId,
+                        "query": query
+                    }), // body data type must match "Content-Type" header
+                }
+            );
+
+            if (response.status === 200) {
+                const result = await response.text()
+                return result;
+            } else {
+                console.log('error');
+            }
+            //return response;
+        }
+
+
+
+
+
+
+        function getAnswerStream(sessionId, query, cb, errorCb) {
+            const url = `${baseURL}${'/chatbot/answer_stream'}?session=${sessionId}&query=${encodeURIComponent(query)}`;
+            let source = new EventSource(url);
+
+            source.onmessage = (e) => {
+                cb(e.data);
+                if (e.data == "[DONE]") {
+                    source.close();
+                }
+            };
+
+            source.onerror = (err) => {
+                source.close();
+                errorCb();
+            };
+        }
+
+
+        async function addMessageToChat() {
+
+            const input = document.getElementById('chat-input');
+            const message = input.value.trim();
+            if (!message) return;
+
+            const newMessageUser = {
+                role: "user",
+                content: message
+            };
+
+            const chatMessages = document.getElementById('chat-messages');
+            chatMessages.insertAdjacentHTML("beforeend",
+                `<div class="chat-message user"><div class="chat-message-text">${message}</div></div>`)
+
+            const lastMesage = chatMessages.lastChild.querySelector('.chat-message-text');
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            input.value = '';
+
+            const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+
+            if (STREAM_RESPONSE) {
+                chatMessages.insertAdjacentHTML("beforeend",
+                    `<div class="chat-message chatbot"><div class="chat-message-text"><div class='chat-loading-dot-cont'>
+											<div class="chat-loading-dot"></div>
+											<div class="chat-loading-dot"></div>
+											<div class="chat-loading-dot"></div>
+										</div></div></div>`)
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+                const msgHolder = chatMessages.lastChild.querySelector('.chat-message-text');
+                let msg = '';
+                if (!sessionId) {
+                    sessionId = await createSession({
+                        userAgent: userAgent,
+                        origin: origin
+                    });
+                    notifyNewSession(sessionId);
+                }
+                const response = getAnswerStream(sessionId, message, (data) => {
+
+                    if (data !== "[DONE]") {
+                        data = JSON.parse(data);
+                        let content = data.content;
+                        let sources = data.sources;
+                        content = replaceAll(content, '<', '&lt;')
+                        content = replaceAll(content, '>', '&gt;')
+                        content = replaceAll(content, '\n', '<br/>')
+
+                        let sourcesBtns = '';
+                        if (showReadMore && sources && sources.length > 0) {
+
+                            sources = sources.filter((p, i) => {
+                                return i === sources.findIndex(q => q.url === p.url);
+                            });
+
+                            sourcesBtns = sources.map((source) => {
+                                const parts = source.url.split('/');
+                                const lastSegment = parts.pop() || parts.pop();
+                                return `<a href="${source.url}" target="_blank" class="chat-source-btn">${lastSegment}</a>`
+                            }).join('');
+                            sourcesBtns = `<div class="chat-sources"><div class="chat-source-read-more">Read more:</div>${sourcesBtns}</div>`
+                        }
+
+                        //data = data.replace(/\n/g, '<br/>')
+                        msg = `${msg}${content}${sourcesBtns}`
+                        msgHolder.innerHTML = msg;
+                    } else {
+                        const newMessageAssistant = {
+                            role: "assistant",
+                            content: msg
+                        };
+                        messages.push(newMessageUser);
+                        messages.push(newMessageAssistant);
+                        notifyNewMessage(messages)
+                        msg = replaceAll(msg, '&lt;', '<')
+                        msg = replaceAll(msg, '&gt;', '>')
+                        msg = replaceAll(msg, '<br/>', '\n')
+                        const markdownRes = marked.parse(msg);
+                        msgHolder.innerHTML = markdownRes;
+                    }
+
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                }, () => {
+                    msgHolder.innerHTML = 'Oops! I am unable to answer right now!';
+                });
+            } else {
+                if (!sessionId) {
+                    sessionId = await createSession({
+                        userAgent: userAgent
+                    });
+                    notifyNewSession(sessionId);
+                }
+                const response = await getAnswer(sessionId, message);
+                const markdownRes = marked.parse(
+                    response.replace(/^[\u200B\u200C\u200D\u200E\u200F\uFEFF]/, "")
+                )
+                chatMessages.insertAdjacentHTML("beforeend",
+                    `<div class="chat-message chatbot"><div class="chat-message-text">${markdownRes}</div></div>`)
+            }
+        }
+
+
+        // JavaScript code to handle the chat form submission
+        const form = document.getElementById('chat-form');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            addMessageToChat();
+        });
+
+        document.getElementById('chat-input').onkeydown = function (e) {
+            if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
+                e.preventDefault();
+                addMessageToChat();
+            }
+        };
+
+
+        /**
+         * Iframe communications
+         */
+        // Msg listener
+        window.onmessage = function (event) {
+            if (event.data.messageType === 'webwhiz:recieve_meta_data') {
+                origin = event.data.url;
+                container = event.data.container;
+
+                if(container) {
+                    const $chatLauncher = document.getElementById('chat-launcher');
+                    const $chatActions = document.getElementById('chat-actions');
+                    $chatLauncher.parentNode.removeChild($chatLauncher);
+                    $chatActions.parentNode.removeChild($chatActions);
+                    chatWidget.classList.add('widget-open');
+
+                    notifyParentWidgetExpand();
+                    setTimeout(() => {
+                        document.getElementById('chat-input').focus();
+                    }, 320);
+                }
+            } else if(event.data.messageType === 'webwhiz:recieve_chat_data') {
+                messages = event.data.chatHistory;
+                let msgHTML = messages.map(msg => {
+                    const type = msg.role === 'user' ? 'user' : 'chatbot';
+                    let msgContent = msg.content;
+                    msgContent = replaceAll(msgContent, '&lt;', '<')
+                    msgContent = replaceAll(msgContent, '&gt;', '>')
+                    msgContent = replaceAll(msgContent, '<br/>', '\n')
+                    const markdownRes = marked.parse(msgContent);
+                    return `<div class="chat-message ${type}"><div class="chat-message-text">${markdownRes}</div></div>`
+                })
+                msgHTML = msgHTML.join('');
+
+                const chatMessages = document.getElementById('chat-messages');
+                chatMessages.insertAdjacentHTML("beforeend",msgHTML)
+
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            } else if(event.data.messageType === 'webwhiz:recieve_session_id') {
+                sessionId = event.data.sessionId;
+            }
+        }
+
+        function notifyParentWidgetExpand() {
+            window.top.postMessage('webwhiz:widget_expand', '*');
+        }
+        function notifyParentWidgetMaximize() {
+            window.top.postMessage('webwhiz:widget_maximize', '*');
+        }
+        function notifyParentWidgetMinimize() {
+            window.top.postMessage('webwhiz:widget_minimize', '*');
+        }
+        function notifyClearHistory() {
+            window.top.postMessage('webwhiz:widget_clear_history', '*');
+        }
+
+        function notifyParentWidgetCollapse() {
+            window.top.postMessage('webwhiz:widget_collapse', '*');
+        }
+
+        function notifyParentWidgetLeftPosition() {
+            window.top.postMessage('webwhiz:widget_align_left', '*');
+        }
+       
+        function notifyNewMessage(message) {
+            window.top.postMessage({
+                messageType: 'webwhiz:recieve_new_message',
+                message: message
+            }, '*');
+        }
+        function notifyNewSession(sessionId) {
+            window.top.postMessage({
+                messageType: 'webwhiz:recieve_new_session_id',
+                sessionId: sessionId
+            }, '*');
+        }
+
+        function requestMetaData() {
+            window.top.postMessage('webwhiz:request_meta_data', '*');
+        }
+        
+        function requestChatHistoryData() {
+            window.top.postMessage('webwhiz:request_chat_data', '*');
+        }
+        
+         function requestSessionId() {
+            window.top.postMessage('webwhiz:request_session_id', '*');
+        }
+
+
+        const offlineMessageBtn = document.getElementById('offline-message-submit');
+
+        if (offlineMessageBtn) {
+            const $name = document.getElementById('offline-message-name')
+            const $email = document.getElementById('offline-message-email')
+            const $message = document.getElementById('offline-message-message')
+            const $invlidEmail = document.getElementById('invalid-feedback-email');
+            const $invlidEmailInvalid = document.getElementById('invalid-feedback-email-invalid');
+            const $invlidName = document.getElementById('invalid-feedback-name')
+            const $invlidMessage = document.getElementById('invalid-feedback-message')
+
+            $name.addEventListener('blur', (e) => {
+                if (e.target.value) {
+                    $invlidName.classList.remove('feedback-visible')
+                } else {
+                    $invlidName.classList.add('feedback-visible')
+                }
+            })
+            $email.addEventListener('blur', (e) => {
+                if (e.target.value) {
+                    const email = e.target.value;
+                    const isValidEmail = validateEmail(email);
+                    if (!isValidEmail) {
+                        $invlidEmailInvalid.classList.add('feedback-visible');
+                    } else {
+                        $invlidEmailInvalid.classList.remove('feedback-visible');
+                    }
+                    $invlidEmail.classList.remove('feedback-visible');
+                } else {
+                    $invlidEmail.classList.add('feedback-visible');
+                    $invlidEmailInvalid.classList.remove('feedback-visible');
+                }
+            })
+            $message.addEventListener('blur', (e) => {
+                if (e.target.value) {
+                    $invlidMessage.classList.remove('feedback-visible')
+                } else {
+                    $invlidMessage.classList.add('feedback-visible')
+                }
+            })
+
+            offlineMessageBtn.addEventListener('click', async (e) => {
+                e.preventDefault();
+                const name = $name.value;
+                const email = $email.value;
+                const message = $message.value;
+
+                const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+
+                const isValidEmail = validateEmail(email);
+
+                console.log(isValidEmail, name, message)
+
+                if (isValidEmail && name && message) {
+
+                    const prevBtnText = offlineMessageBtn.innerHTML;
+                    offlineMessageBtn.innerHTML = 'Submitting...';
+                    offlineMessageBtn.setAttribute('disabled', true);
+                    if (!sessionId) {
+                        sessionId = await createSession({
+                            userAgent: userAgent,
+                            origin: origin
+                        });
+                        notifyNewSession(sessionId);
+                    }
+
+                    const response = await fetch(
+                        `${baseURL}${'/offline_msg'}`,
+                        {
+                            method: 'POST', // *GET, POST, PUT, DELETE, etc.
+                            mode: 'cors', // no-cors, *cors, same-origin
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                "name": name,
+                                "email": email,
+                                "knowledgebaseId": knowledgebaseId,
+                                "message": message,
+                                "sessionId": sessionId,
+                            }), // body data type must match "Content-Type" header
+                        }
+                    );
+
+                    const $offlineMessage = document.getElementById('offline-message');
+
+                    if (response.status === 201) {
+                        const result = await response.text()
+                        $name.value = '';
+                        $email.value = '';
+                        $message.value = '';
+                        $invlidEmail.classList.remove('feedback-visible');
+                        $invlidName.classList.remove('feedback-visible');
+                        $invlidEmailInvalid.classList.remove('feedback-visible');
+                        $invlidMessage.classList.remove('feedback-visible');
+
+                        $offlineMessage.classList.add('show-success-msg');
+                    } else {
+                        $offlineMessage.classList.add('show-error-msg');
+                    }
+                    offlineMessageBtn.innerHTML = prevBtnText;
+                    offlineMessageBtn.removeAttribute('disabled');
+                } else {
+                    if (email && !isValidEmail) {
+                        $invlidEmail.classList.remove('feedback-visible');
+                        $invlidEmailInvalid.classList.add('feedback-visible');
+                    }
+                    if (!email) {
+                        $invlidEmail.classList.add('feedback-visible');
+                        $invlidEmailInvalid.classList.remove('feedback-visible');
+                    }
+
+                    if (email && isValidEmail) {
+                        $invlidEmail.classList.remove('feedback-visible');
+                        $invlidEmailInvalid.classList.remove('feedback-visible');
+                    }
+
+                    if (!name) {
+                        $invlidName.classList.add('feedback-visible');
+                    } else {
+                        $invlidName.classList.remove('feedback-visible');
+                    }
+                    if (!message) {
+                        $invlidMessage.classList.add('feedback-visible');
+                    } else {
+                        $invlidMessage.classList.remove('feedback-visible');
+                    }
+                }
+            });
+
+            const $offlineMessageClose = document.getElementById('offline-message-success-close');
+            const $offlineMessageErrorClose = document.getElementById('offline-message-error-close');
+            const $offlineMessage = document.getElementById('offline-message');
+
+            $offlineMessageClose.addEventListener('click', () => {
+                $offlineMessage.classList.remove('show-success-msg');
+            })
+            $offlineMessageErrorClose.addEventListener('click', () => {
+                $offlineMessage.classList.remove('show-error-msg');
+            })
+
+        }
+
+
+        const aiAssistantTab = document.getElementById('tab-ai-assistant');
+        const offlineMsgTab = document.getElementById('tab-offline-msg');
+        const tabsActive = document.getElementById('tabs-active');
+
+        const chatWrap = document.getElementById('chat-wrap');
+
+        if(offlineMsgTab) {
+            offlineMsgTab.addEventListener('click', function () {
+                const width = offlineMsgTab.offsetWidth;
+                const left = aiAssistantTab.offsetWidth;
+                tabsActive.style.width = `${width - 5}px`;
+                tabsActive.style.left = `${left + 5}px`;
+                chatWrap.classList.add('chat-wrap-offline');
+                chatWrap.classList.remove('chat-wrap-ai-assistant');
+    
+            });
+        }
+        if(aiAssistantTab) {
+            aiAssistantTab.addEventListener('click', function () {
+                const width = aiAssistantTab.offsetWidth;
+                tabsActive.style.width = `${width - 5}px`;
+                tabsActive.style.left = `4px`;
+                chatWrap.classList.add('chat-wrap-ai-assistant');
+                chatWrap.classList.remove('chat-wrap-offline');
+            });
+        }
+    </script>
+</body>
+
+
+</html>
