@@ -96,7 +96,11 @@
             </div>
             <div id="chat-messages" class="chat-messages">
                 <div class="chat-message chatbot">
-                    <div class="chat-message-text">Hello! How can I assist you today?</div>
+                    <div class="chat-message-text">
+                        <p id="chat-welcome-msg">
+                            Hello! How can I assist you today?
+                        </p>
+                    </div>
                 </div>
             </div>
             <div id="offline-message" class="offline-message">
@@ -295,6 +299,7 @@
             const heading = document.getElementById('chat-heading');
             const description = document.getElementById('chat-description');
             const branding = document.getElementById('powered-by');
+            const welcomeMsg = document.getElementById('chat-welcome-msg');
 
             if(data.hideBranding) {
                 branding.style.display = 'none';
@@ -305,6 +310,10 @@
             }
             if (data.description) {
                 description.innerText = data.description;
+            }
+
+            if (data.welcomeMessage) {
+                welcomeMsg.innerText = data.welcomeMessage;
             }
 
             if(data.offlineMessage) {
