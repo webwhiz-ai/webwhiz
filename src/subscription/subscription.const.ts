@@ -3,6 +3,7 @@ import { Subscription } from '../user/user.schema';
 export enum SubscriptionType {
   MONTHLY = 'MONTHLY',
   YEARLY = 'YEARLY',
+  LIFETIME = 'LIFETIME',
 }
 
 export interface SubscriptionPlanInfo {
@@ -94,6 +95,31 @@ export const subscriptionPlanData: Record<Subscription, SubscriptionPlanInfo> =
       maxChatbots: 500,
       maxTokens: 995000000,
       maxPages: 200,
+      maxChunksPerPage: 100,
+    },
+    // APP SUMO PLANS
+    [Subscription.APPSUMO_TIER1]: {
+      name: 'App Sumo Tier 1',
+      type: SubscriptionType.LIFETIME,
+      maxChatbots: 20,
+      maxTokens: 1000000,
+      maxPages: 2000,
+      maxChunksPerPage: 100,
+    },
+    [Subscription.APPSUMO_TIER2]: {
+      name: 'App Sumo Tier 2',
+      type: SubscriptionType.LIFETIME,
+      maxChatbots: 50,
+      maxTokens: 2500000,
+      maxPages: 5000,
+      maxChunksPerPage: 100,
+    },
+    [Subscription.APPSUMO_TIER3]: {
+      name: 'App Sumo Tier 3',
+      type: SubscriptionType.LIFETIME,
+      maxChatbots: 500,
+      maxTokens: 5000000,
+      maxPages: 10000,
       maxChunksPerPage: 100,
     },
   };

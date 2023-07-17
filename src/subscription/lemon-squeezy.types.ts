@@ -163,8 +163,17 @@ const VARIANT_TO_SUBSCRIPTION_MAP: Record<number, Subscription> = {
   68062: Subscription.ENTERPRISE_YEARLY,
 };
 
+const LTD_VARIANT_ID = 97685;
+
 export function getSubscriptionPlanFromVariantId(
   variantId: number,
-): Subscription {
-  return VARIANT_TO_SUBSCRIPTION_MAP[variantId];
+): Subscription | undefined {
+  if (variantId in VARIANT_TO_SUBSCRIPTION_MAP) {
+    return VARIANT_TO_SUBSCRIPTION_MAP[variantId];
+  }
+  return undefined;
+}
+
+export function isVariantForLifeTimeDeals(variantId: number) {
+  return variantId === LTD_VARIANT_ID;
 }

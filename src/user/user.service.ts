@@ -185,9 +185,12 @@ export class UserService {
     const currentMonth = `${
       new Date().getMonth() + 1
     }/${new Date().getFullYear()}`;
-    if (userData?.monthUsage?.month === undefined || userData?.monthUsage?.month !== currentMonth) {
+    if (
+      userData?.monthUsage?.month === undefined ||
+      userData?.monthUsage?.month !== currentMonth
+    ) {
       if (userData.monthUsage === undefined) {
-        userData.monthUsage = {month: '', count: 0};
+        userData.monthUsage = { month: '', count: 0 };
       }
       userData.monthUsage.month = currentMonth;
       userData.monthUsage.count = 0;
@@ -217,6 +220,8 @@ export class UserService {
       update['subscriptionData'] = payload;
     }
 
+    // TODO: If the user is not present then we need to create
+    // TODO: We will need to send email to user with password since this user won't have a password
     await this.userCollection.updateOne(
       { email },
       {
