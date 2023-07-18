@@ -58,6 +58,21 @@ WebWhiz have any limitations on the size of context. However, please note that t
 ## 📑 License
 Webwhiz is open-source under the **GNU Affero General Public License Version 3 (AGPLv3)**
 
+## WebWhiz SDK
+WebWhiz SDK is available on NPM, CDNs, and GitHub.
+
+-   [NPM](https://www.npmjs.com/) - NPM is a package manager for the JavaScript
+    programming language. You can install `webwhiz` using the following
+    command
+
+    ```sh
+    npm install webwhiz
+    ```
+- [CDN](https://www.unpkg.com/webwhiz@1.0.0/dist/sdk.js) Use directly from CDN
+
+  ```sh
+    https://www.unpkg.com/webwhiz@1.0.0/dist/sdk.js
+  ```
 
 
 
