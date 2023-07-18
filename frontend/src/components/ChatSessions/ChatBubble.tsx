@@ -1,5 +1,8 @@
 import React from 'react'
 import { Box } from '@chakra-ui/react'
+import ReactMarkdown from 'react-markdown'
+import ChakraUIRenderer from 'chakra-ui-markdown-renderer'
+import { markdownTheme } from '../../theme/markdownTheme'
 
 type ChatBubbleProps = {
     message: string;
@@ -16,7 +19,14 @@ export const ChatBubble = ({ message, type }: ChatBubbleProps) => {
             fontSize="sm"
             bg={type === 'user' ? 'gray.200' : 'blue.100'}
         >
-            {message}
+            {
+                type === 'user' ? message :
+                    <ReactMarkdown
+                        components={ChakraUIRenderer(markdownTheme)}
+                        children={message}
+                        skipHtml
+                    />
+            }
         </Box>
     )
 }
