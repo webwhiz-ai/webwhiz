@@ -169,8 +169,8 @@ export const ChatBotProductSetup = ({
 	);
 
 
-	const handlePageClick = React.useCallback((event) => {
-		onCrawlDataPaginationClick(event.selected + 1);
+	const handlePageClick = React.useCallback((page) => {
+		onCrawlDataPaginationClick(page+1);
 	}, [onCrawlDataPaginationClick]);
 
 
