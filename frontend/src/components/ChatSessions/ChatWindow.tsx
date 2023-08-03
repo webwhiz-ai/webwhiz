@@ -13,11 +13,8 @@ export const ChatWindow = ({ messages, isMessagesLoading }: ChatWindowProps) => 
         <Box
             w="calc(100% - 450px)"
             h="100%"
-            overflowX="hidden"
             maxW="620px"
-            overflowY="auto"
             position="relative"
-            p={4}
         >
             {
                 isMessagesLoading && <Flex
@@ -29,18 +26,27 @@ export const ChatWindow = ({ messages, isMessagesLoading }: ChatWindowProps) => 
                     right={0}
                     left={0}
                     bg="whiteAlpha.700"
+                    zIndex={1}
                 >
                     <Spinner />
                 </Flex>
             }
-            {
-                messages && messages.map((message) => {
-                    return <Box key={message.ts.toString()}>
-                        <ChatBubble message={message.q} type={'user'} />
-                        <ChatBubble message={message.a} type={'bot'} />
-                    </Box>
-                })
-            }
+
+            <Box
+                h="100%"
+                overflowX="hidden"
+                overflowY="auto"
+                p={4}
+            >
+                {
+                    messages && messages.map((message) => {
+                        return <Box key={message.ts.toString()}>
+                            <ChatBubble message={message.q} type={'user'} />
+                            <ChatBubble message={message.a} type={'bot'} />
+                        </Box>
+                    })
+                }
+            </Box>
         </Box>
     )
 }
