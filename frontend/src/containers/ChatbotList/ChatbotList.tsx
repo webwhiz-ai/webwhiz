@@ -21,8 +21,13 @@ import { CurrentUser } from "../../services/appConfig";
 import { NoDataSubscribeIcon } from "../../components/Icons/noData/NoDataSubscribeIcon";
 import { NoDataProjectIcon } from "../../components/Icons/noData/NoDataProjectIcon";
 import { deleteKnowledgebase, fetchKnowledgebases, generateEmbeddings } from "../../services/knowledgebaseService";
+import { SELF_HOST } from "../../config";
 
-const PAID_ONLY = false;
+let PAID_ONLY = false;
+
+if(SELF_HOST === 'true') { 
+	PAID_ONLY = false;
+}
 
 export const ChatbotList = () => {
 	const toast = useToast();

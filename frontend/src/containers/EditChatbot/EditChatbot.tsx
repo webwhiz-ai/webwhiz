@@ -311,36 +311,35 @@ const EditChatbot = (props: EditChatbotProps) => {
 
 
 	const getAddToWebsiteContent = React.useCallback(() => {
-		console.log("user", user);
-		if (user && user?.subscriptionData?.name === 'FREE') {
-			return <VStack
-				alignItems="center"
-				direction="column"
-				justifyContent="center"
-				pt={32}
-				pb={32}
-				spacing="9"
-			>
-				<NoDataSubscribeIcon width="auto" height="180px" />
-				<Box textAlign="center">
-					<Heading
-						maxW="580px"
-						fontSize="xl"
-						fontWeight="500"
-						as="h3"
-						mb="4"
-						color="gray.500"
-						lineHeight="medium"
-						textAlign="center"
-					>
-						Upgrade to a paid plan to add chatbot to your website
-					</Heading>
-					<Link to="/app/settings/subscription">
-						<Button variant='outline' colorScheme='blue' size='md'>Subscribe Now</Button>
-					</Link>
-				</Box>
-			</VStack>
-		}
+		// if (user && user?.subscriptionData?.name === 'FREE') {
+		// 	return <VStack
+		// 		alignItems="center"
+		// 		direction="column"
+		// 		justifyContent="center"
+		// 		pt={32}
+		// 		pb={32}
+		// 		spacing="9"
+		// 	>
+		// 		<NoDataSubscribeIcon width="auto" height="180px" />
+		// 		<Box textAlign="center">
+		// 			<Heading
+		// 				maxW="580px"
+		// 				fontSize="xl"
+		// 				fontWeight="500"
+		// 				as="h3"
+		// 				mb="4"
+		// 				color="gray.500"
+		// 				lineHeight="medium"
+		// 				textAlign="center"
+		// 			>
+		// 				Upgrade to a paid plan to add chatbot to your website
+		// 			</Heading>
+		// 			<Link to="/app/settings/subscription">
+		// 				<Button variant='outline' colorScheme='blue' size='md'>Subscribe Now</Button>
+		// 			</Link>
+		// 		</Box>
+		// 	</VStack>
+		// }
 
 
 
