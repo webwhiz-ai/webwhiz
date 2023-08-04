@@ -7,6 +7,8 @@ import {
 	SimpleGrid,
 	Spinner,
 	Tooltip,
+	HStack,
+	Link as ChakraLink,
 	useToast,
 	VStack,
 } from "@chakra-ui/react";
@@ -23,7 +25,7 @@ import { NoDataProjectIcon } from "../../components/Icons/noData/NoDataProjectIc
 import { deleteKnowledgebase, fetchKnowledgebases, generateEmbeddings } from "../../services/knowledgebaseService";
 import { SELF_HOST } from "../../config";
 
-let PAID_ONLY = false;
+let PAID_ONLY = true;
 
 if(SELF_HOST === 'true') { 
 	PAID_ONLY = false;
@@ -103,7 +105,7 @@ export const ChatbotList = () => {
 				<NoDataSubscribeIcon width="auto" height="250px" />
 				<Box textAlign="center">
 					<Heading
-						maxW="580px"
+						maxW="480px"
 						fontSize="xl"
 						fontWeight="500"
 						as="h3"
@@ -112,11 +114,17 @@ export const ChatbotList = () => {
 						lineHeight="medium"
 						textAlign="center"
 					>
-						Upgrade to a paid plan to create chatbots.
+						Upgrade to a paid plan or purchase credits to create chatbots.
 					</Heading>
-					<Link to="/app/settings/subscription">
-						<Button variant='outline' colorScheme='blue' size='md'>Subscribe Now</Button>
-					</Link>
+					<HStack justify="center">
+						<Link to="/app/settings/subscription">
+							<Button colorScheme='blue' size='md'>Subscribe Now</Button>
+						</Link>
+						<ChakraLink href={'https://webwhiz.lemonsqueezy.com/checkout/buy/60da93fa-87b8-4fcd-9176-48da47405541?checkout[email]='+user.email}
+                    isExternal >
+								<Button variant='outline' colorScheme='blue' size='md'>Buy 50K tokens for $5</Button>
+						</ChakraLink>
+					</HStack>
 				</Box>
 			</VStack>
 		}
