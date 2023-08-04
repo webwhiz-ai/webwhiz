@@ -39,3 +39,10 @@ services:
       - "3030:80"
     depends_on:
       - web
+
+  widget:
+    build: ./widget
+    ports:
+      - "3031:80"
+    depends_on:
+      - web

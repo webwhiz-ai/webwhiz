@@ -25,6 +25,7 @@ Running Webwhiz with docker
 # Bring up webwhiz
 # Once the building is done and webwhiz starts the UI will be available at
 # http://localhost:3030, backend is available at http://localhost:3000
+# widget is available at http://localhost:3031
 # To exit Press Ctrl-C
 docker-compose up
 

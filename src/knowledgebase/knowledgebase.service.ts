@@ -64,6 +64,9 @@ export class KnowledgebaseService {
       maxPages,
     };
 
+    // Exclude other file types
+    data.exclude.push(`${baseUrl}/**/*.mp3`);
+
     const client = this.celeryClient.get(CeleryClientQueue.CRAWLER);
     const task = client.createTask('tasks.crawl');
     await task.applyAsync([data, kbId.toString(), 1, useAlternateParser]);
