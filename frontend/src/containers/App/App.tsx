@@ -75,7 +75,8 @@ export const App = (props: AppProps) => {
 				<Box className={styles.usgaeNumbers}><Text as="span" fontWeight="bold">{formatNumber(userData.monthUsage.count)}</Text> / {formatNumber(userData?.subscriptionData?.maxTokens)}</Box>
 				<Text className={styles.usageLabel} fontSize="sm">Monthly usage limits</Text>
 				<Progress className={styles.progressbar} w="100%" value={usage} size='sm' colorScheme={isExceded ? 'red': 'blue'} borderRadius="md" />
-				<Box w="100%" className={styles.usageUpgradeBtn}>
+				{
+					(userData?.subscriptionData?.type !== 'LIFETIME') ? (<Box w="100%" className={styles.usageUpgradeBtn}>
 					<Link to="/app/settings/subscription/">
 						<Button
 							w="100%"
@@ -86,7 +87,9 @@ export const App = (props: AppProps) => {
 							Upgrade now
 						</Button>
 					</Link>
-				</Box>
+				</Box>) : null
+				}
+				
 			</Box>
 		} catch (error) {
 			console.log("error", error);
