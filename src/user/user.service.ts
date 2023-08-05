@@ -2,6 +2,7 @@ import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { compare, hash } from 'bcrypt';
 import { Collection, Db, ObjectId } from 'mongodb';
 import { GoogleUserProfile } from '../auth/google-auth';
+import { AppConfigService } from '../common/config/appConfig.service';
 import { MONGODB } from '../common/mongo/mongo.module';
 import { SubscriptionPlanInfoService } from '../subscription/subscription-plan.service';
 import { CreateUserDTO } from './user.dto';
@@ -29,6 +30,7 @@ export class UserService {
   private readonly userCollection: Collection<User>;
 
   constructor(
+    private appConfig: AppConfigService,
     @Inject(MONGODB) private db: Db,
     private subsPlanService: SubscriptionPlanInfoService,
   ) {
@@ -102,7 +104,7 @@ export class UserService {
       name,
       avatarUrl: picture,
       locale,
-      activeSubscription: Subscription.FREE,
+      activeSubscription: this.appConfig.get("defaultSubscription"),
       createdAt: ts,
       updatedAt: ts,
     };
@@ -148,7 +150,7 @@ export class UserService {
       password: data.password,
       name: data.name,
       avatarUrl: data.avatarUrl,
-      activeSubscription: Subscription.FREE,
+      activeSubscription: this.appConfig.get("defaultSubscription"),
       createdAt: ts,
       updatedAt: ts,
     };

@@ -20,6 +20,7 @@ export enum Subscription {
   APPSUMO_TIER2 = 'APPSUMO_TIER2',
   APPSUMO_TIER3 = 'APPSUMO_TIER3',
   DEMO_ACCOUNT = 'DEMO_ACCOUNT',
+  SELF_HOSTED='SELF_HOSTED'
 }
 
 export interface UserMonthlyUsage {

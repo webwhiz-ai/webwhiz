@@ -122,4 +122,12 @@ export const subscriptionPlanData: Record<Subscription, SubscriptionPlanInfo> =
       maxPages: 10000,
       maxChunksPerPage: 100,
     },
+    [Subscription.SELF_HOSTED]: {
+      name: 'Self Hosted',
+      type: SubscriptionType.LIFETIME,
+      maxChatbots: 500,
+      maxTokens: 5000000,
+      maxPages: 100000,
+      maxChunksPerPage: 500,
+    },
   };

@@ -1,3 +1,5 @@
+import { Subscription } from "../../user/user.schema";
+
 interface AppConfig {
   nodeEnv: 'development' | 'production' | 'test';
   host: string;
@@ -15,6 +17,7 @@ interface AppConfig {
   sendGridApiKey: string;
   docStorageLocation: string;
   textractServiceUrl: string;
+  defaultSubscription: Subscription;
 }
 
 const config = (): AppConfig => ({
@@ -35,6 +38,7 @@ const config = (): AppConfig => ({
   docStorageLocation: process.env.DOC_STORAGE_LOCATION || '../storage',
   textractServiceUrl:
     process.env.TEXTRACT_URL || 'http://localhost:8080/textract',
+    defaultSubscription: Subscription[process.env.DEFAULT_SUBSCRIPTION] || Subscription.FREE,
 });
 
 export { AppConfig };
