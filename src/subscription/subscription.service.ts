@@ -92,6 +92,8 @@ export class SubscriptionService {
         plan = Subscription.APPSUMO_TIER2;
       } else if (userData.activeSubscription === Subscription.APPSUMO_TIER2) {
         plan = Subscription.APPSUMO_TIER3;
+      } else if (userData.activeSubscription === Subscription.APPSUMO_TIER3) {
+        plan = Subscription.APPSUMO_TIER3;
       }
     }
 
