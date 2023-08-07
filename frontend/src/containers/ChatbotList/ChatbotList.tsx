@@ -25,7 +25,7 @@ import { NoDataProjectIcon } from "../../components/Icons/noData/NoDataProjectIc
 import { deleteKnowledgebase, fetchKnowledgebases, generateEmbeddings } from "../../services/knowledgebaseService";
 import { SELF_HOST } from "../../config";
 
-let PAID_ONLY = true;
+let PAID_ONLY = false;
 
 if(SELF_HOST === 'true') { 
 	PAID_ONLY = false;
