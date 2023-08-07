@@ -104,7 +104,7 @@ export class UserService {
       name,
       avatarUrl: picture,
       locale,
-      activeSubscription: this.appConfig.get("defaultSubscription"),
+      activeSubscription: this.appConfig.get('defaultSubscription'),
       createdAt: ts,
       updatedAt: ts,
     };
@@ -150,7 +150,7 @@ export class UserService {
       password: data.password,
       name: data.name,
       avatarUrl: data.avatarUrl,
-      activeSubscription: this.appConfig.get("defaultSubscription"),
+      activeSubscription: this.appConfig.get('defaultSubscription'),
       createdAt: ts,
       updatedAt: ts,
     };
@@ -238,10 +238,10 @@ export class UserService {
 
   async getUserMonthlyUsageData(
     userId: ObjectId,
-  ): Promise<Pick<User, 'monthUsage' | 'activeSubscription'>> {
+  ): Promise<Pick<User, 'monthUsage' | 'tokenCredits' | 'activeSubscription'>> {
     const usageData = await this.userCollection.findOne(
       { _id: userId },
-      { projection: { monthUsage: 1, activeSubscription: 1 } },
+      { projection: { monthUsage: 1, tokenCredits: 1, activeSubscription: 1 } },
     );
 
     return usageData;

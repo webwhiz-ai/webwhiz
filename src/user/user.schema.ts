@@ -20,7 +20,7 @@ export enum Subscription {
   APPSUMO_TIER2 = 'APPSUMO_TIER2',
   APPSUMO_TIER3 = 'APPSUMO_TIER3',
   DEMO_ACCOUNT = 'DEMO_ACCOUNT',
-  SELF_HOSTED='SELF_HOSTED'
+  SELF_HOSTED = 'SELF_HOSTED',
 }
 
 export interface UserMonthlyUsage {
@@ -50,6 +50,7 @@ export interface User {
   // Sotres the usage (# messages) for current month
   monthUsage?: UserMonthlyUsage;
   // Subscription details
+  tokenCredits?: number;
   activeSubscription: Subscription;
   subscriptionData?: SubscriptionData;
   createdAt: Date;
