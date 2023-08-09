@@ -67,7 +67,8 @@ function __WEBWHIZ__addIframe() {
   ifrm.setAttribute("data-powered-by", "https://www.webwhiz.ai/");
   ifrm.setAttribute("frameborder", "0");
 
-  const container = document.getElementById("__webwhizSdk__").getAttribute('container');
+  const scriptEl = document.getElementById("__webwhizSdk__");
+  const container = scriptEl.getAttribute('container') || scriptEl.getAttribute('data-container');
 
 
   if (container) {
@@ -106,7 +107,8 @@ function __WEBWHIZ__getEventHandler(ifrm) {
       localStorage.removeItem('chatHistory');
       localStorage.removeItem('sessionId');
     } else if (e.data === "webwhiz:request_meta_data") {
-      const container = document.getElementById("__webwhizSdk__").getAttribute('container');
+      const scriptEl = document.getElementById("__webwhizSdk__");
+      const container = scriptEl.getAttribute('container') || scriptEl.getAttribute('data-container');
       e.source.postMessage({ messageType: 'webwhiz:recieve_meta_data', url: window.location.href, container: container }, '*');
     } else if (e.data === "webwhiz:request_chat_data") {
       const chatHistoryData = localStorage.getItem("chatHistory");
@@ -134,17 +136,21 @@ function __WEBWHIZ__addEventListeners(ifrm) {
 }
 
 function __WEBWHIZ__getChatbotId() {
-  const chatbotId = document.getElementById("__webwhizSdk__").getAttribute('chatbotId');
+  const scriptEl = document.getElementById("__webwhizSdk__");
+  const chatbotId = scriptEl.getAttribute('chatbotId') || scriptEl.getAttribute('data-chatbot-id');
   return chatbotId;
 }
 
 function __WEBWHIZ__getWidgetURL() {
-  const baseURL = document.getElementById("__webwhizSdk__").getAttribute('widgetUrl');
+  const scriptEl = document.getElementById("__webwhizSdk__");
+  const baseURL = scriptEl.getAttribute('widgetUrl') || scriptEl.getAttribute('data-widget-url');
   return baseURL || 'https://widget.webwhiz.ai/';
 }
 
 function __WEBWHIZ__getBaseURL() {
-  const baseURL = document.getElementById("__webwhizSdk__").getAttribute('baseUrl');
+  const scriptEl = document.getElementById("__webwhizSdk__");
+  const baseURL = scriptEl.getAttribute('baseUrl') || scriptEl.getAttribute('data-base-url');
+  console.log(baseURL);
   return baseURL || 'https://api.webwhiz.ai';
 }
 
