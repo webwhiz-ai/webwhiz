@@ -563,12 +563,11 @@
         });
 
         document.getElementById('chat-input').onkeydown = function (e) {
-            if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
+            if (e.key === "Enter" && !e.shiftKey && !e.ctrlKey && !e.metaKey) {
                 e.preventDefault();
                 addMessageToChat();
             }
         };
-
 
         /**
          * Iframe communications
