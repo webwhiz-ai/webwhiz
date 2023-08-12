@@ -44,7 +44,6 @@ interface ChatBotsCustomizeProps {
 	primaryButtonLabel?: string;
 	isSubmitting?: boolean;
 	showheader?: boolean;
-    defaultPrompt?: string;
 	showTimeMessage?: boolean;
 }
 
@@ -52,7 +51,6 @@ export const ChatBotsCustomize = ({
 	onNextClick,
 	onBackClick,
 	defaultCustomizationValues,
-    defaultPrompt = '',
 	primaryButtonLabel = "Update widget style",
 	isSubmitting = false,
 }: ChatBotsCustomizeProps) => {
@@ -343,7 +341,6 @@ export const ChatBotsCustomize = ({
 																	<Textarea
 																		{...field}
 																		rows={4}
-                                                                        defaultValue={defaultPrompt}
 																		placeholder="This is the base prompt that is used to give instructions to the chatbot. You can customize this prompt to fit your use case."
 																	/>
 																	<FormErrorMessage>

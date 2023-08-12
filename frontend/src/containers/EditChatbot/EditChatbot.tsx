@@ -495,7 +495,8 @@ const EditChatbot = (props: EditChatbotProps) => {
 			offlineMessage: chatBot.chatWidgeData?.offlineMessage,
 			showReadMore: chatBot.chatWidgeData?.showReadMore === undefined ? chatWidgetDefaultValues.showReadMore : chatBot.chatWidgeData?.showReadMore,
 			welcomeMessage: chatBot.chatWidgeData?.welcomeMessage || chatWidgetDefaultValues.welcomeMessage,
-			questionExamples: chatBot.chatWidgeData?.questionExamples || chatWidgetDefaultValues.questionExamples
+			questionExamples: chatBot.chatWidgeData?.questionExamples || chatWidgetDefaultValues.questionExamples,
+			prompt: chatBot.prompt || chatWidgetDefaultValues.prompt,
 		};
 	}, [chatBot]);
 
@@ -656,7 +657,6 @@ const EditChatbot = (props: EditChatbotProps) => {
                                 history.push("/app/chat-bots/");
                             }}
                             isSubmitting={isSubmitting}
-                            defaultPrompt={chatBot.prompt}
                             primaryButtonLabel="Update widget style"
                             defaultCustomizationValues={getDefaultCustomizationValues()}
                             onNextClick={async (formData: ChatBotCustomizeData) => {
