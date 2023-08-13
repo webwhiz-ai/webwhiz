@@ -1,6 +1,6 @@
 import axios, { AxiosResponse } from 'axios';
 import { baseURL } from '../config';
-import { ChatBotCustomizeData, ChatSessionDetail, CrawlDataDetail, CrawlDataListPagination, Knowledgebase, OfflineMessagePagination, TrainingData, TrainingDataDetail, ChatSessionPagination } from '../types/knowledgebase.type';
+import { ChatBotCustomizeData, ChatSessionDetail, CrawlDataDetail, CrawlDataListPagination, Knowledgebase, OfflineMessagePagination, TrainingData, TrainingDataDetail, ChatSessionPagination, CustomDataPagination } from '../types/knowledgebase.type';
 export interface Product {
 	id: string;
 	name: string;
@@ -143,13 +143,11 @@ export async function updateTrainingData(id: string, data): Promise<AxiosRespons
 		url: `/knowledgebase/${id}/datastore/${data._id}`,
 	});
 }
-export async function getTrainingData(id: string): Promise<AxiosResponse<{
-	results: TrainingData[],
-}>> {
+export async function getTrainingData(id: string, page: string): Promise<AxiosResponse<CustomDataPagination>> {
 	return await axios({
 		baseURL: baseURL,
 		method: 'get',
-		url: `/knowledgebase/${id}/datastore?type=CUSTOM&page_size=30`,
+		url: `/knowledgebase/${id}/datastore?type=CUSTOM&page=${page}`,
 	});
 }
 export async function deleteTrainingData(knowledgebaseId: string, id: string): Promise<AxiosResponse<Knowledgebase>> {
