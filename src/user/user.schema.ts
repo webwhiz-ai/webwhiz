@@ -59,6 +59,11 @@ export interface User {
   whitelabelling?: {
     removeBranding: boolean;
   };
+  // Webhooks
+  webhook?: {
+    url: string;
+    secret: string;
+  };
   createdAt: Date;
   updatedAt: Date;
   lastLogin?: Date;

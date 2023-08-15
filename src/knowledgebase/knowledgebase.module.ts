@@ -19,6 +19,7 @@ import { DataStoreService } from './datastore.service';
 import { EmailModule } from '../common/email/email.module';
 import { TaskModule } from '../task/task.module';
 import { CustomKeyService } from './custom-key.service';
+import { WebhookModule } from '../webhook/webhook.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { CustomKeyService } from './custom-key.service';
     SubscriptionModule,
     EmailModule,
     TaskModule,
+    WebhookModule,
   ],
   controllers: [
     ChatbotController,

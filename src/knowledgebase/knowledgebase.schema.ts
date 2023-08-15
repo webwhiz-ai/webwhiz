@@ -157,6 +157,31 @@ export interface ChatSession {
   startedAt: Date;
   updatedAt: Date;
 }
+export type ChatSessionSparse = Pick<
+  ChatSession,
+  | '_id'
+  | 'knowledgebaseId'
+  | 'src'
+  | 'messages'
+  | 'userData'
+  | 'startedAt'
+  | 'updatedAt'
+>;
+
+export interface ChatMessageWebhookPayload {
+  q: string;
+  a: string;
+  ts: Date;
+  session: {
+    id: string;
+    knowledgebaseId: string;
+    kbName: string;
+    src: string;
+    userData: string;
+    startedAt: Date;
+    updatedAt: Date;
+  };
+}
 
 /*********************************************************
  * PROMPT

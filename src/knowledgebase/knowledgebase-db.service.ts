@@ -21,6 +21,7 @@ import {
   KNOWLEDGEBASE_COLLECTION,
   Prompt,
   PROMPT_COLLECTION,
+  ChatSessionSparse,
 } from './knowledgebase.schema';
 
 @Injectable()
@@ -442,6 +443,24 @@ export class KnowledgebaseDbService {
 
   async getChatSessionById(id: ObjectId): Promise<ChatSession> {
     const session = await this.chatSessionCollection.findOne({ _id: id });
+    return session;
+  }
+
+  async getChatSessionSparseById(id: ObjectId): Promise<ChatSessionSparse> {
+    const session = await this.chatSessionCollection.findOne(
+      { _id: id },
+      {
+        projection: {
+          _id: 1,
+          src: 1,
+          messages: 1,
+          userData: 1,
+          startedAt: 1,
+          updatedAt: 1,
+          knowledgebaseId: 1,
+        },
+      },
+    );
     return session;
   }
 

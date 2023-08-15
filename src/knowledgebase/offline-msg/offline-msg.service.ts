@@ -8,6 +8,8 @@ import { OfflineMessage, OFFLINE_MSG_COLLECTION } from './offline-msg.schema';
 import { EmailService } from '../../common/email/email.service';
 import { UserService } from '../../user/user.service';
 import { getLimitOffsetPaginatedResponse } from 'src/common/utils';
+import { WebhookService } from '../../webhook/webhook.service';
+import { WebhookEventType } from '../../webhook/webhook.types';
 
 @Injectable()
 export class OfflineMsgService {
@@ -18,6 +20,7 @@ export class OfflineMsgService {
     private kbDbService: KnowledgebaseDbService,
     private userService: UserService,
     private emailService: EmailService,
+    private readonly webhookService: WebhookService,
   ) {
     this.offlineMsgCollection = this.db.collection(OFFLINE_MSG_COLLECTION);
   }
@@ -119,6 +122,21 @@ export class OfflineMsgService {
       data.message,
       data.name,
     );
+
+    // Call webhook with the offline msg
+    this.webhookService.callWebhook(kb.owner, {
+      event: WebhookEventType.OFFLINE_MSG,
+      payload: {
+        id: res._id.toHexString(),
+        chatSessionId: res.chatSessionId.toHexString(),
+        email: res.email,
+        name: res.name,
+        message: res.message,
+        knowledgebaseId: res.knowledgebaseId.toHexString(),
+        url: res.url,
+        createdAt: res.createdAt,
+      },
+    });
 
     return res;
   }

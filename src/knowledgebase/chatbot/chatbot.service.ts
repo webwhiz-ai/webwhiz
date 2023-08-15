@@ -20,17 +20,20 @@ import { TaskType } from '../../task/task.schema';
 import { TaskService } from '../../task/task.service';
 import { UserSparse } from '../../user/user.schema';
 import { UserService } from '../../user/user.service';
+import { CustomKeyService } from '../custom-key.service';
 import { KnowledgebaseDbService } from '../knowledgebase-db.service';
 import { checkUserIsOwnerOfKb } from '../knowledgebase-utils';
 import {
   ChatQueryAnswer,
   ChatSession,
+  ChatSessionSparse,
   Knowledgebase,
   KnowledgebaseStatus,
 } from '../knowledgebase.schema';
 import { PromptTestDTO } from './chatbot.dto';
 import { OpenaiChatbotService } from './openaiChatbotService';
-import { CustomKeyService } from '../custom-key.service';
+import { WebhookService } from '../../webhook/webhook.service';
+import { WebhookEventType } from '../../webhook/webhook.types';
 
 const CHAT_SESION_EXPIRY_TIME = 5 * 60;
 const CHUNK_FILTER_THRESHOLD = 0.3;
@@ -46,6 +49,7 @@ export class ChatbotService {
     private emailService: EmailService,
     private taskService: TaskService,
     private readonly customKeyService: CustomKeyService,
+    private readonly webhookService: WebhookService,
     @Inject(CELERY_CLIENT) private celeryClient: CeleryClientService,
     @Inject(REDIS) private redis: Redis,
   ) {}
@@ -365,6 +369,25 @@ export class ChatbotService {
           ts: new Date(),
         };
         await this.updateSessionDataWithNewMsg(sessionData, msg);
+
+        // Call webhook with msg
+        this.webhookService.callWebhook(sessionData.userId, {
+          event: WebhookEventType.CHATBOT_MSG,
+          payload: {
+            q: msg.q,
+            a: msg.a,
+            ts: msg.ts,
+            session: {
+              id: sessionData._id.toHexString(),
+              kbName: sessionData.kbName,
+              knowledgebaseId: sessionData.knowledgebaseId.toHexString(),
+              src: sessionData.src,
+              userData: sessionData.userData,
+              startedAt: sessionData.startedAt,
+              updatedAt: sessionData.updatedAt,
+            },
+          },
+        });
       },
       sessionData.defaultAnswer,
       sessionData.prompt,
@@ -512,10 +535,10 @@ export class ChatbotService {
    * @returns
    */
   async getChatSessionData(user: UserSparse, sessionId: string) {
-    let session;
+    let session: ChatSessionSparse;
 
     try {
-      session = await this.kbDbService.getChatSessionById(
+      session = await this.kbDbService.getChatSessionSparseById(
         new ObjectId(sessionId),
       );
     } catch {

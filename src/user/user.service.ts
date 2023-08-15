@@ -270,6 +270,23 @@ export class UserService {
     await this.userCollection.updateOne({ _id: id }, { $set: update });
   }
 
+  async setUserWebhookData(id: ObjectId, webhookData: User['webhook']) {
+    const update: Partial<User> = {
+      webhook: webhookData,
+      updatedAt: new Date(),
+    };
+
+    await this.userCollection.updateOne({ _id: id }, { $set: update });
+  }
+
+  async getUserWebhookData(id: ObjectId): Promise<Pick<User, 'webhook'>> {
+    const res = await this.userCollection.findOne(
+      { _id: id },
+      { projection: { webhook: 1 } },
+    );
+    return res;
+  }
+
   /** **************************************************
    * CHATBOT MONTHLY USAGE RELATED
    *************************************************** */
