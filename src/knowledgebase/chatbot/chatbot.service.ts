@@ -501,7 +501,7 @@ export class ChatbotService {
       throw new HttpException('Invalid Session', HttpStatus.NOT_FOUND);
     }
 
-    const kb = await this.kbDbService.getKnowledgebaseById(
+    const kb = await this.kbDbService.getKnowledgebaseSparseById(
       session.knowledgebaseId,
     );
 
@@ -520,7 +520,7 @@ export class ChatbotService {
   ) {
     const kbId = new ObjectId(knowledgebaseId);
 
-    const kb = await this.kbDbService.getKnowledgebaseById(kbId);
+    const kb = await this.kbDbService.getKnowledgebaseSparseById(kbId);
     checkUserIsOwnerOfKb(user, kb);
 
     return this.kbDbService.getPaginatedChatSessionsForKnowledgebase(

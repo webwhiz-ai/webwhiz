@@ -41,7 +41,7 @@ export class KnowledgebaseController {
     @Param('id') id: string,
   ) {
     const { user } = req;
-    return this.kbService.getKnowledgeBaseData(user, id);
+    return this.kbService.getKnowledgeBaseDetail(user, id);
   }
 
   /**
@@ -110,7 +110,7 @@ export class KnowledgebaseController {
   }
 
   /**
-   * Update Prompt ID for knowledge base
+   * Update Prompt for knowledge base
    */
   @Put('/:id/prompt')
   async setPromptId(
@@ -119,7 +119,7 @@ export class KnowledgebaseController {
     @Body() data: SetPromptDTO,
   ) {
     const { user } = req;
-    return this.kbService.setKnowledgebasePromptId(user, id, data.prompt);
+    return this.kbService.setKnowledgebasePrompt(user, id, data.prompt);
   }
 
   /**

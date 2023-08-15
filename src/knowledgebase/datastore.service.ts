@@ -192,7 +192,7 @@ export class DataStoreService {
     data: AddCustomChunkDTO,
   ) {
     const kbId = new ObjectId(knowledgebaseId);
-    const kb = await this.kbDbService.getKnowledgebaseById(kbId);
+    const kb = await this.kbDbService.getKnowledgebaseSparseById(kbId);
     checkUserIsOwnerOfKb(user, kb);
 
     const ts = new Date();
@@ -227,7 +227,7 @@ export class DataStoreService {
     const dId = new ObjectId(dataStoreId);
 
     // Validations
-    const kb = await this.kbDbService.getKnowledgebaseById(kbId);
+    const kb = await this.kbDbService.getKnowledgebaseSparseById(kbId);
     checkUserIsOwnerOfKb(user, kb);
     const dsItem = await this.kbDbService.getKbDataStoreItemById(dId);
     if (!dsItem.knowledgebaseId.equals(kbId)) {
@@ -251,7 +251,7 @@ export class DataStoreService {
     page?: number,
   ) {
     const kbId = new ObjectId(knowledgebaseId);
-    const kb = await this.kbDbService.getKnowledgebaseById(kbId);
+    const kb = await this.kbDbService.getKnowledgebaseSparseById(kbId);
     checkUserIsOwnerOfKb(user, kb);
 
     return this.kbDbService.getPaginatedDataStoreItemsForKnowledgebase(
@@ -271,7 +271,7 @@ export class DataStoreService {
     const dId = new ObjectId(dataStoreId);
 
     // Validations
-    const kb = await this.kbDbService.getKnowledgebaseById(kbId);
+    const kb = await this.kbDbService.getKnowledgebaseSparseById(kbId);
     checkUserIsOwnerOfKb(user, kb);
     const dsItem = await this.kbDbService.getKbDataStoreItemById(dId);
     if (!dsItem.knowledgebaseId.equals(kbId)) {
@@ -291,7 +291,7 @@ export class DataStoreService {
     const dId = new ObjectId(dataStoreId);
 
     // Validations
-    const kb = await this.kbDbService.getKnowledgebaseById(kbId);
+    const kb = await this.kbDbService.getKnowledgebaseSparseById(kbId);
     checkUserIsOwnerOfKb(user, kb);
     const dsItem = await this.kbDbService.getKbDataStoreItemById(dId);
     if (!dsItem.knowledgebaseId.equals(kbId)) {

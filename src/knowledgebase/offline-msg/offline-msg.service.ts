@@ -7,7 +7,7 @@ import { NewOfflineMsgDTO } from './offline-msg.dto';
 import { OfflineMessage, OFFLINE_MSG_COLLECTION } from './offline-msg.schema';
 import { EmailService } from '../../common/email/email.service';
 import { UserService } from '../../user/user.service';
-import { getLimitOffsetPaginatedResponse } from "src/common/utils";
+import { getLimitOffsetPaginatedResponse } from 'src/common/utils';
 
 @Injectable()
 export class OfflineMsgService {
@@ -48,7 +48,7 @@ export class OfflineMsgService {
   async getPaginatedOfflineMsgsForKnowledgebase(
     kbId: ObjectId,
     pageSize: number,
-    page?: number
+    page?: number,
   ) {
     const itemsPerPage = Math.min(pageSize, 50);
 
@@ -70,10 +70,10 @@ export class OfflineMsgService {
       this.offlineMsgCollection,
       filter,
       projectionFields,
-      "_id",
+      '_id',
       -1,
       itemsPerPage,
-      page
+      page,
     );
 
     return response;
@@ -128,13 +128,13 @@ export class OfflineMsgService {
     user: UserSparse,
     knowledgebaseId: string,
     pageSize: number,
-    page?: number
+    page?: number,
   ) {
     const kbId = new ObjectId(knowledgebaseId);
 
-    const kb = await this.kbDbService.getKnowledgebaseById(kbId);
+    const kb = await this.kbDbService.getKnowledgebaseSparseById(kbId);
     if (!kb || !user._id.equals(kb.owner)) {
-      throw new HttpException("Unauthorized", HttpStatus.UNAUTHORIZED);
+      throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
     }
 
     return this.getPaginatedOfflineMsgsForKnowledgebase(kbId, pageSize, page);

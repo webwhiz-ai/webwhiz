@@ -182,7 +182,7 @@ export class KnowledgebaseService {
     data: UpdateKnowledgebaseWebsiteDataDTO,
   ) {
     const kbId = new ObjectId(id);
-    const kb = await this.kbDbService.getKnowledgebaseById(kbId);
+    const kb = await this.kbDbService.getKnowledgebaseSparseById(kbId);
     checkUserIsOwnerOfKb(user, kb);
 
     if (
@@ -250,7 +250,7 @@ export class KnowledgebaseService {
   async generateEmbeddingsForKnowledgebase(user: UserSparse, id: string) {
     const kbId = new ObjectId(id);
 
-    const kb = await this.kbDbService.getKnowledgebaseById(kbId);
+    const kb = await this.kbDbService.getKnowledgebaseSparseById(kbId);
     checkUserIsOwnerOfKb(user, kb);
 
     if (
@@ -316,7 +316,7 @@ export class KnowledgebaseService {
    * @param id
    * @returns
    */
-  async getKnowledgeBaseData(user: UserSparse, id: string) {
+  async getKnowledgeBaseDetail(user: UserSparse, id: string) {
     const kb = await this.kbDbService.getKnowledgebaseById(new ObjectId(id));
     checkUserIsOwnerOfKb(user, kb);
 
@@ -355,7 +355,7 @@ export class KnowledgebaseService {
   async deleteKnowledgebaseForUser(user: UserSparse, id: string) {
     const kbId = new ObjectId(id);
 
-    const kb = await this.kbDbService.getKnowledgebaseById(kbId);
+    const kb = await this.kbDbService.getKnowledgebaseSparseById(kbId);
     checkUserIsOwnerOfKb(user, kb);
 
     await Promise.all([
@@ -374,7 +374,7 @@ export class KnowledgebaseService {
    */
   async setKnowledgebaseChatWidgeData(user: UserSparse, id: string, data: any) {
     const kbId = new ObjectId(id);
-    const kb = await this.kbDbService.getKnowledgebaseById(kbId);
+    const kb = await this.kbDbService.getKnowledgebaseSparseById(kbId);
     checkUserIsOwnerOfKb(user, kb);
 
     await this.kbDbService.setKnowledgebaseChatWidgetData(kbId, data);
@@ -414,7 +414,7 @@ export class KnowledgebaseService {
   ) {
     const kbId = new ObjectId(id);
 
-    const kb = await this.kbDbService.getKnowledgebaseById(kbId);
+    const kb = await this.kbDbService.getKnowledgebaseSparseById(kbId);
     checkUserIsOwnerOfKb(user, kb);
 
     await this.kbDbService.updateKnowledgebase(kbId, {
@@ -422,10 +422,10 @@ export class KnowledgebaseService {
     });
   }
 
-  async setKnowledgebasePromptId(user: UserSparse, id: string, prompt: string) {
+  async setKnowledgebasePrompt(user: UserSparse, id: string, prompt: string) {
     const kbId = new ObjectId(id);
 
-    const kb = await this.kbDbService.getKnowledgebaseById(kbId);
+    const kb = await this.kbDbService.getKnowledgebaseSparseById(kbId);
     checkUserIsOwnerOfKb(user, kb);
 
     prompt = this.constructPromptFromBaseSystemMsg(prompt);

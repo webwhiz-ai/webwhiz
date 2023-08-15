@@ -34,17 +34,18 @@ export interface Knowledgebase {
     stats: CrawlerStats;
   };
   monthUsage?: UserMonthlyUsage;
-  defaultAnswer?: string;
-  prompt?: string;
   chatWidgeData?: any;
   owner: ObjectId;
   createdAt: Date;
   updatedAt: Date;
+  // Custom prompt fields
+  defaultAnswer?: string;
+  prompt?: string;
 }
 
 export type KnowledgebaseSparse = Pick<
   Knowledgebase,
-  '_id' | 'name' | 'status' | 'monthUsage' | 'crawlData'
+  '_id' | 'name' | 'status' | 'monthUsage' | 'crawlData' | 'owner'
 >;
 
 /*********************************************************

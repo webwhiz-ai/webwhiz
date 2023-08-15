@@ -62,6 +62,23 @@ export class KnowledgebaseDbService {
     };
   }
 
+  async getKnowledgebaseSparseById(id: ObjectId): Promise<KnowledgebaseSparse> {
+    const res = await this.knowledgebaseCollection.findOne(
+      { _id: id },
+      {
+        projection: {
+          _id: 1,
+          name: 1,
+          status: 1,
+          monthUsage: 1,
+          crawlData: 1,
+          owner: 1,
+        },
+      },
+    );
+    return res as KnowledgebaseSparse;
+  }
+
   async getKnowledgebaseById(id: ObjectId): Promise<Knowledgebase> {
     const res = await this.knowledgebaseCollection.findOne({ _id: id });
     return res;
@@ -85,6 +102,7 @@ export class KnowledgebaseDbService {
         status: 1,
         monthUsage: 1,
         'crawlData.stats': 1,
+        owner: 1,
       })
       .toArray();
     return kbs as KnowledgebaseSparse[];
