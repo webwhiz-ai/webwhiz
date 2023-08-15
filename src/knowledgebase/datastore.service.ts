@@ -85,12 +85,18 @@ export class DataStoreService {
       dsItemChunks = await this.kbDbService.getChunkByIdBulk(dsItemChunksIds);
     }
 
+    // Get kb info
+    const kb = await this.kbDbService.getKnowledgebaseById(
+      dsItem.knowledgebaseId,
+    );
+
     // For each chunk generate embedding
     for (const chunk of dsItemChunks) {
       if (chunk.status === ChunkStatus.EMBEDDING_GENERATED) continue;
       await this.openaiChatbotService.addEmbeddingsForChunk(
         dsItem.knowledgebaseId,
         chunk,
+        kb.customKeys,
       );
       console.log(`Added embedding for ${chunk.title}`);
     }

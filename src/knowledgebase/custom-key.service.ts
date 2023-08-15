@@ -18,7 +18,9 @@ export class CustomKeyService {
     return encryptedKeys;
   }
 
-  decryptCustomKeys(keys: string[]): string[] {
+  decryptCustomKeys(keys?: string[]): string[] {
+    if (!keys) return undefined;
+
     const decryptedKeys = keys.map((k) => {
       const iv = k.slice(0, 32);
       const encryptedData = k.slice(32);

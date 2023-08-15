@@ -25,6 +25,7 @@ import { checkUserIsOwnerOfKb } from '../knowledgebase-utils';
 import {
   ChatQueryAnswer,
   ChatSession,
+  Knowledgebase,
   KnowledgebaseStatus,
 } from '../knowledgebase.schema';
 import { PromptTestDTO } from './chatbot.dto';
@@ -166,7 +167,14 @@ export class ChatbotService {
   private async isUseUnderUsageLimits(
     userId: ObjectId,
     maxUsage: number,
+    customKeys?: Knowledgebase['customKeys'],
   ): Promise<boolean> {
+    // If there is a custom key configured for this knowledgebase
+    // then by pass any token limit checks
+    if (customKeys?.useOwnKey === true) {
+      return true;
+    }
+
     const monthUsageData = await this.userService.getUserMonthlyUsageData(
       userId,
     );
@@ -218,6 +226,7 @@ export class ChatbotService {
     const allowUsage = await this.isUseUnderUsageLimits(
       sessionData.userId,
       sessionData.subscriptionData.maxTokens,
+      sessionData.customKeys,
     );
     if (!allowUsage) {
       const answer = 'Sorry I cannot respond right now';
@@ -243,6 +252,7 @@ export class ChatbotService {
       kbId,
       query,
       CHUNK_FILTER_THRESHOLD,
+      sessionData.customKeys,
     );
 
     //
@@ -259,6 +269,7 @@ export class ChatbotService {
       prevMessages,
       sessionData.defaultAnswer,
       sessionData.prompt,
+      sessionData.customKeys,
       debug,
     );
 
@@ -302,6 +313,7 @@ export class ChatbotService {
     const allowUsage = await this.isUseUnderUsageLimits(
       sessionData.userId,
       sessionData.subscriptionData.maxTokens,
+      sessionData.customKeys,
     );
     if (!allowUsage) {
       const answer = 'Sorry I cannot respond right now';
@@ -327,6 +339,7 @@ export class ChatbotService {
       kbId,
       query,
       CHUNK_FILTER_THRESHOLD,
+      sessionData.customKeys,
     );
 
     //
@@ -353,6 +366,7 @@ export class ChatbotService {
       },
       sessionData.defaultAnswer,
       sessionData.prompt,
+      sessionData.customKeys,
     );
 
     const sources = topChunks
@@ -436,6 +450,7 @@ export class ChatbotService {
       prompt,
       isDemo: kb.isDemo,
       subscriptionData: subscriptionPlan,
+      customKeys: kb.customKeys,
       userId: kb.owner,
       startedAt: new Date(),
       updatedAt: new Date(),

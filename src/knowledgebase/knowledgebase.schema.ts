@@ -148,6 +148,7 @@ export interface ChatSession {
   isDemo?: boolean;
   src?: string;
   subscriptionData: SubscriptionPlanInfo;
+  customKeys?: Knowledgebase['customKeys'];
   userId: ObjectId;
   messages: ChatQueryAnswer[];
   userData?: any;

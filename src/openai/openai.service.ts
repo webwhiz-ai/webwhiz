@@ -117,8 +117,6 @@ export class OpenaiService {
     keys = keys || this.defaultKeys;
     const [openAiClient, _, openAiKeyHash] = getOpenAiClient(keys);
 
-    console.log(_, openAiKeyHash);
-
     // Rate limiter check
     try {
       await this.rateLimiter.consume(`openai-req-${openAiKeyHash}`, 1);
