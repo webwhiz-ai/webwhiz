@@ -23,6 +23,7 @@ import {
   KnowledgebaseStatus,
 } from './knowledgebase.schema';
 import { CustomKeyService } from './custom-key.service';
+import { UserService } from '../user/user.service';
 
 @Injectable()
 export class KnowledgebaseService {
@@ -31,6 +32,7 @@ export class KnowledgebaseService {
     private kbDbService: KnowledgebaseDbService,
     private subPlanInfoService: SubscriptionPlanInfoService,
     private customKeyService: CustomKeyService,
+    private readonly userService: UserService,
   ) {}
 
   /*********************************************************
@@ -320,6 +322,11 @@ export class KnowledgebaseService {
     const kb = await this.kbDbService.getKnowledgebaseById(new ObjectId(id));
     checkUserIsOwnerOfKb(user, kb);
 
+    // Remove custom keys if present
+    if (kb.customKeys?.keys) {
+      delete kb.customKeys.keys;
+    }
+
     // Set Default prompt if knowledgebase prompt is not defined
     if (!kb.prompt) {
       kb.prompt = DEFAULT_CHATGPT_PROMPT;
@@ -393,9 +400,16 @@ export class KnowledgebaseService {
       throw new HttpException('Invalid Knowledgebase Id', HttpStatus.NOT_FOUND);
     }
 
-    const widgetData = await this.kbDbService.getKnowledgebaseChatWidgetData(
-      kbId,
+    const kbData = await this.kbDbService.getKnowledgebaseById(kbId);
+    const userData = await this.userService.getUserWhitelabelSettings(
+      kbData.owner,
     );
+
+    const widgetData = {
+      ...kbData.chatWidgeData,
+      customKey: kbData.customKeys?.useOwnKey,
+      whitelabelling: userData.whitelabelling,
+    };
 
     return widgetData;
   }

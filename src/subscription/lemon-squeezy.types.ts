@@ -165,6 +165,8 @@ const VARIANT_TO_SUBSCRIPTION_MAP: Record<number, Subscription> = {
 
 const LTD_VARIANT_ID = 97685;
 
+const WHITELABELLING_VARIANT = 110028;
+
 export function getSubscriptionPlanFromVariantId(
   variantId: number,
 ): Subscription | undefined {
@@ -176,4 +178,8 @@ export function getSubscriptionPlanFromVariantId(
 
 export function isVariantForLifeTimeDeals(variantId: number) {
   return variantId === LTD_VARIANT_ID;
+}
+
+export function isVariantForWhileLabelling(variantId: number) {
+  return variantId === WHITELABELLING_VARIANT;
 }

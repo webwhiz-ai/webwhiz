@@ -53,6 +53,10 @@ export interface User {
   tokenCredits?: number;
   activeSubscription: Subscription;
   subscriptionData?: SubscriptionData;
+  // Whitelabelling settings
+  whitelabelling?: {
+    removeBranding: boolean;
+  };
   createdAt: Date;
   updatedAt: Date;
   lastLogin?: Date;

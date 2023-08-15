@@ -232,6 +232,28 @@ export class UserService {
     );
   }
 
+  async setUserWhitelabelSettings(
+    email: string,
+    whitelabelSettings: User['whitelabelling'],
+  ) {
+    const update: Partial<User> = {
+      whitelabelling: whitelabelSettings,
+      updatedAt: new Date(),
+    };
+
+    await this.userCollection.updateOne({ email }, { $set: update });
+  }
+
+  async getUserWhitelabelSettings(
+    userId: ObjectId,
+  ): Promise<Pick<User, 'whitelabelling'>> {
+    const res = await this.userCollection.findOne(
+      { _id: userId },
+      { projection: { whitelabelling: 1 } },
+    );
+    return res;
+  }
+
   /** **************************************************
    * CHATBOT MONTHLY USAGE RELATED
    *************************************************** */
