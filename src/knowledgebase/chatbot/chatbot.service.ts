@@ -20,15 +20,20 @@ import { TaskType } from '../../task/task.schema';
 import { TaskService } from '../../task/task.service';
 import { UserSparse } from '../../user/user.schema';
 import { UserService } from '../../user/user.service';
+import { CustomKeyService } from '../custom-key.service';
 import { KnowledgebaseDbService } from '../knowledgebase-db.service';
 import { checkUserIsOwnerOfKb } from '../knowledgebase-utils';
 import {
   ChatQueryAnswer,
   ChatSession,
+  ChatSessionSparse,
+  Knowledgebase,
   KnowledgebaseStatus,
 } from '../knowledgebase.schema';
 import { PromptTestDTO } from './chatbot.dto';
 import { OpenaiChatbotService } from './openaiChatbotService';
+import { WebhookService } from '../../webhook/webhook.service';
+import { WebhookEventType } from '../../webhook/webhook.types';
 
 const CHAT_SESION_EXPIRY_TIME = 5 * 60;
 const CHUNK_FILTER_THRESHOLD = 0.3;
@@ -43,6 +48,8 @@ export class ChatbotService {
     private subPlanInfoService: SubscriptionPlanInfoService,
     private emailService: EmailService,
     private taskService: TaskService,
+    private readonly customKeyService: CustomKeyService,
+    private readonly webhookService: WebhookService,
     @Inject(CELERY_CLIENT) private celeryClient: CeleryClientService,
     @Inject(REDIS) private redis: Redis,
   ) {}
@@ -166,7 +173,14 @@ export class ChatbotService {
   private async isUseUnderUsageLimits(
     userId: ObjectId,
     maxUsage: number,
+    customKeys?: Knowledgebase['customKeys'],
   ): Promise<boolean> {
+    // If there is a custom key configured for this knowledgebase
+    // then by pass any token limit checks
+    if (customKeys?.useOwnKey === true) {
+      return true;
+    }
+
     const monthUsageData = await this.userService.getUserMonthlyUsageData(
       userId,
     );
@@ -218,6 +232,7 @@ export class ChatbotService {
     const allowUsage = await this.isUseUnderUsageLimits(
       sessionData.userId,
       sessionData.subscriptionData.maxTokens,
+      sessionData.customKeys,
     );
     if (!allowUsage) {
       const answer = 'Sorry I cannot respond right now';
@@ -243,6 +258,7 @@ export class ChatbotService {
       kbId,
       query,
       CHUNK_FILTER_THRESHOLD,
+      sessionData.customKeys,
     );
 
     //
@@ -259,6 +275,7 @@ export class ChatbotService {
       prevMessages,
       sessionData.defaultAnswer,
       sessionData.prompt,
+      sessionData.customKeys,
       debug,
     );
 
@@ -302,6 +319,7 @@ export class ChatbotService {
     const allowUsage = await this.isUseUnderUsageLimits(
       sessionData.userId,
       sessionData.subscriptionData.maxTokens,
+      sessionData.customKeys,
     );
     if (!allowUsage) {
       const answer = 'Sorry I cannot respond right now';
@@ -327,6 +345,7 @@ export class ChatbotService {
       kbId,
       query,
       CHUNK_FILTER_THRESHOLD,
+      sessionData.customKeys,
     );
 
     //
@@ -350,9 +369,29 @@ export class ChatbotService {
           ts: new Date(),
         };
         await this.updateSessionDataWithNewMsg(sessionData, msg);
+
+        // Call webhook with msg
+        this.webhookService.callWebhook(sessionData.userId, {
+          event: WebhookEventType.CHATBOT_MSG,
+          payload: {
+            q: msg.q,
+            a: msg.a,
+            ts: msg.ts,
+            session: {
+              id: sessionData._id.toHexString(),
+              kbName: sessionData.kbName,
+              knowledgebaseId: sessionData.knowledgebaseId.toHexString(),
+              src: sessionData.src,
+              userData: sessionData.userData,
+              startedAt: sessionData.startedAt,
+              updatedAt: sessionData.updatedAt,
+            },
+          },
+        });
       },
       sessionData.defaultAnswer,
       sessionData.prompt,
+      sessionData.customKeys,
     );
 
     const sources = topChunks
@@ -420,7 +459,7 @@ export class ChatbotService {
     }
 
     // Get the subscription plan for the user to which the kb belongs
-    const user = await this.userService.findUserByIdSparse(kb.owner.toString());
+    const user = await this.userService.findUserById(kb.owner.toString());
     const subscriptionPlan = this.subPlanInfoService.getSubscriptionPlanInfo(
       user.activeSubscription,
     );
@@ -436,6 +475,11 @@ export class ChatbotService {
       prompt,
       isDemo: kb.isDemo,
       subscriptionData: subscriptionPlan,
+      customKeys: this.customKeyService.mergeCustomKeysFromUserAndKb(
+        kb.customKeys?.useOwnKey,
+        user.customKeys,
+        kb.customKeys?.keys,
+      ),
       userId: kb.owner,
       startedAt: new Date(),
       updatedAt: new Date(),
@@ -491,17 +535,17 @@ export class ChatbotService {
    * @returns
    */
   async getChatSessionData(user: UserSparse, sessionId: string) {
-    let session;
+    let session: ChatSessionSparse;
 
     try {
-      session = await this.kbDbService.getChatSessionById(
+      session = await this.kbDbService.getChatSessionSparseById(
         new ObjectId(sessionId),
       );
     } catch {
       throw new HttpException('Invalid Session', HttpStatus.NOT_FOUND);
     }
 
-    const kb = await this.kbDbService.getKnowledgebaseById(
+    const kb = await this.kbDbService.getKnowledgebaseSparseById(
       session.knowledgebaseId,
     );
 
@@ -520,7 +564,7 @@ export class ChatbotService {
   ) {
     const kbId = new ObjectId(knowledgebaseId);
 
-    const kb = await this.kbDbService.getKnowledgebaseById(kbId);
+    const kb = await this.kbDbService.getKnowledgebaseSparseById(kbId);
     checkUserIsOwnerOfKb(user, kb);
 
     return this.kbDbService.getPaginatedChatSessionsForKnowledgebase(

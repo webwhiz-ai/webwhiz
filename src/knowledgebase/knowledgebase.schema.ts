@@ -34,17 +34,25 @@ export interface Knowledgebase {
     stats: CrawlerStats;
   };
   monthUsage?: UserMonthlyUsage;
-  defaultAnswer?: string;
-  prompt?: string;
   chatWidgeData?: any;
   owner: ObjectId;
+  // Alternate email for knowledgebase
+  adminEmail?: string;
   createdAt: Date;
   updatedAt: Date;
+  // Custom prompt fields
+  defaultAnswer?: string;
+  prompt?: string;
+  // Custom key
+  customKeys?: {
+    useOwnKey: boolean;
+    keys?: string[];
+  };
 }
 
 export type KnowledgebaseSparse = Pick<
   Knowledgebase,
-  '_id' | 'name' | 'status' | 'monthUsage' | 'crawlData'
+  '_id' | 'name' | 'status' | 'monthUsage' | 'crawlData' | 'owner'
 >;
 
 /*********************************************************
@@ -142,11 +150,37 @@ export interface ChatSession {
   isDemo?: boolean;
   src?: string;
   subscriptionData: SubscriptionPlanInfo;
+  customKeys?: Knowledgebase['customKeys'];
   userId: ObjectId;
   messages: ChatQueryAnswer[];
   userData?: any;
   startedAt: Date;
   updatedAt: Date;
+}
+export type ChatSessionSparse = Pick<
+  ChatSession,
+  | '_id'
+  | 'knowledgebaseId'
+  | 'src'
+  | 'messages'
+  | 'userData'
+  | 'startedAt'
+  | 'updatedAt'
+>;
+
+export interface ChatMessageWebhookPayload {
+  q: string;
+  a: string;
+  ts: Date;
+  session: {
+    id: string;
+    knowledgebaseId: string;
+    kbName: string;
+    src: string;
+    userData: string;
+    startedAt: Date;
+    updatedAt: Date;
+  };
 }
 
 /*********************************************************

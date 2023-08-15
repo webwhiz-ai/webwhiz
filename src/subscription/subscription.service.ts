@@ -6,6 +6,7 @@ import { UserService } from '../user/user.service';
 import {
   getSubscriptionPlanFromVariantId,
   isVariantForLifeTimeDeals,
+  isVariantForWhileLabelling,
   LemonSqueezyWebhookEventName,
   LemonSqueezyWebhookOrderCreatedEvent,
   LemonSqueezyWebhookSubscriptionCreatedEvent,
@@ -118,47 +119,66 @@ export class SubscriptionService {
     payload: LemonSqueezyWebhookSubscriptionCreatedEvent,
   ) {
     const email = payload.data.attributes.user_email;
+    const variantId = payload.data.attributes.variant_id;
 
-    const plan = getSubscriptionPlanFromVariantId(
-      payload.data.attributes.variant_id,
-    );
+    if (isVariantForWhileLabelling(variantId)) {
+      this.logger.log(
+        `subscription_created (WHITELABEL) hook called for ${email}, variant: ${payload.data.attributes.variant_id}`,
+      );
+      await this.userService.setUserWhitelabelSettings(email, {
+        removeBranding: true,
+      });
+    } else {
+      const plan = getSubscriptionPlanFromVariantId(variantId);
 
-    const data: SubscriptionData = {
-      provider: 'lemonsqueezy',
-      data: {
-        subscriptionId: payload.data.id,
-        productId: payload.data.attributes.product_id,
-        variantId: payload.data.attributes.variant_id,
-        status: payload.data.attributes.status,
-        createdAt: payload.data.attributes.created_at,
-        updatedAt: payload.data.attributes.updated_at,
-      },
-    };
-    this.logger.log(
-      `subscription_created hook called for ${email}, variant: ${payload.data.attributes.variant_id}, plan: ${plan}`,
-    );
-    await this.userService.setUserSubscription(email, plan, data);
+      const data: SubscriptionData = {
+        provider: 'lemonsqueezy',
+        data: {
+          subscriptionId: payload.data.id,
+          productId: payload.data.attributes.product_id,
+          variantId: payload.data.attributes.variant_id,
+          status: payload.data.attributes.status,
+          createdAt: payload.data.attributes.created_at,
+          updatedAt: payload.data.attributes.updated_at,
+        },
+      };
+      this.logger.log(
+        `subscription_created hook called for ${email}, variant: ${payload.data.attributes.variant_id}, plan: ${plan}`,
+      );
+      await this.userService.setUserSubscription(email, plan, data);
+    }
   }
 
   async subscriptionExpiredHandler(
     payload: LemonSqueezyWebhookSubscriptionExpiredEvent,
   ) {
     const email = payload.data.attributes.user_email;
-    const plan = Subscription.FREE;
-    const data: SubscriptionData = {
-      provider: 'lemonsqueezy',
-      data: {
-        subscriptionId: payload.data.id,
-        productId: payload.data.attributes.product_id,
-        variantId: payload.data.attributes.variant_id,
-        status: payload.data.attributes.status,
-        createdAt: payload.data.attributes.created_at,
-        updatedAt: payload.data.attributes.updated_at,
-      },
-    };
-    this.logger.log(
-      `subscription_expired hook called for ${email}, variant: ${payload.data.attributes.variant_id}`,
-    );
-    await this.userService.setUserSubscription(email, plan, data);
+    const variantId = payload.data.attributes.variant_id;
+
+    if (isVariantForWhileLabelling(variantId)) {
+      this.logger.log(
+        `subscription_expired (WHITELABEL) hook called for ${email}, variant: ${payload.data.attributes.variant_id}`,
+      );
+      await this.userService.setUserWhitelabelSettings(email, {
+        removeBranding: false,
+      });
+    } else {
+      const plan = Subscription.FREE;
+      const data: SubscriptionData = {
+        provider: 'lemonsqueezy',
+        data: {
+          subscriptionId: payload.data.id,
+          productId: payload.data.attributes.product_id,
+          variantId: payload.data.attributes.variant_id,
+          status: payload.data.attributes.status,
+          createdAt: payload.data.attributes.created_at,
+          updatedAt: payload.data.attributes.updated_at,
+        },
+      };
+      this.logger.log(
+        `subscription_expired hook called for ${email}, variant: ${payload.data.attributes.variant_id}`,
+      );
+      await this.userService.setUserSubscription(email, plan, data);
+    }
   }
 }

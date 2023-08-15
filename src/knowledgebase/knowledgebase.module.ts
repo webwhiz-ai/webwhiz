@@ -18,6 +18,8 @@ import { PromptService } from './prompt/prompt.service';
 import { DataStoreService } from './datastore.service';
 import { EmailModule } from '../common/email/email.module';
 import { TaskModule } from '../task/task.module';
+import { CustomKeyService } from './custom-key.service';
+import { WebhookModule } from '../webhook/webhook.module';
 
 @Module({
   imports: [
@@ -29,6 +31,7 @@ import { TaskModule } from '../task/task.module';
     SubscriptionModule,
     EmailModule,
     TaskModule,
+    WebhookModule,
   ],
   controllers: [
     ChatbotController,
@@ -44,6 +47,7 @@ import { TaskModule } from '../task/task.module';
     OpenaiChatbotService,
     OfflineMsgService,
     PromptService,
+    CustomKeyService,
   ],
   exports: [KnowledgebaseDbService],
 })

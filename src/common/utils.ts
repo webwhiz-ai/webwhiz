@@ -3,6 +3,7 @@ import {
   CursorPaginatedResponse,
   LimitOffsetPaginatedReponse,
 } from './@types/nest.types';
+import * as crypto from 'node:crypto';
 
 export async function getCursorPaginatedResponse<T = any>(
   collection: Collection<any>,
@@ -182,4 +183,39 @@ function retry(
   return retryWithBackoff(0);
 }
 
-export { retry as retryWithBackoff };
+/** *************************************************
+ * ENCRYPT / DECRYPT
+ ************************************************** */
+
+// Encrypt data using the symmetric key
+function encryptData(data: string, key: string) {
+  const keyBuf = Buffer.from(key, 'hex');
+  const iv = crypto.randomBytes(16); // 16 bytes for AES
+  const cipher = crypto.createCipheriv('aes-256-cbc', keyBuf, iv);
+  const encryptedBuffer = Buffer.concat([
+    cipher.update(data, 'utf8'),
+    cipher.final(),
+  ]);
+  return {
+    encryptedData: encryptedBuffer.toString('hex'),
+    iv: iv.toString('hex'),
+  };
+}
+
+// Decrypt data using the symmetric key and IV
+function decryptData(encryptedData: string, key: string, iv: string) {
+  const keyBuf = Buffer.from(key, 'hex');
+
+  const decipher = crypto.createDecipheriv(
+    'aes-256-cbc',
+    keyBuf,
+    Buffer.from(iv, 'hex'),
+  );
+  const decryptedBuffer = Buffer.concat([
+    decipher.update(Buffer.from(encryptedData, 'hex')),
+    decipher.final(),
+  ]);
+  return decryptedBuffer.toString('utf8');
+}
+
+export { retry as retryWithBackoff, encryptData, decryptData };

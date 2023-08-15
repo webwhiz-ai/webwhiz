@@ -72,7 +72,7 @@ export class TextractImporterService {
   ) {
     const kbId = new ObjectId(knowledgebaseId);
 
-    const kb = await this.kbDbService.getKnowledgebaseById(kbId);
+    const kb = await this.kbDbService.getKnowledgebaseSparseById(kbId);
     checkUserIsOwnerOfKb(user, kb);
 
     // Extract content

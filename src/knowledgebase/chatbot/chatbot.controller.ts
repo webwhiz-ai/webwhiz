@@ -12,13 +12,13 @@ import {
 import { RealIP } from 'nestjs-real-ip';
 import { Public } from '../../auth/guards/public.guard';
 import { RequestWithUser } from '../../common/@types/nest.types';
+import { ChatSessionSparse } from '../knowledgebase.schema';
 import {
   ChatbotQueryDTO,
   CreateChatbotSessionDTO,
   PromptTestDTO,
 } from './chatbot.dto';
 import { ChatbotService } from './chatbot.service';
-import { ChatSession } from '../knowledgebase.schema';
 
 @Controller('chatbot')
 export class ChatbotController {
@@ -44,7 +44,7 @@ export class ChatbotController {
   async getSessionData(
     @Req() req: RequestWithUser,
     @Param('id') id: string,
-  ): Promise<ChatSession> {
+  ): Promise<ChatSessionSparse> {
     const { user } = req;
     return this.chatbotService.getChatSessionData(user, id);
   }

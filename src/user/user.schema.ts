@@ -53,6 +53,17 @@ export interface User {
   tokenCredits?: number;
   activeSubscription: Subscription;
   subscriptionData?: SubscriptionData;
+  // Custom keys
+  customKeys?: string[];
+  // Whitelabelling settings
+  whitelabelling?: {
+    removeBranding: boolean;
+  };
+  // Webhooks
+  webhook?: {
+    url: string;
+    secret: string;
+  };
   createdAt: Date;
   updatedAt: Date;
   lastLogin?: Date;

@@ -1,8 +1,11 @@
 import { HttpException, HttpStatus } from '@nestjs/common';
 import { UserSparse } from '../user/user.schema';
-import { Knowledgebase } from './knowledgebase.schema';
+import { KnowledgebaseSparse } from './knowledgebase.schema';
 
-export function checkUserIsOwnerOfKb(user: UserSparse, kb: Knowledgebase) {
+export function checkUserIsOwnerOfKb(
+  user: UserSparse,
+  kb: KnowledgebaseSparse,
+) {
   if (!kb) {
     throw new HttpException('Invalid Knowledgebase Id', HttpStatus.NOT_FOUND);
   }

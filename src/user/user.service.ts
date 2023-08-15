@@ -60,6 +60,13 @@ export class UserService {
     return sanitizeUser(user);
   }
 
+  async findUserById(id: string): Promise<User> {
+    const user = await this.userCollection.findOne({
+      _id: new ObjectId(id),
+    });
+    return sanitizeUser(user);
+  }
+
   /**
    * Find user by email, password
    * @param email
@@ -230,6 +237,54 @@ export class UserService {
         $set: update,
       },
     );
+  }
+
+  async setUserWhitelabelSettings(
+    email: string,
+    whitelabelSettings: User['whitelabelling'],
+  ) {
+    const update: Partial<User> = {
+      whitelabelling: whitelabelSettings,
+      updatedAt: new Date(),
+    };
+
+    await this.userCollection.updateOne({ email }, { $set: update });
+  }
+
+  async getUserWhitelabelSettings(
+    userId: ObjectId,
+  ): Promise<Pick<User, 'whitelabelling'>> {
+    const res = await this.userCollection.findOne(
+      { _id: userId },
+      { projection: { whitelabelling: 1 } },
+    );
+    return res;
+  }
+
+  async setUserCustomKeys(id: ObjectId, keys: string[]) {
+    const update: Partial<User> = {
+      customKeys: keys,
+      updatedAt: new Date(),
+    };
+
+    await this.userCollection.updateOne({ _id: id }, { $set: update });
+  }
+
+  async setUserWebhookData(id: ObjectId, webhookData: User['webhook']) {
+    const update: Partial<User> = {
+      webhook: webhookData,
+      updatedAt: new Date(),
+    };
+
+    await this.userCollection.updateOne({ _id: id }, { $set: update });
+  }
+
+  async getUserWebhookData(id: ObjectId): Promise<Pick<User, 'webhook'>> {
+    const res = await this.userCollection.findOne(
+      { _id: id },
+      { projection: { webhook: 1 } },
+    );
+    return res;
   }
 
   /** **************************************************
