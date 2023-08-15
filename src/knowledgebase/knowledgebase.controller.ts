@@ -18,6 +18,7 @@ import { DataStoreService } from './datastore.service';
 import {
   AddCustomChunkDTO,
   CreateKnowledgebaseDTO,
+  CustomKeysDTO,
   SetKnowledgebaseDefaultAnswerDTO,
   SetPromptDTO,
   UpdateKnowledgebaseWebsiteDataDTO,
@@ -77,6 +78,16 @@ export class KnowledgebaseController {
   ) {
     const { user } = req;
     return this.kbService.setKnowledgebaseChatWidgeData(user, id, data);
+  }
+
+  @Put('/:id/custom_keys')
+  async setCustomKeys(
+    @Req() req: RequestWithUser,
+    @Param('id') id: string,
+    @Body() data: CustomKeysDTO,
+  ) {
+    const { user } = req;
+    return this.kbService.setKnowledgebaseCustomKeys(user, id, data.keys);
   }
 
   /**

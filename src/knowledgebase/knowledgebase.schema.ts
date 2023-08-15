@@ -41,6 +41,11 @@ export interface Knowledgebase {
   // Custom prompt fields
   defaultAnswer?: string;
   prompt?: string;
+  // Custom key
+  customKeys?: {
+    useOwnKey: boolean;
+    keys?: string[];
+  };
 }
 
 export type KnowledgebaseSparse = Pick<

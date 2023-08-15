@@ -153,6 +153,16 @@ export class KnowledgebaseDbService {
     );
   }
 
+  async setKnowledgebaseCustomKeys(
+    id: ObjectId,
+    customKeyData: Knowledgebase['customKeys'],
+  ) {
+    await this.knowledgebaseCollection.updateOne(
+      { _id: id },
+      { $set: { customKeys: customKeyData, updatedAt: new Date() } },
+    );
+  }
+
   async updateMonthlyUsageByN(kbId: ObjectId, n: number) {
     await this.knowledgebaseCollection.updateOne({ _id: kbId }, [
       {

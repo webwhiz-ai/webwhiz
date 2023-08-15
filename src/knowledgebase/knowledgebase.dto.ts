@@ -1,4 +1,5 @@
 import {
+  ArrayNotEmpty,
   IsArray,
   IsBoolean,
   IsNotEmpty,
@@ -81,4 +82,11 @@ export class PromptDTO {
   @IsString()
   @IsNotEmpty()
   prompt: string;
+}
+
+export class CustomKeysDTO {
+  @IsArray()
+  @ArrayNotEmpty()
+  @IsNotEmpty({ each: true })
+  keys: string[];
 }

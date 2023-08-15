@@ -2,14 +2,15 @@ import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { ObjectId } from 'mongodb';
 import { isAdmin } from '../auth/guards/role.enum';
 import {
+  CELERY_CLIENT,
   CeleryClientQueue,
   CeleryClientService,
-  CELERY_CLIENT,
 } from '../common/celery/celery-client.module';
 import { CrawlConfig } from '../importers/crawler/crawlee/crawler.types';
 import { SubscriptionPlanInfoService } from '../subscription/subscription-plan.service';
 import { SubscriptionPlanInfo } from '../subscription/subscription.const';
 import { UserSparse } from '../user/user.schema';
+import { DEFAULT_CHATGPT_PROMPT } from './chatbot/openaiChatbot.constant';
 import { KnowledgebaseDbService } from './knowledgebase-db.service';
 import { checkUserIsOwnerOfKb } from './knowledgebase-utils';
 import {
@@ -21,8 +22,7 @@ import {
   Knowledgebase,
   KnowledgebaseStatus,
 } from './knowledgebase.schema';
-import { PromptService } from './prompt/prompt.service';
-import { DEFAULT_CHATGPT_PROMPT } from './chatbot/openaiChatbot.constant';
+import { CustomKeyService } from './custom-key.service';
 
 @Injectable()
 export class KnowledgebaseService {
@@ -30,7 +30,7 @@ export class KnowledgebaseService {
     @Inject(CELERY_CLIENT) private celeryClient: CeleryClientService,
     private kbDbService: KnowledgebaseDbService,
     private subPlanInfoService: SubscriptionPlanInfoService,
-    private promptService: PromptService,
+    private customKeyService: CustomKeyService,
   ) {}
 
   /*********************************************************
@@ -435,5 +435,22 @@ export class KnowledgebaseService {
     });
 
     return 'Done';
+  }
+
+  async setKnowledgebaseCustomKeys(
+    user: UserSparse,
+    id: string,
+    keys: string[],
+  ) {
+    const encryptedKeys = this.customKeyService.encryptCustomKeys(keys);
+
+    const kbId = new ObjectId(id);
+    const kb = await this.kbDbService.getKnowledgebaseSparseById(kbId);
+    checkUserIsOwnerOfKb(user, kb);
+
+    await this.kbDbService.setKnowledgebaseCustomKeys(kbId, {
+      useOwnKey: true,
+      keys: encryptedKeys,
+    });
   }
 }

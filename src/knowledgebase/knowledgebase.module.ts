@@ -18,6 +18,7 @@ import { PromptService } from './prompt/prompt.service';
 import { DataStoreService } from './datastore.service';
 import { EmailModule } from '../common/email/email.module';
 import { TaskModule } from '../task/task.module';
+import { CustomKeyService } from './custom-key.service';
 
 @Module({
   imports: [
@@ -44,6 +45,7 @@ import { TaskModule } from '../task/task.module';
     OpenaiChatbotService,
     OfflineMsgService,
     PromptService,
+    CustomKeyService,
   ],
   exports: [KnowledgebaseDbService],
 })
