@@ -2,6 +2,7 @@ import {
   ArrayNotEmpty,
   IsArray,
   IsBoolean,
+  IsEmail,
   IsNotEmpty,
   IsOptional,
   IsString,
@@ -89,4 +90,10 @@ export class CustomKeysDTO {
   @ArrayNotEmpty()
   @IsNotEmpty({ each: true })
   keys: string[];
+}
+
+export class SetAdminEmailDTO {
+  @IsNotEmpty()
+  @IsEmail()
+  email: string;
 }

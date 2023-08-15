@@ -467,4 +467,16 @@ export class KnowledgebaseService {
       keys: encryptedKeys,
     });
   }
+
+  async setKnowledgebaseAdminEmail(
+    user: UserSparse,
+    id: string,
+    email: string,
+  ) {
+    const kbId = new ObjectId(id);
+    const kb = await this.kbDbService.getKnowledgebaseSparseById(kbId);
+    checkUserIsOwnerOfKb(user, kb);
+
+    await this.kbDbService.updateKnowledgebase(kbId, { adminEmail: email });
+  }
 }

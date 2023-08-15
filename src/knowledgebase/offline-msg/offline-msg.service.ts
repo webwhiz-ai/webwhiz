@@ -95,17 +95,25 @@ export class OfflineMsgService {
       throw new HttpException('Invalid Knowledgebase', HttpStatus.NOT_FOUND);
     }
 
-    // Get kb owner
-    const kbOwner = await this.userService.findUserByIdSparse(
-      kb.owner.toHexString(),
-    );
+    // Choose email address to send this mail
+    // If adminEmail field is set user that, else use owner email
+    let email = '';
+    if (kb.adminEmail) {
+      email = kb.adminEmail;
+    } else {
+      // Get kb owner
+      const kbOwner = await this.userService.findUserByIdSparse(
+        kb.owner.toHexString(),
+      );
+      email = kbOwner.email;
+    }
 
     // Insert offline msg
     const res = await this.insertOfflineMsg(data);
 
     // Send email
     await this.emailService.sendOfflineMsgEmail(
-      kbOwner.email,
+      email,
       kb.websiteData.websiteUrl,
       data.email,
       data.message,

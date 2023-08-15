@@ -36,6 +36,8 @@ export interface Knowledgebase {
   monthUsage?: UserMonthlyUsage;
   chatWidgeData?: any;
   owner: ObjectId;
+  // Alternate email for knowledgebase
+  adminEmail?: string;
   createdAt: Date;
   updatedAt: Date;
   // Custom prompt fields

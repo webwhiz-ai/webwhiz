@@ -19,6 +19,7 @@ import {
   AddCustomChunkDTO,
   CreateKnowledgebaseDTO,
   CustomKeysDTO,
+  SetAdminEmailDTO,
   SetKnowledgebaseDefaultAnswerDTO,
   SetPromptDTO,
   UpdateKnowledgebaseWebsiteDataDTO,
@@ -80,6 +81,9 @@ export class KnowledgebaseController {
     return this.kbService.setKnowledgebaseChatWidgeData(user, id, data);
   }
 
+  /**
+   * Set Custom Keys for Knowledgebase
+   */
   @Put('/:id/custom_keys')
   async setCustomKeys(
     @Req() req: RequestWithUser,
@@ -88,6 +92,19 @@ export class KnowledgebaseController {
   ) {
     const { user } = req;
     return this.kbService.setKnowledgebaseCustomKeys(user, id, data.keys);
+  }
+
+  /**
+   * Set Admin email for knowledgebase
+   */
+  @Put('/:id/admin_email')
+  async setAdminEmail(
+    @Req() req: RequestWithUser,
+    @Param('id') id: string,
+    @Body() data: SetAdminEmailDTO,
+  ) {
+    const { user } = req;
+    return this.kbService.setKnowledgebaseAdminEmail(user, id, data.email);
   }
 
   /**
