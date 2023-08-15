@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { AppConfigService } from '../common/config/appConfig.service';
 import { decryptData, encryptData } from '../common/utils';
+import { Knowledgebase } from './knowledgebase.schema';
 
 @Injectable()
 export class CustomKeyService {
@@ -8,6 +9,19 @@ export class CustomKeyService {
 
   constructor(private appConfig: AppConfigService) {
     this.encryptionKey = this.appConfig.get('encryptionKey');
+  }
+
+  mergeCustomKeysFromUserAndKb(
+    shouldUseCustomKeys?: boolean,
+    userCustomKeys?: string[],
+    kbCustomKeys?: string[],
+  ): Knowledgebase['customKeys'] {
+    if (!shouldUseCustomKeys) return undefined;
+    const keys = kbCustomKeys || userCustomKeys;
+    return {
+      useOwnKey: shouldUseCustomKeys,
+      keys,
+    };
   }
 
   encryptCustomKeys(keys: string[]): string[] {

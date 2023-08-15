@@ -85,7 +85,7 @@ export class PromptDTO {
   prompt: string;
 }
 
-export class CustomKeysDTO {
+export class KbCustomKeysDTO {
   @IsArray()
   @ArrayNotEmpty()
   @IsNotEmpty({ each: true })

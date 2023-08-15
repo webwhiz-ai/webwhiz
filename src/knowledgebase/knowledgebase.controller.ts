@@ -18,7 +18,7 @@ import { DataStoreService } from './datastore.service';
 import {
   AddCustomChunkDTO,
   CreateKnowledgebaseDTO,
-  CustomKeysDTO,
+  KbCustomKeysDTO,
   SetAdminEmailDTO,
   SetKnowledgebaseDefaultAnswerDTO,
   SetPromptDTO,
@@ -33,6 +33,19 @@ export class KnowledgebaseController {
     private readonly kbService: KnowledgebaseService,
     private readonly dataStoreService: DataStoreService,
   ) {}
+
+  /**
+   * Set Custom Keys for Knowledgebase
+   */
+  @Put('/custom_keys')
+  async setUserCustomKeys(
+    @Req() req: RequestWithUser,
+    @Param('id') id: string,
+    @Body() data: KbCustomKeysDTO,
+  ) {
+    const { user } = req;
+    return this.kbService.setUserCustomKeys(user, id, data.keys);
+  }
 
   /**
    * Get Knowleldgebase Detail by ID
@@ -88,7 +101,7 @@ export class KnowledgebaseController {
   async setCustomKeys(
     @Req() req: RequestWithUser,
     @Param('id') id: string,
-    @Body() data: CustomKeysDTO,
+    @Body() data: KbCustomKeysDTO,
   ) {
     const { user } = req;
     return this.kbService.setKnowledgebaseCustomKeys(user, id, data.keys);

@@ -53,6 +53,8 @@ export interface User {
   tokenCredits?: number;
   activeSubscription: Subscription;
   subscriptionData?: SubscriptionData;
+  // Custom keys
+  customKeys?: string[];
   // Whitelabelling settings
   whitelabelling?: {
     removeBranding: boolean;

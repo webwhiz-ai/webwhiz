@@ -60,6 +60,13 @@ export class UserService {
     return sanitizeUser(user);
   }
 
+  async findUserById(id: string): Promise<User> {
+    const user = await this.userCollection.findOne({
+      _id: new ObjectId(id),
+    });
+    return sanitizeUser(user);
+  }
+
   /**
    * Find user by email, password
    * @param email
@@ -252,6 +259,15 @@ export class UserService {
       { projection: { whitelabelling: 1 } },
     );
     return res;
+  }
+
+  async setUserCustomKeys(id: ObjectId, keys: string[]) {
+    const update: Partial<User> = {
+      customKeys: keys,
+      updatedAt: new Date(),
+    };
+
+    await this.userCollection.updateOne({ _id: id }, { $set: update });
   }
 
   /** **************************************************

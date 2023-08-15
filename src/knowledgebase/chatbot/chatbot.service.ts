@@ -30,6 +30,7 @@ import {
 } from '../knowledgebase.schema';
 import { PromptTestDTO } from './chatbot.dto';
 import { OpenaiChatbotService } from './openaiChatbotService';
+import { CustomKeyService } from '../custom-key.service';
 
 const CHAT_SESION_EXPIRY_TIME = 5 * 60;
 const CHUNK_FILTER_THRESHOLD = 0.3;
@@ -44,6 +45,7 @@ export class ChatbotService {
     private subPlanInfoService: SubscriptionPlanInfoService,
     private emailService: EmailService,
     private taskService: TaskService,
+    private readonly customKeyService: CustomKeyService,
     @Inject(CELERY_CLIENT) private celeryClient: CeleryClientService,
     @Inject(REDIS) private redis: Redis,
   ) {}
@@ -434,7 +436,7 @@ export class ChatbotService {
     }
 
     // Get the subscription plan for the user to which the kb belongs
-    const user = await this.userService.findUserByIdSparse(kb.owner.toString());
+    const user = await this.userService.findUserById(kb.owner.toString());
     const subscriptionPlan = this.subPlanInfoService.getSubscriptionPlanInfo(
       user.activeSubscription,
     );
@@ -450,7 +452,11 @@ export class ChatbotService {
       prompt,
       isDemo: kb.isDemo,
       subscriptionData: subscriptionPlan,
-      customKeys: kb.customKeys,
+      customKeys: this.customKeyService.mergeCustomKeysFromUserAndKb(
+        kb.customKeys?.useOwnKey,
+        user.customKeys,
+        kb.customKeys?.keys,
+      ),
       userId: kb.owner,
       startedAt: new Date(),
       updatedAt: new Date(),

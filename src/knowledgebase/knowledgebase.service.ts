@@ -468,6 +468,12 @@ export class KnowledgebaseService {
     });
   }
 
+  async setUserCustomKeys(user: UserSparse, id: string, keys: string[]) {
+    const encryptedKeys = this.customKeyService.encryptCustomKeys(keys);
+
+    await this.userService.setUserCustomKeys(user._id, encryptedKeys);
+  }
+
   async setKnowledgebaseAdminEmail(
     user: UserSparse,
     id: string,

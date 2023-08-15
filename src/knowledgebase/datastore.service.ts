@@ -4,17 +4,19 @@ import { ObjectId } from 'mongodb';
 import { REDIS } from '../common/redis/redis.module';
 import { splitTextIntoChunksOnLines } from '../importers/chunker';
 import { UserSparse } from '../user/user.schema';
+import { UserService } from '../user/user.service';
 import { OpenaiChatbotService } from './chatbot/openaiChatbotService';
+import { CustomKeyService } from './custom-key.service';
 import { KnowledgebaseDbService } from './knowledgebase-db.service';
 import { checkUserIsOwnerOfKb } from './knowledgebase-utils';
 import { AddCustomChunkDTO } from './knowledgebase.dto';
 import {
-  KbDataStore,
   CHUNK_SIZE,
   Chunk,
   ChunkStatus,
-  DataStoreType,
   DataStoreStatus,
+  DataStoreType,
+  KbDataStore,
 } from './knowledgebase.schema';
 
 function getEmbeddingsCacheKey(kbId: ObjectId): string {
@@ -26,6 +28,8 @@ export class DataStoreService {
   constructor(
     private kbDbService: KnowledgebaseDbService,
     private openaiChatbotService: OpenaiChatbotService,
+    private readonly userService: UserService,
+    private readonly customKeyService: CustomKeyService,
     @Inject(REDIS) private redis: Redis,
   ) {}
 
@@ -89,6 +93,8 @@ export class DataStoreService {
     const kb = await this.kbDbService.getKnowledgebaseById(
       dsItem.knowledgebaseId,
     );
+    // Get user info for custom keys
+    const user = await this.userService.findUserById(kb.owner.toHexString());
 
     // For each chunk generate embedding
     for (const chunk of dsItemChunks) {
@@ -96,7 +102,11 @@ export class DataStoreService {
       await this.openaiChatbotService.addEmbeddingsForChunk(
         dsItem.knowledgebaseId,
         chunk,
-        kb.customKeys,
+        this.customKeyService.mergeCustomKeysFromUserAndKb(
+          kb.customKeys?.useOwnKey,
+          user.customKeys,
+          kb.customKeys?.keys,
+        ),
       );
       console.log(`Added embedding for ${chunk.title}`);
     }
