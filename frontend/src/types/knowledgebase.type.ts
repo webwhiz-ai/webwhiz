@@ -46,6 +46,11 @@ export interface CrawlDataList {
     _id : string;
 }
 
+export interface launcherIcon {
+    id: string;
+    svgElement: string;
+}
+
 export interface ChatBotCustomizeData {
     backgroundColor: string;
     borderRadius:  string;
@@ -60,7 +65,8 @@ export interface ChatBotCustomizeData {
     questionExamples: {
         question: string;
         label: string;
-    }
+    },
+    launcherIcon: launcherIcon;
 }
 export interface CrawlDataListPagination {
     pages: number;
@@ -162,6 +168,7 @@ export interface OfflineMessage {
     url: null,
     createdAt: string;
 }
+
 export interface OfflineMessagePagination {
     pages: number;
     results: OfflineMessage[];
@@ -169,4 +176,9 @@ export interface OfflineMessagePagination {
 export interface ChatSessionPagination {
     pages: number;
     results: ChatSession[];
+}
+
+export interface CustomDataPagination {
+    pages: number;
+    results: TrainingDataDetail[];
 }

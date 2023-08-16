@@ -54,9 +54,10 @@ import { AddTrainingDataForm } from "../AddTrainingDataForm/AddTrainingDataForm"
 import { NoDataSubscribeIcon } from "../../components/Icons/noData/NoDataSubscribeIcon";
 import { SectionTitle } from "../../components/SectionTitle/SectionTitle";
 import { CurrentUser, User } from "../../services/appConfig";
-import { ChatBotCustomizeData, TrainingData, OfflineMessagePagination, ChatSessionPagination } from "../../types/knowledgebase.type";
+import { ChatBotCustomizeData, TrainingData, OfflineMessagePagination, ChatSessionPagination, CustomDataPagination } from "../../types/knowledgebase.type";
 import { OfflineMessagesNew } from "../OfflineMessages/OfflineMessagesNew";
 import { ChatSessionsNew } from "../ChatSessions/ChatSessionsNew";
+import { Paginator } from "../../widgets/Paginator/Paginator";
 export function validateEmailAddress(email: string) {
 	return email && !/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(email);
 }
@@ -226,6 +227,14 @@ const EditChatbot = (props: EditChatbotProps) => {
 	const [trainingData, setTrainingData] = React.useState<TrainingData[]>(
 		[] as TrainingData[]
 	);
+
+	const [customTrainingDataPage, setCustomTrainingDataPage] = React.useState<CustomDataPagination>({
+		pages: 0,
+		results: [],
+	});
+
+	const [isCustomDataLoading, setIsCustomDataLoading] = React.useState<boolean>(false);
+
 	const [selectedTrainingData, setSelectedTrainingData] = React.useState<TrainingData>(
 		{} as TrainingData
 	);
@@ -235,34 +244,56 @@ const EditChatbot = (props: EditChatbotProps) => {
 	useEffect(() => {
 		async function fetchData() {
 			try {
-				const response = await getTrainingData(props.match.params.chatbotId);
+				const response = await getTrainingData(props.match.params.chatbotId, '1');
 
 				console.log('response.data.results', response.data.results)
-				const data = response.data.results || [];
-				setTrainingData(data);
-				if (data.length > 0) {
+				setCustomTrainingDataPage(response.data);
+				if (response.data.results.length > 0) {
 					setIsCustomDataDetailsLoading(true)
-					const _trainingData = await getTrainingDataDetails(props.match.params.chatbotId, data[0]?._id)
+					const _trainingData = await getTrainingDataDetails(props.match.params.chatbotId, response.data.results[0]?._id)
 					console.log('response.data.results details', _trainingData)
 					setSelectedTrainingData(_trainingData.data);
 					setIsCustomDataDetailsLoading(false)
 				}
 
 			} catch (error) {
-				console.log("Unable to fetch chatbots", error);
+				console.log("Unable to fetch custom training data", error);
 			} finally {
 			}
 		}
 		fetchData();
 	}, [props.match.params.chatbotId]);
 
+	const handleCustomDataPageChange = React.useCallback(async (selectedPage: number) => {
+		try {
+			setIsCustomDataLoading(true);
+			const response = await getTrainingData(props.match.params.chatbotId, (selectedPage + 1).toString());
+			setCustomTrainingDataPage(response.data);
+
+			if (response.data.results.length > 0) {
+				setIsCustomDataDetailsLoading(true)
+				const _trainingData = await getTrainingDataDetails(props.match.params.chatbotId, response.data.results[0]?._id)
+				setSelectedTrainingData(_trainingData.data);
+				setIsCustomDataDetailsLoading(false)
+			}
+		} catch (error) {
+			console.log("Unable to fetch custom training data", error);
+		} finally {
+			setIsCustomDataLoading(false);
+		}
+	}, [props.match.params.chatbotId]);
 
 	const handleQuestionDelete = React.useCallback(async () => {
 		const id = questionsToDelete;
 		setDeleteCustomDataLoading(true);
 		try {
 			await deleteTrainingData(props.match.params.chatbotId, id as string);
-			setTrainingData(trainingData?.filter((data) => data._id !== id));
+			const updatedResults = customTrainingDataPage?.results.filter((data) => data._id !== id);
+			setCustomTrainingDataPage(prevPage => ({
+				...prevPage, 
+				results: updatedResults, 
+			}));
+
 			toast({
 				title: `Custom data has been deleted successfully `,
 				status: "success",
@@ -281,7 +312,7 @@ const EditChatbot = (props: EditChatbotProps) => {
 		}
 
 
-	}, [onDeleteDialogClose, props.match.params.chatbotId, questionsToDelete, toast, trainingData]);
+	}, [onDeleteDialogClose, props.match.params.chatbotId, questionsToDelete, toast, customTrainingDataPage]);
 
 
 	const goToStep = React.useCallback((step: Steps) => {
@@ -291,23 +322,26 @@ const EditChatbot = (props: EditChatbotProps) => {
 	const handleTrainingDataSave = React.useCallback((values) => {
 		console.log("values", values);
 
-		setTrainingData([values, ...trainingData]);
+		setCustomTrainingDataPage(prevPage => ({
+			...prevPage,
+			results: [values, ...prevPage.results]
+		}));
 
-	}, [trainingData]);
+	}, []);
 
 	const handleTrainingDataUpdate = React.useCallback((values) => {
 
-		const trainingDataToUpdate = trainingData.find((data) => data._id === values._id);
+		const trainingDataToUpdate = customTrainingDataPage.results.find((data) => data._id === values._id);
 		console.log("trainingDataToUpdate", trainingDataToUpdate);
 		console.log("values", values);
 		if (trainingDataToUpdate) {
 			trainingDataToUpdate.title = values.q;
 			trainingDataToUpdate.content = values.a;
 
-			setTrainingData([...trainingData]);
+			setCustomTrainingDataPage({...customTrainingDataPage});
 		}
 
-	}, [trainingData]);
+	}, [customTrainingDataPage]);
 
 
 	const getAddToWebsiteContent = React.useCallback(() => {
@@ -390,11 +424,11 @@ const EditChatbot = (props: EditChatbotProps) => {
 			</HStack>
 		</>
 
-	}, [chatBot._id, isSubmitting, toast, user]);
+	}, [chatBot._id, isSubmitting, toast]);
 
 	const getCustomDataComponent = React.useCallback(() => {
 
-		if (!trainingData.length) {
+		if (!customTrainingDataPage?.results.length) {
 
 			return <VStack
 				alignItems="center"
@@ -425,51 +459,93 @@ const EditChatbot = (props: EditChatbotProps) => {
 		}
 
 		return <>
-			<Box w="50%" className={styles.questionCont}>
-				{trainingData.map((data) => (
-					<Box className={classNames(styles.questionTab, {
-						[styles.activeQuestion]: selectedTrainingData && selectedTrainingData._id === data._id
-					})} key={data._id} p="3">
-						<Box onClick={async () => {
+			<Box w="450px" className={styles.questionCont} pos="relative">
+				{
+					isCustomDataLoading && <Flex
+						pos="absolute"
+						align="center"
+						justify="center"
+						top={0}
+						bottom={0}
+						right={0}
+						left={0}
+						bg="whiteAlpha.700"
+					>
+						<Spinner />
+					</Flex>
+				}
 
-							try {
-								setIsCustomDataDetailsLoading(true)
-								const _trainingData = await getTrainingDataDetails(props.match.params.chatbotId, data._id)
-								setSelectedTrainingData(_trainingData.data);
-								setIsCustomDataDetailsLoading(false)
-							} catch (error) {
-								console.log('error', error)
-							} finally {
-								setIsCustomDataDetailsLoading(false)
-							}
+				<Flex
+					direction="column"
+					h="calc(100% - 47px)"
+					overflowY="auto"
+					overflowX="hidden"
+				>
+					{customTrainingDataPage?.results.map((data) => (
+						<Box
+							borderBottom="1px"
+							borderBottomColor="gray.100"
+							bg={selectedTrainingData._id === data._id ? 'gray.100' : 'white'}
+							borderRight={selectedTrainingData._id === data._id ? "2px" : "0"}
+							borderRightColor="blue.500"
+							pr="40px !important"
+							className={classNames(styles.questionTab, {
+								[styles.activeQuestion]: selectedTrainingData && selectedTrainingData._id === data._id
+							})} key={data._id} p="3">
+							<Box 
+							onClick={async () => {
 
-							console.log('data', data)
-						}}>
-							{data.title}
+								try {
+									setIsCustomDataDetailsLoading(true)
+									const _trainingData = await getTrainingDataDetails(props.match.params.chatbotId, data._id)
+									setSelectedTrainingData(_trainingData.data);
+									setIsCustomDataDetailsLoading(false)
+								} catch (error) {
+									console.log('error', error)
+								} finally {
+									setIsCustomDataDetailsLoading(false)
+								}
+
+								console.log('data', data)
+							}}>
+								<Text fontSize="sm" noOfLines={2} fontWeight="medium">
+									{data.title}
+								</Text>
+							</Box>
+							<IconButton
+								className={styles.questionDeleteBtn}
+								variant='outline'
+								colorScheme='gray'
+								aria-label='Call Sage'
+								fontSize='14px'
+								size="xs"
+								isLoading={deleteCustomDataLoading && questionsToDelete === data._id}
+								onClick={() => {
+									setQuestionsToDelete(data._id)
+									onDeleteDialogOpen()
+								}}
+								icon={<RiDeleteBin5Line />}
+							/>
 						</Box>
-						<IconButton
-							className={styles.questionDeleteBtn}
-							variant='outline'
-							colorScheme='gray'
-							aria-label='Call Sage'
-							fontSize='14px'
-							size="xs"
-							isLoading={deleteCustomDataLoading && questionsToDelete === data._id}
-							onClick={() => {
-								setQuestionsToDelete(data._id)
-								onDeleteDialogOpen()
-							}}
-							icon={<RiDeleteBin5Line />}
-						/>
-					</Box>
-				))}
+					))}
+				</Flex>
+				
+				<Box
+					bg="white"
+					borderTop="1px"
+					borderRight="1px"
+					borderColor="gray.200"
+					justifyContent="center"
+				>
+					<Paginator onPageChange={handleCustomDataPageChange} pageRangeDisplayed={5} pageCount={customTrainingDataPage.pages} />
+				</Box>
 			</Box>
-			<Box w="50%" className={styles.answerCont}>
+			<Box w="calc(100% - 450px)" overflowY="auto"  className={styles.answerCont}>
 				{isCustomDataDetailsLoading && <Box className={styles.customDataloadingCont}>	<Spinner /></Box>}
 				{selectedTrainingData && <AddTrainingDataForm knowledgeBaseId={props.match.params.chatbotId} onSubmit={handleTrainingDataUpdate} selectedTrainingData={selectedTrainingData} />}
 			</Box>
 		</>
-	}, [deleteCustomDataLoading, handleTrainingDataUpdate, isCustomDataDetailsLoading, onDeleteDialogOpen, props.match.params.chatbotId, questionsToDelete, selectedTrainingData, trainingData]);
+	}, [customTrainingDataPage?.results, customTrainingDataPage.pages, isCustomDataLoading, handleCustomDataPageChange, isCustomDataDetailsLoading, selectedTrainingData, props.match.params.chatbotId, handleTrainingDataUpdate, deleteCustomDataLoading, questionsToDelete, onDeleteDialogOpen]);
 
 
 
@@ -495,7 +571,9 @@ const EditChatbot = (props: EditChatbotProps) => {
 			offlineMessage: chatBot.chatWidgeData?.offlineMessage,
 			showReadMore: chatBot.chatWidgeData?.showReadMore === undefined ? chatWidgetDefaultValues.showReadMore : chatBot.chatWidgeData?.showReadMore,
 			welcomeMessage: chatBot.chatWidgeData?.welcomeMessage || chatWidgetDefaultValues.welcomeMessage,
-			questionExamples: chatBot.chatWidgeData?.questionExamples || chatWidgetDefaultValues.questionExamples
+			questionExamples: chatBot.chatWidgeData?.questionExamples || chatWidgetDefaultValues.questionExamples,
+			prompt: chatBot.prompt || chatWidgetDefaultValues.prompt,
+			launcherIcon: chatBot.chatWidgeData?.launcherIcon || chatWidgetDefaultValues.launcherIcon,
 		};
 	}, [chatBot]);
 
@@ -656,7 +734,6 @@ const EditChatbot = (props: EditChatbotProps) => {
                                 history.push("/app/chat-bots/");
                             }}
                             isSubmitting={isSubmitting}
-                            defaultPrompt={chatBot.prompt}
                             primaryButtonLabel="Update widget style"
                             defaultCustomizationValues={getDefaultCustomizationValues()}
                             onNextClick={async (formData: ChatBotCustomizeData) => {
