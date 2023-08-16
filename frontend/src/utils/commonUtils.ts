@@ -26,6 +26,7 @@ export const chatWidgetDefaultValues = {
     {question: 'How can I contact you?', label: 'Contact'},
   ],
   welcomeMessage: 'Hello! How can I assist you today?',
+  prompt: 'You are a very enthusiastic chatbot who loves to help people! Your name is {{chatbotName}} and you are designed to respond only based on the given context, outputted in Markdown format.',
   launcherIcon: { 
     id: 'icon1', 
     svgElement: LauncherIconsSVGs.get('icon1') 
