@@ -482,6 +482,7 @@
             const lastMesage = chatMessages.lastChild.querySelector('.chat-message-text');
             chatMessages.scrollTop = chatMessages.scrollHeight;
             input.value = '';
+            autosize.update(input);
 
             const userAgent = navigator.userAgent || navigator.vendor || window.opera;
 
