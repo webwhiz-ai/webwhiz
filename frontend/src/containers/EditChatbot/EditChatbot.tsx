@@ -488,6 +488,7 @@ const EditChatbot = (props: EditChatbotProps) => {
 							bg={selectedTrainingData._id === data._id ? 'gray.100' : 'white'}
 							borderRight={selectedTrainingData._id === data._id ? "2px" : "0"}
 							borderRightColor="blue.500"
+							pr="40px !important"
 							className={classNames(styles.questionTab, {
 								[styles.activeQuestion]: selectedTrainingData && selectedTrainingData._id === data._id
 							})} key={data._id} p="3">
