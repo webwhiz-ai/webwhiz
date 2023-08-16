@@ -1,6 +1,8 @@
 import {
+  ArrayNotEmpty,
   IsArray,
   IsBoolean,
+  IsEmail,
   IsNotEmpty,
   IsOptional,
   IsString,
@@ -81,4 +83,17 @@ export class PromptDTO {
   @IsString()
   @IsNotEmpty()
   prompt: string;
+}
+
+export class KbCustomKeysDTO {
+  @IsArray()
+  @ArrayNotEmpty()
+  @IsNotEmpty({ each: true })
+  keys: string[];
+}
+
+export class SetAdminEmailDTO {
+  @IsNotEmpty()
+  @IsEmail()
+  email: string;
 }

@@ -1,10 +1,11 @@
-import { Subscription } from "../../user/user.schema";
+import { Subscription } from '../../user/user.schema';
 
 interface AppConfig {
   nodeEnv: 'development' | 'production' | 'test';
   host: string;
   port: number;
   secretKey: string;
+  encryptionKey: string;
   mongoUri: string;
   mongoDbName: string;
   redisHost: string;
@@ -25,6 +26,9 @@ const config = (): AppConfig => ({
   host: process.env.HOST || '127.0.0.1',
   port: parseInt(process.env.PORT as string, 10) || 8000,
   secretKey: process.env.SECRET_KEY || 'secret',
+  encryptionKey:
+    process.env.ENC_KEY ||
+    '4b23f673b133b01777259525a4a1c2097fe309048db6593462312d5c35679ced',
   mongoUri: process.env.MONGO_URI || 'mongodb://localhost:27017',
   mongoDbName: process.env.MONGO_DBNAME || 'sitemine',
   redisHost: process.env.REDIS_HOST || 'localhost',
@@ -38,7 +42,8 @@ const config = (): AppConfig => ({
   docStorageLocation: process.env.DOC_STORAGE_LOCATION || '../storage',
   textractServiceUrl:
     process.env.TEXTRACT_URL || 'http://localhost:8080/textract',
-    defaultSubscription: Subscription[process.env.DEFAULT_SUBSCRIPTION] || Subscription.FREE,
+  defaultSubscription:
+    Subscription[process.env.DEFAULT_SUBSCRIPTION] || Subscription.FREE,
 });
 
 export { AppConfig };

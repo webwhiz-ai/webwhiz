@@ -17,9 +17,11 @@ import {
   ChatQueryAnswer,
   Chunk,
   ChunkStatus,
+  Knowledgebase,
 } from '../knowledgebase.schema';
 import { PromptService } from '../prompt/prompt.service';
 import { DEFAULT_CHATGPT_PROMPT } from './openaiChatbot.constant';
+import { CustomKeyService } from '../custom-key.service';
 
 interface CosineSimilarityWorkerResponse {
   chunkId: {
@@ -41,9 +43,18 @@ export class OpenaiChatbotService {
     private openaiService: OpenaiService,
     private kbDbService: KnowledgebaseDbService,
     private readonly promptService: PromptService,
+    private readonly customKeyService: CustomKeyService,
     @Inject(CELERY_CLIENT) private celeryClient: CeleryClientService,
   ) {
     this.logger = new Logger(OpenaiChatbotService.name);
+  }
+
+  private getCustomKeys(
+    customKeys?: Knowledgebase['customKeys'],
+  ): string[] | undefined {
+    if (!customKeys?.useOwnKey) return undefined;
+
+    return this.customKeyService.decryptCustomKeys(customKeys?.keys);
   }
 
   /** *******************************************
@@ -65,7 +76,10 @@ export class OpenaiChatbotService {
    * @param chunk
    * @returns
    */
-  async getEmbeddingsForChunk(chunk: Chunk) {
+  async getEmbeddingsForChunk(
+    chunk: Chunk,
+    customKeys?: Knowledgebase['customKeys'],
+  ) {
     if (!chunk._id) {
       throw new Error('Invalid Chunk! No _id present');
     }
@@ -77,7 +91,10 @@ export class OpenaiChatbotService {
     // Generate embeddings for chunk
     const embeddings = await retryWithBackoff(
       async () => {
-        const embeddings = await this.openaiService.getEmbedding(text);
+        const embeddings = await this.openaiService.getEmbedding(
+          text,
+          this.getCustomKeys(customKeys),
+        );
         return embeddings;
       },
       undefined,
@@ -92,8 +109,12 @@ export class OpenaiChatbotService {
    * @param kbId
    * @param chunk
    */
-  async addEmbeddingsForChunk(kbId: ObjectId, chunk: Chunk) {
-    const embeddings = await this.getEmbeddingsForChunk(chunk);
+  async addEmbeddingsForChunk(
+    kbId: ObjectId,
+    chunk: Chunk,
+    customKeys?: Knowledgebase['customKeys'],
+  ) {
+    const embeddings = await this.getEmbeddingsForChunk(chunk, customKeys);
 
     // Add embedding for new chunk into embeddings collection
     await this.kbDbService.insertEmbeddingForChunk({
@@ -107,8 +128,12 @@ export class OpenaiChatbotService {
     });
   }
 
-  async updateEmbeddingsForChunk(kbId: ObjectId, chunk: Chunk) {
-    const embeddings = await this.getEmbeddingsForChunk(chunk);
+  async updateEmbeddingsForChunk(
+    kbId: ObjectId,
+    chunk: Chunk,
+    customKeys?: Knowledgebase['customKeys'],
+  ) {
+    const embeddings = await this.getEmbeddingsForChunk(chunk, customKeys);
 
     // Add embedding for new chunk into embeddings collection
     await this.kbDbService.updateEmbeddingForChunk(chunk._id, embeddings);
@@ -128,9 +153,13 @@ export class OpenaiChatbotService {
     kbId: ObjectId,
     query: string,
     threshold = 0.0,
+    customKeys?: Knowledgebase['customKeys'],
   ): Promise<ChunkForCompletion[]> {
     // Get embeddings for given query
-    const queryEmbedding = await this.openaiService.getEmbedding(query);
+    const queryEmbedding = await this.openaiService.getEmbedding(
+      query,
+      this.getCustomKeys(customKeys),
+    );
 
     const client = this.celeryClient.get(CeleryClientQueue.DEFAULT);
     const task = client.createTask('worker.get_top_n_chunks');
@@ -295,6 +324,7 @@ export class OpenaiChatbotService {
     prevMessages: ChatQueryAnswer[],
     defaultAnswer: string | undefined,
     prompt: string | undefined,
+    customKeys: Knowledgebase['customKeys'],
     debug = false,
   ) {
     const messages = this.getChatGptPrompt(
@@ -310,14 +340,17 @@ export class OpenaiChatbotService {
       this.logger.log('Prompt Messages', JSON.stringify(messages));
     }
 
-    const answer = await this.openaiService.getChatGptCompletion({
-      messages: messages as any,
-      temperature: 0.1,
-      frequency_penalty: 0,
-      presence_penalty: 0,
-      top_p: 1,
-      model: 'gpt-3.5-turbo',
-    });
+    const answer = await this.openaiService.getChatGptCompletion(
+      {
+        messages: messages as any,
+        temperature: 0.1,
+        frequency_penalty: 0,
+        presence_penalty: 0,
+        top_p: 1,
+        model: 'gpt-3.5-turbo',
+      },
+      this.getCustomKeys(customKeys),
+    );
 
     return { ...answer, messages: debug ? { messages } : {} };
   }
@@ -333,6 +366,7 @@ export class OpenaiChatbotService {
     ) => Promise<void>,
     defaultAnswer: string | undefined,
     prompt: string | undefined,
+    customKeys?: Knowledgebase['customKeys'],
   ) {
     const messages = this.getChatGptPrompt(
       chatbotName,
@@ -354,6 +388,7 @@ export class OpenaiChatbotService {
         model: 'gpt-3.5-turbo',
       },
       answerCompleteCb,
+      this.getCustomKeys(customKeys),
     );
 
     return answerStream;

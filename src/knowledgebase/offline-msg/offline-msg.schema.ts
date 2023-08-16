@@ -12,3 +12,14 @@ export interface OfflineMessage {
   url?: string;
   createdAt: Date;
 }
+
+export interface OfflineMessageWebhookPayload {
+  id: string;
+  knowledgebaseId: string;
+  chatSessionId: string;
+  name: string;
+  email: string;
+  message: string;
+  url: string;
+  createdAt: Date;
+}

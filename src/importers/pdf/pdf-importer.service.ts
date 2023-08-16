@@ -34,7 +34,7 @@ export class PdfImporterService {
   ) {
     const kbId = new ObjectId(knowledgebaseId);
 
-    const kb = await this.kbDbService.getKnowledgebaseById(kbId);
+    const kb = await this.kbDbService.getKnowledgebaseSparseById(kbId);
     checkUserIsOwnerOfKb(user, kb);
 
     // Save the file

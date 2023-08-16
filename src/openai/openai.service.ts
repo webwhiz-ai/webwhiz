@@ -5,6 +5,7 @@ import { RateLimiterMemory } from 'rate-limiter-flexible';
 import { Subject } from 'rxjs';
 import { AppConfigService } from '../common/config/appConfig.service';
 import * as tiktoken from '@dqbd/tiktoken';
+import { createHash } from 'node:crypto';
 
 const TOKENIZERS = {
   chatgtp: tiktoken.encoding_for_model('gpt-3.5-turbo'),
@@ -21,25 +22,31 @@ export interface ChatGTPResponse {
 
 export type ChatGptPromptMessages = CreateChatCompletionRequest['messages'];
 
+function getOpenAiClient(keys: string[]): [OpenAIApi, string, string] {
+  // Select random key from the given list of keys
+  const randomKeyIdx = Math.floor(Math.random() * keys.length);
+  const selectedKey = keys[randomKeyIdx];
+  const selectedKeyHash = createHash('md5').update(selectedKey).digest('hex');
+
+  const config = new Configuration({
+    apiKey: selectedKey,
+  });
+  const client = new OpenAIApi(config);
+  return [client, selectedKey, selectedKeyHash];
+}
+
 @Injectable()
 export class OpenaiService {
-  private readonly openai: OpenAIApi;
-  private readonly openai2: OpenAIApi;
   private readonly logger: Logger;
   private readonly rateLimiter: RateLimiterMemory;
   private readonly embedRateLimiter: RateLimiterMemory;
+  private readonly defaultKeys = [];
 
   constructor(private appConfig: AppConfigService) {
-    const config = new Configuration({
-      apiKey: this.appConfig.get('openaiKey'),
-    });
-    this.openai = new OpenAIApi(config);
-
-    this.openai2 = new OpenAIApi(
-      new Configuration({
-        apiKey: this.appConfig.get('openaiKey2'),
-      }),
-    );
+    this.defaultKeys = [
+      this.appConfig.get('openaiKey'),
+      this.appConfig.get('openaiKey2'),
+    ];
 
     this.logger = new Logger(OpenaiService.name);
 
@@ -66,10 +73,17 @@ export class OpenaiService {
    * @param input
    * @returns
    */
-  async getEmbedding(input: string): Promise<number[] | undefined> {
+  async getEmbedding(
+    input: string,
+    keys?: string[],
+  ): Promise<number[] | undefined> {
+    // Get openAi client from the given keys
+    keys = keys || this.defaultKeys;
+    const [openAiClient, _, openAiKeyHash] = getOpenAiClient(keys);
+
     // Rate limiter check
     try {
-      await this.embedRateLimiter.consume('openai-emd', 1);
+      await this.embedRateLimiter.consume(`openai-emd-${openAiKeyHash}`, 1);
     } catch (err) {
       this.logger.error('OpenAI Embedding Request exeeced rate limiting');
       throw new Error('Requests exceeded maximum rate');
@@ -77,7 +91,7 @@ export class OpenaiService {
 
     // API Call
     try {
-      const res = await this.openai2.createEmbedding({
+      const res = await openAiClient.createEmbedding({
         input,
         model: 'text-embedding-ada-002',
       });
@@ -97,10 +111,15 @@ export class OpenaiService {
    */
   async getChatGptCompletion(
     data: CreateChatCompletionRequest,
+    keys?: string[],
   ): Promise<ChatGTPResponse> {
+    // Get openAi client from the given keys
+    keys = keys || this.defaultKeys;
+    const [openAiClient, _, openAiKeyHash] = getOpenAiClient(keys);
+
     // Rate limiter check
     try {
-      await this.rateLimiter.consume('openai-req', 1);
+      await this.rateLimiter.consume(`openai-req-${openAiKeyHash}`, 1);
     } catch (err) {
       this.logger.error('OpenAI ChatCompletion Request exeeced rate limiting');
       throw new Error('Requests exceeded maximum rate');
@@ -108,7 +127,7 @@ export class OpenaiService {
 
     // API Call
     try {
-      const res = await this.openai.createChatCompletion(data);
+      const res = await openAiClient.createChatCompletion(data);
       return {
         response: res.data.choices[0].message.content,
         tokenUsage: {
@@ -136,10 +155,15 @@ export class OpenaiService {
       answer: string,
       usage: ChatGTPResponse['tokenUsage'],
     ) => Promise<void>,
+    keys?: string[],
   ) {
+    // Get openAi client from the given keys
+    keys = keys || this.defaultKeys;
+    const [_, openAiKey, openAiKeyHash] = getOpenAiClient(keys);
+
     // Rate limiter check
     try {
-      await this.rateLimiter.consume('openai-req', 1);
+      await this.rateLimiter.consume(`openai-req-${openAiKeyHash}`, 1);
     } catch (err) {
       this.logger.error('OpenAI ChatCompletion Request exeeced rate limiting');
       throw new Error('Requests exceeded maximum rate');
@@ -158,7 +182,7 @@ export class OpenaiService {
         {
           responseType: 'stream',
           headers: {
-            Authorization: `Bearer ${this.appConfig.get('openaiKey')}`,
+            Authorization: `Bearer ${openAiKey}`,
           },
         },
       );

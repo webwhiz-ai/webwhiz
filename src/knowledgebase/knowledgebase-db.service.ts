@@ -21,6 +21,7 @@ import {
   KNOWLEDGEBASE_COLLECTION,
   Prompt,
   PROMPT_COLLECTION,
+  ChatSessionSparse,
 } from './knowledgebase.schema';
 
 @Injectable()
@@ -62,6 +63,23 @@ export class KnowledgebaseDbService {
     };
   }
 
+  async getKnowledgebaseSparseById(id: ObjectId): Promise<KnowledgebaseSparse> {
+    const res = await this.knowledgebaseCollection.findOne(
+      { _id: id },
+      {
+        projection: {
+          _id: 1,
+          name: 1,
+          status: 1,
+          monthUsage: 1,
+          crawlData: 1,
+          owner: 1,
+        },
+      },
+    );
+    return res as KnowledgebaseSparse;
+  }
+
   async getKnowledgebaseById(id: ObjectId): Promise<Knowledgebase> {
     const res = await this.knowledgebaseCollection.findOne({ _id: id });
     return res;
@@ -85,6 +103,7 @@ export class KnowledgebaseDbService {
         status: 1,
         monthUsage: 1,
         'crawlData.stats': 1,
+        owner: 1,
       })
       .toArray();
     return kbs as KnowledgebaseSparse[];
@@ -132,6 +151,16 @@ export class KnowledgebaseDbService {
     await this.knowledgebaseCollection.updateOne(
       { _id: id },
       { $set: { chatWidgeData: widgetData, updatedAt: new Date() } },
+    );
+  }
+
+  async setKnowledgebaseCustomKeys(
+    id: ObjectId,
+    customKeyData: Knowledgebase['customKeys'],
+  ) {
+    await this.knowledgebaseCollection.updateOne(
+      { _id: id },
+      { $set: { customKeys: customKeyData, updatedAt: new Date() } },
     );
   }
 
@@ -414,6 +443,24 @@ export class KnowledgebaseDbService {
 
   async getChatSessionById(id: ObjectId): Promise<ChatSession> {
     const session = await this.chatSessionCollection.findOne({ _id: id });
+    return session;
+  }
+
+  async getChatSessionSparseById(id: ObjectId): Promise<ChatSessionSparse> {
+    const session = await this.chatSessionCollection.findOne(
+      { _id: id },
+      {
+        projection: {
+          _id: 1,
+          src: 1,
+          messages: 1,
+          userData: 1,
+          startedAt: 1,
+          updatedAt: 1,
+          knowledgebaseId: 1,
+        },
+      },
+    );
     return session;
   }
 

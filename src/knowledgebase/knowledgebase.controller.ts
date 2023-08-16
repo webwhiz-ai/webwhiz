@@ -18,6 +18,8 @@ import { DataStoreService } from './datastore.service';
 import {
   AddCustomChunkDTO,
   CreateKnowledgebaseDTO,
+  KbCustomKeysDTO,
+  SetAdminEmailDTO,
   SetKnowledgebaseDefaultAnswerDTO,
   SetPromptDTO,
   UpdateKnowledgebaseWebsiteDataDTO,
@@ -33,6 +35,19 @@ export class KnowledgebaseController {
   ) {}
 
   /**
+   * Set Custom Keys for Knowledgebase
+   */
+  @Put('/custom_keys')
+  async setUserCustomKeys(
+    @Req() req: RequestWithUser,
+    @Param('id') id: string,
+    @Body() data: KbCustomKeysDTO,
+  ) {
+    const { user } = req;
+    return this.kbService.setUserCustomKeys(user, id, data.keys);
+  }
+
+  /**
    * Get Knowleldgebase Detail by ID
    */
   @Get('/:id')
@@ -41,7 +56,7 @@ export class KnowledgebaseController {
     @Param('id') id: string,
   ) {
     const { user } = req;
-    return this.kbService.getKnowledgeBaseData(user, id);
+    return this.kbService.getKnowledgeBaseDetail(user, id);
   }
 
   /**
@@ -80,6 +95,32 @@ export class KnowledgebaseController {
   }
 
   /**
+   * Set Custom Keys for Knowledgebase
+   */
+  @Put('/:id/custom_keys')
+  async setCustomKeys(
+    @Req() req: RequestWithUser,
+    @Param('id') id: string,
+    @Body() data: KbCustomKeysDTO,
+  ) {
+    const { user } = req;
+    return this.kbService.setKnowledgebaseCustomKeys(user, id, data.keys);
+  }
+
+  /**
+   * Set Admin email for knowledgebase
+   */
+  @Put('/:id/admin_email')
+  async setAdminEmail(
+    @Req() req: RequestWithUser,
+    @Param('id') id: string,
+    @Body() data: SetAdminEmailDTO,
+  ) {
+    const { user } = req;
+    return this.kbService.setKnowledgebaseAdminEmail(user, id, data.email);
+  }
+
+  /**
    * Update website data for KB
    */
   @Put('/:id/website_data')
@@ -110,7 +151,7 @@ export class KnowledgebaseController {
   }
 
   /**
-   * Update Prompt ID for knowledge base
+   * Update Prompt for knowledge base
    */
   @Put('/:id/prompt')
   async setPromptId(
@@ -119,7 +160,7 @@ export class KnowledgebaseController {
     @Body() data: SetPromptDTO,
   ) {
     const { user } = req;
-    return this.kbService.setKnowledgebasePromptId(user, id, data.prompt);
+    return this.kbService.setKnowledgebasePrompt(user, id, data.prompt);
   }
 
   /**

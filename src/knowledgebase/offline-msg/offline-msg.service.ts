@@ -7,7 +7,9 @@ import { NewOfflineMsgDTO } from './offline-msg.dto';
 import { OfflineMessage, OFFLINE_MSG_COLLECTION } from './offline-msg.schema';
 import { EmailService } from '../../common/email/email.service';
 import { UserService } from '../../user/user.service';
-import { getLimitOffsetPaginatedResponse } from "src/common/utils";
+import { getLimitOffsetPaginatedResponse } from 'src/common/utils';
+import { WebhookService } from '../../webhook/webhook.service';
+import { WebhookEventType } from '../../webhook/webhook.types';
 
 @Injectable()
 export class OfflineMsgService {
@@ -18,6 +20,7 @@ export class OfflineMsgService {
     private kbDbService: KnowledgebaseDbService,
     private userService: UserService,
     private emailService: EmailService,
+    private readonly webhookService: WebhookService,
   ) {
     this.offlineMsgCollection = this.db.collection(OFFLINE_MSG_COLLECTION);
   }
@@ -48,7 +51,7 @@ export class OfflineMsgService {
   async getPaginatedOfflineMsgsForKnowledgebase(
     kbId: ObjectId,
     pageSize: number,
-    page?: number
+    page?: number,
   ) {
     const itemsPerPage = Math.min(pageSize, 50);
 
@@ -70,10 +73,10 @@ export class OfflineMsgService {
       this.offlineMsgCollection,
       filter,
       projectionFields,
-      "_id",
+      '_id',
       -1,
       itemsPerPage,
-      page
+      page,
     );
 
     return response;
@@ -95,22 +98,45 @@ export class OfflineMsgService {
       throw new HttpException('Invalid Knowledgebase', HttpStatus.NOT_FOUND);
     }
 
-    // Get kb owner
-    const kbOwner = await this.userService.findUserByIdSparse(
-      kb.owner.toHexString(),
-    );
+    // Choose email address to send this mail
+    // If adminEmail field is set user that, else use owner email
+    let email = '';
+    if (kb.adminEmail) {
+      email = kb.adminEmail;
+    } else {
+      // Get kb owner
+      const kbOwner = await this.userService.findUserByIdSparse(
+        kb.owner.toHexString(),
+      );
+      email = kbOwner.email;
+    }
 
     // Insert offline msg
     const res = await this.insertOfflineMsg(data);
 
     // Send email
     await this.emailService.sendOfflineMsgEmail(
-      kbOwner.email,
+      email,
       kb.websiteData.websiteUrl,
       data.email,
       data.message,
       data.name,
     );
+
+    // Call webhook with the offline msg
+    this.webhookService.callWebhook(kb.owner, {
+      event: WebhookEventType.OFFLINE_MSG,
+      payload: {
+        id: res._id.toHexString(),
+        chatSessionId: res.chatSessionId.toHexString(),
+        email: res.email,
+        name: res.name,
+        message: res.message,
+        knowledgebaseId: res.knowledgebaseId.toHexString(),
+        url: res.url,
+        createdAt: res.createdAt,
+      },
+    });
 
     return res;
   }
@@ -128,13 +154,13 @@ export class OfflineMsgService {
     user: UserSparse,
     knowledgebaseId: string,
     pageSize: number,
-    page?: number
+    page?: number,
   ) {
     const kbId = new ObjectId(knowledgebaseId);
 
-    const kb = await this.kbDbService.getKnowledgebaseById(kbId);
+    const kb = await this.kbDbService.getKnowledgebaseSparseById(kbId);
     if (!kb || !user._id.equals(kb.owner)) {
-      throw new HttpException("Unauthorized", HttpStatus.UNAUTHORIZED);
+      throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
     }
 
     return this.getPaginatedOfflineMsgsForKnowledgebase(kbId, pageSize, page);
