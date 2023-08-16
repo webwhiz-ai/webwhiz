@@ -406,7 +406,7 @@ export class KnowledgebaseService {
     );
 
     const widgetData = {
-      ...kbData.chatWidgeData,
+      chatWidgeData: kbData.chatWidgeData,
       customKey: kbData.customKeys?.useOwnKey,
       whitelabelling: userData.whitelabelling,
     };
