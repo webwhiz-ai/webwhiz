@@ -343,7 +343,8 @@ export const ChatBotsCustomize = ({
 																</FormControl>
 															)}
 														</Field>
-														<Field type="text" name="launcherIcon">
+														{/* @todo enable this after finizing the icons */}
+														{/* <Field type="text" name="launcherIcon">
 															{({ field, form }: any) => (
 																<FormControl mb="6">
 																	<FormLabel fontWeight="400" fontSize="sm" color="gray.700" htmlFor="launcherIcon">
@@ -367,7 +368,7 @@ export const ChatBotsCustomize = ({
 																	</ButtonGroup>
 																</FormControl>
 															)}
-														</Field>
+														</Field> */}
 													</TabPanel>
 													<TabPanel pt="8">
                                                         <Field type="text" name="prompt">
