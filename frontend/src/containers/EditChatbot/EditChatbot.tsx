@@ -327,7 +327,7 @@ const EditChatbot = (props: EditChatbotProps) => {
 			results: [values, ...prevPage.results]
 		}));
 
-	}, [customTrainingDataPage]);
+	}, []);
 
 	const handleTrainingDataUpdate = React.useCallback((values) => {
 
@@ -424,7 +424,7 @@ const EditChatbot = (props: EditChatbotProps) => {
 			</HStack>
 		</>
 
-	}, [chatBot._id, isSubmitting, toast, user]);
+	}, [chatBot._id, isSubmitting, toast]);
 
 	const getCustomDataComponent = React.useCallback(() => {
 
@@ -492,7 +492,6 @@ const EditChatbot = (props: EditChatbotProps) => {
 								[styles.activeQuestion]: selectedTrainingData && selectedTrainingData._id === data._id
 							})} key={data._id} p="3">
 							<Box 
-							h="39px"
 							onClick={async () => {
 
 								try {
@@ -540,12 +539,12 @@ const EditChatbot = (props: EditChatbotProps) => {
 					<Paginator onPageChange={handleCustomDataPageChange} pageRangeDisplayed={5} pageCount={customTrainingDataPage.pages} />
 				</Box>
 			</Box>
-			<Box w="calc(100% - 450px)"  className={styles.answerCont}>
+			<Box w="calc(100% - 450px)" overflowY="auto"  className={styles.answerCont}>
 				{isCustomDataDetailsLoading && <Box className={styles.customDataloadingCont}>	<Spinner /></Box>}
 				{selectedTrainingData && <AddTrainingDataForm knowledgeBaseId={props.match.params.chatbotId} onSubmit={handleTrainingDataUpdate} selectedTrainingData={selectedTrainingData} />}
 			</Box>
 		</>
-	}, [deleteCustomDataLoading, handleTrainingDataUpdate, isCustomDataDetailsLoading, onDeleteDialogOpen, props.match.params.chatbotId, questionsToDelete, selectedTrainingData, customTrainingDataPage, isCustomDataLoading]);
+	}, [customTrainingDataPage?.results, customTrainingDataPage.pages, isCustomDataLoading, handleCustomDataPageChange, isCustomDataDetailsLoading, selectedTrainingData, props.match.params.chatbotId, handleTrainingDataUpdate, deleteCustomDataLoading, questionsToDelete, onDeleteDialogOpen]);
 
 
 

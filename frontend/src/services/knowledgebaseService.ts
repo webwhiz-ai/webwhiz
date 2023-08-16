@@ -147,7 +147,7 @@ export async function getTrainingData(id: string, page: string): Promise<AxiosRe
 	return await axios({
 		baseURL: baseURL,
 		method: 'get',
-		url: `/knowledgebase/${id}/datastore?type=CUSTOM&page=${page}`,
+		url: `/knowledgebase/${id}/datastore?type=CUSTOM&page=${page}&page_size=20`,
 	});
 }
 export async function deleteTrainingData(knowledgebaseId: string, id: string): Promise<AxiosResponse<Knowledgebase>> {
