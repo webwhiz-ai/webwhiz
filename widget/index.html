@@ -310,7 +310,7 @@
             </svg>`
 
             const iconContainer = document.createElement("div");
-            iconContainer.innerHTML = data.launcherIcon.svgElement || defaultLauncherIcon;
+            iconContainer.innerHTML = data?.launcherIcon?.svgElement || defaultLauncherIcon;
             buttonElement.appendChild(iconContainer);
 
             if(data.hideBranding) {
