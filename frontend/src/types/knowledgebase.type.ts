@@ -46,6 +46,11 @@ export interface CrawlDataList {
     _id : string;
 }
 
+export interface launcherIcon {
+    id: string;
+    svgElement: string;
+}
+
 export interface ChatBotCustomizeData {
     backgroundColor: string;
     borderRadius:  string;
@@ -60,7 +65,8 @@ export interface ChatBotCustomizeData {
     questionExamples: {
         question: string;
         label: string;
-    }
+    },
+    launcherIcon: launcherIcon;
 }
 export interface CrawlDataListPagination {
     pages: number;

@@ -18,6 +18,7 @@ import {
 	IconButton,
 	Radio,
 	RadioGroup,
+	ButtonGroup,
 } from "@chakra-ui/react";
 
 import { ErrorMessage, Field, FieldArray, Form, Formik } from "formik";
@@ -30,8 +31,14 @@ import styles from "./ChatBotsCustomize.module.scss";
 
 import { chatWidgetDefaultValues } from "../../utils/commonUtils";
 import { SectionTitle } from "../../components/SectionTitle/SectionTitle";
-import { ChatBotCustomizeData } from "../../types/knowledgebase.type";
+import { ChatBotCustomizeData, launcherIcon } from "../../types/knowledgebase.type";
 import ChatBotLauncher from "../ChatBotLauncher/ChatBotLauncher";
+import LauncherIcon1 from "../../components/Icons/ChatBotLauncherIcons/LauncherIcon1";
+import LauncherIcon2 from "../../components/Icons/ChatBotLauncherIcons/LauncherIcon2";
+import LauncherIcon3 from "../../components/Icons/ChatBotLauncherIcons/LauncherIcon3";
+import LauncherIcon4 from "../../components/Icons/ChatBotLauncherIcons/LauncherIcon4";
+import LauncherIcon5 from "../../components/Icons/ChatBotLauncherIcons/LauncherIcon5";
+import { LauncherIconsSVGs } from "../../utils/LauncherIconSVGs";
 export function validateEmailAddress(email: string) {
 	return email && !/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(email);
 }
@@ -47,6 +54,15 @@ interface ChatBotsCustomizeProps {
     defaultPrompt?: string;
 	showTimeMessage?: boolean;
 }
+
+
+const AvailableIcons = [
+	{ id: 'icon1', icon: <LauncherIcon1 /> },
+	{ id: 'icon2', icon: <LauncherIcon2 /> },
+	{ id: 'icon3', icon: <LauncherIcon3 /> },
+	{ id: 'icon4', icon: <LauncherIcon4 /> },
+	{ id: 'icon5', icon: <LauncherIcon5 /> },
+];
 
 export const ChatBotsCustomize = ({
 	onNextClick,
@@ -225,7 +241,7 @@ export const ChatBotsCustomize = ({
 														</Box>
 													</TabPanel>
 													<TabPanel pt="8">
-														<Field t pt="8" ype="text" name="backgroundColor">
+														<Field t pt="8" type="text" name="backgroundColor">
 															{({ field, form }: any) => (
 																<FormControl
 																	mb="6"
@@ -324,6 +340,31 @@ export const ChatBotsCustomize = ({
 																			</Radio>
 																		</HStack>
 																	</RadioGroup>
+																</FormControl>
+															)}
+														</Field>
+														<Field type="text" name="launcherIcon">
+															{({ field, form }: any) => (
+																<FormControl mb="6">
+																	<FormLabel fontWeight="400" fontSize="sm" color="gray.700" htmlFor="launcherIcon">
+																		Launcher Icon
+																</FormLabel>
+																	<ButtonGroup spacing="3" mt={2}>
+																		{AvailableIcons.map((icon) => (
+																			<IconButton
+																				size="lg"
+																				key={icon.id}
+																				aria-label={`icon_${icon.id}`}
+																				icon={icon.icon}
+																				onClick={() => form.setFieldValue('launcherIcon', {
+																					id: icon.id,
+																					svgElement: LauncherIconsSVGs.get(icon.id)
+																				})}
+																				colorScheme={form.values.launcherIcon.id === icon.id ? 'blue' : 'gray'}
+																				isSelected={field.value.id === icon.id}
+																			/>
+																		))}
+																	</ButtonGroup>
 																</FormControl>
 															)}
 														</Field>
@@ -448,7 +489,7 @@ export const ChatBotsCustomize = ({
 												</Box>
 											</div>
 										</div>
-										<ChatBotLauncher backgroundColor= { values.backgroundColor} fontColor= {values.fontColor} />
+										<ChatBotLauncher backgroundColor= { values.backgroundColor} fontColor= {values.fontColor} launcherIcon={values.launcherIcon.id} />
 									</div>
 								</Flex>
 
