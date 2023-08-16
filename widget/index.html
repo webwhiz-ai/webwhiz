@@ -53,8 +53,15 @@
                                 <path d="M10 10l-2 2l2 2"></path>
                             </svg>
                         </button>
-                        <button title="Clear chat history" class="chat-clear-session-btn chat-actions-btn" id="chat-clear-session-btn">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-refresh-ccw"><polyline points="1 4 1 10 7 10"></polyline><polyline points="23 20 23 14 17 14"></polyline><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"></path></svg>                             
+                        <button title="Clear chat history" class="chat-clear-session-btn chat-actions-btn"
+                            id="chat-clear-session-btn">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" class="feather feather-refresh-ccw">
+                                <polyline points="1 4 1 10 7 10"></polyline>
+                                <polyline points="23 20 23 14 17 14"></polyline>
+                                <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"></path>
+                            </svg>
                         </button>
                         <button class="chat-close-btn chat-actions-btn" id="chat-close-btn">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
@@ -154,7 +161,8 @@
                             fill="currentColor"></path>
                     </svg></button>
             </form>
-            <a id="powered-by" class="powered-by" href="https://www.webwhiz.ai/" target="_blank">powered by webwhiz.ai</a>
+            <a id="powered-by" class="powered-by" href="https://www.webwhiz.ai/" target="_blank">powered by
+                webwhiz.ai</a>
         </div>
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/autosize.js/3.0.20/autosize.min.js"></script>
@@ -172,9 +180,9 @@
 
         let showReadMore = true;
 
-        
+
         let sessionId = '';
-        
+
         let messages = [];
 
         const urlParams = new URLSearchParams(window.location.search);
@@ -273,7 +281,10 @@
             if (response.status === 200) {
                 const releaseBody = await response.json();
                 const chatWidgeData = releaseBody.chatWidgeData || defaultWidgetData;
-                return chatWidgeData;
+                return {
+                    ...releaseBody,
+                    chatWidgeData: chatWidgeData
+                }
             } else {
                 console.log('error');
             }
@@ -282,7 +293,8 @@
 
         (async () => {
             const data = await getWidgetData();
-            showReadMore = data.showReadMore;
+            const chatWidgetData = data.chatWidgeData;
+            showReadMore = chatWidgetData.showReadMore;
             requestMetaData();
 
             const heading = document.getElementById('chat-heading');
@@ -290,7 +302,7 @@
             const branding = document.getElementById('powered-by');
             const welcomeMsg = document.getElementById('chat-welcome-msg');
             const buttonElement = document.getElementById("chat-launcher-btn");
-            
+
             const defaultLauncherIcon = `<svg 
                 focusable="false" 
                 stroke="currentColor" 
@@ -313,22 +325,22 @@
             iconContainer.innerHTML = data?.launcherIcon?.svgElement || defaultLauncherIcon;
             buttonElement.appendChild(iconContainer);
 
-            if(data.hideBranding) {
+            if (chatWidgetData.hideBranding || data.whitelabelling?.removeBranding) {
                 branding.style.display = 'none';
             }
 
-            if (data.heading) {
-                heading.innerText = data.heading;
+            if (chatWidgetData.heading) {
+                heading.innerText = chatWidgetData.heading;
             }
-            if (data.description) {
-                description.innerText = data.description;
-            }
-
-            if (data.welcomeMessage) {
-                welcomeMsg.innerText = data.welcomeMessage;
+            if (chatWidgetData.description) {
+                description.innerText = chatWidgetData.description;
             }
 
-            if(data.offlineMessage) {
+            if (chatWidgetData.welcomeMessage) {
+                welcomeMsg.innerText = chatWidgetData.welcomeMessage;
+            }
+
+            if (chatWidgetData.offlineMessage) {
                 const chatWrap = document.getElementById('chat-wrap');
                 chatWrap.classList.add('has-offline-message');
             }
@@ -336,29 +348,29 @@
             var styleSheet = document.createElement('style');
 
             const styles = `
-                .chat-widget { border-radius: ${data.borderRadius}!important}
-                .chat-header, .chat-loading-dot, .chat-launcher-btn { background-color: ${data.backgroundColor}!important}
+                .chat-widget { border-radius: ${chatWidgetData.borderRadius}!important}
+                .chat-header, .chat-loading-dot, .chat-launcher-btn { background-color: ${chatWidgetData.backgroundColor}!important}
                 .chat-wrap {
                     opacity: 1 !important;
                 }
                 .chat-launcher-btn {
-                    color: ${data.fontColor}!important
+                    color: ${chatWidgetData.fontColor}!important
                 }
-                .chat-header, .chat-tabs button, .btn-primary {color: ${data.fontColor}!important}
-                .tabs-active, .btn-primary {background-color: ${data.backgroundColor}!important}
+                .chat-header, .chat-tabs button, .btn-primary {color: ${chatWidgetData.fontColor}!important}
+                .tabs-active, .btn-primary {background-color: ${chatWidgetData.backgroundColor}!important}
                 .chat-submit-btn svg, .message-feedback {
-                    color: ${data.backgroundColor}!important
+                    color: ${chatWidgetData.backgroundColor}!important
                 }
-                .chat-message.user .chat-message-text {background-color: ${data.backgroundColor}!important; color: ${data.fontColor}!important}
+                .chat-message.user .chat-message-text {background-color: ${chatWidgetData.backgroundColor}!important; color: ${chatWidgetData.fontColor}!important}
             `
 
             styleSheet.innerText = styles;
 
 
-            if (data.questionExamples && data.questionExamples.length > 0) {
+            if (chatWidgetData.questionExamples && chatWidgetData.questionExamples.length > 0) {
                 const sampleMessages = document.getElementById('chat-sample-messages');
                 sampleMessages.classList.remove('hide-sample-messages');
-                data.questionExamples.forEach((message) => {
+                chatWidgetData.questionExamples.forEach((message) => {
                     const sampleMessage = document.createElement('div');
                     sampleMessage.classList.add('chat-sample-message');
                     sampleMessage.setAttribute('data-message', message.question);
@@ -374,7 +386,7 @@
                 }
             });
 
-            if (data.placement === 'left') {
+            if (chatWidgetData.placement === 'left') {
                 notifyParentWidgetLeftPosition();
                 const chatLauncher = document.getElementById('chat-launcher');
                 chatLauncher.style.left = '20px';
@@ -591,7 +603,7 @@
                 origin = event.data.url;
                 container = event.data.container;
 
-                if(container) {
+                if (container) {
                     const $chatLauncher = document.getElementById('chat-launcher');
                     const $chatActions = document.getElementById('chat-actions');
                     $chatLauncher.parentNode.removeChild($chatLauncher);
@@ -603,7 +615,7 @@
                         document.getElementById('chat-input').focus();
                     }, 320);
                 }
-            } else if(event.data.messageType === 'webwhiz:recieve_chat_data') {
+            } else if (event.data.messageType === 'webwhiz:recieve_chat_data') {
                 messages = event.data.chatHistory;
                 let msgHTML = messages.map(msg => {
                     const type = msg.role === 'user' ? 'user' : 'chatbot';
@@ -617,10 +629,10 @@
                 msgHTML = msgHTML.join('');
 
                 const chatMessages = document.getElementById('chat-messages');
-                chatMessages.insertAdjacentHTML("beforeend",msgHTML)
+                chatMessages.insertAdjacentHTML("beforeend", msgHTML)
 
                 chatMessages.scrollTop = chatMessages.scrollHeight;
-            } else if(event.data.messageType === 'webwhiz:recieve_session_id') {
+            } else if (event.data.messageType === 'webwhiz:recieve_session_id') {
                 sessionId = event.data.sessionId;
             }
         }
@@ -645,7 +657,7 @@
         function notifyParentWidgetLeftPosition() {
             window.top.postMessage('webwhiz:widget_align_left', '*');
         }
-       
+
         function notifyNewMessage(message) {
             window.top.postMessage({
                 messageType: 'webwhiz:recieve_new_message',
@@ -662,12 +674,12 @@
         function requestMetaData() {
             window.top.postMessage('webwhiz:request_meta_data', '*');
         }
-        
+
         function requestChatHistoryData() {
             window.top.postMessage('webwhiz:request_chat_data', '*');
         }
-        
-         function requestSessionId() {
+
+        function requestSessionId() {
             window.top.postMessage('webwhiz:request_session_id', '*');
         }
 
@@ -822,7 +834,7 @@
 
         const chatWrap = document.getElementById('chat-wrap');
 
-        if(offlineMsgTab) {
+        if (offlineMsgTab) {
             offlineMsgTab.addEventListener('click', function () {
                 const width = offlineMsgTab.offsetWidth;
                 const left = aiAssistantTab.offsetWidth;
@@ -830,10 +842,10 @@
                 tabsActive.style.left = `${left + 5}px`;
                 chatWrap.classList.add('chat-wrap-offline');
                 chatWrap.classList.remove('chat-wrap-ai-assistant');
-    
+
             });
         }
-        if(aiAssistantTab) {
+        if (aiAssistantTab) {
             aiAssistantTab.addEventListener('click', function () {
                 const width = aiAssistantTab.offsetWidth;
                 tabsActive.style.width = `${width - 5}px`;
