@@ -168,6 +168,7 @@ export interface OfflineMessage {
     url: null,
     createdAt: string;
 }
+
 export interface OfflineMessagePagination {
     pages: number;
     results: OfflineMessage[];
@@ -175,4 +176,9 @@ export interface OfflineMessagePagination {
 export interface ChatSessionPagination {
     pages: number;
     results: ChatSession[];
+}
+
+export interface CustomDataPagination {
+    pages: number;
+    results: TrainingDataDetail[];
 }
