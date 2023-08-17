@@ -46,7 +46,7 @@ import { ChatBotsCustomize } from "../ChatBotsCustomize/ChatBotsCustomize";
 import { useLocation } from "react-router-dom";
 
 import styles from "./EditChatbot.module.scss";
-import { fetchKnowledgebaseCrawlData, customizeWidget, deleteTrainingData, fetcKnowledgebase, fetchKnowledgebaseDetails, generateEmbeddings, getTrainingData, getTrainingDataDetails, updateWebsiteData, getChatSessions, getOfflineMessages, updatePrompt } from "../../services/knowledgebaseService";
+import { fetchKnowledgebaseCrawlData, customizeWidget, deleteTrainingData, fetcKnowledgebase, fetchKnowledgebaseDetails, generateEmbeddings, getTrainingData, getTrainingDataDetails, updateWebsiteData, getChatSessions, getOfflineMessages, updatePrompt, updateDefaultAnswer } from "../../services/knowledgebaseService";
 import { ChatBot } from "../../components/ChatBot/ChatBot";
 import { chatWidgetDefaultValues, getDomainFromUrl } from "../../utils/commonUtils";
 import { AddTrainingData } from "../AddTrainingData/AddTrainingData";
@@ -573,6 +573,7 @@ const EditChatbot = (props: EditChatbotProps) => {
 			welcomeMessage: chatBot.chatWidgeData?.welcomeMessage || chatWidgetDefaultValues.welcomeMessage,
 			questionExamples: chatBot.chatWidgeData?.questionExamples || chatWidgetDefaultValues.questionExamples,
 			prompt: chatBot.prompt || chatWidgetDefaultValues.prompt,
+			defaultAnswer: chatBot.defaultAnswer || chatWidgetDefaultValues.defaultAnswer,
 			launcherIcon: chatBot.chatWidgeData?.launcherIcon || chatWidgetDefaultValues.launcherIcon,
 		};
 	}, [chatBot]);
@@ -742,6 +743,7 @@ const EditChatbot = (props: EditChatbotProps) => {
                                     setIsSubmitting(true)
                                     customizeWidget(chatBot._id, formData);
                                     updatePrompt(chatBot._id, formData.prompt || '');
+                                    updateDefaultAnswer(chatBot._id, formData.defaultAnswer || '');
                                 } catch (error) {
 
                                 } finally {

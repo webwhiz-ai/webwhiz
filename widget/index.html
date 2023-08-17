@@ -189,6 +189,49 @@
         const knowledgebaseId = urlParams.get('kbId');
         const baseURL = urlParams.get('baseUrl');
 
+        /**
+         * Iframe communications
+         */
+        // Msg listener
+        window.onmessage = function (event) {
+            if (event.data.messageType === 'webwhiz:recieve_meta_data') {
+                origin = event.data.url;
+                container = event.data.container;
+
+                if (container) {
+                    const $chatLauncher = document.getElementById('chat-launcher');
+                    const $chatActions = document.getElementById('chat-actions');
+                    $chatLauncher.parentNode.removeChild($chatLauncher);
+                    $chatActions.parentNode.removeChild($chatActions);
+                    chatWidget.classList.add('widget-open');
+
+                    notifyParentWidgetExpand();
+                    setTimeout(() => {
+                        document.getElementById('chat-input').focus();
+                    }, 320);
+                }
+            } else if (event.data.messageType === 'webwhiz:recieve_chat_data') {
+                messages = event.data.chatHistory;
+                let msgHTML = messages.map(msg => {
+                    const type = msg.role === 'user' ? 'user' : 'chatbot';
+                    let msgContent = msg.content;
+                    msgContent = replaceAll(msgContent, '&lt;', '<')
+                    msgContent = replaceAll(msgContent, '&gt;', '>')
+                    msgContent = replaceAll(msgContent, '<br/>', '\n')
+                    const markdownRes = marked.parse(msgContent);
+                    return `<div class="chat-message ${type}"><div class="chat-message-text">${markdownRes}</div></div>`
+                })
+                msgHTML = msgHTML.join('');
+
+                const chatMessages = document.getElementById('chat-messages');
+                chatMessages.insertAdjacentHTML("beforeend", msgHTML)
+
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            } else if (event.data.messageType === 'webwhiz:recieve_session_id') {
+                sessionId = event.data.sessionId;
+            }
+        }
+
         requestChatHistoryData();
         requestSessionId();
 
@@ -593,49 +636,6 @@
                 addMessageToChat();
             }
         };
-
-        /**
-         * Iframe communications
-         */
-        // Msg listener
-        window.onmessage = function (event) {
-            if (event.data.messageType === 'webwhiz:recieve_meta_data') {
-                origin = event.data.url;
-                container = event.data.container;
-
-                if (container) {
-                    const $chatLauncher = document.getElementById('chat-launcher');
-                    const $chatActions = document.getElementById('chat-actions');
-                    $chatLauncher.parentNode.removeChild($chatLauncher);
-                    $chatActions.parentNode.removeChild($chatActions);
-                    chatWidget.classList.add('widget-open');
-
-                    notifyParentWidgetExpand();
-                    setTimeout(() => {
-                        document.getElementById('chat-input').focus();
-                    }, 320);
-                }
-            } else if (event.data.messageType === 'webwhiz:recieve_chat_data') {
-                messages = event.data.chatHistory;
-                let msgHTML = messages.map(msg => {
-                    const type = msg.role === 'user' ? 'user' : 'chatbot';
-                    let msgContent = msg.content;
-                    msgContent = replaceAll(msgContent, '&lt;', '<')
-                    msgContent = replaceAll(msgContent, '&gt;', '>')
-                    msgContent = replaceAll(msgContent, '<br/>', '\n')
-                    const markdownRes = marked.parse(msgContent);
-                    return `<div class="chat-message ${type}"><div class="chat-message-text">${markdownRes}</div></div>`
-                })
-                msgHTML = msgHTML.join('');
-
-                const chatMessages = document.getElementById('chat-messages');
-                chatMessages.insertAdjacentHTML("beforeend", msgHTML)
-
-                chatMessages.scrollTop = chatMessages.scrollHeight;
-            } else if (event.data.messageType === 'webwhiz:recieve_session_id') {
-                sessionId = event.data.sessionId;
-            }
-        }
 
         function notifyParentWidgetExpand() {
             window.top.postMessage('webwhiz:widget_expand', '*');

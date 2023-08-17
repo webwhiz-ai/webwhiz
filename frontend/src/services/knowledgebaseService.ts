@@ -101,6 +101,17 @@ export async function updatePrompt(id:string, prompt: string): Promise<AxiosResp
 	});
 }
 
+export async function updateDefaultAnswer(id:string, defaultAnswer: string): Promise<AxiosResponse<Knowledgebase[]>> {
+	return await axios({
+		baseURL: baseURL,
+		method: 'put',
+		data: {
+			defaultAnswer: defaultAnswer
+		},
+		url: `knowledgebase/${id}/default_answer`,
+	});
+}
+
 export async function updateWebsiteData(id:string, data: ChatBotCustomizeData): Promise<AxiosResponse<Knowledgebase[]>> {
 	return await axios({
 		baseURL: baseURL,

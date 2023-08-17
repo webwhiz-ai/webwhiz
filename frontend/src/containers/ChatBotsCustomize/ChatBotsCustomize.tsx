@@ -383,10 +383,37 @@ export const ChatBotsCustomize = ({
 																	<Textarea
 																		{...field}
 																		rows={4}
-																		placeholder="This is the base prompt that is used to give instructions to the chatbot. You can customize this prompt to fit your use case."
+																		placeholder="You are a very enthusiastic chatbot who loves to help people! Your name is {{chatbotName}} and you are designed to respond only based on the given context, outputted in Markdown format."
 																	/>
+																	<FormHelperText fontSize="sm">This base prompt serves as a foundational instruction set for your chatbot. Feel free to tailor it to suit your specific needs. For instance, if you'd like your chatbot to respond solely in French, include the directive "Reply only in the French language".</FormHelperText>
+																	<FormHelperText fontSize="sm">It's a good practice to provide some elementary information about your website in the base prompt to give your chatbot context.</FormHelperText>
 																	<FormErrorMessage>
 																		{form.errors.prompt}
+																	</FormErrorMessage>
+																</FormControl>
+															)}
+														</Field>
+                                                        <Field type="text" name="defaultAnswer">
+															{({ field, form }: any) => (
+																<FormControl
+																	mb="6"
+																	isInvalid={
+																		form.errors.defaultAnswer && form.touched.defaultAnswer
+																	}
+																>
+																	<FormLabel fontSize="sm" htmlFor="defaultAnswer" color="gray.700" fontWeight="400" >
+																		Default Answer
+																	</FormLabel>
+																	<Textarea
+																		{...field}
+																		rows={4}
+																		placeholder="I don't know how to answer that"
+																	/>
+																	<FormHelperText fontSize="sm">This field allows you to set a default response for the chatbot when it can't find an appropriate answer. You can personalize it with your own text or even translate it into another language.</FormHelperText>
+																	<FormHelperText fontSize="sm">For example, you could write 'Sorry, I don't have the answer to that. Please email hi@example.com for help.'</FormHelperText>
+
+																	<FormErrorMessage>
+																		{form.errors.defaultAnswer}
 																	</FormErrorMessage>
 																</FormControl>
 															)}
