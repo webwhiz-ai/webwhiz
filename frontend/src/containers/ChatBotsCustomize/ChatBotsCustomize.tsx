@@ -409,7 +409,8 @@ export const ChatBotsCustomize = ({
 																		rows={4}
 																		placeholder="I don't know how to answer that"
 																	/>
-																	<FormHelperText fontSize="sm">You can use this field to translate the default response or set custom prompts, such as 'Sorry, I don't know the answer to that. Please send an email to hi@example.com for assistance"</FormHelperText>
+																	<FormHelperText fontSize="sm">This field allows you to set a default response for the chatbot when it can't find an appropriate answer. You can personalize it with your own text or even translate it into another language.</FormHelperText>
+																	<FormHelperText fontSize="sm">For example, you could write 'Sorry, I don't have the answer to that. Please email hi@example.com for help.'</FormHelperText>
 
 																	<FormErrorMessage>
 																		{form.errors.defaultAnswer}
