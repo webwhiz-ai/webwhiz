@@ -175,6 +175,27 @@ export const ChatBotsCustomize = ({
 																</FormControl>
 															)}
 														</Field>
+														<Field type="text" name="chatInputPlaceholderText">
+															{({ field, form }: any) => (
+																<FormControl
+																	mb="6"
+																	isInvalid={
+																		form.errors.chatInputPlaceholderText && form.touched.chatInputPlaceholderText
+																	}
+																>
+																	<FormLabel fontSize="sm" htmlFor="chatInputPlaceholderText" color="gray.700" fontWeight="400" >
+																		Chat Input Placeholder Text
+																	</FormLabel>
+																	<Input
+																		{...field}
+																		placeholder={(defaultCustomizationValues || chatWidgetDefaultValues).chatInputPlaceholderText}
+																	/>
+																	<FormErrorMessage>
+																		{form.errors.chatInputPlaceholderText}
+																	</FormErrorMessage>
+																</FormControl>
+															)}
+														</Field>
 														<Box className={styles.nestedFormCont} mt="8">
 															<Text className={styles.nestedFormHeading} fontSize="md" mb="4" pb="2" fontWeight="500" borderBottom={"1px solid"} borderBottomColor="gray.200">Sample Questions</Text>
 

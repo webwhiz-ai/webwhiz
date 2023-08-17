@@ -575,6 +575,7 @@ const EditChatbot = (props: EditChatbotProps) => {
 			prompt: chatBot.prompt || chatWidgetDefaultValues.prompt,
 			defaultAnswer: chatBot.defaultAnswer || chatWidgetDefaultValues.defaultAnswer,
 			launcherIcon: chatBot.chatWidgeData?.launcherIcon || chatWidgetDefaultValues.launcherIcon,
+			chatInputPlaceholderText: chatBot.chatWidgeData?.chatInputPlaceholderText || chatWidgetDefaultValues.chatInputPlaceholderText,
 		};
 	}, [chatBot]);
 

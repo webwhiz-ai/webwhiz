@@ -17,6 +17,7 @@ export const chatWidgetDefaultValues = {
 	backgroundColor: "#000",
 	heading: 'I am your AI assistant',
 	description: `Ask me anything. I'll try to answer based on the data from this website.`,
+  chatInputPlaceholderText: 'Type your message',
 	fontColor: "#FFF",
 	borderRadius: "12px",
 	placement: "right",
