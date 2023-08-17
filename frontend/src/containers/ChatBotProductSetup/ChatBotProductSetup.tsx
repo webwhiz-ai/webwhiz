@@ -28,6 +28,11 @@ import {
 	StatArrow,
 	StatGroup,
 	useDisclosure,
+	Tabs,
+	TabList,
+	Tab,
+	TabPanels,
+	TabPanel,
 } from "@chakra-ui/react";
 
 
@@ -53,11 +58,13 @@ import { CrawlData, WebsiteData } from "../../types/knowledgebase.type";
 import ReactMarkdown from "react-markdown";
 import { Paginator } from "../../widgets/Paginator/Paginator";
 import { SectionTitle } from "../../components/SectionTitle/SectionTitle";
+import CustomDropzone from "../../components/FileDropzone/CustomDropzone";
 
 interface FormValues {
 	websiteUrl: string;
 	target: string;
 	exclude: string;
+	files: File[];
 }
 interface ChatBotProductSetupProps {
 	onPrimaryBtnClick: (finalFormValues: WebsiteData) => void;
@@ -73,6 +80,7 @@ interface ChatBotProductSetupProps {
 	showDescription?: boolean;
 	crawlDataLoading?: boolean;
 	defaultCrauledData: CrawlData;
+	defaultFiles?: File[];
 	isSubmitting?: boolean;
 	isSecondaryBtnSubmitting?: boolean;
 	disableWebsiteInput?: boolean;
@@ -108,6 +116,7 @@ export const ChatBotProductSetup = ({
 	defaultCrauledData,
 	defaultExcludedPaths,
 	defaultIncludedPaths,
+	defaultFiles = [],
 	disableWebsiteInput = false,
 	loadingText = '',
 	isSubmitting = false,
@@ -127,7 +136,7 @@ export const ChatBotProductSetup = ({
 	}, [defaultCrauledData]);
 
 	const onNextButtonClick = React.useCallback(
-		async ({ websiteUrl, target, exclude }: FormValues, type) => {
+		async ({ websiteUrl, target, exclude, files }: FormValues, type) => {
 			const formValues: FormValues = {} as FormValues;
 			formValues.websiteUrl = websiteUrl;
 
@@ -152,7 +161,8 @@ export const ChatBotProductSetup = ({
 				websiteUrl: websiteUrl,
 				urls: [],
 				include: targetPaths,
-				exclude: excludePaths
+				exclude: excludePaths,
+				files: files,
 			}
 
 			// formValues.targetPagesBar = [...includedTarget, ...excludedTarget];
@@ -184,6 +194,25 @@ export const ChatBotProductSetup = ({
 		onOpen();
 	}, [onOpen]);
 
+
+	// TODO: Add proper validation
+	// const validationSchema = Yup.object().shape(
+	// 	{
+	// 		files: Yup.array().when("websiteUrl", {
+	// 			is: "",
+	// 			then: Yup.array()
+	// 				.min(1, "Pick at least 1 item")
+	// 				.of(Yup.number().required("This field is required.")),
+	// 			otherwise: Yup.array()
+	// 		}),
+	// 		websiteUrl: Yup.string().when("files", {
+	// 			is: files => files.length === 0,
+	// 			then: Yup.string().required("This field is required."),
+	// 			otherwise: Yup.string()
+	// 		})
+	// 	},
+	// 	[["files", "websiteUrl"]]
+	// );
 
 	const getCrauledPaths = React.useCallback(() => {
 		if (isSubmitting) {
@@ -286,8 +315,10 @@ export const ChatBotProductSetup = ({
 						websiteUrl: defaultWebsite,
 						target: defaultIncludedPaths,
 						exclude: defaultExcludedPaths,
+						files: defaultFiles,
 					}}
 					onSubmit={async () => { }}
+					// validationSchema={validationSchema}
 				>
 					{({ values, isValid, dirty }) => (
 						<>
@@ -295,95 +326,133 @@ export const ChatBotProductSetup = ({
 								alignItems="start"
 								overflowY="auto"
 								spacing="4"
-								p="2px"
+								p={2}
 								mb="51"
 							>
 								<SectionTitle title="Product setup" description="Enter your website URL and path, will automatically fetch data from your website" />
 								<Form style={{ width: '100%' }}>
 									<HStack spacing="16" alignItems="start">
 										<Box w="50%" maxW="520px">
-											<Field
-												type="text"
-												name="websiteUrl"
-												validate={validateWebsite}
-											>
-												{({ field, form }: any) => (
-													<FormControl isRequired mb="8">
-														<FormLabel fontWeight={400} color="gray.700" fontSize="sm" htmlFor="websiteUrl">
-															Website URL
+
+											<Tabs variant='soft-rounded' colorScheme='gray' mt="1" size="sm">
+												<TabList>
+													<Tab>Website</Tab>
+													<Tab>Files</Tab>
+												</TabList>
+												<TabPanels>
+													<TabPanel pt="8">
+														<Field
+															type="text"
+															name="websiteUrl"
+															validate={validateWebsite}
+														>
+															{({ field, form }: any) => (
+																<FormControl 
+																isRequired 
+																mb="8">
+																	<FormLabel fontWeight={400} color="gray.700" fontSize="sm" htmlFor="websiteUrl">
+																		Website URL
 														</FormLabel>
-														<Input
-															color="gray.700"
-															{...field}
-															id="websiteUrl"
-															isDisabled={disableWebsiteInput}
-															required
-															placeholder="https://www.paritydeals.com"
-														/>
-														{disableWebsiteInput && (<FormHelperText fontSize="smaller" color="gray.400">
-															The website name can not be edited once the product is created.
-														</FormHelperText>)}
-														{form.touched.websiteUrl && form.errors.websiteUrl && (
-															<FormHelperText color="red">
-																{form.errors.websiteUrl}
-															</FormHelperText>
-														)}
-														<FormErrorMessage>
-															{form.errors.websiteUrl}
-														</FormErrorMessage>
-													</FormControl>
-												)}
-											</Field>
-											<Field type="text" name="target">
-												{({ field, form }: any) => (
-													<FormControl
-														mb="8"
-														isInvalid={form.errors.target && form.touched.target}
-													>
-														<FormLabel fontWeight={400} color="gray.700" fontSize="sm" htmlFor="target">
-															Included paths
+																	<Input
+																		color="gray.700"
+																		{...field}
+																		id="websiteUrl"
+																		isDisabled={disableWebsiteInput}
+																		required
+																		placeholder="https://www.paritydeals.com"
+																	/>
+																	{disableWebsiteInput && (<FormHelperText fontSize="smaller" color="gray.400">
+																		The website name can not be edited once the product is created.
+																	</FormHelperText>)}
+																	{form.touched.websiteUrl && form.errors.websiteUrl && (
+																		<FormHelperText color="red">
+																			{form.errors.websiteUrl}
+																		</FormHelperText>
+																	)}
+																	<FormErrorMessage>
+																		{form.errors.websiteUrl}
+																	</FormErrorMessage>
+																</FormControl>
+															)}
+														</Field>
+														<Field type="text" name="target">
+															{({ field, form }: any) => (
+																<FormControl
+																	mb="8"
+																	isInvalid={form.errors.target && form.touched.target}
+																>
+																	<FormLabel fontWeight={400} color="gray.700" fontSize="sm" htmlFor="target">
+																		Included paths
 														</FormLabel>
-														<Input
-															color="gray.700"
-															{...field}
-															id="target"
-															placeholder="/docs"
-														/>
-														<FormHelperText fontSize="smaller" color="gray.400">
-															Add only the path after the domain separated by a comma. For e.g. /docs, /features.
+																	<Input
+																		color="gray.700"
+																		{...field}
+																		id="target"
+																		placeholder="/docs"
+																	/>
+																	<FormHelperText fontSize="smaller" color="gray.400">
+																		Add only the path after the domain separated by a comma. For e.g. /docs, /features.
 														</FormHelperText>
 
-														<FormErrorMessage>
-															{form.errors.target}
-														</FormErrorMessage>
-													</FormControl>
-												)}
-											</Field>
-											<Field type="text" name="exclude">
-												{({ field, form }: any) => (
-													<FormControl
-														mb="8"
-														isInvalid={form.errors.exclude && form.touched.exclude}
-													>
-														<FormLabel fontWeight={400} color="gray.700" fontSize="sm" htmlFor="exclude">
-															Excluded paths
-														</FormLabel>
-														<Input
-															color="gray.700"
-															{...field}
-															id="exclude"
-															placeholder="/privacy"
-														/>
-														<FormHelperText fontSize="smaller" color="gray.400">
-															Add only the path after the domain separated by a comma. For e.g. /privacy, /terms-and-conditions.
-														</FormHelperText>
+																	<FormErrorMessage>
+																		{form.errors.target}
+																	</FormErrorMessage>
+																</FormControl>
+															)}
+														</Field>
+														<Field type="text" name="exclude">
+															{({ field, form }: any) => (
+																<FormControl
+																	mb="8"
+																	isInvalid={form.errors.exclude && form.touched.exclude}
+																>
+																	<FormLabel fontWeight={400} color="gray.700" fontSize="sm" htmlFor="exclude">
+																		Excluded paths
+																	</FormLabel>
+																	<Input
+																		color="gray.700"
+																		{...field}
+																		id="exclude"
+																		placeholder="/privacy"
+																	/>
+																	<FormHelperText fontSize="smaller" color="gray.400">
+																		Add only the path after the domain separated by a comma. For e.g. /privacy, /terms-and-conditions.
+																	</FormHelperText>
 
-														<FormErrorMessage>
-															{form.errors.exclude}
-														</FormErrorMessage>
-													</FormControl>
-												)}
-											</Field>
+																	<FormErrorMessage>
+																		{form.errors.exclude}
+																	</FormErrorMessage>
+																</FormControl>
+															)}
+														</Field>
+													</TabPanel>
+													<TabPanel pt="8">
+														<Field name="files" as={CustomDropzone} label="Upload Files" helperText="Upload files to be crawled. For e.g. sitemap.xml, robots.txt." >
+															{/* {({ field, form, setFieldValue }: any) => (
+																<FormControl
+																	mb="8"
+																	isInvalid={form.errors.files && form.touched.files}
+																>
+																	<FormLabel fontWeight={400} color="gray.700" fontSize="sm" htmlFor="files">
+																		Upload files
+																	</FormLabel>
+
+
+																	<FormHelperText fontSize="smaller" color="gray.400">
+																		Upload files to be crawled. For e.g. sitemap.xml, robots.txt.
+																	</FormHelperText>
+
+
+																	<FormErrorMessage>
+																		{form.errors.files}
+																	</FormErrorMessage>
+																</FormControl>
+															)} */}
+														</Field>
+													</TabPanel>
+												</TabPanels>
+											</Tabs>
+
 										</Box>
 										<Box w="50%">
 											{getCrauledPaths()}
