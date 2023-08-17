@@ -58,6 +58,7 @@ export interface ChatBotCustomizeData {
     fontColor: string;
     heading: string;
     prompt?: string;
+    defaultAnswer?: string;
     placement: 'left' | 'right';
     showReadMore: boolean;
     offlineMessage: boolean;

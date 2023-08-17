@@ -391,6 +391,30 @@ export const ChatBotsCustomize = ({
 																</FormControl>
 															)}
 														</Field>
+                                                        <Field type="text" name="defaultAnswer">
+															{({ field, form }: any) => (
+																<FormControl
+																	mb="6"
+																	isInvalid={
+																		form.errors.defaultAnswer && form.touched.defaultAnswer
+																	}
+																>
+																	<FormLabel fontSize="sm" htmlFor="defaultAnswer" color="gray.700" fontWeight="400" >
+																		Default Answer
+																	</FormLabel>
+																	<Textarea
+																		{...field}
+																		rows={4}
+																		placeholder="I don't know how to answer that"
+																	/>
+																	<FormHelperText fontSize="sm">You can use this field to translate the default response or set custom prompts, such as 'Sorry, I don't know the answer to that. Please send an email to hi@example.com for assistance"</FormHelperText>
+
+																	<FormErrorMessage>
+																		{form.errors.defaultAnswer}
+																	</FormErrorMessage>
+																</FormControl>
+															)}
+														</Field>
 														<Field type="text" name="showReadMore">
 															{({ field, form }: any) => (
 																<FormControl mb="6">
