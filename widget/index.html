@@ -345,6 +345,7 @@
             const branding = document.getElementById('powered-by');
             const welcomeMsg = document.getElementById('chat-welcome-msg');
             const buttonElement = document.getElementById("chat-launcher-btn");
+            const chatInputElement = document.getElementById("chat-input");
 
             const defaultLauncherIcon = `<svg 
                 focusable="false" 
@@ -377,6 +378,10 @@
             }
             if (chatWidgetData.description) {
                 description.innerText = chatWidgetData.description;
+            }
+
+            if (chatWidgetData.chatInputPlaceholderText) {
+                chatInputElement.placeholder = chatWidgetData.chatInputPlaceholderText;
             }
 
             if (chatWidgetData.welcomeMessage) {
