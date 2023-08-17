@@ -103,7 +103,7 @@ export const ChatBotsCustomize = ({
 								<Box w="50%" h="100%" overflow="auto">
 									<Form style={{ width: '100%' }}>
 										<Box maxW="620px">
-											<Tabs variant='soft-rounded' colorScheme='gray' mt="1" size="sm">
+											<Tabs variant='soft-rounded' colorScheme='gray' mt="1" size="sm" p={1}>
 												<TabList>
 													<Tab>Content</Tab>
 													<Tab>Appearance</Tab>
