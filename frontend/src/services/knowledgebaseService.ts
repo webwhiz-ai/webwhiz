@@ -143,6 +143,24 @@ export async function addTrainingData(id: string, data): Promise<AxiosResponse<K
 		url: `/knowledgebase/${id}/datastore/custom_data`,
 	});
 }
+
+export async function addTrainingDocs(id: string, files: File[]): Promise<AxiosResponse<Knowledgebase>> {
+	const formData = new FormData();
+	files.forEach((file) => {
+		formData.append('file', file);
+	});
+	formData.append('knowledgebaseId', id);
+	return await axios({
+		baseURL: baseURL,
+		method: 'post',
+		data: formData,
+		url: `knowledgebase/importers/document`,
+		headers: {
+			'Content-Type': 'multipart/form-data',
+		},
+	});
+}
+
 export async function updateTrainingData(id: string, data): Promise<AxiosResponse<Knowledgebase>> {
 	return await axios({
 		baseURL: baseURL,
