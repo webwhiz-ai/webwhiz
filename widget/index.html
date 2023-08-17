@@ -382,7 +382,7 @@
             document.getElementById('chat-sample-messages').addEventListener('click', (e) => {
                 if (e.target.classList.contains('chat-sample-message')) {
                     const message = e.target.getAttribute('data-message') || e.target.innerText;
-                    document.getElementById('chat-input').value = message;
+                    addMessageToChat(message);
                 }
             });
 
@@ -476,10 +476,10 @@
         }
 
 
-        async function addMessageToChat() {
+        async function addMessageToChat(message) {
 
             const input = document.getElementById('chat-input');
-            const message = input.value.trim();
+            message = message || input.value.trim();
             if (!message) return;
 
             const newMessageUser = {
