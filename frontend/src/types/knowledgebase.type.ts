@@ -22,6 +22,7 @@ export interface WebsiteData {
     include: string[];
     urls: string[];
     name?: string;
+    files?: File[];
 }
 
 export interface CrawlDataDetail {
