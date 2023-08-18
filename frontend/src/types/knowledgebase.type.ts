@@ -69,6 +69,8 @@ export interface ChatBotCustomizeData {
     },
     launcherIcon: launcherIcon;
     chatInputPlaceholderText: string;
+    assistantTabHeader: string;
+    offlineMsgTabHeader: string;
 }
 export interface CrawlDataListPagination {
     pages: number;

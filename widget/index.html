@@ -373,6 +373,19 @@
                 branding.style.display = 'none';
             }
 
+            if(chatWidgetData.offlineMsgTabHeader) {
+                offlineMsgTab.innerText = chatWidgetData.offlineMsgTabHeader;
+            }
+
+            if(chatWidgetData.assistantTabHeader) {
+                aiAssistantTab.innerText = chatWidgetData.assistantTabHeader;
+
+                requestAnimationFrame(() => {
+                    const width = aiAssistantTab.offsetWidth;
+                    tabsActive.style.width = `${width - 5}px`;
+                });
+            }
+
             if (chatWidgetData.heading) {
                 heading.innerText = chatWidgetData.heading;
             }

@@ -196,6 +196,48 @@ export const ChatBotsCustomize = ({
 																</FormControl>
 															)}
 														</Field>
+														<Field type="text" name="assistantTabHeader">
+															{({ field, form }: any) => (
+																<FormControl
+																	mb="6"
+																	isInvalid={
+																		form.errors.assistantTabHeader && form.touched.assistantTabHeader
+																	}
+																>
+																	<FormLabel fontSize="sm" htmlFor="assistantTabHeader" color="gray.700" fontWeight="400" >
+																		Chat Input Placeholder Text
+																	</FormLabel>
+																	<Input
+																		{...field}
+																		placeholder={(defaultCustomizationValues || chatWidgetDefaultValues).assistantTabHeader}
+																	/>
+																	<FormErrorMessage>
+																		{form.errors.assistantTabHeader}
+																	</FormErrorMessage>
+																</FormControl>
+															)}
+														</Field>
+														<Field type="text" name="offlineMsgTabHeader">
+															{({ field, form }: any) => (
+																<FormControl
+																	mb="6"
+																	isInvalid={
+																		form.errors.offlineMsgTabHeader && form.touched.offlineMsgTabHeader
+																	}
+																>
+																	<FormLabel fontSize="sm" htmlFor="offlineMsgTabHeader" color="gray.700" fontWeight="400" >
+																		Chat Input Placeholder Text
+																	</FormLabel>
+																	<Input
+																		{...field}
+																		placeholder={(defaultCustomizationValues || chatWidgetDefaultValues).offlineMsgTabHeader}
+																	/>
+																	<FormErrorMessage>
+																		{form.errors.offlineMsgTabHeader}
+																	</FormErrorMessage>
+																</FormControl>
+															)}
+														</Field>
 														<Box className={styles.nestedFormCont} mt="8">
 															<Text className={styles.nestedFormHeading} fontSize="md" mb="4" pb="2" fontWeight="500" borderBottom={"1px solid"} borderBottomColor="gray.200">Sample Questions</Text>
 
