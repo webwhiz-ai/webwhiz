@@ -205,7 +205,7 @@ export const ChatBotsCustomize = ({
 																	}
 																>
 																	<FormLabel fontSize="sm" htmlFor="assistantTabHeader" color="gray.700" fontWeight="400" >
-																		Chat Input Placeholder Text
+																		Assistant Tab Header
 																	</FormLabel>
 																	<Input
 																		{...field}
@@ -226,7 +226,7 @@ export const ChatBotsCustomize = ({
 																	}
 																>
 																	<FormLabel fontSize="sm" htmlFor="offlineMsgTabHeader" color="gray.700" fontWeight="400" >
-																		Chat Input Placeholder Text
+																		Offline Message Tab Header
 																	</FormLabel>
 																	<Input
 																		{...field}
