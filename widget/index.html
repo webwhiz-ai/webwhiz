@@ -179,7 +179,7 @@
         let container = '';
 
         let showReadMore = true;
-
+        let readMoreText = 'Read More:';
 
         let sessionId = '';
 
@@ -406,6 +406,10 @@
                 chatWrap.classList.add('has-offline-message');
             }
 
+            if(chatWidgetData.readMoreText) {
+                readMoreText = chatWidgetData.readMoreText;
+            }
+
             var styleSheet = document.createElement('style');
 
             const styles = `
@@ -598,7 +602,7 @@
                                 const lastSegment = parts.pop() || parts.pop();
                                 return `<a href="${source.url}" target="_blank" class="chat-source-btn">${lastSegment}</a>`
                             }).join('');
-                            sourcesBtns = `<div class="chat-sources"><div class="chat-source-read-more">Read more:</div>${sourcesBtns}</div>`
+                            sourcesBtns = `<div class="chat-sources"><div class="chat-source-read-more">${readMoreText}</div>${sourcesBtns}</div>`
                         }
 
                         //data = data.replace(/\n/g, '<br/>')
