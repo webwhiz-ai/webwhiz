@@ -14,6 +14,7 @@ import {
   UserSparse,
   USER_COLLECTION,
 } from './user.schema';
+import { CustomKeyData } from '../knowledgebase/knowledgebase.schema';
 
 /**
  * Sanitise user objcect from sensitive info
@@ -261,7 +262,7 @@ export class UserService {
     return res;
   }
 
-  async setUserCustomKeys(id: ObjectId, keys: string[]) {
+  async setUserCustomKeys(id: ObjectId, keys: CustomKeyData) {
     const update: Partial<User> = {
       customKeys: keys,
       updatedAt: new Date(),

@@ -27,6 +27,7 @@ import {
   ChatQueryAnswer,
   ChatSession,
   ChatSessionSparse,
+  CustomKeyData,
   Knowledgebase,
   KnowledgebaseStatus,
 } from '../knowledgebase.schema';
@@ -173,7 +174,7 @@ export class ChatbotService {
   private async isUseUnderUsageLimits(
     userId: ObjectId,
     maxUsage: number,
-    customKeys?: Knowledgebase['customKeys'],
+    customKeys?: CustomKeyData,
   ): Promise<boolean> {
     // If there is a custom key configured for this knowledgebase
     // then by pass any token limit checks
@@ -475,11 +476,7 @@ export class ChatbotService {
       prompt,
       isDemo: kb.isDemo,
       subscriptionData: subscriptionPlan,
-      customKeys: this.customKeyService.mergeCustomKeysFromUserAndKb(
-        kb.customKeys?.useOwnKey,
-        user.customKeys,
-        kb.customKeys?.keys,
-      ),
+      customKeys: user.customKeys,
       userId: kb.owner,
       startedAt: new Date(),
       updatedAt: new Date(),

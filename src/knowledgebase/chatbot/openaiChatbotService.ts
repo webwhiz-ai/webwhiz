@@ -17,6 +17,7 @@ import {
   ChatQueryAnswer,
   Chunk,
   ChunkStatus,
+  CustomKeyData,
   Knowledgebase,
 } from '../knowledgebase.schema';
 import { PromptService } from '../prompt/prompt.service';
@@ -49,9 +50,7 @@ export class OpenaiChatbotService {
     this.logger = new Logger(OpenaiChatbotService.name);
   }
 
-  private getCustomKeys(
-    customKeys?: Knowledgebase['customKeys'],
-  ): string[] | undefined {
+  private getCustomKeys(customKeys?: CustomKeyData): string[] | undefined {
     if (!customKeys?.useOwnKey) return undefined;
 
     return this.customKeyService.decryptCustomKeys(customKeys?.keys);
@@ -76,10 +75,7 @@ export class OpenaiChatbotService {
    * @param chunk
    * @returns
    */
-  async getEmbeddingsForChunk(
-    chunk: Chunk,
-    customKeys?: Knowledgebase['customKeys'],
-  ) {
+  async getEmbeddingsForChunk(chunk: Chunk, customKeys?: CustomKeyData) {
     if (!chunk._id) {
       throw new Error('Invalid Chunk! No _id present');
     }
@@ -112,7 +108,7 @@ export class OpenaiChatbotService {
   async addEmbeddingsForChunk(
     kbId: ObjectId,
     chunk: Chunk,
-    customKeys?: Knowledgebase['customKeys'],
+    customKeys?: CustomKeyData,
   ) {
     const embeddings = await this.getEmbeddingsForChunk(chunk, customKeys);
 
@@ -131,7 +127,7 @@ export class OpenaiChatbotService {
   async updateEmbeddingsForChunk(
     kbId: ObjectId,
     chunk: Chunk,
-    customKeys?: Knowledgebase['customKeys'],
+    customKeys?: CustomKeyData,
   ) {
     const embeddings = await this.getEmbeddingsForChunk(chunk, customKeys);
 
@@ -153,7 +149,7 @@ export class OpenaiChatbotService {
     kbId: ObjectId,
     query: string,
     threshold = 0.0,
-    customKeys?: Knowledgebase['customKeys'],
+    customKeys?: CustomKeyData,
   ): Promise<ChunkForCompletion[]> {
     // Get embeddings for given query
     const queryEmbedding = await this.openaiService.getEmbedding(
@@ -324,7 +320,7 @@ export class OpenaiChatbotService {
     prevMessages: ChatQueryAnswer[],
     defaultAnswer: string | undefined,
     prompt: string | undefined,
-    customKeys: Knowledgebase['customKeys'],
+    customKeys: CustomKeyData,
     debug = false,
   ) {
     const messages = this.getChatGptPrompt(
@@ -366,7 +362,7 @@ export class OpenaiChatbotService {
     ) => Promise<void>,
     defaultAnswer: string | undefined,
     prompt: string | undefined,
-    customKeys?: Knowledgebase['customKeys'],
+    customKeys?: CustomKeyData,
   ) {
     const messages = this.getChatGptPrompt(
       chatbotName,
