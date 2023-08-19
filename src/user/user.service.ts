@@ -186,6 +186,7 @@ export class UserService {
           avatarUrl: 1,
           monthUsage: 1,
           activeSubscription: 1,
+          'customKeys.useOwnKey': 1,
         },
       },
     );
