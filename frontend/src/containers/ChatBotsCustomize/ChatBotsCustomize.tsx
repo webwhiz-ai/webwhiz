@@ -78,6 +78,11 @@ export const ChatBotsCustomize = ({
 		setMessage(value);
 	}, []);
 
+	const handleSwitchChange = React.useCallback((e: any, form) => {
+		const { checked, name } = e.target;
+		form.setFieldValue(name, checked);
+	}, []);
+
 	return (
 		<Flex h="100%" direction="column">
 			<VStack alignItems="start" w="100%">
@@ -192,48 +197,6 @@ export const ChatBotsCustomize = ({
 																	/>
 																	<FormErrorMessage>
 																		{form.errors.chatInputPlaceholderText}
-																	</FormErrorMessage>
-																</FormControl>
-															)}
-														</Field>
-														<Field type="text" name="assistantTabHeader">
-															{({ field, form }: any) => (
-																<FormControl
-																	mb="6"
-																	isInvalid={
-																		form.errors.assistantTabHeader && form.touched.assistantTabHeader
-																	}
-																>
-																	<FormLabel fontSize="sm" htmlFor="assistantTabHeader" color="gray.700" fontWeight="400" >
-																		Assistant Tab Header
-																	</FormLabel>
-																	<Input
-																		{...field}
-																		placeholder={(defaultCustomizationValues || chatWidgetDefaultValues).assistantTabHeader}
-																	/>
-																	<FormErrorMessage>
-																		{form.errors.assistantTabHeader}
-																	</FormErrorMessage>
-																</FormControl>
-															)}
-														</Field>
-														<Field type="text" name="offlineMsgTabHeader">
-															{({ field, form }: any) => (
-																<FormControl
-																	mb="6"
-																	isInvalid={
-																		form.errors.offlineMsgTabHeader && form.touched.offlineMsgTabHeader
-																	}
-																>
-																	<FormLabel fontSize="sm" htmlFor="offlineMsgTabHeader" color="gray.700" fontWeight="400" >
-																		Offline Message Tab Header
-																	</FormLabel>
-																	<Input
-																		{...field}
-																		placeholder={(defaultCustomizationValues || chatWidgetDefaultValues).offlineMsgTabHeader}
-																	/>
-																	<FormErrorMessage>
-																		{form.errors.offlineMsgTabHeader}
 																	</FormErrorMessage>
 																</FormControl>
 															)}
@@ -508,17 +471,63 @@ export const ChatBotsCustomize = ({
 																		<FormLabel fontWeight="400" fontSize="sm" color="gray.700" htmlFor="offlineMessage">
 																			Enable offline message
 																		</FormLabel>
-																		<Switch
-																			defaultChecked={(defaultCustomizationValues || chatWidgetDefaultValues).offlineMessage}
-																			{...field}
-																			colorScheme="teal"
-																			size="md"
-																			mr="2"
-																		/>
+																			<Switch
+																				{...field}
+																				defaultChecked={(defaultCustomizationValues || chatWidgetDefaultValues).offlineMessage}
+																				onChange={(event) => { handleSwitchChange(event, form) }}
+																				colorScheme="teal"
+																				size="md"
+																				mr="2"
+																			/>
 																	</Flex>
 																</FormControl>
 															)}
 														</Field>
+														{values.offlineMessage && (
+															<>
+																<Field type="text" name="assistantTabHeader">
+																	{({ field, form }: any) => (
+																		<FormControl
+																			mb="6"
+																			isInvalid={
+																				form.errors.assistantTabHeader && form.touched.assistantTabHeader
+																			}
+																		>
+																			<FormLabel fontSize="sm" htmlFor="assistantTabHeader" color="gray.700" fontWeight="400" >
+																				Assistant Tab Header
+																			</FormLabel>
+																			<Input
+																				{...field}
+																				placeholder={(defaultCustomizationValues || chatWidgetDefaultValues).assistantTabHeader}
+																			/>
+																			<FormErrorMessage>
+																				{form.errors.assistantTabHeader}
+																			</FormErrorMessage>
+																		</FormControl>
+																	)}
+																</Field>
+																<Field type="text" name="offlineMsgTabHeader">
+																	{({ field, form }: any) => (
+																		<FormControl
+																			mb="6"
+																			isInvalid={
+																				form.errors.offlineMsgTabHeader && form.touched.offlineMsgTabHeader
+																			}
+																		>
+																			<FormLabel fontSize="sm" htmlFor="offlineMsgTabHeader" color="gray.700" fontWeight="400" >
+																				Offline Message Tab Header
+																			</FormLabel>
+																			<Input
+																				{...field}
+																				placeholder={(defaultCustomizationValues || chatWidgetDefaultValues).offlineMsgTabHeader}
+																			/>
+																			<FormErrorMessage>
+																				{form.errors.offlineMsgTabHeader}
+																			</FormErrorMessage>
+																		</FormControl>
+																	)}
+																</Field></>
+														)}
 													</TabPanel>
 												</TabPanels>
 											</Tabs>
