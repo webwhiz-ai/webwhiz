@@ -537,14 +537,64 @@ export const ChatBotsCustomize = ({
 
 										<div className="chat-widget" style={{ borderRadius: values.borderRadius }}>
 											<div className="chat-header" style={{ backgroundColor: values.backgroundColor, color: values.fontColor }}>
-												<div className="chat-close">
-													<button className="chat-close-btn" id="chat-close-btn">
-														<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="feather feather-x">
-															<line x1="18" y1="6" x2="6" y2="18"></line>
-															<line x1="6" y1="6" x2="18" y2="18"></line>
-														</svg>
-													</button>
-												</div>
+												
+													<div className="chat-header-top" style={{ display: "flex", alignItems: "center", marginBottom: "12px" }}>
+														<div className="chat-tabs" id="chat-tabs"
+															style={{
+																marginTop: '-17px',
+																display: values.offlineMessage ? 'flex' : 'none',
+																position: 'relative',
+																backgroundColor: 'rgba(255, 255, 255, 0.2)',
+																borderRadius: '16px',
+															}}>
+															<button id="tab-ai-assistant"
+																style={{
+																	border: 'none',
+																	padding: '6px 10px',
+																	fontSize: '13px',
+																	borderRadius: '16px',
+																	cursor: 'pointer',
+																	position: 'relative',
+																	zIndex: 2,
+																}}>{values.assistantTabHeader}</button>
+															<button id="tab-offline-msg"
+																style={{
+																	border: 'none',
+																	padding: '6px 10px',
+																	fontSize: '13px',
+																	borderRadius: '16px',
+																	cursor: 'pointer',
+																	position: 'relative',
+																	zIndex: 2,
+																}}
+															>{values.offlineMsgTabHeader}</button>
+															<div className="tabs-active" id="tabs-active"
+																style={{
+																	zIndex: 1,
+																	position: 'absolute',
+																	top: '4px',
+																	bottom: '4px',
+																	left: '4px',
+																	backgroundColor: values.backgroundColor,
+																	width: '85px',
+																	borderRadius: '12px',
+																	transition: 'width 0.35s cubic-bezier(0.215, 0.61, 0.355, 1), left 0.35s cubic-bezier(0.215, 0.61, 0.355, 1)',
+																}}
+															></div>
+														</div>
+
+
+														<div className="chat-close">
+															<button className="chat-close-btn" id="chat-close-btn">
+																<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="feather feather-x">
+																	<line x1="18" y1="6" x2="6" y2="18"></line>
+																	<line x1="6" y1="6" x2="18" y2="18"></line>
+																</svg>
+															</button>
+														</div>
+													</div>
+
+												
 												<h2>
 													{values.heading}
 												</h2>
