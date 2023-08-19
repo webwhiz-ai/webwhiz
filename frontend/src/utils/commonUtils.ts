@@ -20,6 +20,7 @@ export const chatWidgetDefaultValues = {
   chatInputPlaceholderText: 'Type your message',
   assistantTabHeader: 'AI assistant',
   offlineMsgTabHeader: 'Offline message',
+  readMoreText: 'Read more:',
 	fontColor: "#FFF",
 	borderRadius: "12px",
 	placement: "right",

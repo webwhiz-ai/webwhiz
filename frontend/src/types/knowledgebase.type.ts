@@ -71,6 +71,7 @@ export interface ChatBotCustomizeData {
     chatInputPlaceholderText: string;
     assistantTabHeader: string;
     offlineMsgTabHeader: string;
+    readMoreText: string;
 }
 export interface CrawlDataListPagination {
     pages: number;

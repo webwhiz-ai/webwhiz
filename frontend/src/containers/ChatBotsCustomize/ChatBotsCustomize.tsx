@@ -453,8 +453,9 @@ export const ChatBotsCustomize = ({
 																			Show read more links
 																		</FormLabel>
 																		<Switch
-																			defaultChecked={(defaultCustomizationValues || chatWidgetDefaultValues).showReadMore}
 																			{...field}
+																			defaultChecked={(defaultCustomizationValues || chatWidgetDefaultValues).showReadMore}
+																			onChange={(event) => { handleSwitchChange(event, form) }}
 																			colorScheme="teal"
 																			size="md"
 																			mr="2"
@@ -463,6 +464,29 @@ export const ChatBotsCustomize = ({
 																</FormControl>
 															)}
 														</Field>
+														{values.showReadMore && (
+															<Field type="text" name="readMoreText">
+																{({ field, form }: any) => (
+																	<FormControl
+																		mb="6"
+																		isInvalid={
+																			form.errors.readMoreText && form.touched.readMoreText
+																		}
+																	>
+																		<FormLabel fontSize="sm" htmlFor="readMoreText" color="gray.700" fontWeight="400" >
+																			Read More Text
+																</FormLabel>
+																		<Input
+																			{...field}
+																			placeholder={(defaultCustomizationValues || chatWidgetDefaultValues).readMoreText}
+																		/>
+																		<FormErrorMessage>
+																			{form.errors.readMoreText}
+																		</FormErrorMessage>
+																	</FormControl>
+																)}
+															</Field>
+														)}
 														<Field type="text" name="offlineMessage">
 															{({ field, form }: any) => (
 																<FormControl mb="6">
