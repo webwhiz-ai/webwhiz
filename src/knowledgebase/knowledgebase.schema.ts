@@ -19,6 +19,11 @@ export enum KnowledgebaseStatus {
   READY = 'READY',
 }
 
+export interface CustomKeyData {
+  useOwnKey: boolean;
+  keys?: string[];
+}
+
 export interface Knowledgebase {
   _id?: ObjectId;
   name: string;
@@ -43,11 +48,6 @@ export interface Knowledgebase {
   // Custom prompt fields
   defaultAnswer?: string;
   prompt?: string;
-  // Custom key
-  customKeys?: {
-    useOwnKey: boolean;
-    keys?: string[];
-  };
 }
 
 export type KnowledgebaseSparse = Pick<
@@ -150,7 +150,7 @@ export interface ChatSession {
   isDemo?: boolean;
   src?: string;
   subscriptionData: SubscriptionPlanInfo;
-  customKeys?: Knowledgebase['customKeys'];
+  customKeys?: CustomKeyData;
   userId: ObjectId;
   messages: ChatQueryAnswer[];
   userData?: any;

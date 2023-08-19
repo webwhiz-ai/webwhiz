@@ -1,4 +1,5 @@
 import { ObjectId } from 'mongodb';
+import { CustomKeyData } from '../knowledgebase/knowledgebase.schema';
 
 /** **************************************************
  * TYPES
@@ -54,7 +55,7 @@ export interface User {
   activeSubscription: Subscription;
   subscriptionData?: SubscriptionData;
   // Custom keys
-  customKeys?: string[];
+  customKeys?: CustomKeyData;
   // Whitelabelling settings
   whitelabelling?: {
     removeBranding: boolean;

@@ -44,7 +44,10 @@ export class KnowledgebaseController {
     @Body() data: KbCustomKeysDTO,
   ) {
     const { user } = req;
-    return this.kbService.setUserCustomKeys(user, id, data.keys);
+    return this.kbService.setUserCustomKeys(user, id, {
+      useOwnKey: data.useOwnKey,
+      keys: data.keys,
+    });
   }
 
   /**
@@ -92,19 +95,6 @@ export class KnowledgebaseController {
   ) {
     const { user } = req;
     return this.kbService.setKnowledgebaseChatWidgeData(user, id, data);
-  }
-
-  /**
-   * Set Custom Keys for Knowledgebase
-   */
-  @Put('/:id/custom_keys')
-  async setCustomKeys(
-    @Req() req: RequestWithUser,
-    @Param('id') id: string,
-    @Body() data: KbCustomKeysDTO,
-  ) {
-    const { user } = req;
-    return this.kbService.setKnowledgebaseCustomKeys(user, id, data.keys);
   }
 
   /**

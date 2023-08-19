@@ -102,11 +102,7 @@ export class DataStoreService {
       await this.openaiChatbotService.addEmbeddingsForChunk(
         dsItem.knowledgebaseId,
         chunk,
-        this.customKeyService.mergeCustomKeysFromUserAndKb(
-          kb.customKeys?.useOwnKey,
-          user.customKeys,
-          kb.customKeys?.keys,
-        ),
+        user.customKeys,
       );
       console.log(`Added embedding for ${chunk.title}`);
     }

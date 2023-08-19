@@ -86,8 +86,11 @@ export class PromptDTO {
 }
 
 export class KbCustomKeysDTO {
+  @IsBoolean()
+  @IsNotEmpty()
+  useOwnKey: boolean;
+
   @IsArray()
-  @ArrayNotEmpty()
   @IsNotEmpty({ each: true })
   keys: string[];
 }

@@ -18,6 +18,7 @@ import {
   UpdateKnowledgebaseWebsiteDataDTO,
 } from './knowledgebase.dto';
 import {
+  CustomKeyData,
   DataStoreType,
   Knowledgebase,
   KnowledgebaseStatus,
@@ -322,11 +323,6 @@ export class KnowledgebaseService {
     const kb = await this.kbDbService.getKnowledgebaseById(new ObjectId(id));
     checkUserIsOwnerOfKb(user, kb);
 
-    // Remove custom keys if present
-    if (kb.customKeys?.keys) {
-      delete kb.customKeys.keys;
-    }
-
     // Set Default prompt if knowledgebase prompt is not defined
     if (!kb.prompt) {
       kb.prompt = DEFAULT_CHATGPT_PROMPT;
@@ -401,13 +397,13 @@ export class KnowledgebaseService {
     }
 
     const kbData = await this.kbDbService.getKnowledgebaseById(kbId);
-    const userData = await this.userService.getUserWhitelabelSettings(
-      kbData.owner,
+    const userData = await this.userService.findUserById(
+      kbData.owner.toHexString(),
     );
 
     const widgetData = {
       chatWidgeData: kbData.chatWidgeData,
-      customKey: kbData.customKeys?.useOwnKey,
+      customKey: userData.customKeys?.useOwnKey,
       whitelabelling: userData.whitelabelling,
     };
 
@@ -451,27 +447,17 @@ export class KnowledgebaseService {
     return 'Done';
   }
 
-  async setKnowledgebaseCustomKeys(
+  async setUserCustomKeys(
     user: UserSparse,
     id: string,
-    keys: string[],
+    keyData: CustomKeyData,
   ) {
-    const encryptedKeys = this.customKeyService.encryptCustomKeys(keys);
+    const encryptedKeys = this.customKeyService.encryptCustomKeys(keyData.keys);
 
-    const kbId = new ObjectId(id);
-    const kb = await this.kbDbService.getKnowledgebaseSparseById(kbId);
-    checkUserIsOwnerOfKb(user, kb);
-
-    await this.kbDbService.setKnowledgebaseCustomKeys(kbId, {
-      useOwnKey: true,
+    await this.userService.setUserCustomKeys(user._id, {
+      useOwnKey: keyData.useOwnKey,
       keys: encryptedKeys,
     });
-  }
-
-  async setUserCustomKeys(user: UserSparse, id: string, keys: string[]) {
-    const encryptedKeys = this.customKeyService.encryptCustomKeys(keys);
-
-    await this.userService.setUserCustomKeys(user._id, encryptedKeys);
   }
 
   async setKnowledgebaseAdminEmail(
