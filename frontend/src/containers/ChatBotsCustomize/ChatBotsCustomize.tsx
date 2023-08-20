@@ -19,6 +19,10 @@ import {
 	Radio,
 	RadioGroup,
 	ButtonGroup,
+	PopoverTrigger,
+	Popover,
+	Portal,
+	PopoverContent,
 } from "@chakra-ui/react";
 
 import { ErrorMessage, Field, FieldArray, Form, Formik } from "formik";
@@ -39,6 +43,9 @@ import LauncherIcon3 from "../../components/Icons/ChatBotLauncherIcons/LauncherI
 import LauncherIcon4 from "../../components/Icons/ChatBotLauncherIcons/LauncherIcon4";
 import LauncherIcon5 from "../../components/Icons/ChatBotLauncherIcons/LauncherIcon5";
 import { LauncherIconsSVGs } from "../../utils/LauncherIconSVGs";
+import { FiArrowRight } from "react-icons/fi";
+import { SketchPicker } from 'react-color';
+
 export function validateEmailAddress(email: string) {
 	return email && !/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(email);
 }
@@ -251,12 +258,26 @@ export const ChatBotsCustomize = ({
 																	<FormLabel fontWeight="400" fontSize="sm" color="gray.700" htmlFor="backgroundColor">
 																		Background color
 																	</FormLabel>
-																	<Input
-																		{...field}
-																		size="sm"
-																		id="backgroundColor"
-																		placeholder="#11141C"
-																	/>
+																	<Popover placement="right-start">
+																		<PopoverTrigger>
+																			<Button variant="outline" size="sm" colorScheme="blue"
+																				borderRadius="4px"
+																				p={2}
+																				rightIcon={<FiArrowRight/>}>
+																				<Box
+																					width="40px" 
+																					height="20px" 
+																					backgroundColor={field.value}
+																					borderWidth="2px"
+																				/>
+																			</Button>
+																		</PopoverTrigger>
+																		<Portal>
+																			<PopoverContent width="auto">
+																				<SketchPicker onChangeComplete={(color) => form.setFieldValue(field.name, color.hex)}/>
+																			</PopoverContent>
+																		</Portal>
+																		</Popover>
 																	<FormErrorMessage>
 																		{form.errors.backgroundColor}
 																	</FormErrorMessage>
