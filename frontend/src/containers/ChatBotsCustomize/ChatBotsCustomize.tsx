@@ -23,6 +23,11 @@ import {
 	Popover,
 	Portal,
 	PopoverContent,
+	Slider,
+	SliderMark,
+	SliderTrack,
+	SliderFilledTrack,
+	SliderThumb,
 } from "@chakra-ui/react";
 
 import { ErrorMessage, Field, FieldArray, Form, Formik } from "formik";
@@ -330,15 +335,35 @@ export const ChatBotsCustomize = ({
 																		form.errors.borderRadius && form.touched.borderRadius
 																	}
 																>
-																	<FormLabel fontWeight="400" fontSize="sm" color="gray.700" htmlFor="borderRadius">
+																	<FormLabel fontWeight="400" fontSize="sm" color="gray.700" htmlFor="borderRadius" mb={5}>
 																		Border radius
 																	</FormLabel>
-																	<Input
-																		{...field}
-																		size="sm"
-																		id="borderRadius"
-																		placeholder="0px"
-																	/>
+																	<Slider
+																		defaultValue={parseInt(field.value, 10)}
+																		w="50%"
+																		min={0} max={50} step={1}
+																		aria-label='slider-ex-6'
+																		onChange={(val) => form.setFieldValue(field.name, `${val}px`)}
+																	>
+																		<SliderMark
+																			fontSize='xs'
+																			rounded='full'
+																			value={parseInt(field.value, 10)}
+																			textAlign='center'
+																			bg='blue.500'
+																			color='white'
+																			mt='-8'
+																			ml='-5'
+																			w='12'
+																			hasArrow
+																		>
+																			{field.value}
+																		</SliderMark>
+																		<SliderTrack>
+																			<SliderFilledTrack />
+																		</SliderTrack>
+																		<SliderThumb bg="blue.500" />
+																	</Slider>
 																	<FormErrorMessage>
 																		{form.errors.borderRadius}
 																	</FormErrorMessage>
