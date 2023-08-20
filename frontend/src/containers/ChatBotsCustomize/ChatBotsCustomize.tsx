@@ -296,12 +296,26 @@ export const ChatBotsCustomize = ({
 																	<FormLabel fontWeight="400" fontSize="sm" color="gray.700" htmlFor="fontColor">
 																		Text color
 																	</FormLabel>
-																	<Input
-																		{...field}
-																		size="sm"
-																		id="fontColor"
-																		placeholder="#11141C"
-																	/>
+																	<Popover placement="right-start">
+																		<PopoverTrigger>
+																			<Button variant="outline" size="sm" colorScheme="blue"
+																				borderRadius="4px"
+																				p={2}
+																				rightIcon={<FiArrowRight/>}>
+																				<Box
+																					width="40px" 
+																					height="20px" 
+																					backgroundColor={field.value}
+																					borderWidth="2px"
+																				/>
+																			</Button>
+																		</PopoverTrigger>
+																		<Portal>
+																			<PopoverContent width="auto">
+																				<SketchPicker onChangeComplete={(color) => form.setFieldValue(field.name, color.hex)}/>
+																			</PopoverContent>
+																		</Portal>
+																		</Popover>
 																	<FormErrorMessage>
 																		{form.errors.fontColor}
 																	</FormErrorMessage>
