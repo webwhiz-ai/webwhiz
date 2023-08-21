@@ -368,7 +368,7 @@
             iconContainer.innerHTML = data?.launcherIcon?.svgElement || defaultLauncherIcon;
             buttonElement.appendChild(iconContainer);
 
-            if (chatWidgetData.hideBranding || data.whitelabelling?.removeBranding) {
+            if (data.customKey || chatWidgetData.hideBranding || data.whitelabelling?.removeBranding) {
                 branding.style.display = 'none';
             }
 
