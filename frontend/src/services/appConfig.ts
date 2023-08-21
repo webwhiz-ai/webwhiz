@@ -4,6 +4,9 @@ export interface User {
     email: string;
     id: number;
     activeSubscription: string;
+    customKeys: {
+        useOwnKey: boolean
+    },
     subscriptionData: {
         maxChatbots :number
         maxChunksPerPage :number

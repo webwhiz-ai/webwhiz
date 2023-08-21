@@ -127,6 +127,9 @@ export const App = (props: AppProps) => {
 							<Link to="/app/settings/subscription/">
 								<MenuItem fontSize="small">Subscription</MenuItem>
 							</Link>
+							<Link to="/app/settings/general/">
+								<MenuItem fontSize="small">Settings</MenuItem>
+							</Link>
 							<MenuDivider />
 							<MenuItem onClick={props.onLoginOut} fontSize="small">
 								Log Out
