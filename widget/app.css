@@ -852,6 +852,7 @@ a.chat-source-btn {
     cursor: pointer;
     position: relative;
     z-index: 2;
+    white-space: nowrap;
 }
 
 .chat-tabs {
