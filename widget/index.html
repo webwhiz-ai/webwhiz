@@ -179,7 +179,7 @@
         let container = '';
 
         let showReadMore = true;
-
+        let readMoreText = 'Read More:';
 
         let sessionId = '';
 
@@ -345,6 +345,7 @@
             const branding = document.getElementById('powered-by');
             const welcomeMsg = document.getElementById('chat-welcome-msg');
             const buttonElement = document.getElementById("chat-launcher-btn");
+            const chatInputElement = document.getElementById("chat-input");
 
             const defaultLauncherIcon = `<svg 
                 focusable="false" 
@@ -372,11 +373,28 @@
                 branding.style.display = 'none';
             }
 
+            if(chatWidgetData.offlineMsgTabHeader) {
+                offlineMsgTab.innerText = chatWidgetData.offlineMsgTabHeader;
+            }
+
+            if(chatWidgetData.assistantTabHeader) {
+                aiAssistantTab.innerText = chatWidgetData.assistantTabHeader;
+
+                requestAnimationFrame(() => {
+                    const width = aiAssistantTab.offsetWidth;
+                    tabsActive.style.width = `${width - 5}px`;
+                });
+            }
+
             if (chatWidgetData.heading) {
                 heading.innerText = chatWidgetData.heading;
             }
             if (chatWidgetData.description) {
                 description.innerText = chatWidgetData.description;
+            }
+
+            if (chatWidgetData.chatInputPlaceholderText) {
+                chatInputElement.placeholder = chatWidgetData.chatInputPlaceholderText;
             }
 
             if (chatWidgetData.welcomeMessage) {
@@ -386,6 +404,10 @@
             if (chatWidgetData.offlineMessage) {
                 const chatWrap = document.getElementById('chat-wrap');
                 chatWrap.classList.add('has-offline-message');
+            }
+
+            if(chatWidgetData.readMoreText) {
+                readMoreText = chatWidgetData.readMoreText;
             }
 
             var styleSheet = document.createElement('style');
@@ -580,7 +602,7 @@
                                 const lastSegment = parts.pop() || parts.pop();
                                 return `<a href="${source.url}" target="_blank" class="chat-source-btn">${lastSegment}</a>`
                             }).join('');
-                            sourcesBtns = `<div class="chat-sources"><div class="chat-source-read-more">Read more:</div>${sourcesBtns}</div>`
+                            sourcesBtns = `<div class="chat-sources"><div class="chat-source-read-more">${readMoreText}</div>${sourcesBtns}</div>`
                         }
 
                         //data = data.replace(/\n/g, '<br/>')

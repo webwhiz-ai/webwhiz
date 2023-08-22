@@ -52,3 +52,13 @@
 .chatSampleMessage:active {
     box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.08) inset;
 }
+.activeTab {
+    z-index: -1;
+    width: 100%;
+    position: absolute;
+    top: 4px;
+    bottom: 4px;
+    left: 4px;
+    border-radius: 12px;
+    transition: width 0.35s cubic-bezier(0.215, 0.61, 0.355, 1), left 0.35s cubic-bezier(0.215, 0.61, 0.355, 1),
+}
