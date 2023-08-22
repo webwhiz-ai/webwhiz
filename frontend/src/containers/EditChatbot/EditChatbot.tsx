@@ -575,6 +575,10 @@ const EditChatbot = (props: EditChatbotProps) => {
 			prompt: chatBot.prompt || chatWidgetDefaultValues.prompt,
 			defaultAnswer: chatBot.defaultAnswer || chatWidgetDefaultValues.defaultAnswer,
 			launcherIcon: chatBot.chatWidgeData?.launcherIcon || chatWidgetDefaultValues.launcherIcon,
+			chatInputPlaceholderText: chatBot.chatWidgeData?.chatInputPlaceholderText || chatWidgetDefaultValues.chatInputPlaceholderText,
+			assistantTabHeader: chatBot.chatWidgeData?.assistantTabHeader || chatWidgetDefaultValues.assistantTabHeader,
+			offlineMsgTabHeader: chatBot.chatWidgeData?.offlineMsgTabHeader || chatWidgetDefaultValues.offlineMsgTabHeader,
+			readMoreText: chatBot.chatWidgeData?.readMoreText || chatWidgetDefaultValues.readMoreText,
 		};
 	}, [chatBot]);
 

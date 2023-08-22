@@ -78,6 +78,11 @@ export const ChatBotsCustomize = ({
 		setMessage(value);
 	}, []);
 
+	const handleSwitchChange = React.useCallback((e: any, form) => {
+		const { checked, name } = e.target;
+		form.setFieldValue(name, checked);
+	}, []);
+
 	return (
 		<Flex h="100%" direction="column">
 			<VStack alignItems="start" w="100%">
@@ -103,7 +108,7 @@ export const ChatBotsCustomize = ({
 								<Box w="50%" h="100%" overflow="auto">
 									<Form style={{ width: '100%' }}>
 										<Box maxW="620px">
-											<Tabs variant='soft-rounded' colorScheme='gray' mt="1" size="sm">
+											<Tabs variant='soft-rounded' colorScheme='gray' mt="1" size="sm" p={1}>
 												<TabList>
 													<Tab>Content</Tab>
 													<Tab>Appearance</Tab>
@@ -171,6 +176,27 @@ export const ChatBotsCustomize = ({
 																	/>
 																	<FormErrorMessage>
 																		{form.errors.welcomeMessage}
+																	</FormErrorMessage>
+																</FormControl>
+															)}
+														</Field>
+														<Field type="text" name="chatInputPlaceholderText">
+															{({ field, form }: any) => (
+																<FormControl
+																	mb="6"
+																	isInvalid={
+																		form.errors.chatInputPlaceholderText && form.touched.chatInputPlaceholderText
+																	}
+																>
+																	<FormLabel fontSize="sm" htmlFor="chatInputPlaceholderText" color="gray.700" fontWeight="400" >
+																		Chat Input Placeholder Text
+																	</FormLabel>
+																	<Input
+																		{...field}
+																		placeholder={(defaultCustomizationValues || chatWidgetDefaultValues).chatInputPlaceholderText}
+																	/>
+																	<FormErrorMessage>
+																		{form.errors.chatInputPlaceholderText}
 																	</FormErrorMessage>
 																</FormControl>
 															)}
@@ -427,8 +453,9 @@ export const ChatBotsCustomize = ({
 																			Show read more links
 																		</FormLabel>
 																		<Switch
-																			defaultChecked={(defaultCustomizationValues || chatWidgetDefaultValues).showReadMore}
 																			{...field}
+																			defaultChecked={(defaultCustomizationValues || chatWidgetDefaultValues).showReadMore}
+																			onChange={(event) => { handleSwitchChange(event, form) }}
 																			colorScheme="teal"
 																			size="md"
 																			mr="2"
@@ -437,6 +464,29 @@ export const ChatBotsCustomize = ({
 																</FormControl>
 															)}
 														</Field>
+														{values.showReadMore && (
+															<Field type="text" name="readMoreText">
+																{({ field, form }: any) => (
+																	<FormControl
+																		mb="6"
+																		isInvalid={
+																			form.errors.readMoreText && form.touched.readMoreText
+																		}
+																	>
+																		<FormLabel fontSize="sm" htmlFor="readMoreText" color="gray.700" fontWeight="400" >
+																			Read More Text
+																</FormLabel>
+																		<Input
+																			{...field}
+																			placeholder={(defaultCustomizationValues || chatWidgetDefaultValues).readMoreText}
+																		/>
+																		<FormErrorMessage>
+																			{form.errors.readMoreText}
+																		</FormErrorMessage>
+																	</FormControl>
+																)}
+															</Field>
+														)}
 														<Field type="text" name="offlineMessage">
 															{({ field, form }: any) => (
 																<FormControl mb="6">
@@ -445,17 +495,63 @@ export const ChatBotsCustomize = ({
 																		<FormLabel fontWeight="400" fontSize="sm" color="gray.700" htmlFor="offlineMessage">
 																			Enable offline message
 																		</FormLabel>
-																		<Switch
-																			defaultChecked={(defaultCustomizationValues || chatWidgetDefaultValues).offlineMessage}
-																			{...field}
-																			colorScheme="teal"
-																			size="md"
-																			mr="2"
-																		/>
+																			<Switch
+																				{...field}
+																				defaultChecked={(defaultCustomizationValues || chatWidgetDefaultValues).offlineMessage}
+																				onChange={(event) => { handleSwitchChange(event, form) }}
+																				colorScheme="teal"
+																				size="md"
+																				mr="2"
+																			/>
 																	</Flex>
 																</FormControl>
 															)}
 														</Field>
+														{values.offlineMessage && (
+															<>
+																<Field type="text" name="assistantTabHeader">
+																	{({ field, form }: any) => (
+																		<FormControl
+																			mb="6"
+																			isInvalid={
+																				form.errors.assistantTabHeader && form.touched.assistantTabHeader
+																			}
+																		>
+																			<FormLabel fontSize="sm" htmlFor="assistantTabHeader" color="gray.700" fontWeight="400" >
+																				Assistant Tab Header
+																			</FormLabel>
+																			<Input
+																				{...field}
+																				placeholder={(defaultCustomizationValues || chatWidgetDefaultValues).assistantTabHeader}
+																			/>
+																			<FormErrorMessage>
+																				{form.errors.assistantTabHeader}
+																			</FormErrorMessage>
+																		</FormControl>
+																	)}
+																</Field>
+																<Field type="text" name="offlineMsgTabHeader">
+																	{({ field, form }: any) => (
+																		<FormControl
+																			mb="6"
+																			isInvalid={
+																				form.errors.offlineMsgTabHeader && form.touched.offlineMsgTabHeader
+																			}
+																		>
+																			<FormLabel fontSize="sm" htmlFor="offlineMsgTabHeader" color="gray.700" fontWeight="400" >
+																				Offline Message Tab Header
+																			</FormLabel>
+																			<Input
+																				{...field}
+																				placeholder={(defaultCustomizationValues || chatWidgetDefaultValues).offlineMsgTabHeader}
+																			/>
+																			<FormErrorMessage>
+																				{form.errors.offlineMsgTabHeader}
+																			</FormErrorMessage>
+																		</FormControl>
+																	)}
+																</Field></>
+														)}
 													</TabPanel>
 												</TabPanels>
 											</Tabs>
@@ -474,14 +570,51 @@ export const ChatBotsCustomize = ({
 
 										<div className="chat-widget" style={{ borderRadius: values.borderRadius }}>
 											<div className="chat-header" style={{ backgroundColor: values.backgroundColor, color: values.fontColor }}>
-												<div className="chat-close">
-													<button className="chat-close-btn" id="chat-close-btn">
-														<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="feather feather-x">
-															<line x1="18" y1="6" x2="6" y2="18"></line>
-															<line x1="6" y1="6" x2="18" y2="18"></line>
-														</svg>
-													</button>
-												</div>
+												
+													<div className="chat-header-top" style={{ display: "flex", alignItems: "center", marginBottom: "12px" }}>
+														<div className="chat-tabs" id="chat-tabs"
+															style={{
+																marginTop: '-17px',
+																display: values.offlineMessage ? 'flex' : 'none',
+																position: 'relative',
+																backgroundColor: 'rgba(255, 255, 255, 0.2)',
+																borderRadius: '16px',
+															}}>
+															<button id="tab-ai-assistant"
+																style={{
+																	border: 'none',
+																	padding: '6px 10px',
+																	fontSize: '13px',
+																	borderRadius: '16px',
+																	cursor: 'pointer',
+																	position: 'relative',
+																	zIndex: 2,
+																}}><div className={styles.activeTab} style={{backgroundColor: values.backgroundColor}}></div>{values.assistantTabHeader}</button>
+															<button id="tab-offline-msg"
+																style={{
+																	border: 'none',
+																	padding: '6px 10px',
+																	fontSize: '13px',
+																	borderRadius: '16px',
+																	cursor: 'pointer',
+																	position: 'relative',
+																	zIndex: 2,
+																}}
+															>{values.offlineMsgTabHeader}</button>
+														</div>
+
+
+														<div className="chat-close">
+															<button className="chat-close-btn" id="chat-close-btn">
+																<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="feather feather-x">
+																	<line x1="18" y1="6" x2="6" y2="18"></line>
+																	<line x1="6" y1="6" x2="18" y2="18"></line>
+																</svg>
+															</button>
+														</div>
+													</div>
+
+												
 												<h2>
 													{values.heading}
 												</h2>
@@ -506,7 +639,7 @@ export const ChatBotsCustomize = ({
 												</div>
 												<Box id="chat-form">
 													<div className="chat-input-wrap">
-														<textarea value={message} onChange={handleTextAreaChange} rows="1" className="chat-input textarea js-auto-size" id="chat-input" placeholder="Type your message" ></textarea>
+														<textarea value={message} onChange={handleTextAreaChange} rows="1" className="chat-input textarea js-auto-size" id="chat-input" placeholder={values.chatInputPlaceholderText} ></textarea>
 														<button className="chat-submit-btn"><svg width="16" height="16" fill="none" xmlns="http://www.w3.org/2000/svg">
 															<path fillRule="evenodd" clipRule="evenodd" d="M4.394 14.7L13.75 9.3c1-.577 1-2.02 0-2.598L4.394 1.299a1.5 1.5 0 00-2.25 1.3v3.438l4.059 1.088c.494.132.494.833 0 .966l-4.06 1.087v4.224a1.5 1.5 0 002.25 1.299z" style={{ fill: values.backgroundColor }}></path>
 														</svg></button>
