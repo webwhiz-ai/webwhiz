@@ -589,7 +589,7 @@ export const ChatBotsCustomize = ({
 																	cursor: 'pointer',
 																	position: 'relative',
 																	zIndex: 2,
-																}}>{values.assistantTabHeader}</button>
+																}}><div className={styles.activeTab} style={{backgroundColor: values.backgroundColor}}></div>{values.assistantTabHeader}</button>
 															<button id="tab-offline-msg"
 																style={{
 																	border: 'none',
@@ -601,19 +601,6 @@ export const ChatBotsCustomize = ({
 																	zIndex: 2,
 																}}
 															>{values.offlineMsgTabHeader}</button>
-															<div className="tabs-active" id="tabs-active"
-																style={{
-																	zIndex: 1,
-																	position: 'absolute',
-																	top: '4px',
-																	bottom: '4px',
-																	left: '4px',
-																	backgroundColor: values.backgroundColor,
-																	width: '85px',
-																	borderRadius: '12px',
-																	transition: 'width 0.35s cubic-bezier(0.215, 0.61, 0.355, 1), left 0.35s cubic-bezier(0.215, 0.61, 0.355, 1)',
-																}}
-															></div>
 														</div>
 
 
