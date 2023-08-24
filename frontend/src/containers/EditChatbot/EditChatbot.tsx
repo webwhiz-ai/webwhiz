@@ -377,52 +377,110 @@ const EditChatbot = (props: EditChatbotProps) => {
 
 
 
-		return <>
-			<Box className={styles.codeBlock}>
-				<span style={{ color: '#808080' }}>&lt;<span style={{ color: '#ed6a43' }}>script</span>
-					<span style={{ color: '#0086b3' }}> id</span>=<span style={{ color: '#183691' }}>"__webwhizSdk__"</span>
+		return <VStack spacing={12} alignItems="start">
+			<VStack alignItems="start">
+				<Heading fontSize="md">Chatbot with Launcher Icon</Heading>
+				<Text color="gray.500" fontSize="sm">A launcher icon will be displayed at the corner of your website. Once clicked, the full chat interface will appear.</Text>
+				<Box className={styles.codeBlock}>
+					<span style={{ color: '#808080' }}>&lt;<span style={{ color: '#ed6a43' }}>script</span>
+						<span style={{ color: '#0086b3' }}> id</span>=<span style={{ color: '#183691' }}>"__webwhizSdk__"</span><span style={{ color: '#0086b3', paddingLeft: '4px' }}> chatbotId</span>=<span style={{ color: '#183691' }}>"{chatBot._id}"</span>
+						<br></br>
+						<span style={{ color: '#0086b3', paddingLeft: '20px' }}> src</span>=<span style={{ color: '#183691' }}>"https://widget.webwhiz.ai/webwhiz-sdk.js"</span>
+						&gt;</span>
 					<br></br>
-					<span style={{ color: '#0086b3', paddingLeft: '20px' }}> src</span>=<span style={{ color: '#183691' }}>"https://widget.webwhiz.ai/webwhiz-sdk.js"</span>
+					<span style={{ color: '#808080' }}>&lt;/<span style={{ color: '#ed6a43' }}>script</span>&gt;</span>
+				</Box>
+				<HStack mt="6">
+					<Button
+						colorScheme="blue"
+						variant="solid"
+						size="sm"
+						isLoading={isSubmitting}
+						isDisabled={isSubmitting}
+						onClick={() => {
+							navigator.clipboard.writeText(
+								`<script id="__webwhizSdk__" src="https://widget.webwhiz.ai/webwhiz-sdk.js" chatbotId="${chatBot._id}"></script>`
+							);
+							toast({
+								title: `Copied to Clipboard`,
+								status: "info",
+								isClosable: true,
+							});
+						}}
+					>
+						Copy code
+					</Button>
+				</HStack>
+			</VStack>
+			<VStack alignItems="start">
+				<Heading fontSize="md">Embedded Chat Interface (No Launcher)</Heading>
+				<Text color="gray.500" fontSize="sm">Chat interface is permanently displayed on your web page without a launcher icon.</Text>
+				<Box className={styles.codeBlock}>
+					<span style={{ color: '#808080' }}>&lt;<span style={{ color: '#ed6a43' }}>iframe</span>
+						<span style={{ color: '#0086b3', paddingLeft: '4px' }}> width</span>=<span style={{ color: '#183691' }}>"500px"</span>
+						<span style={{ color: '#0086b3', paddingLeft: '4px' }}> height</span>=<span style={{ color: '#183691' }}>"700px"</span>
+						<span style={{ color: '#0086b3', paddingLeft: '4px' }}> frameborder</span>=<span style={{ color: '#183691' }}>"0"</span>
+						<br></br>
+						<span style={{ color: '#0086b3', paddingLeft: '20px' }}> src</span>=<span style={{ color: '#183691' }}>"https://widget.webwhiz.ai/?kbId={chatBot._id}&embed=true&hide-chat-actions=true"</span>
+						&gt;</span>
 					<br></br>
-					<span style={{ color: '#0086b3', paddingLeft: '20px' }}> chatbotId</span>=<span style={{ color: '#183691' }}>"{chatBot._id}"</span>
-					&gt;</span>
-				<br></br>
-				<span style={{ color: '#808080' }}>&lt;/<span style={{ color: '#ed6a43' }}>script</span>&gt;</span>
-			</Box>
-			{/* <Code p="4" shadow="sm" mt="12" borderRadius="md">
-						<pre>
-								&lt;script
-								id="__webwhizSdk__" 
-								src="https://widget.webwhiz.ai/webwhiz-sdk.js" 
-								chatbotId="{chatBot._id}"&gt;
-								&lt;/script&gt;
-						</pre>
-						</Code> */}
-			<HStack mt="6">
-				<Link to="/app/chat-bots/">
-					<Button size="sm" variant="outline">View ChatBots</Button>
-				</Link>
-				<Button
-					colorScheme="blue"
-					variant="solid"
-					size="sm"
-					isLoading={isSubmitting}
-					isDisabled={isSubmitting}
-					onClick={() => {
-						navigator.clipboard.writeText(
-							`<script id="__webwhizSdk__" src="https://widget.webwhiz.ai/webwhiz-sdk.js" chatbotId="${chatBot._id}"></script>`
-						);
-						toast({
-							title: `Copied to Clipboard`,
-							status: "info",
-							isClosable: true,
-						});
-					}}
-				>
-					Copy code
-				</Button>
-			</HStack>
-		</>
+					<span style={{ color: '#808080' }}>&lt;/<span style={{ color: '#ed6a43' }}>iframe</span>&gt;</span>
+				</Box>
+				<HStack mt="6">
+					<Button
+						colorScheme="blue"
+						variant="solid"
+						size="sm"
+						isLoading={isSubmitting}
+						isDisabled={isSubmitting}
+						onClick={() => {
+							navigator.clipboard.writeText(
+								`<iframe width="500px" height="700px" frameborder="0"
+								src="https://widget.webwhiz.ai/?kbId=${chatBot._id}&embed=true&hide-chat-actions=true">
+								</iframe>`
+							);
+							toast({
+								title: `Copied to Clipboard`,
+								status: "info",
+								isClosable: true,
+							});
+						}}
+					>
+						Copy code
+					</Button>
+				</HStack>
+			</VStack>
+			<VStack alignItems="start">
+				<Heading fontSize="md">Public Link to Chat Interface</Heading>
+				<Text color="gray.500" fontSize="sm">
+					Share the chat interface with anyone with the below unique link.
+				</Text>
+				<Box className={styles.codeBlock}>
+					<span style={{color: '#0086b3'}}>https://widget.webwhiz.ai/?kbId={chatBot._id}&embed=true&hide-chat-actions=true</span>
+				</Box>
+				<HStack mt="6">
+					<Button
+						colorScheme="blue"
+						variant="solid"
+						size="sm"
+						isLoading={isSubmitting}
+						isDisabled={isSubmitting}
+						onClick={() => {
+							navigator.clipboard.writeText(
+								`https://widget.webwhiz.ai/?kbId=${chatBot._id}&embed=true&hide-chat-actions=true`
+							);
+							toast({
+								title: `Copied to Clipboard`,
+								status: "info",
+								isClosable: true,
+							});
+						}}
+					>
+						Copy link
+					</Button>
+				</HStack>
+			</VStack>
+		</VStack>
 
 	}, [chatBot._id, isSubmitting, toast]);
 
@@ -765,8 +823,8 @@ const EditChatbot = (props: EditChatbotProps) => {
 					}}
 					h="100%" overflow="auto"
 				>
-					<SectionTitle title="Add to your website" description="Add the below script to your site to embed chatbot." />
-					<Flex direction="column" >
+					<SectionTitle title="Add to your website" description="Choose any of the below options to add the chatbot to your website." />
+					<Flex direction="column" alignItems="start">
 						{getAddToWebsiteContent()}
 					</Flex>
 				</Flex>
