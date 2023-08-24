@@ -1,7 +1,7 @@
 <html lang="en">
 
 <head>
-    <title>webWhiz Live Chat</title>
+    <title>WebWhiz Live Chat</title>
     <base target="_parent">
     <link rel="stylesheet" href="app.css">
 </head>
@@ -188,6 +188,14 @@
         const urlParams = new URLSearchParams(window.location.search);
         const knowledgebaseId = urlParams.get('kbId');
         const baseURL = urlParams.get('baseUrl');
+        const chatWidget = document.querySelector('.chat-wrap');
+
+        if(urlParams.get('embed') === 'true') {
+            chatWidget.classList.add('widget-open');
+        } 
+        if(urlParams.get('hide-chat-actions') === 'true') {
+            chatWidget.classList.add('hide-chat-actions');
+        }
 
         /**
          * Iframe communications
@@ -275,7 +283,6 @@
         const chatMaximizeBtn = document.querySelector('#chat-maximize-btn');
         const chatMinimizeBtn = document.querySelector('#chat-minimize-btn');
         const chatClearHistoryBtn = document.querySelector('#chat-clear-session-btn');
-        const chatWidget = document.querySelector('.chat-wrap');
         chatLauncherBtn.addEventListener('click', () => {
             chatWidget.classList.add('widget-open');
 
