@@ -473,6 +473,9 @@ form#chat-form {
 .chat-actions-btn:hover {
     opacity: 1;
 }
+.hide-chat-actions .chat-actions{
+    display: none;
+}
 
 .chat-minimize-btn {
     display: none;
