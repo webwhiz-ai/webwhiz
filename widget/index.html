@@ -187,7 +187,7 @@
 
         const urlParams = new URLSearchParams(window.location.search);
         const knowledgebaseId = urlParams.get('kbId');
-        const baseURL = urlParams.get('baseUrl');
+        const baseURL = urlParams.get('baseUrl') || 'https://api.webwhiz.ai';
         const chatWidget = document.querySelector('.chat-wrap');
 
         if(urlParams.get('embed') === 'true') {
