@@ -82,6 +82,9 @@ export const ChatBotsCustomize = ({
 	const handleSwitchChange = React.useCallback((e: any, form) => {
 		const { checked, name } = e.target;
 		form.setFieldValue(name, checked);
+		if(name === 'offlineMessage' && !checked){
+			setSelectedTab(0);
+		}
 	}, []);
 
 	return (
