@@ -570,6 +570,7 @@ export const ChatBotsCustomize = ({
 																	<Input
 																		{...field}
 																		placeholder={(defaultCustomizationValues || chatWidgetDefaultValues).offlineMsgHeading}
+																		isDisabled={!values.offlineMessage}
 																	/>
 																	<FormErrorMessage>
 																		{form.errors.headinofflineMsgHeadingg}
@@ -593,6 +594,7 @@ export const ChatBotsCustomize = ({
 																		{...field}
 																		rows={2}
 																		placeholder={(defaultCustomizationValues || chatWidgetDefaultValues).offlineMsgDescription}
+																		isDisabled={!values.offlineMessage}
 																	/>
 																	<FormErrorMessage>
 																		{form.errors.offlineMsgDescription}
