@@ -638,6 +638,7 @@ const EditChatbot = (props: EditChatbotProps) => {
 			offlineMsgTabHeader: chatBot.chatWidgeData?.offlineMsgTabHeader || chatWidgetDefaultValues.offlineMsgTabHeader,
 			readMoreText: chatBot.chatWidgeData?.readMoreText || chatWidgetDefaultValues.readMoreText,
 			offlineMsgHeading: chatBot.chatWidgeData?.offlineMsgHeading || chatWidgetDefaultValues.offlineMsgHeading,
+			offlineMsgDescription: chatBot.chatWidgeData?.offlineMsgDescription || chatWidgetDefaultValues.offlineMsgDescription,
 		};
 	}, [chatBot]);
 

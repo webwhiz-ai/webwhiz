@@ -73,6 +73,7 @@ export interface ChatBotCustomizeData {
     offlineMsgTabHeader: string;
     readMoreText: string;
     offlineMsgHeading: string;
+    offlineMsgDescription: string;
 }
 export interface CrawlDataListPagination {
     pages: number;

@@ -350,6 +350,7 @@
             const heading = document.getElementById('chat-heading');
             const description = document.getElementById('chat-description');
             const offlineMsgHeading = document.getElementById('offline-message-heading');
+            const offlineMsgDescription = document.getElementById('offline-message-description');
             const branding = document.getElementById('powered-by');
             const welcomeMsg = document.getElementById('chat-welcome-msg');
             const buttonElement = document.getElementById("chat-launcher-btn");
@@ -420,6 +421,10 @@
 
             if(chatWidgetData.offlineMsgHeading) {
                 offlineMsgHeading.innerText = chatWidgetData.offlineMsgHeading;
+            }
+
+            if(chatWidgetData.offlineMsgDescription) {
+                offlineMsgDescription.innerText = chatWidgetData.offlineMsgDescription;
             }
 
             var styleSheet = document.createElement('style');

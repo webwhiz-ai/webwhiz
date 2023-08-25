@@ -37,6 +37,7 @@ export const chatWidgetDefaultValues = {
     svgElement: LauncherIconsSVGs.get('icon1') 
   },
   offlineMsgHeading: "Offlne message",
+  offlineMsgDescription: "Please fill out the form below and we will get back to you as soon as possible.",
 };
 
 

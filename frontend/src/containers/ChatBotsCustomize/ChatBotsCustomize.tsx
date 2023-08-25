@@ -490,7 +490,7 @@ export const ChatBotsCustomize = ({
 														)}
 													</TabPanel>
 													<TabPanel>
-													<Field type="text" name="offlineMessage">
+														<Field type="text" name="offlineMessage">
 															{({ field, form }: any) => (
 																<FormControl mb="6">
 																	<Flex justifyContent="space-between" w="100%" alignItems="center">
@@ -573,6 +573,29 @@ export const ChatBotsCustomize = ({
 																	/>
 																	<FormErrorMessage>
 																		{form.errors.headinofflineMsgHeadingg}
+																	</FormErrorMessage>
+																</FormControl>
+															)}
+														</Field>
+
+														<Field type="text" name="offlineMsgDescription">
+															{({ field, form }: any) => (
+																<FormControl
+																	mb="6"
+																	isInvalid={
+																		form.errors.offlineMsgDescription && form.touched.offlineMsgDescription
+																	}
+																>
+																	<FormLabel fontSize="sm" htmlFor="offlineMsgDescription" color="gray.700" fontWeight="400" >
+																		Description
+																	</FormLabel>
+																	<Textarea
+																		{...field}
+																		rows={2}
+																		placeholder={(defaultCustomizationValues || chatWidgetDefaultValues).offlineMsgDescription}
+																	/>
+																	<FormErrorMessage>
+																		{form.errors.offlineMsgDescription}
 																	</FormErrorMessage>
 																</FormControl>
 															)}
