@@ -555,6 +555,28 @@ export const ChatBotsCustomize = ({
 																</FormControl>
 															)}
 														</Field>
+
+														<Field type="text" name="offlineMsgHeading">
+															{({ field, form }: any) => (
+																<FormControl
+																	mb="6"
+																	isInvalid={
+																		form.errors.offlineMsgHeading && form.touched.offlineMsgHeading
+																	}
+																>
+																	<FormLabel fontSize="sm" htmlFor="offlineMsgHeading" color="gray.700" fontWeight="400" >
+																		Heading
+																	</FormLabel>
+																	<Input
+																		{...field}
+																		placeholder={(defaultCustomizationValues || chatWidgetDefaultValues).offlineMsgHeading}
+																	/>
+																	<FormErrorMessage>
+																		{form.errors.headinofflineMsgHeadingg}
+																	</FormErrorMessage>
+																</FormControl>
+															)}
+														</Field>
 													</TabPanel>
 												</TabPanels>
 											</Tabs>

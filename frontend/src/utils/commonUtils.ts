@@ -35,7 +35,8 @@ export const chatWidgetDefaultValues = {
   launcherIcon: { 
     id: 'icon1', 
     svgElement: LauncherIconsSVGs.get('icon1') 
-  }
+  },
+  offlineMsgHeading: "Offlne message",
 };
 
 
