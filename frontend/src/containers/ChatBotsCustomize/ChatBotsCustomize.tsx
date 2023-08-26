@@ -493,7 +493,7 @@ export const ChatBotsCustomize = ({
 															</Field>
 														)}
 													</TabPanel>
-													<TabPanel>
+													<TabPanel  pt="8">
 														<Field type="text" name="offlineMessage">
 															{({ field, form }: any) => (
 																<FormControl mb="6">
