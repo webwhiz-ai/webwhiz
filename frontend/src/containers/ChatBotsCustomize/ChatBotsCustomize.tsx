@@ -19,6 +19,15 @@ import {
 	Radio,
 	RadioGroup,
 	ButtonGroup,
+	PopoverTrigger,
+	Popover,
+	Portal,
+	PopoverContent,
+	Slider,
+	SliderMark,
+	SliderTrack,
+	SliderFilledTrack,
+	SliderThumb,
 } from "@chakra-ui/react";
 
 import { ErrorMessage, Field, FieldArray, Form, Formik } from "formik";
@@ -39,6 +48,9 @@ import LauncherIcon3 from "../../components/Icons/ChatBotLauncherIcons/LauncherI
 import LauncherIcon4 from "../../components/Icons/ChatBotLauncherIcons/LauncherIcon4";
 import LauncherIcon5 from "../../components/Icons/ChatBotLauncherIcons/LauncherIcon5";
 import { LauncherIconsSVGs } from "../../utils/LauncherIconSVGs";
+import { FiArrowRight } from "react-icons/fi";
+import { SketchPicker } from 'react-color';
+
 export function validateEmailAddress(email: string) {
 	return email && !/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(email);
 }
@@ -277,12 +289,26 @@ export const ChatBotsCustomize = ({
 																	<FormLabel fontWeight="400" fontSize="sm" color="gray.700" htmlFor="backgroundColor">
 																		Background color
 																	</FormLabel>
-																	<Input
-																		{...field}
-																		size="sm"
-																		id="backgroundColor"
-																		placeholder="#11141C"
-																	/>
+																	<Popover placement="right-start">
+																		<PopoverTrigger>
+																			<Button variant="outline" size="sm" colorScheme="blue"
+																				borderRadius="4px"
+																				p={2}
+																				rightIcon={<FiArrowRight/>}>
+																				<Box
+																					width="40px" 
+																					height="20px" 
+																					backgroundColor={field.value}
+																					borderWidth="2px"
+																				/>
+																			</Button>
+																		</PopoverTrigger>
+																		<Portal>
+																			<PopoverContent width="auto">
+																				<SketchPicker onChangeComplete={(color) => form.setFieldValue(field.name, color.hex)}/>
+																			</PopoverContent>
+																		</Portal>
+																		</Popover>
 																	<FormErrorMessage>
 																		{form.errors.backgroundColor}
 																	</FormErrorMessage>
@@ -301,12 +327,26 @@ export const ChatBotsCustomize = ({
 																	<FormLabel fontWeight="400" fontSize="sm" color="gray.700" htmlFor="fontColor">
 																		Text color
 																	</FormLabel>
-																	<Input
-																		{...field}
-																		size="sm"
-																		id="fontColor"
-																		placeholder="#11141C"
-																	/>
+																	<Popover placement="right-start">
+																		<PopoverTrigger>
+																			<Button variant="outline" size="sm" colorScheme="blue"
+																				borderRadius="4px"
+																				p={2}
+																				rightIcon={<FiArrowRight/>}>
+																				<Box
+																					width="40px" 
+																					height="20px" 
+																					backgroundColor={field.value}
+																					borderWidth="2px"
+																				/>
+																			</Button>
+																		</PopoverTrigger>
+																		<Portal>
+																			<PopoverContent width="auto">
+																				<SketchPicker onChangeComplete={(color) => form.setFieldValue(field.name, color.hex)}/>
+																			</PopoverContent>
+																		</Portal>
+																		</Popover>
 																	<FormErrorMessage>
 																		{form.errors.fontColor}
 																	</FormErrorMessage>
@@ -321,15 +361,35 @@ export const ChatBotsCustomize = ({
 																		form.errors.borderRadius && form.touched.borderRadius
 																	}
 																>
-																	<FormLabel fontWeight="400" fontSize="sm" color="gray.700" htmlFor="borderRadius">
+																	<FormLabel fontWeight="400" fontSize="sm" color="gray.700" htmlFor="borderRadius" mb={5}>
 																		Border radius
 																	</FormLabel>
-																	<Input
-																		{...field}
-																		size="sm"
-																		id="borderRadius"
-																		placeholder="0px"
-																	/>
+																	<Slider
+																		defaultValue={parseInt(field.value, 10)}
+																		w="50%"
+																		min={0} max={50} step={1}
+																		aria-label='slider-ex-6'
+																		onChange={(val) => form.setFieldValue(field.name, `${val}px`)}
+																	>
+																		<SliderMark
+																			fontSize='xs'
+																			rounded='full'
+																			value={parseInt(field.value, 10)}
+																			textAlign='center'
+																			bg='blue.500'
+																			color='white'
+																			mt='-8'
+																			ml='-5'
+																			w='12'
+																			hasArrow
+																		>
+																			{field.value}
+																		</SliderMark>
+																		<SliderTrack>
+																			<SliderFilledTrack />
+																		</SliderTrack>
+																		<SliderThumb bg="blue.500" />
+																	</Slider>
 																	<FormErrorMessage>
 																		{form.errors.borderRadius}
 																	</FormErrorMessage>
