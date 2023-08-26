@@ -72,6 +72,7 @@ export const ChatBotsCustomize = ({
 }: ChatBotsCustomizeProps) => {
 
 	const [message, setMessage] = React.useState("");
+	const [selectedTab, setSelectedTab] = React.useState<number>(0);
 
 	const handleTextAreaChange = React.useCallback((e: any) => {
 		const { value } = e.target;
@@ -81,6 +82,9 @@ export const ChatBotsCustomize = ({
 	const handleSwitchChange = React.useCallback((e: any, form) => {
 		const { checked, name } = e.target;
 		form.setFieldValue(name, checked);
+		if(name === 'offlineMessage' && !checked){
+			setSelectedTab(0);
+		}
 	}, []);
 
 	return (
@@ -113,6 +117,7 @@ export const ChatBotsCustomize = ({
 													<Tab>Content</Tab>
 													<Tab>Appearance</Tab>
 													<Tab>Advanced</Tab>
+													<Tab>Offline Message</Tab>
 												</TabList>
 												<TabPanels>
 													<TabPanel pt="8">
@@ -487,6 +492,8 @@ export const ChatBotsCustomize = ({
 																)}
 															</Field>
 														)}
+													</TabPanel>
+													<TabPanel  pt="8">
 														<Field type="text" name="offlineMessage">
 															{({ field, form }: any) => (
 																<FormControl mb="6">
@@ -507,51 +514,98 @@ export const ChatBotsCustomize = ({
 																</FormControl>
 															)}
 														</Field>
-														{values.offlineMessage && (
-															<>
-																<Field type="text" name="assistantTabHeader">
-																	{({ field, form }: any) => (
-																		<FormControl
-																			mb="6"
-																			isInvalid={
-																				form.errors.assistantTabHeader && form.touched.assistantTabHeader
-																			}
-																		>
-																			<FormLabel fontSize="sm" htmlFor="assistantTabHeader" color="gray.700" fontWeight="400" >
-																				Assistant Tab Header
-																			</FormLabel>
-																			<Input
-																				{...field}
-																				placeholder={(defaultCustomizationValues || chatWidgetDefaultValues).assistantTabHeader}
-																			/>
-																			<FormErrorMessage>
-																				{form.errors.assistantTabHeader}
-																			</FormErrorMessage>
-																		</FormControl>
-																	)}
-																</Field>
-																<Field type="text" name="offlineMsgTabHeader">
-																	{({ field, form }: any) => (
-																		<FormControl
-																			mb="6"
-																			isInvalid={
-																				form.errors.offlineMsgTabHeader && form.touched.offlineMsgTabHeader
-																			}
-																		>
-																			<FormLabel fontSize="sm" htmlFor="offlineMsgTabHeader" color="gray.700" fontWeight="400" >
-																				Offline Message Tab Header
-																			</FormLabel>
-																			<Input
-																				{...field}
-																				placeholder={(defaultCustomizationValues || chatWidgetDefaultValues).offlineMsgTabHeader}
-																			/>
-																			<FormErrorMessage>
-																				{form.errors.offlineMsgTabHeader}
-																			</FormErrorMessage>
-																		</FormControl>
-																	)}
-																</Field></>
-														)}
+
+														<Field type="text" name="assistantTabHeader">
+															{({ field, form }: any) => (
+																<FormControl
+																	mb="6"
+																	isInvalid={
+																		form.errors.assistantTabHeader && form.touched.assistantTabHeader
+																	}
+																>
+																	<FormLabel fontSize="sm" htmlFor="assistantTabHeader" color="gray.700" fontWeight="400" >
+																		Assistant Tab Header
+																		</FormLabel>
+																	<Input
+																		{...field}
+																		placeholder={(defaultCustomizationValues || chatWidgetDefaultValues).assistantTabHeader}
+																		isDisabled={!values.offlineMessage}
+																	/>
+																	<FormErrorMessage>
+																		{form.errors.assistantTabHeader}
+																	</FormErrorMessage>
+																</FormControl>
+															)}
+														</Field>
+														<Field type="text" name="offlineMsgTabHeader">
+															{({ field, form }: any) => (
+																<FormControl
+																	mb="6"
+																	isInvalid={
+																		form.errors.offlineMsgTabHeader && form.touched.offlineMsgTabHeader
+																	}
+																>
+																	<FormLabel fontSize="sm" htmlFor="offlineMsgTabHeader" color="gray.700" fontWeight="400" >
+																		Offline Message Tab Header
+																		</FormLabel>
+																	<Input
+																		{...field}
+																		placeholder={(defaultCustomizationValues || chatWidgetDefaultValues).offlineMsgTabHeader}
+																		isDisabled={!values.offlineMessage}
+																	/>
+																	<FormErrorMessage>
+																		{form.errors.offlineMsgTabHeader}
+																	</FormErrorMessage>
+																</FormControl>
+															)}
+														</Field>
+
+														<Field type="text" name="offlineMsgHeading">
+															{({ field, form }: any) => (
+																<FormControl
+																	mb="6"
+																	isInvalid={
+																		form.errors.offlineMsgHeading && form.touched.offlineMsgHeading
+																	}
+																>
+																	<FormLabel fontSize="sm" htmlFor="offlineMsgHeading" color="gray.700" fontWeight="400" >
+																		Heading
+																	</FormLabel>
+																	<Input
+																		{...field}
+																		placeholder={(defaultCustomizationValues || chatWidgetDefaultValues).offlineMsgHeading}
+																		isDisabled={!values.offlineMessage}
+																	/>
+																	<FormErrorMessage>
+																		{form.errors.headinofflineMsgHeadingg}
+																	</FormErrorMessage>
+																</FormControl>
+															)}
+														</Field>
+
+														<Field type="text" name="offlineMsgDescription">
+															{({ field, form }: any) => (
+																<FormControl
+																	mb="6"
+																	isInvalid={
+																		form.errors.offlineMsgDescription && form.touched.offlineMsgDescription
+																	}
+																>
+																	<FormLabel fontSize="sm" htmlFor="offlineMsgDescription" color="gray.700" fontWeight="400" >
+																		Description
+																	</FormLabel>
+																	<Textarea
+																		{...field}
+																		rows={2}
+																		placeholder={(defaultCustomizationValues || chatWidgetDefaultValues).offlineMsgDescription}
+																		isDisabled={!values.offlineMessage}
+																	/>
+																	<FormErrorMessage>
+																		{form.errors.offlineMsgDescription}
+																	</FormErrorMessage>
+																</FormControl>
+															)}
+														</Field>
 													</TabPanel>
 												</TabPanels>
 											</Tabs>
@@ -565,10 +619,10 @@ export const ChatBotsCustomize = ({
 									</Form>
 								</Box>
 								<Flex w="50%" height="100%" pos="absolute" right="0" top="0" bottom="74px" justifyContent="center" overflow="auto">
-									<div className="chat-wrap widget-open" id="chat-wrap" style={{ marginTop: '0', minHeight: "500px" }}>
+									<div className="chat-wrap widget-open" id="chat-wrap" style={{ marginTop: '0', minHeight: "550px" }}>
 
 
-										<div className="chat-widget" style={{ borderRadius: values.borderRadius }}>
+										<div className="chat-widget" style={{ borderRadius: values.borderRadius, height: "520px", width: "400px" }}>
 											<div className="chat-header" style={{ backgroundColor: values.backgroundColor, color: values.fontColor }}>
 												
 													<div className="chat-header-top" style={{ display: "flex", alignItems: "center", marginBottom: "12px" }}>
@@ -581,6 +635,7 @@ export const ChatBotsCustomize = ({
 																borderRadius: '16px',
 															}}>
 															<button id="tab-ai-assistant"
+																onClick={() => { setSelectedTab(0) }}
 																style={{
 																	border: 'none',
 																	padding: '6px 10px',
@@ -589,8 +644,12 @@ export const ChatBotsCustomize = ({
 																	cursor: 'pointer',
 																	position: 'relative',
 																	zIndex: 2,
-																}}><div className={styles.activeTab} style={{backgroundColor: values.backgroundColor}}></div>{values.assistantTabHeader}</button>
+																}}>
+																	{selectedTab === 0 && <div className={styles.activeTab} style={{ backgroundColor: values.backgroundColor, left: "4px" }}></div>}
+																{values.assistantTabHeader}
+															</button>
 															<button id="tab-offline-msg"
+																onClick={() => { setSelectedTab(1) }}
 																style={{
 																	border: 'none',
 																	padding: '6px 10px',
@@ -600,7 +659,10 @@ export const ChatBotsCustomize = ({
 																	position: 'relative',
 																	zIndex: 2,
 																}}
-															>{values.offlineMsgTabHeader}</button>
+															>
+																{selectedTab === 1 && <div className={styles.activeTab} style={{ backgroundColor: values.backgroundColor, right: "4px" }}></div>}
+																{values.offlineMsgTabHeader}
+															</button>
 														</div>
 
 
@@ -614,37 +676,80 @@ export const ChatBotsCustomize = ({
 														</div>
 													</div>
 
-												
-												<h2>
-													{values.heading}
-												</h2>
-												<p>{values.description}</p>
-											</div>
-											<div id="chat-container" className="chat-container">
-												<div id="chat-messages" className="chat-messages">
-													<div className="chat-message chatbot">
-														<div className="chat-message-text">{values.welcomeMessage}</div>
-													</div>
-													<div className="chat-message user" ><div className="chat-message-text" style={{ backgroundColor: values.backgroundColor, color: values.fontColor }}>What is webwhiz?</div></div></div>
-												<div className={styles.chatSampleMessages} id="chat-sample-messages">
-													{values.questionExamples.map((item: any, index: number) => (
-
-														<button onClick={() => {
-															setMessage(item.question)
-														}} className={styles.chatSampleMessage} data-message={item.question} key={index}>{item.label}</button>
-
-
-													))
+													{
+														selectedTab === 0 && (
+															<div className="ai-assistant-header">
+																<h2>
+																	{values.heading}
+																</h2>
+																<p>{values.description}</p>
+															</div>
+														)
 													}
-												</div>
-												<Box id="chat-form">
-													<div className="chat-input-wrap">
-														<textarea value={message} onChange={handleTextAreaChange} rows="1" className="chat-input textarea js-auto-size" id="chat-input" placeholder={values.chatInputPlaceholderText} ></textarea>
-														<button className="chat-submit-btn"><svg width="16" height="16" fill="none" xmlns="http://www.w3.org/2000/svg">
-															<path fillRule="evenodd" clipRule="evenodd" d="M4.394 14.7L13.75 9.3c1-.577 1-2.02 0-2.598L4.394 1.299a1.5 1.5 0 00-2.25 1.3v3.438l4.059 1.088c.494.132.494.833 0 .966l-4.06 1.087v4.224a1.5 1.5 0 002.25 1.299z" style={{ fill: values.backgroundColor }}></path>
-														</svg></button>
+													{
+														selectedTab === 1 && (
+															<div className="offline-message-header">
+																<h2>
+																	{values.offlineMsgHeading}
+																</h2>
+																<p>{values.offlineMsgDescription}</p>
+															</div>
+														)
+													}
+											</div>
+											<div id="chat-container" className="chat-container" style={{ minHeight: "140px"}}>
+												{selectedTab === 0 && (
+													<div>
+														<div id="chat-messages" className="chat-messages">
+															<div className="chat-message chatbot">
+																<div className="chat-message-text">{values.welcomeMessage}</div>
+															</div>
+															<div className="chat-message user" >
+																<div className="chat-message-text" style={{ backgroundColor: values.backgroundColor, color: values.fontColor }}>What is webwhiz?</div>
+															</div>
+														</div>
+														<div className={styles.chatSampleMessages} id="chat-sample-messages">
+															{values.questionExamples.map((item: any, index: number) => (
+
+																<button onClick={() => {
+																	setMessage(item.question)
+																}} className={styles.chatSampleMessage} data-message={item.question} key={index}>{item.label}</button>
+
+
+															))
+															}
+														</div>
+														<Box id="chat-form">
+															<div className="chat-input-wrap">
+																<textarea value={message} onChange={handleTextAreaChange} rows={1} className="chat-input textarea js-auto-size" id="chat-input" placeholder={values.chatInputPlaceholderText} ></textarea>
+																<button className="chat-submit-btn"><svg width="16" height="16" fill="none" xmlns="http://www.w3.org/2000/svg">
+																	<path fillRule="evenodd" clipRule="evenodd" d="M4.394 14.7L13.75 9.3c1-.577 1-2.02 0-2.598L4.394 1.299a1.5 1.5 0 00-2.25 1.3v3.438l4.059 1.088c.494.132.494.833 0 .966l-4.06 1.087v4.224a1.5 1.5 0 002.25 1.299z" style={{ fill: values.backgroundColor }}></path>
+																</svg></button>
+															</div>
+														</Box>
 													</div>
-												</Box>
+												)}
+
+												{selectedTab === 1 && (
+													<div className="offline-message" style={{ padding: "20px 20px 10px 20px", position: "relative", height: "100%", overflow: "auto" }}>
+														<div className={styles.formGroup}>
+															<label className={styles.formLabel}>Name <span className={styles.formRequired}>*</span></label>
+															<input type="text" className={styles.formControl} id="offline-message-name" placeholder="Enter your name"></input>
+														</div>
+
+														<div className={styles.formGroup}>
+															<label className={styles.formLabel}>Email <span className={styles.formRequired}>*</span></label>
+															<input type="text" className={styles.formControl} id="offline-message-email" placeholder="Enter your email"></input>
+														</div>
+														<div className={styles.formGroup}>
+															<label className={styles.formLabel}>Message <span className={styles.formRequired}>*</span></label>
+															<textarea className={styles.formControl} rows={4} id="offline-message-message"
+																placeholder="Enter your message"></textarea>
+														</div>
+														<button className={styles.formSubmit} id="offline-message-submit"
+															type="button" style={{ backgroundColor: values.backgroundColor, color: values.fontColor }}>Submit</button>
+													</div>
+												)}
 											</div>
 										</div>
 										<ChatBotLauncher backgroundColor= { values.backgroundColor} fontColor= {values.fontColor} launcherIcon={values.launcherIcon.id} />
