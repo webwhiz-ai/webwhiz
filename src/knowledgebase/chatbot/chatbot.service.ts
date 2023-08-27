@@ -498,7 +498,7 @@ export class ChatbotService {
   async updateChatbotSession(sessionId: string, data: UpdateChatbotSessionDTO) {
     const sessionData = await this.getChatSessionDataFromCache(sessionId);
 
-    if (!(sessionData || data.userData || Object.keys(data.userData).length))
+    if (!sessionData || !data.userData || !Object.keys(data.userData).length)
       return;
 
     const updatedSessionData: ChatSession = {
