@@ -5,6 +5,7 @@ import {
   HttpCode,
   Param,
   Post,
+  Put,
   Query,
   Req,
   Sse,
@@ -17,6 +18,7 @@ import {
   ChatbotQueryDTO,
   CreateChatbotSessionDTO,
   PromptTestDTO,
+  UpdateChatbotSessionDTO,
 } from './chatbot.dto';
 import { ChatbotService } from './chatbot.service';
 
@@ -47,6 +49,16 @@ export class ChatbotController {
   ): Promise<ChatSessionSparse> {
     const { user } = req;
     return this.chatbotService.getChatSessionData(user, id);
+  }
+
+  @Public()
+  @Put('/session/:id')
+  @HttpCode(200)
+  async updateSession(
+    @Param('id') id: string,
+    @Body() data: UpdateChatbotSessionDTO,
+  ) {
+    return this.chatbotService.updateChatbotSession(id, data);
   }
 
   @Public()

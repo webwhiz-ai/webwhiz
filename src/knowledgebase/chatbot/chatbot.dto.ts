@@ -13,6 +13,10 @@ export class CreateChatbotSessionDTO {
   userData: any;
 }
 
+export class UpdateChatbotSessionDTO {
+  userData: any;
+}
+
 export class ChatbotQueryDTO {
   @IsNotEmpty()
   sessionId: string;
