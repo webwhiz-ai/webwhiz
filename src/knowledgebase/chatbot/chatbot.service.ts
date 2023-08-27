@@ -69,6 +69,9 @@ export class ChatbotService {
     const data = await this.redis.get(sessionKey);
     if (!data) {
       const session = await this.kbDbService.getChatSessionById(sId);
+      if (!session) {
+        return null;
+      }
       await this.putChatSessionDataToCache(session);
       return session;
     } else {
@@ -495,7 +498,8 @@ export class ChatbotService {
   async updateChatbotSession(sessionId: string, data: UpdateChatbotSessionDTO) {
     const sessionData = await this.getChatSessionDataFromCache(sessionId);
 
-    if (!(data.userData || Object.keys(data.userData).length)) return;
+    if (!(sessionData || data.userData || Object.keys(data.userData).length))
+      return;
 
     const updatedSessionData: ChatSession = {
       ...sessionData,
