@@ -397,6 +397,10 @@ export class KnowledgebaseService {
     }
 
     const kbData = await this.kbDbService.getKnowledgebaseById(kbId);
+    if (!kbData) {
+      throw new HttpException('Invalid Knowledgebase Id', HttpStatus.NOT_FOUND);
+    }
+
     const userData = await this.userService.findUserById(
       kbData.owner.toHexString(),
     );

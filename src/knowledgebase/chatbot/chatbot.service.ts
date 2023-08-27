@@ -545,13 +545,10 @@ export class ChatbotService {
    * @returns
    */
   async getChatSessionData(user: UserSparse, sessionId: string) {
-    let session: ChatSessionSparse;
+    const session: ChatSessionSparse =
+      await this.kbDbService.getChatSessionSparseById(new ObjectId(sessionId));
 
-    try {
-      session = await this.kbDbService.getChatSessionSparseById(
-        new ObjectId(sessionId),
-      );
-    } catch {
+    if (!session) {
       throw new HttpException('Invalid Session', HttpStatus.NOT_FOUND);
     }
 
