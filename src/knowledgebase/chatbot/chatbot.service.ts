@@ -20,6 +20,8 @@ import { TaskType } from '../../task/task.schema';
 import { TaskService } from '../../task/task.service';
 import { UserSparse } from '../../user/user.schema';
 import { UserService } from '../../user/user.service';
+import { WebhookService } from '../../webhook/webhook.service';
+import { WebhookEventType } from '../../webhook/webhook.types';
 import { CustomKeyService } from '../custom-key.service';
 import { KnowledgebaseDbService } from '../knowledgebase-db.service';
 import { checkUserIsOwnerOfKb } from '../knowledgebase-utils';
@@ -28,13 +30,10 @@ import {
   ChatSession,
   ChatSessionSparse,
   CustomKeyData,
-  Knowledgebase,
   KnowledgebaseStatus,
 } from '../knowledgebase.schema';
-import { PromptTestDTO } from './chatbot.dto';
+import { PromptTestDTO, UpdateChatbotSessionDTO } from './chatbot.dto';
 import { OpenaiChatbotService } from './openaiChatbotService';
-import { WebhookService } from '../../webhook/webhook.service';
-import { WebhookEventType } from '../../webhook/webhook.types';
 
 const CHAT_SESION_EXPIRY_TIME = 5 * 60;
 const CHUNK_FILTER_THRESHOLD = 0.3;
@@ -486,16 +485,30 @@ export class ChatbotService {
     };
 
     await Promise.all([
-      this.redis.set(
-        `c_${sessionId}`,
-        JSON.stringify(sessionData),
-        'EX',
-        CHAT_SESION_EXPIRY_TIME,
-      ),
+      this.setChatSessionData(sessionData),
       this.kbDbService.insertChatSession(sessionData),
     ]);
 
     return sessionId.toString();
+  }
+
+  async updateChatbotSession(sessionId: string, data: UpdateChatbotSessionDTO) {
+    const sessionData = await this.getChatSessionDataFromCache(sessionId);
+
+    if (!(data.userData || Object.keys(data.userData).length)) return;
+
+    const updatedSessionData: ChatSession = {
+      ...sessionData,
+      userData: {
+        ...sessionData.userData,
+        ...data.userData,
+      },
+    };
+
+    await Promise.all([
+      this.setChatSessionData(updatedSessionData),
+      this.kbDbService.updateChatSession(sessionData._id, updatedSessionData),
+    ]);
   }
 
   /**
@@ -532,13 +545,10 @@ export class ChatbotService {
    * @returns
    */
   async getChatSessionData(user: UserSparse, sessionId: string) {
-    let session: ChatSessionSparse;
+    const session: ChatSessionSparse =
+      await this.kbDbService.getChatSessionSparseById(new ObjectId(sessionId));
 
-    try {
-      session = await this.kbDbService.getChatSessionSparseById(
-        new ObjectId(sessionId),
-      );
-    } catch {
+    if (!session) {
       throw new HttpException('Invalid Session', HttpStatus.NOT_FOUND);
     }
 

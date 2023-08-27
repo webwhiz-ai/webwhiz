@@ -493,6 +493,15 @@ export class KnowledgebaseDbService {
     );
   }
 
+  async updateChatSession(id: ObjectId, session: Partial<ChatSession>) {
+    await this.chatSessionCollection.updateOne(
+      {
+        _id: id,
+      },
+      { $set: session },
+    );
+  }
+
   /** *******************************************
    * PROMPT RELATED
    ******************************************** */
