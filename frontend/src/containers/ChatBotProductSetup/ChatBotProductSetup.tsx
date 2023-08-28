@@ -33,6 +33,9 @@ import {
 	Tab,
 	TabPanels,
 	TabPanel,
+	IconButton,
+	Heading,
+	useToast,
 } from "@chakra-ui/react";
 
 
@@ -48,27 +51,29 @@ import {
 
 import classNames from 'classnames';
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { Formik, Form, Field } from "formik";
 
 import styles from './ChatBotProductSetup.module.scss'
 import { getDomainFromUrl } from "../../utils/commonUtils";
-import { fetchKnowledgebaseCrawlDataDetails } from "../../services/knowledgebaseService";
-import { CrawlData, WebsiteData } from "../../types/knowledgebase.type";
+import { fetchKnowledgebaseCrawlDataDetails, deleteTrainingData } from "../../services/knowledgebaseService";
+import { CrawlData, WebsiteData, ProductSetupData, DocsKnowledgeData } from "../../types/knowledgebase.type";
 import ReactMarkdown from "react-markdown";
 import { Paginator } from "../../widgets/Paginator/Paginator";
 import { SectionTitle } from "../../components/SectionTitle/SectionTitle";
 import CustomDropzone from "../../components/FileDropzone/CustomDropzone";
+import { RiDeleteBin5Line } from "react-icons/ri";
+import { NoDataFineTuneIcon } from "../../components/Icons/noData/NoDataFineTuneIcon";
 
 interface FormValues {
 	websiteUrl: string;
-	target: string;
-	exclude: string;
+	target?: string[];
+	exclude?: string[];
 	files: File[];
 }
 interface ChatBotProductSetupProps {
-	onPrimaryBtnClick: (finalFormValues: WebsiteData) => void;
-	onSecondaryBtnClick: (finalFormValues: WebsiteData) => void;
+	onPrimaryBtnClick: (finalFormValues: ProductSetupData) => void;
+	onSecondaryBtnClick: (finalFormValues: ProductSetupData) => void;
 	onCrawlDataPaginationClick: (pageNo: number) => void;
 	primaryButtonLabel?: string;
 	secondaryBtnLabel?: string;
@@ -82,10 +87,13 @@ interface ChatBotProductSetupProps {
 	defaultCrauledData: CrawlData;
 	defaultFiles?: File[];
 	isSubmitting?: boolean;
+	isUploadingDocs?: boolean;
 	isSecondaryBtnSubmitting?: boolean;
 	disableWebsiteInput?: boolean;
 	loadingText?: string;
 	disableSubmitBtnByDefault?: boolean;
+	docsData?: DocsKnowledgeData;
+	docsDataLoading?: boolean;
 }
 
 function validateWebsite(value: string) {
@@ -120,9 +128,13 @@ export const ChatBotProductSetup = ({
 	disableWebsiteInput = false,
 	loadingText = '',
 	isSubmitting = false,
+	isUploadingDocs = false,
 	isSecondaryBtnSubmitting = false,
+	docsDataLoading = false,
+	docsData,
 }: ChatBotProductSetupProps) => {
-
+	const customDropzoneRef = useRef(); 
+	const toast = useToast();
 
 	const { isOpen, onOpen, onClose } = useDisclosure()
 
@@ -130,6 +142,14 @@ export const ChatBotProductSetup = ({
 
 	const [crauledDataDetail, setCrauledDataDetail] = React.useState<string>(defaultCrauledData as unknown as string)
 
+	const [selectedTab, setSelectedTab] = React.useState<number>(0);
+	const [deleteDocLoading, setDeleteDocLoading] = React.useState<boolean>(false);
+	const [localDocsData, setLocalDocsData] = React.useState<DocsKnowledgeData>(docsData as unknown as DocsKnowledgeData);
+	const [docToDelete, setDocToDelete] = React.useState<string>('0');
+
+	useEffect(() => {
+		setLocalDocsData(docsData as unknown as DocsKnowledgeData);
+	}, [docsData]);
 
 	useEffect(() => {
 		setCrauledData(defaultCrauledData);
@@ -156,13 +176,21 @@ export const ChatBotProductSetup = ({
 			// 	return (website.endsWith('/') ? website.slice(0, -1) : website) + path + '!/**/*';
 			// });
 
-			const payLoad = {
+			const websiteData: WebsiteData = {
 				name: getDomainFromUrl(websiteUrl),
 				websiteUrl: websiteUrl,
 				urls: [],
 				include: targetPaths,
 				exclude: excludePaths,
-				files: files,
+			}
+
+			const payLoad: ProductSetupData = {
+				websiteData: websiteData,
+				files: files
+			}
+
+			if (customDropzoneRef.current) {
+				customDropzoneRef.current.clearFiles();
 			}
 
 			// formValues.targetPagesBar = [...includedTarget, ...excludedTarget];
@@ -175,7 +203,7 @@ export const ChatBotProductSetup = ({
 				onSecondaryBtnClick(payLoad);
 			}
 		},
-		[onPrimaryBtnClick, onSecondaryBtnClick]
+		[onPrimaryBtnClick, onSecondaryBtnClick, customDropzoneRef, customDropzoneRef.current]
 	);
 
 
@@ -194,6 +222,33 @@ export const ChatBotProductSetup = ({
 		onOpen();
 	}, [onOpen]);
 
+	const handleDocDelete = React.useCallback(async (knowledgeBaseId, docId) => {
+		setDeleteDocLoading(true);
+		try {
+			await deleteTrainingData(knowledgeBaseId, docId);
+			const updatedResults = localDocsData?.docs.filter((data) => data._id !== docId);
+			if (updatedResults) {
+				setLocalDocsData(prevPage => ({
+					...prevPage,
+					docs: updatedResults,
+				}));
+			}
+			toast({
+				title: `Document has been deleted successfully `,
+				status: "success",
+				isClosable: true,
+			});
+		} catch (error) {
+			toast({
+				title: `Oops! unable to delete the document`,
+				status: "error",
+				isClosable: true,
+			});
+		} finally {
+			setDeleteDocLoading(false);
+			setDocToDelete('0');
+		}
+	}, [localDocsData, toast]);
 
 	// TODO: Add proper validation
 	// const validationSchema = Yup.object().shape(
@@ -307,6 +362,119 @@ export const ChatBotProductSetup = ({
 		return null
 	}, [crauledData, crawlDatLoading, crawlDataLoading, handlePageClick, handleURLClick, isSubmitting, loadingText]);
 
+	const getCrawledDocs = React.useCallback(() => {
+		if (isUploadingDocs || isSubmitting) {
+			return <>
+				<VStack alignItems="center" w="100%" mb="6">
+					<VStack w="100%">
+						<Flex direction="column" justifyContent="center" alignItems="center" borderRadius="md" border="1px solid" borderColor="gray.200" w="100%" p="12">
+
+							<Spinner color='gray.700' mb="4" />
+							<Text color="gray.500">
+								{isUploadingDocs ? 'Uploading files...' : loadingText}
+							</Text>
+						</Flex>
+					</VStack>
+				</VStack>
+			</>
+		}
+
+		if (localDocsData && !localDocsData?.docs.length) {
+
+			return <VStack
+				alignItems="center"
+				direction="column"
+				justifyContent="center"
+				w="100%"
+				h="100%"
+				pt={32}
+				pb={32}
+				spacing="9"
+			>
+				<NoDataFineTuneIcon width="auto" height="250px" />
+				<Box textAlign="center">
+					<Heading
+						maxW="580px"
+						fontSize="xl"
+						fontWeight="500"
+						as="h3"
+						mb="4"
+						color="gray.500"
+						lineHeight="medium"
+						textAlign="center"
+					>
+						The more data you add, the better your chatbot response will be.
+					</Heading>
+				</Box>
+			</VStack>
+		}
+
+		if (localDocsData) {
+			return <>
+			<Box>
+				<Box position="relative">
+					{docsDataLoading ? <Box className={styles.crawlDataLoading}><Spinner color='gray.700' size="xs" /></Box> : ''}
+					<TableContainer>
+						<Table size='sm'>
+							<Thead>
+								<Tr>
+									<Th>Files</Th>
+								</Tr>
+							</Thead>
+							<Tbody>
+								{localDocsData?.docs?.map((doc, index) => {
+									return (
+										<Tr key={doc._id}>
+											<Td className={classNames(styles.urls, {
+												[styles.firstUrl]: index === 0,
+											})} maxW="400px" overflow="hidden" whiteSpace="nowrap" textOverflow="ellipsis" align="center">
+												<Flex alignItems="center" justifyContent="space-between">
+													{doc.url}
+													{crawlDatLoading === doc._id ? <Box className={styles.urlSpinner}><Spinner color='gray.700' size="xs" /></Box> : ''}
+
+													<Box float="right">
+														<Button colorScheme='gray' size='xs' mr={2}
+															onClick={() => {
+																handleURLClick(localDocsData?.knowledgebaseId, doc._id)
+															}}
+														>
+															View data
+														</Button>
+														<IconButton
+															variant='outline'
+															colorScheme='gray'
+															aria-label='Call Sage'
+															fontSize='14px'
+															size="xs"
+															isLoading={deleteDocLoading && docToDelete === doc._id}
+															onClick={() => {
+																setDocToDelete(doc._id);
+																handleDocDelete(localDocsData.knowledgebaseId, doc._id)
+															}}
+															icon={<RiDeleteBin5Line />}
+														/>
+													</Box>
+												</Flex>
+												
+
+											</Td>
+										</Tr>
+									)
+								})}
+							</Tbody>
+						</Table>
+					</TableContainer>
+				</Box>
+				<Box mt="4">
+					<Paginator onPageChange={handlePageClick} pageRangeDisplayed={5}
+						pageCount={localDocsData.pages} />
+				</Box>
+			</Box>
+			</>
+		}
+		return null
+	}, [isUploadingDocs, localDocsData, crawlDataLoading, handlePageClick, handleURLClick, handleDocDelete, deleteDocLoading, docToDelete, crawlDatLoading, docsDataLoading, loadingText, isSubmitting]);
+
 	return (
 		<>
 			<Flex h="100%" direction="column">
@@ -334,7 +502,7 @@ export const ChatBotProductSetup = ({
 									<HStack spacing="16" alignItems="start">
 										<Box w="50%" maxW="520px">
 
-											<Tabs variant='soft-rounded' colorScheme='gray' mt="1" size="sm">
+											<Tabs variant='soft-rounded' colorScheme='gray' mt="1" size="sm" onChange={(index) => setSelectedTab(index)}>
 												<TabList>
 													<Tab>Website</Tab>
 													<Tab>Files</Tab>
@@ -427,7 +595,7 @@ export const ChatBotProductSetup = ({
 														</Field>
 													</TabPanel>
 													<TabPanel pt="8">
-														<Field name="files" as={CustomDropzone} label="Upload Files" helperText="Upload files to be crawled. For e.g. sitemap.xml, robots.txt." >
+														<Field name="files" innerRef={customDropzoneRef} as={CustomDropzone} label="Upload Files" helperText="Upload files to be crawled. For e.g. sitemap.xml, robots.txt.">
 															{/* {({ field, form, setFieldValue }: any) => (
 																<FormControl
 																	mb="8"
@@ -448,6 +616,7 @@ export const ChatBotProductSetup = ({
 																	</FormErrorMessage>
 																</FormControl>
 															)} */}
+															{console.log('ref', customDropzoneRef)}
 														</Field>
 													</TabPanel>
 												</TabPanels>
@@ -455,7 +624,7 @@ export const ChatBotProductSetup = ({
 
 										</Box>
 										<Box w="50%">
-											{getCrauledPaths()}
+											{selectedTab === 0 ? getCrauledPaths() : getCrawledDocs()}
 										</Box>
 									</HStack>
 
@@ -538,7 +707,6 @@ export const ChatBotProductSetup = ({
 						</ModalFooter>
 					</ModalContent>
 				</Modal>
-
 
 			</Flex>
 		</>

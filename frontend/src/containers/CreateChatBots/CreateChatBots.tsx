@@ -11,7 +11,8 @@ import { Link, useHistory } from "react-router-dom";
 import {
 	ChatBotProductSetup,
 } from "../ChatBotProductSetup/ChatBotProductSetup";
-import { createKnowledgebase, deleteKnowledgebase, fetchKnowledgebaseCrawlData, fetchKnowledgebaseDetails, generateEmbeddings } from "../../services/knowledgebaseService";
+import { createKnowledgebase, deleteKnowledgebase, fetchKnowledgebaseCrawlData, fetchKnowledgebaseDetails, generateEmbeddings, addTrainingDocs, fetchKnowledgebaseCrawlDataForDocs } from "../../services/knowledgebaseService";
+import { ProductSetupData, DocsKnowledgeData } from "../../types/knowledgebase.type";
 
 
 export const CreateChatBots = () => {
@@ -27,6 +28,9 @@ export const CreateChatBots = () => {
 
 	const [productSetupLoadingText, setProductSetupLoadingText] = React.useState("Setting up your product");
 
+	const [docsDataLoading, setDocsDataLoading] = React.useState<boolean>(false);
+	const [docsData, setDocsData] = React.useState<any>();
+	const [isUploadingDocs, setIsUploadingDocs] = React.useState<boolean>(false);
 
 	const [crawlDataLoading, setIrawlDataLoading] = React.useState<boolean>(false);
 	const getCrawlDataPagination = React.useCallback(async (pageNo: number) => {
@@ -49,17 +53,61 @@ export const CreateChatBots = () => {
 		}
 	}, [defaultCrauledData]);
 
-	const handlePrimaryButtonClick = React.useCallback(async (payLoad) => {
+	const getDocsDataPagination = React.useCallback(async (pageNo: number) => {
+		try {
+			setDocsDataLoading(true);
+			const _docsDataResponse = await fetchKnowledgebaseCrawlDataForDocs(defaultCrauledData.knowledgebaseId,pageNo);
+			console.log("_docsDataResponse", _docsDataResponse);
+			const _data: DocsKnowledgeData = {
+				docs: _docsDataResponse.data.results,
+				pages: _docsDataResponse.data.pages,
+				knowledgebaseId: defaultCrauledData.knowledgebaseId
+			}
+			setDocsData(_data)
+		} catch (error) {
+			console.log(error);
+		} finally {
+			setDocsDataLoading(false);
+		}
+	}, [defaultCrauledData]);
+
+	const handlePrimaryButtonClick = React.useCallback(async (payLoad: ProductSetupData) => {
 		setIsSubmitting(true);
 		console.log('payload', payLoad)
 
 		if(savingStep ==='CRAWL') {
 			try {
 				setProductSetupLoadingText('Crawling your website data.. This may take some time based on the amount of the data...');
-				const response = await createKnowledgebase(payLoad);
+				const response = await createKnowledgebase(payLoad.websiteData);
 
 				setKnowledgeBaseId(response.data._id);
 
+				if (payLoad.files?.length && payLoad.files.length > 0) {
+					try {
+						setIsUploadingDocs(true);
+						const addDocsResponse = await addTrainingDocs(response.data._id, payLoad.files);
+						if (addDocsResponse.status >= 200 && addDocsResponse.status < 300) {
+							console.log('Upload successful');
+							console.log('Response data:', addDocsResponse.data);
+						} else {
+							console.error('Upload failed. Status code:', addDocsResponse.status);
+							console.error('Error response:', addDocsResponse.data);
+						}
+					} catch (error) {
+						console.log('error', error)
+					} finally {
+						setIsUploadingDocs(false);
+					}
+					setDocsDataLoading(true);
+					const _docsDataResponse = await fetchKnowledgebaseCrawlDataForDocs(response.data._id, 1); 
+					const _docsData: DocsKnowledgeData = {
+						docs: _docsDataResponse.data.results,
+						pages: _docsDataResponse.data.pages,
+						knowledgebaseId: response.data._id
+					}
+					setDocsData(_docsData);
+					setDocsDataLoading(false);
+				}
 
 				let interval = setInterval(async () => {
 					const details = await fetchKnowledgebaseDetails(response.data._id);
@@ -143,6 +191,7 @@ export const CreateChatBots = () => {
 				
 			} catch (error) {
 				setIsSubmitting(false);
+				setDocsDataLoading(false);
 				const errorData = error?.response?.data?.message
 				toast({
 					title:  (errorData) || 'Oops! Something went wrong',
@@ -154,7 +203,7 @@ export const CreateChatBots = () => {
 	}, [history, knowledgeBaseId, savingStep, toast]);
 
 
-	const handleSecondaryButtonClick = React.useCallback(async (payLoad) => {
+	const handleSecondaryButtonClick = React.useCallback(async (payLoad: ProductSetupData) => {
 		console.log('payload', payLoad)
 		setIsSubmitting(true);
 		setIsSecondaryBtnSubmitting(true);
@@ -164,10 +213,36 @@ export const CreateChatBots = () => {
 
 			await deleteKnowledgebase(knowledgeBaseId as string);
 			
-			const response = await createKnowledgebase(payLoad);
+			const response = await createKnowledgebase(payLoad.websiteData);
 
 			setKnowledgeBaseId(response.data._id);
 
+			if (payLoad.files?.length && payLoad.files.length > 0) {
+				try {
+					setIsUploadingDocs(true);
+					const addDocsResponse = await addTrainingDocs(response.data._id, payLoad.files);
+					if (addDocsResponse.status >= 200 && addDocsResponse.status < 300) {
+						console.log('Upload successful');
+						console.log('Response data:', addDocsResponse.data);
+					} else {
+						console.error('Upload failed. Status code:', addDocsResponse.status);
+						console.error('Error response:', addDocsResponse.data);
+					}
+				} catch (error) {
+					console.log('error', error)
+				} finally {
+					setIsUploadingDocs(false);
+				}
+				setDocsDataLoading(true);
+				const _docsDataResponse = await fetchKnowledgebaseCrawlDataForDocs(response.data._id, 1); 
+				const _docsData: DocsKnowledgeData = {
+					docs: _docsDataResponse.data.results,
+					pages: _docsDataResponse.data.pages,
+					knowledgebaseId: response.data._id
+				}
+				setDocsData(_docsData);
+				setDocsDataLoading(false);
+			}
 
 			let interval = setInterval(async () => {
 				const details = await fetchKnowledgebaseDetails(response.data._id);
@@ -214,6 +289,7 @@ export const CreateChatBots = () => {
 			
 		} catch (error) {
 			setIsSubmitting(false);
+			setDocsDataLoading(false);
 			const errorData = error?.response?.data?.message
 			toast({
 				title:  (errorData) || 'Oops! Something went wrong',
@@ -240,9 +316,12 @@ export const CreateChatBots = () => {
 				secondaryBtnLabel={"Update paths"}
 				onPrimaryBtnClick={handlePrimaryButtonClick}
 				onSecondaryBtnClick={handleSecondaryButtonClick}
+				docsData={docsData}
+				isUploadingDocs={isUploadingDocs}
+				docsDataLoading={docsDataLoading}
 			/>
 		);
-	}, [crawlDataLoading, defaultCrauledData, getCrawlDataPagination, handlePrimaryButtonClick, handleSecondaryButtonClick, isSecondaryBtnSubmitting, isSubmitting, primaryButtonLabel, productSetupLoadingText, savingStep]);
+	}, [crawlDataLoading, defaultCrauledData, getCrawlDataPagination, handlePrimaryButtonClick, handleSecondaryButtonClick, isSecondaryBtnSubmitting, isSubmitting, isUploadingDocs, primaryButtonLabel, productSetupLoadingText, savingStep]);
 
 	const getMainComponent = React.useCallback(() => {
 		return (
