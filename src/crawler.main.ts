@@ -26,6 +26,7 @@ import { EmailModule } from './common/email/email.module';
 import { TaskModule } from './task/task.module';
 import { ChatbotService } from './knowledgebase/chatbot/chatbot.service';
 import { AppConfigService } from './common/config/appConfig.service';
+import { MaxJobQueue } from './common/max-job-queue';
 
 @Module({
   imports: [
@@ -97,6 +98,8 @@ async function bootstrap() {
     'crawler',
   );
 
+  const crawlerJobQueue = new MaxJobQueue(1);
+
   // Hack to decrease the TTL of the result
   (worker.backend as any).set = function (key: string, value: string) {
     return Promise.all([
@@ -117,65 +120,68 @@ async function bootstrap() {
     retryCount: number,
     useAlternateParser = false,
   ) {
-    console.log('Crawldata', crawlData, knowledgebaseId, retryCount);
-    console.log('Retry count', retryCount);
+    return crawlerJobQueue.addJob(async () => {
+      console.log('Crawldata', crawlData, knowledgebaseId, retryCount);
+      console.log('Retry count', retryCount);
 
-    const crawlUrls: string[] = [];
+      const crawlUrls: string[] = [];
 
-    try {
-      const crawlStats = await crawlerService.crawl(
-        crawlData,
-        async (pageData) => {
-          crawlUrls.push(pageData.url);
+      try {
+        const crawlStats = await crawlerService.crawl(
+          crawlData,
+          async (pageData) => {
+            crawlUrls.push(pageData.url);
 
-          await processPage(
-            pageData,
-            new ObjectId(knowledgebaseId),
-            async (data: KbDataStore) => kbDbService.insertToKbDataStore(data),
-            async (html: string) => inscriptisService.getTextForHtml(html),
-            useAlternateParser,
-          );
-        },
-      );
-
-      let status = KnowledgebaseStatus.CRAWLED;
-      if (crawlStats.crawledPages === 0) {
-        status = KnowledgebaseStatus.CRAWL_ERROR;
-      }
-
-      await kbDbService.setKnowledgebaseCrawlData(
-        new ObjectId(knowledgebaseId),
-        {
-          stats: crawlStats,
-        },
-        status,
-      );
-
-      console.log(crawlStats);
-
-      return {
-        ...crawlStats,
-      };
-    } catch (err) {
-      logger.error(`Error in crawl for ${knowledgebaseId}`, err);
-      await kbDbService.updateKnowledgebaseStatus(
-        new ObjectId(knowledgebaseId),
-        KnowledgebaseStatus.CRAWL_ERROR,
-      );
-      // Retry task with linearly increasing timeout
-      if (retryCount < 3) {
-        setTimeout(async () => {
-          await client
-            .createTask('tasks.crawl')
-            .applyAsync([
-              crawlData,
-              knowledgebaseId,
-              retryCount ? retryCount + 1 : 1,
+            await processPage(
+              pageData,
+              new ObjectId(knowledgebaseId),
+              async (data: KbDataStore) =>
+                kbDbService.insertToKbDataStore(data),
+              async (html: string) => inscriptisService.getTextForHtml(html),
               useAlternateParser,
-            ]);
-        }, retryCount * 1000);
+            );
+          },
+        );
+
+        let status = KnowledgebaseStatus.CRAWLED;
+        if (crawlStats.crawledPages === 0) {
+          status = KnowledgebaseStatus.CRAWL_ERROR;
+        }
+
+        await kbDbService.setKnowledgebaseCrawlData(
+          new ObjectId(knowledgebaseId),
+          {
+            stats: crawlStats,
+          },
+          status,
+        );
+
+        console.log(crawlStats);
+
+        return {
+          ...crawlStats,
+        };
+      } catch (err) {
+        logger.error(`Error in crawl for ${knowledgebaseId}`, err);
+        await kbDbService.updateKnowledgebaseStatus(
+          new ObjectId(knowledgebaseId),
+          KnowledgebaseStatus.CRAWL_ERROR,
+        );
+        // Retry task with linearly increasing timeout
+        if (retryCount < 3) {
+          setTimeout(async () => {
+            await client
+              .createTask('tasks.crawl')
+              .applyAsync([
+                crawlData,
+                knowledgebaseId,
+                retryCount ? retryCount + 1 : 1,
+                useAlternateParser,
+              ]);
+          }, retryCount * 1000);
+        }
       }
-    }
+    });
   }
 
   /**

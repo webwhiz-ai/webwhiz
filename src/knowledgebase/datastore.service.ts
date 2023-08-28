@@ -241,8 +241,9 @@ export class DataStoreService {
     // Validations
     const kb = await this.kbDbService.getKnowledgebaseSparseById(kbId);
     checkUserIsOwnerOfKb(user, kb);
+
     const dsItem = await this.kbDbService.getKbDataStoreItemById(dId);
-    if (!dsItem.knowledgebaseId.equals(kbId)) {
+    if (!dsItem || !dsItem.knowledgebaseId.equals(kbId)) {
       throw new HttpException('Invalid DataStore Id', HttpStatus.UNAUTHORIZED);
     }
 
