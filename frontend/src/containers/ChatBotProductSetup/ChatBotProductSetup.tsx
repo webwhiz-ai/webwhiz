@@ -75,6 +75,7 @@ interface ChatBotProductSetupProps {
 	onPrimaryBtnClick: (finalFormValues: ProductSetupData) => void;
 	onSecondaryBtnClick: (finalFormValues: ProductSetupData) => void;
 	onCrawlDataPaginationClick: (pageNo: number) => void;
+	onDocsDataPaginationClick: (pageNo: number) => void;
 	primaryButtonLabel?: string;
 	secondaryBtnLabel?: string;
 	showSecondaryButton?: boolean;
@@ -115,6 +116,7 @@ export const ChatBotProductSetup = ({
 	onPrimaryBtnClick,
 	onSecondaryBtnClick,
 	onCrawlDataPaginationClick,
+	onDocsDataPaginationClick,
 	crawlDataLoading,
 	defaultWebsite = "",
 	primaryButtonLabel = "Create Chat bot",
@@ -211,6 +213,9 @@ export const ChatBotProductSetup = ({
 		onCrawlDataPaginationClick(page+1);
 	}, [onCrawlDataPaginationClick]);
 
+	const handleDocsPageClick = React.useCallback((page) => {
+		onDocsDataPaginationClick(page + 1);
+	}, [onDocsDataPaginationClick]);
 
 	const [crawlDatLoading, setCrawlDatLoading] = React.useState<string>('');
 
@@ -466,14 +471,14 @@ export const ChatBotProductSetup = ({
 					</TableContainer>
 				</Box>
 				<Box mt="4">
-					<Paginator onPageChange={handlePageClick} pageRangeDisplayed={5}
+					<Paginator onPageChange={handleDocsPageClick} pageRangeDisplayed={5}
 						pageCount={localDocsData.pages} />
 				</Box>
 			</Box>
 			</>
 		}
 		return null
-	}, [isUploadingDocs, localDocsData, crawlDataLoading, handlePageClick, handleURLClick, handleDocDelete, deleteDocLoading, docToDelete, crawlDatLoading, docsDataLoading, loadingText, isSubmitting]);
+	}, [isUploadingDocs, localDocsData, crawlDataLoading, handleDocsPageClick, handleURLClick, handleDocDelete, deleteDocLoading, docToDelete, crawlDatLoading, docsDataLoading, loadingText, isSubmitting]);
 
 	return (
 		<>

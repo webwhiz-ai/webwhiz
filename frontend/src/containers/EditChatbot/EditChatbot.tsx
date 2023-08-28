@@ -141,6 +141,24 @@ const EditChatbot = (props: EditChatbotProps) => {
 		}
 	}, [defaultCrauledData]);
 
+	const getDocsDataPagination = React.useCallback(async (pageNo: number) => {
+		try {
+			setDocsDataLoading(true);
+			const _docsDataResponse = await fetchKnowledgebaseCrawlDataForDocs(defaultCrauledData.knowledgebaseId, pageNo);
+			console.log("_docsDataResponse", _docsDataResponse);
+			const _data: DocsKnowledgeData = {
+				docs: _docsDataResponse.data.results,
+				pages: _docsDataResponse.data.pages,
+				knowledgebaseId: defaultCrauledData.knowledgebaseId
+			}
+			setDocsData(_data)
+		} catch (error) {
+			console.log(error);
+		} finally {
+			setDocsDataLoading(false);
+		}
+	}, [defaultCrauledData]);
+
 	const [productSetupLoadingText, setProductSetupLoadingText] = React.useState("Setting up your product");
 
 	useEffect(() => {
@@ -681,6 +699,7 @@ const EditChatbot = (props: EditChatbotProps) => {
 				>
 					<ChatBotProductSetup
 						onCrawlDataPaginationClick={getCrawlDataPagination}
+						onDocsDataPaginationClick={getDocsDataPagination}
 						defaultWebsite={chatBot.websiteData.websiteUrl}
 						defaultExcludedPaths={getExcludedPaths()}
 						defaultIncludedPaths={getIncludedPaths()}
@@ -691,6 +710,7 @@ const EditChatbot = (props: EditChatbotProps) => {
 						defaultCrauledData={defaultCrauledData}
 						isSubmitting={isSubmitting}
 						isUploadingDocs={isUploadingDocs}
+						docsDataLoading={docsDataLoading}
 						docsData={docsData}
 						crawlDataLoading={crawlDataLoading}
 						loadingText={productSetupLoadingText}
@@ -751,9 +771,19 @@ const EditChatbot = (props: EditChatbotProps) => {
 										} else {
 											console.error('Upload failed. Status code:', addDocsResponse.status);
 											console.error('Error response:', addDocsResponse.data);
+											toast({
+												title: `Oops! Document upload failed.`,
+												status: "error",
+												isClosable: true,
+											});
 										}
 									} catch (error) {
-										console.log('error', error)
+										console.log('error', error);
+										toast({
+											title: `Oops! Document upload failed.`,
+											status: "error",
+											isClosable: true,
+										});
 									} finally {
 										setIsUploadingDocs(false);
 									}

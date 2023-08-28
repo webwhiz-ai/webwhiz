@@ -56,7 +56,7 @@ export const CreateChatBots = () => {
 	const getDocsDataPagination = React.useCallback(async (pageNo: number) => {
 		try {
 			setDocsDataLoading(true);
-			const _docsDataResponse = await fetchKnowledgebaseCrawlDataForDocs(defaultCrauledData.knowledgebaseId,pageNo);
+			const _docsDataResponse = await fetchKnowledgebaseCrawlDataForDocs(defaultCrauledData.knowledgebaseId, pageNo);
 			console.log("_docsDataResponse", _docsDataResponse);
 			const _data: DocsKnowledgeData = {
 				docs: _docsDataResponse.data.results,
@@ -306,6 +306,7 @@ export const CreateChatBots = () => {
 			<ChatBotProductSetup
 				defaultCrauledData={defaultCrauledData}
 				onCrawlDataPaginationClick={getCrawlDataPagination}
+				onDocsDataPaginationClick={getDocsDataPagination}
 				crawlDataLoading={crawlDataLoading}
 				isSubmitting={isSubmitting}
 				isSecondaryBtnSubmitting={isSecondaryBtnSubmitting}
@@ -321,7 +322,7 @@ export const CreateChatBots = () => {
 				docsDataLoading={docsDataLoading}
 			/>
 		);
-	}, [crawlDataLoading, defaultCrauledData, getCrawlDataPagination, handlePrimaryButtonClick, handleSecondaryButtonClick, isSecondaryBtnSubmitting, isSubmitting, isUploadingDocs, primaryButtonLabel, productSetupLoadingText, savingStep]);
+	}, [crawlDataLoading, defaultCrauledData, getCrawlDataPagination, getDocsDataPagination, handlePrimaryButtonClick, handleSecondaryButtonClick, isSecondaryBtnSubmitting, isSubmitting, isUploadingDocs, primaryButtonLabel, productSetupLoadingText, savingStep]);
 
 	const getMainComponent = React.useCallback(() => {
 		return (
