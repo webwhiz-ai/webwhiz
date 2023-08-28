@@ -26,6 +26,8 @@ export const chatWidgetDefaultValues = {
 	placement: "right",
 	offlineMessage: false,
 	showReadMore: true,
+  collectEmail: false,
+  collectEmailText: 'What is your email address?',
   questionExamples: [
     {question: 'How can I contact you?', label: 'Contact'},
   ],

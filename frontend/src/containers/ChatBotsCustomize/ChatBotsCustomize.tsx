@@ -449,6 +449,49 @@ export const ChatBotsCustomize = ({
 																</FormControl>
 															)}
 														</Field>
+														<Field type="text" name="collectEmail">
+															{({ field, form }: any) => (
+																<FormControl mb="6">
+																	<Flex justifyContent="space-between" w="100%" alignItems="center">
+
+																		<FormLabel fontWeight="400" fontSize="sm" color="gray.700" htmlFor="collectEmail">
+																			Collect Email
+																		</FormLabel>
+																		<Switch
+																			{...field}
+																			defaultChecked={(defaultCustomizationValues || chatWidgetDefaultValues).collectEmail}
+																			onChange={(event) => { handleSwitchChange(event, form) }}
+																			colorScheme="teal"
+																			size="md"
+																			mr="2"
+																		/>
+																	</Flex>
+																</FormControl>
+															)}
+														</Field>
+														{values.collectEmail && (
+															<Field type="text" name="collectEmailText">
+																{({ field, form }: any) => (
+																	<FormControl
+																		mb="6"
+																		isInvalid={
+																			form.errors.collectEmailText && form.touched.collectEmailText
+																		}
+																	>
+																		<FormLabel fontSize="sm" htmlFor="collectEmailText" color="gray.700" fontWeight="400" >
+																			Collect email Text
+																		</FormLabel>
+																		<Input
+																			{...field}
+																			placeholder={(defaultCustomizationValues || chatWidgetDefaultValues).collectEmailText}
+																		/>
+																		<FormErrorMessage>
+																			{form.errors.collectEmailText}
+																		</FormErrorMessage>
+																	</FormControl>
+																)}
+															</Field>
+														)}
 														<Field type="text" name="showReadMore">
 															{({ field, form }: any) => (
 																<FormControl mb="6">

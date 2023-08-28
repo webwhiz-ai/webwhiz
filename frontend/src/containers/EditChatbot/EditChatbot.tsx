@@ -628,6 +628,8 @@ const EditChatbot = (props: EditChatbotProps) => {
 			description: chatBot.chatWidgeData?.description,
 			offlineMessage: chatBot.chatWidgeData?.offlineMessage,
 			showReadMore: chatBot.chatWidgeData?.showReadMore === undefined ? chatWidgetDefaultValues.showReadMore : chatBot.chatWidgeData?.showReadMore,
+			collectEmailText: chatBot.chatWidgeData?.collectEmailText || chatWidgetDefaultValues.collectEmailText,
+			collectEmail: chatBot.chatWidgeData?.collectEmail,
 			welcomeMessage: chatBot.chatWidgeData?.welcomeMessage || chatWidgetDefaultValues.welcomeMessage,
 			questionExamples: chatBot.chatWidgeData?.questionExamples || chatWidgetDefaultValues.questionExamples,
 			prompt: chatBot.prompt || chatWidgetDefaultValues.prompt,
