@@ -10,7 +10,7 @@ type CustomDropzoneProps = {
     helperText?: string;
 }
 
-const CustomDropzone = ({name, label, helperText}: CustomDropzoneProps) => {
+const CustomDropzone = React.forwardRef(({name, label, helperText}: CustomDropzoneProps, innerRef: React.Ref<any>) => {
 
     const [field, meta, helpers] = useField(name);
 
@@ -25,6 +25,10 @@ const CustomDropzone = ({name, label, helperText}: CustomDropzoneProps) => {
         console.log(field.value.length);
       };
 
+    const clearFiles = () => {
+        helpers.setValue([]); // Clear the files
+    };
+
     const { getRootProps, getInputProps, isDragActive } = useDropzone({
         onDrop: handleDrop,
         accept: {
@@ -37,6 +41,14 @@ const CustomDropzone = ({name, label, helperText}: CustomDropzoneProps) => {
         multiple: true,
         // maxFiles: 5,
     });
+
+    React.useImperativeHandle(innerRef, () => ({
+        clearFiles,
+    }));
+
+    React.useEffect(() => {
+        console.log("Ref in CustomDropzone:", innerRef);
+      }, [innerRef]);
 
     return (
         <Box>
@@ -96,6 +108,6 @@ const CustomDropzone = ({name, label, helperText}: CustomDropzoneProps) => {
         </Box>
        
     )
-}
+});
 
 export default CustomDropzone
