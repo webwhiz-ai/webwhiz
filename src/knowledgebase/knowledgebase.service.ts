@@ -142,12 +142,14 @@ export class KnowledgebaseService {
       );
     }
 
-    const websiteData: Knowledgebase['websiteData'] = this.cleanWebsiteData({
-      websiteUrl: data.websiteUrl,
-      urls: data.urls,
-      include: data.include,
-      exclude: data.exclude,
-    });
+    const websiteData: Knowledgebase['websiteData'] = data.websiteUrl
+      ? this.cleanWebsiteData({
+          websiteUrl: data.websiteUrl,
+          urls: data.urls,
+          include: data.include,
+          exclude: data.exclude,
+        })
+      : undefined;
 
     // Create a new Kb in db
     const ts = new Date();
@@ -162,13 +164,15 @@ export class KnowledgebaseService {
     const kbData = await this.kbDbService.insertKnowledgebase(kb);
 
     // Start crawling
-    const maxPages = isAdmin(user) ? 2000 : subscriptionData.maxPages;
-    await this.crawlWebsiteForKb(
-      kbData._id,
-      websiteData,
-      maxPages,
-      data.useAlternateParser,
-    );
+    if (websiteData) {
+      const maxPages = isAdmin(user) ? 2000 : subscriptionData.maxPages;
+      await this.crawlWebsiteForKb(
+        kbData._id,
+        websiteData,
+        maxPages,
+        data.useAlternateParser,
+      );
+    }
 
     return kbData;
   }
