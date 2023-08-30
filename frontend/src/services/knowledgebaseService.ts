@@ -1,13 +1,13 @@
 import axios, { AxiosResponse } from 'axios';
 import { baseURL } from '../config';
-import { ChatBotCustomizeData, ChatSessionDetail, CrawlDataDetail, CrawlDataListPagination, Knowledgebase, OfflineMessagePagination, TrainingData, TrainingDataDetail, ChatSessionPagination, CustomDataPagination } from '../types/knowledgebase.type';
+import { ChatBotCustomizeData, ChatSessionDetail, CrawlDataDetail, CrawlDataListPagination, Knowledgebase, OfflineMessagePagination, TrainingData, TrainingDataDetail, ChatSessionPagination, CustomDataPagination, WebsiteData } from '../types/knowledgebase.type';
 export interface Product {
 	id: string;
 	name: string;
 	previewUrl: string;
 }
 
-export async function createKnowledgebase(data: Knowledgebase): Promise<AxiosResponse<Knowledgebase>> {
+export async function createKnowledgebase(data: WebsiteData): Promise<AxiosResponse<Knowledgebase>> {
 	return await axios({
 		baseURL: baseURL,
 		method: 'post',
@@ -66,6 +66,13 @@ export async function fetchKnowledgebaseCrawlData(id:string, page: number): Prom
 		url: `/knowledgebase/${id}/datastore?type=WEBPAGE&page=${page}`,
 	});
 }
+export async function fetchKnowledgebaseCrawlDataForDocs(id:string, page: number): Promise<AxiosResponse<CrawlDataListPagination>> {
+	return await axios({
+		baseURL: baseURL,
+		method: 'get',
+		url: `/knowledgebase/${id}/datastore?type=DOCUMENT&page=${page}`,
+	});
+}
 export async function fetchKnowledgebaseCrawlDataDetails(id:string, crawlId:string): Promise<AxiosResponse<CrawlDataDetail>> {
 	return await axios({
 		baseURL: baseURL,
@@ -112,12 +119,11 @@ export async function updateDefaultAnswer(id:string, defaultAnswer: string): Pro
 	});
 }
 
-export async function updateWebsiteData(id:string, data: ChatBotCustomizeData): Promise<AxiosResponse<Knowledgebase[]>> {
+export async function updateWebsiteData(id:string, data: WebsiteData): Promise<AxiosResponse<Knowledgebase[]>> {
 	return await axios({
 		baseURL: baseURL,
 		method: 'put',
-		data: data,
-		useAlternateParser: true,
+		data: { ...data, useAlternateParser: true },
 		url: `/knowledgebase/${id}/website_data`,
 	});
 }
@@ -143,6 +149,24 @@ export async function addTrainingData(id: string, data): Promise<AxiosResponse<K
 		url: `/knowledgebase/${id}/datastore/custom_data`,
 	});
 }
+
+export async function addTrainingDocs(id: string, files: File[]): Promise<AxiosResponse<Knowledgebase>> {
+	const formData = new FormData();
+	files.forEach((file) => {
+		formData.append('file', file);
+	});
+	formData.append('knowledgebaseId', id);
+	return await axios({
+		baseURL: baseURL,
+		method: 'post',
+		data: formData,
+		url: `knowledgebase/importers/document`,
+		headers: {
+			'Content-Type': 'multipart/form-data',
+		},
+	});
+}
+
 export async function updateTrainingData(id: string, data): Promise<AxiosResponse<Knowledgebase>> {
 	return await axios({
 		baseURL: baseURL,

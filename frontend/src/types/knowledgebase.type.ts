@@ -6,6 +6,12 @@ export interface CrawlData {
     };
 }
 
+export interface DocsKnowledgeData {
+    docs: CrawlDataList[];
+    pages: number;
+    knowledgebaseId: string;
+}
+
 export enum KnowledgebaseStatus {
     CREATED = 'CREATED',
     CRAWLING = 'CRAWLING',
@@ -22,6 +28,11 @@ export interface WebsiteData {
     include: string[];
     urls: string[];
     name?: string;
+}
+
+export interface ProductSetupData {
+    websiteData: WebsiteData;
+    files?: File[];
 }
 
 export interface CrawlDataDetail {
