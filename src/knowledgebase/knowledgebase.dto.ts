@@ -13,20 +13,19 @@ export class CreateKnowledgebaseDTO {
   @IsNotEmpty()
   name: string;
 
-  @IsNotEmpty()
   websiteUrl: string;
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsArray()
   urls: string[];
 
   // Include paths (relative to website url)
-  @IsNotEmpty()
+  @IsOptional()
   @IsArray()
   include: string[];
 
   // Exclude paths (relative to website url)
-  @IsNotEmpty()
+  @IsOptional()
   @IsArray()
   exclude: string[];
 

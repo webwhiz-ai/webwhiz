@@ -182,6 +182,11 @@
         let showReadMore = true;
         let readMoreText = 'Read More:';
 
+        let isFirstMessage = true;
+        
+        let collectEmail = false;
+        let collectEmailText = 'Read More:';
+
         let sessionId = '';
 
         let messages = [];
@@ -221,6 +226,9 @@
                 }
             } else if (event.data.messageType === 'webwhiz:recieve_chat_data') {
                 messages = event.data.chatHistory;
+                if(messages.length > 0) {
+                    isFirstMessage = false;
+                }
                 let msgHTML = messages.map(msg => {
                     const type = msg.role === 'user' ? 'user' : 'chatbot';
                     let msgContent = msg.content;
@@ -346,6 +354,7 @@
             const data = await getWidgetData();
             const chatWidgetData = data.chatWidgeData;
             showReadMore = chatWidgetData.showReadMore;
+            collectEmail = chatWidgetData.collectEmail;
             requestMetaData();
 
             const heading = document.getElementById('chat-heading');
@@ -419,6 +428,8 @@
             if(chatWidgetData.readMoreText) {
                 readMoreText = chatWidgetData.readMoreText;
             }
+            
+            collectEmailText = chatWidgetData.collectEmailText || collectEmailText;
 
             if(chatWidgetData.offlineMsgHeading) {
                 offlineMsgHeading.innerText = chatWidgetData.offlineMsgHeading;
@@ -441,7 +452,7 @@
                 }
                 .chat-header, .chat-tabs button, .btn-primary {color: ${chatWidgetData.fontColor}!important}
                 .tabs-active, .btn-primary {background-color: ${chatWidgetData.backgroundColor}!important}
-                .chat-submit-btn svg, .message-feedback {
+                .chat-submit-btn svg, .message-feedback, .lead-done-icon {
                     color: ${chatWidgetData.backgroundColor}!important
                 }
                 .chat-message.user .chat-message-text {background-color: ${chatWidgetData.backgroundColor}!important; color: ${chatWidgetData.fontColor}!important}
@@ -501,6 +512,30 @@
                 }
             );
 
+            if (response.status === 200) {
+                const result = await response.text()
+                return result;
+            } else {
+                console.log('error');
+            }
+            //return response;
+        }
+
+        async function updateSession(sessionId, userData) {
+            const response = await fetch(
+                `${baseURL}/chatbot/session/${sessionId}`,
+                {
+                    method: 'PUT', // *GET, POST, PUT, DELETE, etc.
+                    headers: {
+                        Accept: 'application/json',
+                        'Content-Type': 'application/json',
+                    },
+                    referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+                    body: JSON.stringify({
+                        userData: userData
+                    }), // body data type must match "Content-Type" header
+                }
+            );
             if (response.status === 200) {
                 const result = await response.text()
                 return result;
@@ -639,6 +674,57 @@
                         msg = replaceAll(msg, '<br/>', '\n')
                         const markdownRes = marked.parse(msg);
                         msgHolder.innerHTML = markdownRes;
+                        if(collectEmail && isFirstMessage) {
+                            const collectEmailMarkup = `<div class="chat-message chatbot">
+                                    <div
+                                        class="chat-message-text chat-message-form"
+                                        id="chat-message-form-email"
+                                    >
+                                        <div class="form-group">
+                                            <label
+                                                for="lead-email-input"
+                                                >${collectEmailText}</label
+                                            >
+                                            <div id="lead-email-form" class="input-group">
+                                                <input
+                                                    type="text"
+                                                    class="form-control"
+                                                    id="lead-email-input"
+                                                    placeholder="hi@example.com"
+                                                />
+                                                <button
+                                                    class="chat-submit-btn"
+                                                    id="lead-email-input-submit"
+                                                    type="submit"
+                                                >
+                                                    <svg
+                                                        width="16"
+                                                        height="16"
+                                                        fill="none"
+                                                        xmlns="http://www.w3.org/2000/svg"
+                                                    >
+                                                        <path
+                                                        fill-rule="evenodd"
+                                                        clip-rule="evenodd"
+                                                        d="M4.394 14.7L13.75 9.3c1-.577 1-2.02 0-2.598L4.394 1.299a1.5 1.5 0 00-2.25 1.3v3.438l4.059 1.088c.494.132.494.833 0 .966l-4.06 1.087v4.224a1.5 1.5 0 002.25 1.299z"
+                                                        fill="currentColor"
+                                                        ></path>
+                                                    </svg>
+                                                </button>
+                                                <svg class="lead-done-icon" stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 24 24" height="18px" width="18px" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C6.486 2 2 6.486 2 12s4.486 10 10 10 10-4.486 10-10S17.514 2 12 2zm-1.999 14.413-3.713-3.705L7.7 11.292l2.299 2.295 5.294-5.294 1.414 1.414-6.706 6.706z"></path></svg>
+                                                <div class='chat-loading-dot-cont'>
+                                                    <div class="chat-loading-dot"></div>
+                                                    <div class="chat-loading-dot"></div>
+                                                    <div class="chat-loading-dot"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>`;
+                                chatMessages.insertAdjacentHTML("beforeend", collectEmailMarkup);
+                                enableEmailCollection();
+                                isFirstMessage = false;
+                        }
                     }
 
                     chatMessages.scrollTop = chatMessages.scrollHeight;
@@ -661,6 +747,44 @@
             }
         }
 
+        async function saveEmail(email) {
+            const input = document.getElementById('lead-email-input');
+            email = email || input.value.trim();
+            if (!email) return;
+            const $emailFormCont = document.getElementById('chat-message-form-email');
+            $emailFormCont.classList.add('chat-message-form-loading');
+            const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+            try {
+                await updateSession(sessionId, {
+                    email: email,
+                    userAgent: userAgent,
+                    origin: origin
+                });
+            } catch (error) {
+                console.log(error);
+            } finally {
+                $emailFormCont.classList.remove('chat-message-form-loading');
+                $emailFormCont.classList.add('chat-message-form-submitted');
+            }
+        }
+
+        function enableEmailCollection() {
+            const leadInputForm = document.getElementById('lead-email-form');
+            const emailInput = document.getElementById('lead-email-input');
+            emailInput.addEventListener('keydown',  (e) => {
+                if (e.keyCode === 13 || e.key === "Enter") {
+                    e.preventDefault();
+                    saveEmail();
+                }
+                const $emailFormCont = document.getElementById('chat-message-form-email');
+                $emailFormCont.classList.remove('chat-message-form-submitted');
+            });
+            document.getElementById('lead-email-input-submit').addEventListener('click', (e)=>{
+                e.preventDefault();
+                saveEmail();
+            })
+        }
+
 
         // JavaScript code to handle the chat form submission
         const form = document.getElementById('chat-form');
@@ -676,6 +800,7 @@
                 addMessageToChat();
             }
         };
+
 
         function notifyParentWidgetExpand() {
             window.top.postMessage('webwhiz:widget_expand', '*');
@@ -707,7 +832,7 @@
         function notifyNewSession(sessionId) {
             window.top.postMessage({
                 messageType: 'webwhiz:recieve_new_session_id',
-                sessionId: sessionId
+                sessionId: sessionId || ''
             }, '*');
         }
 

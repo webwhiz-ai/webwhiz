@@ -720,6 +720,63 @@ span.form-required {
     color: rgb(0, 0, 0);
 }
 
+.chat-message-text.chat-message-form {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 15px 12px;
+}
+.chat-message-form .form-group {
+    margin-bottom: 0;
+}
+.chat-message-form label {
+    margin-bottom: 8px;
+    display: block;
+}
+.chat-message-form .input-group {
+    position: relative;
+    margin-bottom: 0;
+}
+.chat-message-form .form-control {
+    background-color: #FFF;
+}
+.chat-message-form .chat-submit-btn, .chat-message-form .lead-done-icon {
+    top: 50%;
+    right: 10px;
+    transform: translate3d(0, -50%, 0px);
+    transition: opacity 0.2s ease-in-out;
+    z-index: 1;
+}
+.lead-done-icon {
+    display: none;
+    position: absolute;
+}
+.chat-message-form .chat-loading-dot-cont {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    width: 20px;
+    transform: translate3d(0px, -50%, 0px);
+    margin-top: 5px;
+    opacity: 0;
+    transition: opacity 0.2s ease-in-out;
+}
+.chat-message-form .chat-loading-dot {
+    width: 5px;
+    height: 5px;
+}
+.chat-message-form.chat-message-form-loading .chat-submit-btn {
+    opacity: 0;
+}
+.chat-message-form.chat-message-form-loading .chat-loading-dot-cont {
+    opacity: 1;
+}
+.chat-message-form.chat-message-form-submitted .chat-submit-btn {
+    display: none;
+}
+.chat-message-form.chat-message-form-submitted .lead-done-icon {
+    display: block;
+}
+
 
 
 .chat-loading-dot-cont {
@@ -759,6 +816,24 @@ span.form-required {
 
     16% {
         transform: translate(0, -8px);
+    }
+
+    33% {
+        transform: translate(0, 0);
+    }
+
+    100% {
+        transform: translate(0, 0);
+    }
+}
+
+@keyframes jumpingAnimationSmall {
+    0 {
+        transform: translate(0, 0);
+    }
+
+    16% {
+        transform: translate(0, -4px);
     }
 
     33% {

@@ -62,6 +62,8 @@ export interface ChatBotCustomizeData {
     placement: 'left' | 'right';
     showReadMore: boolean;
     offlineMessage: boolean;
+    collectEmail: boolean,
+    collectEmailText: string,
     welcomeMessage: string;
     questionExamples: {
         question: string;

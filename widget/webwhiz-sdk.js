@@ -106,6 +106,7 @@ function __WEBWHIZ__getEventHandler(ifrm) {
     } else if (e.data === "webwhiz:widget_clear_history") {
       localStorage.removeItem('chatHistory');
       localStorage.removeItem('sessionId');
+      e.source.postMessage({ messageType: 'webwhiz:recieve_session_id', sessionId: '' }, '*');
     } else if (e.data === "webwhiz:request_meta_data") {
       const scriptEl = document.getElementById("__webwhizSdk__");
       const container = scriptEl.getAttribute('container') || scriptEl.getAttribute('data-container');
