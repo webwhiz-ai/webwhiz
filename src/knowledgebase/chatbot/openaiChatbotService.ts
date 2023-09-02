@@ -332,9 +332,9 @@ export class OpenaiChatbotService {
       prompt,
     );
 
-    if (debug) {
-      this.logger.log('Prompt Messages', JSON.stringify(messages));
-    }
+    // if (debug) {
+    //   this.logger.log('Prompt Messages', JSON.stringify(messages));
+    // }
 
     const answer = await this.openaiService.getChatGptCompletion(
       {

@@ -52,7 +52,7 @@ export class OpenaiService {
 
     // Rate limiter for 100 req / min
     this.embedRateLimiter = new RateLimiterMemory({
-      points: 100,
+      points: 400,
       duration: 60 * 1,
     });
 
