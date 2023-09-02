@@ -48,16 +48,12 @@ export class Base extends React.Component<AppProps, AppState> {
 				return response;
 			},
 			(error: any) => {
-				removeAuthenticationDetails();
-				this.setState({
-					isAuthenticated: false,
-				});
-				// if (error.response && error.response.status === 401) {
-				// 	removeAuthenticationDetails();
-				// 	this.setState({
-				// 		isAuthenticated: false,
-				// 	});
-				// }
+				if (error.response && error.response.status === 401) {
+					removeAuthenticationDetails();
+					this.setState({
+						isAuthenticated: false,
+					});
+				}
 				return Promise.reject(error);
 			}
 		);
