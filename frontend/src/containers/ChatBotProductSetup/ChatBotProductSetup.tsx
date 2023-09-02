@@ -99,9 +99,7 @@ interface ChatBotProductSetupProps {
 
 function validateWebsite(value: string) {
 	let error;
-	if (!value) {
-		error = "Please enter website url";
-	} else if (
+	if (value &&
 		!/https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,10}\b([-a-zA-Z0-9@:%_\+.~#()?&//=]*)/gim.test(
 			value
 		)
@@ -179,7 +177,7 @@ export const ChatBotProductSetup = ({
 			// });
 
 			const websiteData: WebsiteData = {
-				name: getDomainFromUrl(websiteUrl),
+				name: websiteUrl ? getDomainFromUrl(websiteUrl) : files[0].name,
 				websiteUrl: websiteUrl,
 				urls: [],
 				include: targetPaths,
@@ -521,7 +519,7 @@ export const ChatBotProductSetup = ({
 														>
 															{({ field, form }: any) => (
 																<FormControl 
-																isRequired 
+																// isRequired 
 																mb="8">
 																	<FormLabel fontWeight={400} color="gray.700" fontSize="sm" htmlFor="websiteUrl">
 																		Website URL
@@ -531,7 +529,7 @@ export const ChatBotProductSetup = ({
 																		{...field}
 																		id="websiteUrl"
 																		isDisabled={disableWebsiteInput}
-																		required
+																		// required
 																		placeholder="https://www.paritydeals.com"
 																	/>
 																	{disableWebsiteInput && (<FormHelperText fontSize="smaller" color="gray.400">
@@ -672,10 +670,13 @@ export const ChatBotProductSetup = ({
 										colorScheme="blue"
 										variant="solid"
 										isLoading={isSubmitting}
+										// disabled={
+										// 	isSubmitting || disableSubmitBtnByDefault
+										// 		? !(isValid && dirty)
+										// 		: !isValid
+										// }
 										disabled={
-											isSubmitting || disableSubmitBtnByDefault
-												? !(isValid && dirty)
-												: !isValid
+											isSubmitting || !isValid || (values.files.length === 0 && !values.websiteUrl)
 										}
 										onClick={() => {
 											onNextButtonClick(values, "primary");
