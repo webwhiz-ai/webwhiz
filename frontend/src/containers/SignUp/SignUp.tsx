@@ -4,8 +4,6 @@ import {
 	Button,
 	Flex,
 	FormControl,
-	AlertDescription,
-	Alert,
 	FormErrorMessage,
 	FormLabel,
 	Heading,
@@ -95,9 +93,6 @@ const SignUp = (props: SignUpProps) => {
 
 	return (
 		<Flex bg='white' h='100vh' direction='column'>
-			<Alert status='error' variant='left-accent'>
-				<AlertDescription>We're updating! Services unavailable for the next 20 mins to 1 hr</AlertDescription>
-			</Alert>
 			<Flex
 				shrink={0}
 				shadow='base'
