@@ -167,6 +167,21 @@ export async function addTrainingDocs(id: string, files: File[]): Promise<AxiosR
 	});
 }
 
+export async function addTrainingDoc(id : string, file: File): Promise<AxiosResponse<Knowledgebase>> {
+	const formData = new FormData();
+	formData.append('file', file);
+	formData.append('knowledgebaseId', id);
+	return await axios({
+		baseURL: baseURL,
+		method: 'post',
+		data: formData,
+		url: `knowledgebase/importers/pdf`,
+		headers: {
+			'Content-Type': 'multipart/form-data',
+		},
+	});
+}
+
 export async function updateTrainingData(id: string, data): Promise<AxiosResponse<Knowledgebase>> {
 	return await axios({
 		baseURL: baseURL,

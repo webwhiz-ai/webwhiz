@@ -11,7 +11,7 @@ import { Link, useHistory } from "react-router-dom";
 import {
 	ChatBotProductSetup,
 } from "../ChatBotProductSetup/ChatBotProductSetup";
-import { createKnowledgebase, deleteKnowledgebase, fetchKnowledgebaseCrawlData, fetchKnowledgebaseDetails, generateEmbeddings, addTrainingDocs, fetchKnowledgebaseCrawlDataForDocs } from "../../services/knowledgebaseService";
+import { createKnowledgebase, deleteKnowledgebase, fetchKnowledgebaseCrawlData, fetchKnowledgebaseDetails, generateEmbeddings, addTrainingDocs, fetchKnowledgebaseCrawlDataForDocs, addTrainingDoc } from "../../services/knowledgebaseService";
 import { ProductSetupData, DocsKnowledgeData } from "../../types/knowledgebase.type";
 
 
@@ -83,21 +83,17 @@ export const CreateChatBots = () => {
 				setKnowledgeBaseId(response.data._id);
 
 				if (payLoad.files?.length && payLoad.files.length > 0) {
-					try {
-						setIsUploadingDocs(true);
-						const addDocsResponse = await addTrainingDocs(response.data._id, payLoad.files);
-						if (addDocsResponse.status >= 200 && addDocsResponse.status < 300) {
-							console.log('Upload successful');
-							console.log('Response data:', addDocsResponse.data);
-						} else {
-							console.error('Upload failed. Status code:', addDocsResponse.status);
-							console.error('Error response:', addDocsResponse.data);
+					setIsUploadingDocs(true);
+					for (const file of payLoad.files) {
+						try {
+							const addDocResponse = await addTrainingDoc(response.data._id, file);
+						} catch (error) {
+							console.log('error', error)
 						}
-					} catch (error) {
-						console.log('error', error)
-					} finally {
-						setIsUploadingDocs(false);
 					}
+					setIsUploadingDocs(false);
+
+
 					setDocsDataLoading(true);
 					const _docsDataResponse = await fetchKnowledgebaseCrawlDataForDocs(response.data._id, 1); 
 					const _docsData: DocsKnowledgeData = {
@@ -112,7 +108,7 @@ export const CreateChatBots = () => {
 				let interval = setInterval(async () => {
 					const details = await fetchKnowledgebaseDetails(response.data._id);
 					console.log("details", details);
-					if(details.data.status === 'CRAWLED') {
+					if(details.data.status === 'CRAWLED' || !details.data.websiteData) {
 						clearInterval(interval);
 						
 						const _crawlDataResponse = await fetchKnowledgebaseCrawlData(response.data._id, 1);
@@ -218,21 +214,15 @@ export const CreateChatBots = () => {
 			setKnowledgeBaseId(response.data._id);
 
 			if (payLoad.files?.length && payLoad.files.length > 0) {
-				try {
-					setIsUploadingDocs(true);
-					const addDocsResponse = await addTrainingDocs(response.data._id, payLoad.files);
-					if (addDocsResponse.status >= 200 && addDocsResponse.status < 300) {
-						console.log('Upload successful');
-						console.log('Response data:', addDocsResponse.data);
-					} else {
-						console.error('Upload failed. Status code:', addDocsResponse.status);
-						console.error('Error response:', addDocsResponse.data);
+				setIsUploadingDocs(true);
+				for (const file of payLoad.files) {
+					try {
+						const addDocResponse = await addTrainingDoc(response.data._id, file);
+					} catch (error) {
+						console.log('error', error)
 					}
-				} catch (error) {
-					console.log('error', error)
-				} finally {
-					setIsUploadingDocs(false);
 				}
+				setIsUploadingDocs(false);
 				setDocsDataLoading(true);
 				const _docsDataResponse = await fetchKnowledgebaseCrawlDataForDocs(response.data._id, 1); 
 				const _docsData: DocsKnowledgeData = {
@@ -247,7 +237,7 @@ export const CreateChatBots = () => {
 			let interval = setInterval(async () => {
 				const details = await fetchKnowledgebaseDetails(response.data._id);
 				console.log("details", details);
-				if(details.data.status === 'CRAWLED') {
+				if(details.data.status === 'CRAWLED' || !details.data.websiteData) {
 					clearInterval(interval);
 					console.log('details.data', details.data.crawlData)
 					

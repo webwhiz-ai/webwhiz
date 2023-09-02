@@ -46,7 +46,7 @@ import { ChatBotsCustomize } from "../ChatBotsCustomize/ChatBotsCustomize";
 import { useLocation } from "react-router-dom";
 
 import styles from "./EditChatbot.module.scss";
-import { fetchKnowledgebaseCrawlData, customizeWidget, deleteTrainingData, fetcKnowledgebase, fetchKnowledgebaseDetails, generateEmbeddings, getTrainingData, getTrainingDataDetails, updateWebsiteData, getChatSessions, getOfflineMessages, updatePrompt, updateDefaultAnswer, addTrainingDocs, fetchKnowledgebaseCrawlDataForDocs } from "../../services/knowledgebaseService";
+import { fetchKnowledgebaseCrawlData, customizeWidget, deleteTrainingData, fetcKnowledgebase, fetchKnowledgebaseDetails, generateEmbeddings, getTrainingData, getTrainingDataDetails, updateWebsiteData, getChatSessions, getOfflineMessages, updatePrompt, updateDefaultAnswer, addTrainingDocs, fetchKnowledgebaseCrawlDataForDocs, addTrainingDoc } from "../../services/knowledgebaseService";
 import { ChatBot } from "../../components/ChatBot/ChatBot";
 import { chatWidgetDefaultValues, getDomainFromUrl } from "../../utils/commonUtils";
 import { AddTrainingData } from "../AddTrainingData/AddTrainingData";
@@ -640,12 +640,12 @@ const EditChatbot = (props: EditChatbotProps) => {
 
 
 	const getExcludedPaths = React.useCallback(() => {
-		if (!chatBot._id) return;
+		if (!chatBot._id || !chatBot.websiteData) return;
 		const excludedPaths = chatBot.websiteData.exclude.join(',')
 		return excludedPaths;
 	}, [chatBot]);
 	const getIncludedPaths = React.useCallback(() => {
-		if (!chatBot._id) return;
+		if (!chatBot._id || !chatBot.websiteData) return;
 		const includedPaths = chatBot.websiteData.include.join(',')
 		return includedPaths;
 	}, [chatBot]);
@@ -702,7 +702,7 @@ const EditChatbot = (props: EditChatbotProps) => {
 					<ChatBotProductSetup
 						onCrawlDataPaginationClick={getCrawlDataPagination}
 						onDocsDataPaginationClick={getDocsDataPagination}
-						defaultWebsite={chatBot.websiteData.websiteUrl}
+						defaultWebsite={chatBot.websiteData?.websiteUrl}
 						defaultExcludedPaths={getExcludedPaths()}
 						defaultIncludedPaths={getIncludedPaths()}
 						showSecondaryButton
@@ -764,31 +764,15 @@ const EditChatbot = (props: EditChatbotProps) => {
 								})
 
 								if (formValues.files?.length && formValues.files.length > 0) {
-									try {
-										setIsUploadingDocs(true);
-										const addDocsResponse = await addTrainingDocs(chatBot._id, formValues.files);
-										if (addDocsResponse.status >= 200 && addDocsResponse.status < 300) {
-											console.log('Upload successful');
-											console.log('Response data:', addDocsResponse.data);
-										} else {
-											console.error('Upload failed. Status code:', addDocsResponse.status);
-											console.error('Error response:', addDocsResponse.data);
-											toast({
-												title: `Oops! Document upload failed.`,
-												status: "error",
-												isClosable: true,
-											});
+									setIsUploadingDocs(true);
+									for (const file of formValues.files) {
+										try {
+											const addDocResponse = await addTrainingDoc(chatBot._id, file);
+										} catch (error) {
+											console.log('error', error)
 										}
-									} catch (error) {
-										console.log('error', error);
-										toast({
-											title: `Oops! Document upload failed.`,
-											status: "error",
-											isClosable: true,
-										});
-									} finally {
-										setIsUploadingDocs(false);
 									}
+									setIsUploadingDocs(false);
 									const _docsDataResponse = await fetchKnowledgebaseCrawlDataForDocs(chatBot._id, 1); 
 									const _docsData: DocsKnowledgeData = {
 										docs: _docsDataResponse.data.results,
@@ -802,7 +786,7 @@ const EditChatbot = (props: EditChatbotProps) => {
 									const details = await fetchKnowledgebaseDetails(response.data._id);
 									console.log("details", details);
 									const chatBotId = details.data._id
-									if (details.data.status === 'CRAWLED') {
+									if (details.data.status === 'CRAWLED' || !details.data.websiteData) {
 										//setDefaultCrauledData(details.data.)
 										//Training ChatGPT with your website data...
 
