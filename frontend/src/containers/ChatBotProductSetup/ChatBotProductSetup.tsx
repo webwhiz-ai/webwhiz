@@ -598,29 +598,11 @@ export const ChatBotProductSetup = ({
 														</Field>
 													</TabPanel>
 													<TabPanel pt="8">
-														<Field name="files" innerRef={customDropzoneRef} as={CustomDropzone} label="Upload Files" helperText="Upload files to be crawled. For e.g. sitemap.xml, robots.txt.">
-															{/* {({ field, form, setFieldValue }: any) => (
-																<FormControl
-																	mb="8"
-																	isInvalid={form.errors.files && form.touched.files}
-																>
-																	<FormLabel fontWeight={400} color="gray.700" fontSize="sm" htmlFor="files">
-																		Upload files
-																	</FormLabel>
-
-
-																	<FormHelperText fontSize="smaller" color="gray.400">
-																		Upload files to be crawled. For e.g. sitemap.xml, robots.txt.
-																	</FormHelperText>
-
-
-																	<FormErrorMessage>
-																		{form.errors.files}
-																	</FormErrorMessage>
-																</FormControl>
-															)} */}
-															{console.log('ref', customDropzoneRef)}
-														</Field>
+														<CustomDropzone 
+															ref={customDropzoneRef} 
+															name="files" label="Upload Files" 
+															helperText="Upload files to be crawled. For e.g. sitemap.xml, robots.txt."
+														/>
 													</TabPanel>
 												</TabPanels>
 											</Tabs>

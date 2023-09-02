@@ -81,7 +81,7 @@ const CustomDropzone = React.forwardRef(({name, label, helperText}: CustomDropzo
             <Text mt={2} fontSize="sm" color="gray.400">{helperText}</Text>
             <Box
                 mt={4}
-                h="320px"
+                maxH="320px"
                 overflowY="auto">
                 {field.value.length > 0 && (
                     <VStack mt={4} align="stretch" spacing={2} >
