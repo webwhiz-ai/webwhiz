@@ -17,10 +17,12 @@ import '@sentry/tracing';
 import { ImportersModule } from './importers/importers.module';
 import { TaskModule } from './task/task.module';
 import { WebhookModule } from './webhook/webhook.module';
+import { MetricsModule } from './common/metrics/metrics.module';
 
 @Module({
   imports: [
     AppConfigModule,
+    MetricsModule,
     SentryModule.forRoot({
       dsn: process.env.SENTRY_DSN,
       tracesSampleRate: 0.3,
