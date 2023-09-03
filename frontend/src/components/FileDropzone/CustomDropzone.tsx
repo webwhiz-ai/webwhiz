@@ -1,7 +1,7 @@
 import { Box, Flex, Icon, IconButton, Text, VStack } from '@chakra-ui/react'
 import { useField } from 'formik'
 import React from 'react'
-import { useDropzone } from 'react-dropzone'
+import { useDropzone, FileRejection } from 'react-dropzone'
 import { FiTrash, FiUpload } from 'react-icons/fi'
 
 type CustomDropzoneProps = {
@@ -15,15 +15,24 @@ const CustomDropzone = React.forwardRef(({name, label, helperText}: CustomDropzo
     const [field, meta, helpers] = useField(name);
 
     const handleDrop = (acceptedFiles: File[]) => {
-        if(acceptedFiles.length > 5) {
-            helpers.setError('You can only upload a maximum of 5 files');
+        // Check if any file size is greater than 5MB
+        const hasOversizedFile = acceptedFiles.some((file) => file.size > 5 * 1024 * 1024); // 5MB in bytes
+
+        if (hasOversizedFile) {
+            helpers.setError('One or more files exceed the maximum allowed size of 5MB');
             console.log(meta.error);
             return;
         }
-        console.log(name);
+
+        if (acceptedFiles.length + field.value.length > 5) {
+            helpers.setError('You can only upload a maximum of 5 files at a time');
+            console.log(meta.error);
+            return;
+        }
+
         helpers.setValue([...field.value, ...acceptedFiles]);
         console.log(field.value.length);
-      };
+    };
 
     const clearFiles = () => {
         helpers.setValue([]); // Clear the files
@@ -40,6 +49,7 @@ const CustomDropzone = React.forwardRef(({name, label, helperText}: CustomDropzo
         },
         multiple: true,
         // maxFiles: 5,
+        // maxSize: 1024 * 1024 * 5,
     });
 
     React.useImperativeHandle(innerRef, () => ({
