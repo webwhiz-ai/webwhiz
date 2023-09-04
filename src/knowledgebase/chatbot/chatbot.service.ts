@@ -38,7 +38,6 @@ import { OpenaiChatbotService } from './openaiChatbotService';
 const CHAT_SESION_EXPIRY_TIME = 5 * 60;
 const CHUNK_FILTER_THRESHOLD = 0.3;
 const SOURCES_FILTER_THRESHOLD = 0.8;
-// const EPOCH = '2000-01-01T00:00:00.000+00:00';
 
 @Injectable()
 export class ChatbotService {
