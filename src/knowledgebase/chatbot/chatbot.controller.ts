@@ -16,6 +16,7 @@ import { RequestWithUser } from '../../common/@types/nest.types';
 import { ChatSessionSparse } from '../knowledgebase.schema';
 import {
   ChatbotQueryDTO,
+  ChatMarkAsUnreadDTO,
   CreateChatbotSessionDTO,
   PromptTestDTO,
   UpdateChatbotSessionDTO,
@@ -84,6 +85,17 @@ export class ChatbotController {
   @Post('/test_prompt')
   async testPrompt(@Body() data: PromptTestDTO) {
     return this.chatbotService.testPrompt(data);
+  }
+
+  @Public()
+  @Post('/session/:sessionId/unread')
+  @HttpCode(200)
+  async markMessageAsUnread(
+    @Req() req: RequestWithUser,
+    @Param('sessionId') sessionId: string,
+    @Body() data: ChatMarkAsUnreadDTO,
+  ) {
+    return this.chatbotService.markMessageAsUnread(sessionId, data.ts);
   }
 
   @Post('/demo_session')

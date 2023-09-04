@@ -489,7 +489,31 @@ export class KnowledgebaseDbService {
   async addMsgToChatSession(id: ObjectId, msg: ChatQueryAnswer) {
     await this.chatSessionCollection.updateOne(
       { _id: id },
-      { $push: { messages: msg }, $set: { updatedAt: new Date() } },
+      { $push: { messages: msg }, $set: { updatedAt: new Date(), read: true } },
+    );
+  }
+
+  async markMessageAsUnread(sessionId: ObjectId, ts: string) {
+    await this.chatSessionCollection.updateMany(
+      {
+        _id: sessionId,
+      },
+      { $set: { 'messages.$[element].read': false } },
+      {
+        arrayFilters: [{ 'element.ts': { $gte: new Date(ts) } }],
+      },
+    );
+  }
+
+  async markMessageAsRead(sessionId: ObjectId, ts: string) {
+    await this.chatSessionCollection.updateMany(
+      {
+        _id: sessionId,
+      },
+      { $set: { 'messages.$[element].read': true } },
+      {
+        arrayFilters: [{ 'element.ts': { $lte: new Date(ts) } }],
+      },
     );
   }
 
