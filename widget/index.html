@@ -102,26 +102,26 @@
             </div>
             <div id="offline-message" class="offline-message">
                 <div class="form-group">
-                    <label for="offline-message-name">Name <span class="form-required">*</span></label>
+                    <label for="offline-message-name"><span id="label-offline-message-name">Name</span> <span class="form-required">*</span></label>
                     <input type="text" class="form-control" id="offline-message-name" placeholder="Enter your name">
                     <!--Error message-->
-                    <div class="invalid-feedback" id="invalid-feedback-name">This field is required</div>
+                    <div class="invalid-feedback required-field" id="invalid-feedback-name">This field is required</div>
 
                 </div>
                 <div class="form-group">
-                    <label for="offline-message-email">Email <span class="form-required">*</span></label>
+                    <label for="offline-message-email"><span id="label-offline-message-email">Email</span> <span class="form-required">*</span></label>
                     <input type="text" class="form-control" id="offline-message-email" placeholder="Enter your email">
                     <!--Error message-->
-                    <div class="invalid-feedback" id="invalid-feedback-email">This field is required</div>
+                    <div class="invalid-feedback required-field" id="invalid-feedback-email">This field is required</div>
                     <div class="invalid-feedback" id="invalid-feedback-email-invalid">Please enter a valid email</div>
 
                 </div>
                 <div class="form-group">
-                    <label for="offline-message-message">Message <span class="form-required">*</span></label>
+                    <label for="offline-message-message"><span id="label-offline-message-message">Message</span> <span class="form-required">*</span></label>
                     <textarea class="form-control" rows="4" id="offline-message-message"
                         placeholder="Enter your message"></textarea>
                     <!--Error message-->
-                    <div class="invalid-feedback" id="invalid-feedback-message">This field is required</div>
+                    <div class="invalid-feedback required-field" id="invalid-feedback-message">This field is required</div>
 
                 </div>
                 <button class="btn btn-primary" loadingText="Submitting..." id="offline-message-submit"
@@ -365,6 +365,14 @@
             const welcomeMsg = document.getElementById('chat-welcome-msg');
             const buttonElement = document.getElementById("chat-launcher-btn");
             const chatInputElement = document.getElementById("chat-input");
+            const offlineMsgNameLabel = document.getElementById("label-offline-message-name");
+            const offlineMsgEmailLabel = document.getElementById("label-offline-message-email");
+            const offlineMsgMessageLabel = document.getElementById("label-offline-message-message");
+            const offlineMsgNameInput = document.getElementById("offline-message-name");
+            const offlineMsgEmailInput = document.getElementById("offline-message-email");
+            const offlineMsgMessageInput = document.getElementById("offline-message-message");
+            const requiredFieldErrorMsg = document.querySelectorAll('.required-field');
+            const invalidEmailErrorMsg = document.getElementById('invalid-feedback-email-invalid');
 
             const defaultLauncherIcon = `<svg 
                 focusable="false" 
@@ -437,6 +445,44 @@
 
             if(chatWidgetData.offlineMsgDescription) {
                 offlineMsgDescription.innerText = chatWidgetData.offlineMsgDescription;
+            }
+
+            if(chatWidgetData.nameFieldLabel) {
+                offlineMsgNameLabel.innerText = chatWidgetData.nameFieldLabel;
+            }
+
+            if(chatWidgetData.emailFieldLabel) {
+                offlineMsgEmailLabel.innerText = chatWidgetData.emailFieldLabel;
+            }
+
+            if(chatWidgetData.msgFieldLabel) {
+                offlineMsgMessageLabel.innerText = chatWidgetData.msgFieldLabel;
+            }
+
+            if(chatWidgetData.nameFieldPlaceholder) {
+                offlineMsgNameInput.placeholder = chatWidgetData.nameFieldPlaceholder;
+            }
+
+            if(chatWidgetData.emailFieldPlaceholder) {
+                offlineMsgEmailInput.placeholder = chatWidgetData.emailFieldPlaceholder;
+            }
+
+            if(chatWidgetData.msgFieldPlaceholder) {
+                offlineMsgMessageInput.placeholder = chatWidgetData.msgFieldPlaceholder;
+            }
+
+            if(chatWidgetData.requiredFieldMsg) {
+                requiredFieldErrorMsg.forEach(div => {
+                        div.innerText = chatWidgetData.requiredFieldMsg;
+                });
+            }
+
+            if(chatWidgetData.invalidEmailMsg) {
+                invalidEmailErrorMsg.innerText = chatWidgetData.invalidEmailMsg;
+            }
+
+            if(chatWidgetData.formSubmitBtnLabel) {
+                offlineMessageBtn.innerText = chatWidgetData.formSubmitBtnLabel;
             }
 
             var styleSheet = document.createElement('style');
