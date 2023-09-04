@@ -108,6 +108,7 @@ export class ChatbotService {
         session.knowledgebaseId,
         totalTokens,
       ),
+      this.markSessionAsRead(session._id),
     ]);
   }
 
@@ -245,6 +246,7 @@ export class ChatbotService {
         qTokens: 0,
         aTokens: 0,
         ts: new Date(),
+        read: true,
       };
       await this.updateSessionDataWithNewMsg(sessionData, msg);
       return answer;
@@ -288,6 +290,7 @@ export class ChatbotService {
       qTokens: answer.tokenUsage.prompt,
       aTokens: answer.tokenUsage.completion,
       ts: new Date(),
+      read: true,
     };
     await this.updateSessionDataWithNewMsg(sessionData, msg);
 
@@ -332,6 +335,7 @@ export class ChatbotService {
         qTokens: 0,
         aTokens: 0,
         ts: new Date(),
+        read: true,
       };
       await this.updateSessionDataWithNewMsg(sessionData, msg);
       return of(answer);
@@ -370,6 +374,7 @@ export class ChatbotService {
           qTokens: usage.prompt,
           aTokens: usage.completion,
           ts: new Date(),
+          read: true,
         };
         await this.updateSessionDataWithNewMsg(sessionData, msg);
 
@@ -583,5 +588,24 @@ export class ChatbotService {
       pageSize,
       page,
     );
+  }
+
+  async markSessionAsRead(sessionId: ObjectId) {
+    try {
+      this.kbDbService.markMessageAsRead(sessionId, new Date().toISOString());
+    } catch {
+      throw new HttpException('Invalid Session', HttpStatus.NOT_FOUND);
+    }
+  }
+
+  async markMessageAsUnread(sessionId: string, ts: string) {
+    try {
+      if (ts == undefined) {
+        ts = new Date().toISOString();
+      }
+      this.kbDbService.markMessageAsUnread(new ObjectId(sessionId), ts);
+    } catch {
+      throw new HttpException('Invalid Session', HttpStatus.NOT_FOUND);
+    }
   }
 }
