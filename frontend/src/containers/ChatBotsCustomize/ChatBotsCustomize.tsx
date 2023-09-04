@@ -1007,21 +1007,23 @@ export const ChatBotsCustomize = ({
 												{selectedTab === 1 && (
 													<div className="offline-message" style={{ padding: "20px 20px 10px 20px", position: "relative", height: "100%", overflow: "auto" }}>
 														<div className={styles.formGroup}>
-															<label className={styles.formLabel}>Name <span className={styles.formRequired}>*</span></label>
-															<input type="text" className={styles.formControl} id="offline-message-name" placeholder="Enter your name"></input>
+															<label className={styles.formLabel}>{values.nameFieldLabel} <span className={styles.formRequired}>*</span></label>
+															<input type="text" className={styles.formControl} id="offline-message-name" placeholder={values.nameFieldPlaceholder}></input>
+															{/* <div className={styles.invalidFeedback} id="invalid-feedback-email">{values.requiredFieldMsg}</div> */}
 														</div>
 
 														<div className={styles.formGroup}>
-															<label className={styles.formLabel}>Email <span className={styles.formRequired}>*</span></label>
-															<input type="text" className={styles.formControl} id="offline-message-email" placeholder="Enter your email"></input>
+															<label className={styles.formLabel}>{values.emailFieldLabel} <span className={styles.formRequired}>*</span></label>
+															<input type="text" className={styles.formControl} id="offline-message-email" placeholder={values.emailFieldPlaceholder}></input>
+																{/* <div className={styles.invalidFeedback} id="invalid-feedback-email-invalid">{values.invalidEmailMsg}</div> */}
 														</div>
 														<div className={styles.formGroup}>
-															<label className={styles.formLabel}>Message <span className={styles.formRequired}>*</span></label>
+															<label className={styles.formLabel}>{values.msgFieldLabel} <span className={styles.formRequired}>*</span></label>
 															<textarea className={styles.formControl} rows={4} id="offline-message-message"
-																placeholder="Enter your message"></textarea>
+																placeholder={values.msgFieldPlaceholder}></textarea>
 														</div>
 														<button className={styles.formSubmit} id="offline-message-submit"
-															type="button" style={{ backgroundColor: values.backgroundColor, color: values.fontColor }}>Submit</button>
+															type="button" style={{ backgroundColor: values.backgroundColor, color: values.fontColor }}>{values.formSubmitBtnLabel}</button>
 													</div>
 												)}
 											</div>
