@@ -810,8 +810,17 @@ const EditChatbot = (props: EditChatbotProps) => {
                                     customizeWidget(chatBot._id, formData);
                                     updatePrompt(chatBot._id, formData.prompt || '');
                                     updateDefaultAnswer(chatBot._id, formData.defaultAnswer || '');
+									toast({
+										title: `Chatbot customizations have been updated successfully`,
+										status: "success",
+										isClosable: true,
+									});
                                 } catch (error) {
-
+									toast({
+										title: `Oops! Something went wrong`,
+										status: "error",
+										isClosable: true,
+									});
                                 } finally {
                                     setIsSubmitting(false)
                                 }
