@@ -76,6 +76,15 @@ export interface ChatBotCustomizeData {
     readMoreText: string;
     offlineMsgHeading: string;
     offlineMsgDescription: string;
+    nameFieldLabel: string;
+    nameFieldPlaceholder: string;
+    emailFieldLabel: string;
+    emailFieldPlaceholder: string;
+    msgFieldLabel: string;
+    msgFieldPlaceholder: string;
+    requiredFieldMsg: string;
+    invalidEmailMsg: string;
+    formSubmitBtnLabel: string;
 }
 export interface CrawlDataListPagination {
     pages: number;

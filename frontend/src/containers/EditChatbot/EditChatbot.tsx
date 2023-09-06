@@ -641,6 +641,15 @@ const EditChatbot = (props: EditChatbotProps) => {
 			readMoreText: chatBot.chatWidgeData?.readMoreText || chatWidgetDefaultValues.readMoreText,
 			offlineMsgHeading: chatBot.chatWidgeData?.offlineMsgHeading || chatWidgetDefaultValues.offlineMsgHeading,
 			offlineMsgDescription: chatBot.chatWidgeData?.offlineMsgDescription || chatWidgetDefaultValues.offlineMsgDescription,
+			nameFieldLabel: chatBot.chatWidgeData?.nameFieldLabel || chatWidgetDefaultValues.nameFieldLabel,
+			nameFieldPlaceholder: chatBot.chatWidgeData?.nameFieldPlaceholder || chatWidgetDefaultValues.nameFieldPlaceholder,
+			emailFieldLabel: chatBot.chatWidgeData?.emailFieldLabel || chatWidgetDefaultValues.emailFieldLabel,
+			emailFieldPlaceholder: chatBot.chatWidgeData?.emailFieldPlaceholder || chatWidgetDefaultValues.emailFieldPlaceholder,
+			msgFieldLabel: chatBot.chatWidgeData?.msgFieldLabel || chatWidgetDefaultValues.msgFieldLabel,
+			msgFieldPlaceholder: chatBot.chatWidgeData?.msgFieldPlaceholder || chatWidgetDefaultValues.msgFieldPlaceholder,
+			requiredFieldMsg: chatBot.chatWidgeData?.requiredFieldMsg || chatWidgetDefaultValues.requiredFieldMsg,
+			invalidEmailMsg: chatBot.chatWidgeData?.invalidEmailMsg || chatWidgetDefaultValues.invalidEmailMsg,
+			formSubmitBtnLabel: chatBot.chatWidgeData?.formSubmitBtnLabel || chatWidgetDefaultValues.formSubmitBtnLabel,
 		};
 	}, [chatBot]);
 

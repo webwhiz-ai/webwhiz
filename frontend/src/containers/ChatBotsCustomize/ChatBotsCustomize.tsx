@@ -19,6 +19,11 @@ import {
 	Radio,
 	RadioGroup,
 	ButtonGroup,
+	AccordionItem,
+	Accordion,
+	AccordionIcon,
+	AccordionPanel,
+	AccordionButton,
 } from "@chakra-ui/react";
 
 import { ErrorMessage, Field, FieldArray, Form, Formik } from "formik";
@@ -620,7 +625,7 @@ export const ChatBotsCustomize = ({
 																		isDisabled={!values.offlineMessage}
 																	/>
 																	<FormErrorMessage>
-																		{form.errors.headinofflineMsgHeadingg}
+																		{form.errors.offlineMsgHeading}
 																	</FormErrorMessage>
 																</FormControl>
 															)}
@@ -649,13 +654,239 @@ export const ChatBotsCustomize = ({
 																</FormControl>
 															)}
 														</Field>
+
+														<Field type="text" name="formSubmitBtnLabel">
+															{({ field, form }: any) => (
+																<FormControl
+																	mb="6"
+																	isInvalid={
+																		form.errors.formSubmitBtnLabel && form.touched.formSubmitBtnLabel
+																	}
+																>
+																	<FormLabel fontSize="sm" htmlFor="formSubmitBtnLabel" color="gray.700" fontWeight="400" >
+																		Submit Button Label
+																	</FormLabel>
+																	<Input
+																		{...field}
+																		placeholder={(defaultCustomizationValues || chatWidgetDefaultValues).formSubmitBtnLabel}
+																		isDisabled={!values.offlineMessage}
+																	/>
+																	<FormErrorMessage>
+																		{form.errors.formSubmitBtnLabel}
+																	</FormErrorMessage>
+																</FormControl>
+															)}
+														</Field>
+
+														{/* <Text className={styles.nestedFormHeading} fontSize="md" mb="4" pb="2" fontWeight="500" borderBottom={"1px solid"} borderBottomColor="gray.200">Additional</Text> */}
+
+														<Accordion allowToggle allowMultiple>
+															<AccordionItem isDisabled={!values.offlineMessage}>
+																<AccordionButton _focus={{boxShadow:'none'}} pl={0}>
+																	<Box as="span" flex='1' textAlign='left' fontSize="sm" fontWeight="500">
+																		Field Labels and Placeholders
+																	</Box>
+																	<AccordionIcon />
+																</AccordionButton>
+																<AccordionPanel pb={4}>
+																	<Field type="text" name="nameFieldLabel">
+																		{({ field, form }: any) => (
+																			<FormControl
+																				mb="6"
+																				isInvalid={
+																					form.errors.nameFieldLabel && form.touched.nameFieldLabel
+																				}
+																			>
+																				<FormLabel fontSize="sm" htmlFor="nameFieldLabel" color="gray.700" fontWeight="400" >
+																					Name Field Label
+																				</FormLabel>
+																				<Input
+																					{...field}
+																					placeholder={(defaultCustomizationValues || chatWidgetDefaultValues).nameFieldLabel}
+																					isDisabled={!values.offlineMessage}
+																				/>
+																				<FormErrorMessage>
+																					{form.errors.nameFieldLabel}
+																				</FormErrorMessage>
+																			</FormControl>
+																		)}
+																	</Field>
+																	<Field type="text" name="nameFieldPlaceholder">
+																		{({ field, form }: any) => (
+																			<FormControl
+																				mb="6"
+																				isInvalid={
+																					form.errors.nameFieldPlaceholder && form.touched.nameFieldPlaceholder
+																				}
+																			>
+																				<FormLabel fontSize="sm" htmlFor="nameFieldPlaceholder" color="gray.700" fontWeight="400" >
+																					Name Field Placeholder
+																				</FormLabel>
+																				<Input
+																					{...field}
+																					placeholder={(defaultCustomizationValues || chatWidgetDefaultValues).nameFieldPlaceholder}
+																					isDisabled={!values.offlineMessage}
+																				/>
+																				<FormErrorMessage>
+																					{form.errors.nameFieldPlaceholder}
+																				</FormErrorMessage>
+																			</FormControl>
+																		)}
+																	</Field>
+
+																	<Field type="text" name="emailFieldLabel">
+																		{({ field, form }: any) => (
+																			<FormControl
+																				mb="6"
+																				isInvalid={
+																					form.errors.emailFieldLabel && form.touched.emailFieldLabel
+																				}
+																			>
+																				<FormLabel fontSize="sm" htmlFor="emailFieldLabel" color="gray.700" fontWeight="400" >
+																					Email Field Label
+																				</FormLabel>
+																				<Input
+																					{...field}
+																					placeholder={(defaultCustomizationValues || chatWidgetDefaultValues).emailFieldLabel}
+																					isDisabled={!values.offlineMessage}
+																					autoComplete="nope"
+																				/>
+																				<FormErrorMessage>
+																					{form.errors.emailFieldLabel}
+																				</FormErrorMessage>
+																			</FormControl>
+																		)}
+																	</Field>
+																	<Field type="text" name="emailFieldPlaceholder">
+																		{({ field, form }: any) => (
+																			<FormControl
+																				mb="6"
+																				isInvalid={
+																					form.errors.emailFieldPlaceholder && form.touched.emailFieldPlaceholder
+																				}
+																			>
+																				<FormLabel fontSize="sm" htmlFor="emailFieldPlaceholder" color="gray.700" fontWeight="400" >
+																					Email Field Placeholder
+																				</FormLabel>
+																				<Input
+																					{...field}
+																					placeholder={(defaultCustomizationValues || chatWidgetDefaultValues).emailFieldPlaceholder}
+																					isDisabled={!values.offlineMessage}
+																					autoComplete="nope"
+																				/>
+																				<FormErrorMessage>
+																					{form.errors.emailFieldPlaceholder}
+																				</FormErrorMessage>
+																			</FormControl>
+																		)}
+																	</Field>
+
+																	<Field type="text" name="msgFieldLabel">
+																		{({ field, form }: any) => (
+																			<FormControl
+																				mb="6"
+																				isInvalid={
+																					form.errors.msgFieldLabel && form.touched.msgFieldLabel
+																				}
+																			>
+																				<FormLabel fontSize="sm" htmlFor="msgFieldLabel" color="gray.700" fontWeight="400" >
+																					Message Field Label
+																				</FormLabel>
+																				<Input
+																					{...field}
+																					placeholder={(defaultCustomizationValues || chatWidgetDefaultValues).msgFieldLabel}
+																					isDisabled={!values.offlineMessage}
+																				/>
+																				<FormErrorMessage>
+																					{form.errors.msgFieldLabel}
+																				</FormErrorMessage>
+																			</FormControl>
+																		)}
+																	</Field>
+																	<Field type="text" name="msgFieldPlaceholder">
+																		{({ field, form }: any) => (
+																			<FormControl
+																				mb="6"
+																				isInvalid={
+																					form.errors.msgFieldPlaceholder && form.touched.msgFieldPlaceholder
+																				}
+																			>
+																				<FormLabel fontSize="sm" htmlFor="msgFieldPlaceholder" color="gray.700" fontWeight="400" >
+																					Message Field Placeholder
+																				</FormLabel>
+																				<Input
+																					{...field}
+																					placeholder={(defaultCustomizationValues || chatWidgetDefaultValues).msgFieldPlaceholder}
+																					isDisabled={!values.offlineMessage}
+																				/>
+																				<FormErrorMessage>
+																					{form.errors.msgFieldPlaceholder}
+																				</FormErrorMessage>
+																			</FormControl>
+																		)}
+																	</Field>
+																</AccordionPanel>
+															</AccordionItem>
+															<AccordionItem isDisabled={!values.offlineMessage}>
+																<AccordionButton _focus={{boxShadow:'none'}} pl={0}>
+																	<Box as="span" flex='1' textAlign='left' fontWeight="500" fontSize="sm">
+																		Error Messages
+																	</Box>
+																	<AccordionIcon />
+																</AccordionButton>
+																<AccordionPanel>
+																	<Field type="text" name="requiredFieldMsg">
+																		{({ field, form }: any) => (
+																			<FormControl
+																				mb="6"
+																				isInvalid={
+																					form.errors.requiredFieldMsg && form.touched.requiredFieldMsg
+																				}
+																			>
+																				<FormLabel fontSize="sm" htmlFor="requiredFieldMsg" color="gray.700" fontWeight="400" >
+																					Field Required Message
+																				</FormLabel>
+																				<Input
+																					{...field}
+																					placeholder={(defaultCustomizationValues || chatWidgetDefaultValues).requiredFieldMsg}
+																					isDisabled={!values.offlineMessage}
+																				/>
+																				<FormErrorMessage>
+																					{form.errors.requiredFieldMsg}
+																				</FormErrorMessage>
+																			</FormControl>
+																		)}
+																	</Field>
+
+																	<Field type="text" name="invalidEmailMsg">
+																		{({ field, form }: any) => (
+																			<FormControl
+																				mb="6"
+																				isInvalid={
+																					form.errors.invalidEmailMsg && form.touched.invalidEmailMsg
+																				}
+																			>
+																				<FormLabel fontSize="sm" htmlFor="invalidEmailMsg" color="gray.700" fontWeight="400" >
+																					Invalid Email Message
+																				</FormLabel>
+																				<Input
+																					{...field}
+																					placeholder={(defaultCustomizationValues || chatWidgetDefaultValues).invalidEmailMsg}
+																					isDisabled={!values.offlineMessage}
+																				/>
+																				<FormErrorMessage>
+																					{form.errors.invalidEmailMsg}
+																				</FormErrorMessage>
+																			</FormControl>
+																		)}
+																	</Field>
+																</AccordionPanel>
+															</AccordionItem>
+														</Accordion>
+
 													</TabPanel>
 												</TabPanels>
 											</Tabs>
-
-
-
-
 
 										</Box>
 
@@ -776,21 +1007,23 @@ export const ChatBotsCustomize = ({
 												{selectedTab === 1 && (
 													<div className="offline-message" style={{ padding: "20px 20px 10px 20px", position: "relative", height: "100%", overflow: "auto" }}>
 														<div className={styles.formGroup}>
-															<label className={styles.formLabel}>Name <span className={styles.formRequired}>*</span></label>
-															<input type="text" className={styles.formControl} id="offline-message-name" placeholder="Enter your name"></input>
+															<label className={styles.formLabel}>{values.nameFieldLabel} <span className={styles.formRequired}>*</span></label>
+															<input type="text" className={styles.formControl} id="offline-message-name" placeholder={values.nameFieldPlaceholder}></input>
+															{/* <div className={styles.invalidFeedback} id="invalid-feedback-email">{values.requiredFieldMsg}</div> */}
 														</div>
 
 														<div className={styles.formGroup}>
-															<label className={styles.formLabel}>Email <span className={styles.formRequired}>*</span></label>
-															<input type="text" className={styles.formControl} id="offline-message-email" placeholder="Enter your email"></input>
+															<label className={styles.formLabel}>{values.emailFieldLabel} <span className={styles.formRequired}>*</span></label>
+															<input type="text" className={styles.formControl} id="offline-message-email" placeholder={values.emailFieldPlaceholder}></input>
+																{/* <div className={styles.invalidFeedback} id="invalid-feedback-email-invalid">{values.invalidEmailMsg}</div> */}
 														</div>
 														<div className={styles.formGroup}>
-															<label className={styles.formLabel}>Message <span className={styles.formRequired}>*</span></label>
+															<label className={styles.formLabel}>{values.msgFieldLabel} <span className={styles.formRequired}>*</span></label>
 															<textarea className={styles.formControl} rows={4} id="offline-message-message"
-																placeholder="Enter your message"></textarea>
+																placeholder={values.msgFieldPlaceholder}></textarea>
 														</div>
 														<button className={styles.formSubmit} id="offline-message-submit"
-															type="button" style={{ backgroundColor: values.backgroundColor, color: values.fontColor }}>Submit</button>
+															type="button" style={{ backgroundColor: values.backgroundColor, color: values.fontColor }}>{values.formSubmitBtnLabel}</button>
 													</div>
 												)}
 											</div>
