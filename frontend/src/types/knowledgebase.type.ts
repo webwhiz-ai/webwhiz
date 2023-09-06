@@ -65,6 +65,7 @@ export interface ChatBotCustomizeData {
     collectEmail: boolean,
     collectEmailText: string,
     welcomeMessage: string;
+    customCSS: string;
     questionExamples: {
         question: string;
         label: string;

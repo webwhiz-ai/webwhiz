@@ -151,7 +151,8 @@ const EditChatbot = (props: EditChatbotProps) => {
 					placement: chatWidgetDefaultValues.placement,
 					heading: chatWidgetDefaultValues.heading,
 					description: chatWidgetDefaultValues.description,
-					welcomeMessage: chatWidgetDefaultValues.welcomeMessage
+					welcomeMessage: chatWidgetDefaultValues.welcomeMessage,
+					customCSS: chatWidgetDefaultValues.customCSS
 				}
 
 				const _crawlDataResponse = await fetchKnowledgebaseCrawlData(chatBotData._id, 1);
@@ -631,6 +632,7 @@ const EditChatbot = (props: EditChatbotProps) => {
 			collectEmailText: chatBot.chatWidgeData?.collectEmailText || chatWidgetDefaultValues.collectEmailText,
 			collectEmail: chatBot.chatWidgeData?.collectEmail,
 			welcomeMessage: chatBot.chatWidgeData?.welcomeMessage || chatWidgetDefaultValues.welcomeMessage,
+			customCSS: chatBot.chatWidgeData?.customCSS || chatWidgetDefaultValues.customCSS,
 			questionExamples: chatBot.chatWidgeData?.questionExamples || chatWidgetDefaultValues.questionExamples,
 			prompt: chatBot.prompt || chatWidgetDefaultValues.prompt,
 			defaultAnswer: chatBot.defaultAnswer || chatWidgetDefaultValues.defaultAnswer,

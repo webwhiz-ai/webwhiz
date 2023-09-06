@@ -123,6 +123,7 @@ export const ChatBotsCustomize = ({
 													<Tab>Appearance</Tab>
 													<Tab>Advanced</Tab>
 													<Tab>Offline Message</Tab>
+													<Tab>Custom CSS</Tab>
 												</TabList>
 												<TabPanels>
 													<TabPanel pt="8">
@@ -884,6 +885,31 @@ export const ChatBotsCustomize = ({
 															</AccordionItem>
 														</Accordion>
 
+													</TabPanel>
+													<TabPanel pt="8">
+                                                        <Field type="text" name="customCSS">
+															{({ field, form }: any) => (
+																<FormControl
+																	mb="6"
+																	isInvalid={
+																		form.errors.customCSS && form.touched.customCSS
+																	}
+																>
+																	<FormLabel fontSize="sm" htmlFor="customCSS" color="gray.700" fontWeight="400" >
+																		Custom CSS
+																	</FormLabel>
+																	<Textarea
+																		{...field}
+																		rows={4}
+																		placeholder=".ai-assistant-header p {
+																			line-height: 1.6;
+																		}"
+																	/>
+																	<FormHelperText fontSize="sm">Please use this feature with caution and only if you require specific styling adjustments that can't be achieved through our standard customization options. You are responsible for maintaining backward compatibility with any updates we make. </FormHelperText>
+																	<FormHelperText fontSize="sm">Note: Changes will not appear in the app's customization section, only in the actual widget. </FormHelperText>
+																</FormControl>
+															)}
+														</Field>
 													</TabPanel>
 												</TabPanels>
 											</Tabs>
