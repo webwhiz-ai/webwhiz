@@ -486,6 +486,7 @@
             }
 
             var styleSheet = document.createElement('style');
+            styleSheet.type = "text/css";
 
             const styles = `
                 .chat-widget { border-radius: ${chatWidgetData.borderRadius}!important}
@@ -503,8 +504,7 @@
                 }
                 .chat-message.user .chat-message-text {background-color: ${chatWidgetData.backgroundColor}!important; color: ${chatWidgetData.fontColor}!important}
             `
-
-            styleSheet.innerText = styles;
+            styleSheet.textContent = styles + (chatWidgetData?.customCSS || '');
 
 
             if (chatWidgetData.questionExamples && chatWidgetData.questionExamples.length > 0) {
