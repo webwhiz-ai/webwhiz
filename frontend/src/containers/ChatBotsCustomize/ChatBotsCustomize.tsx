@@ -683,7 +683,7 @@ export const ChatBotsCustomize = ({
 														<Accordion allowToggle allowMultiple>
 															<AccordionItem isDisabled={!values.offlineMessage}>
 																<AccordionButton _focus={{boxShadow:'none'}} pl={0}>
-																	<Box as="span" flex='1' textAlign='left' fontSize="md" fontWeight="500">
+																	<Box as="span" flex='1' textAlign='left' fontSize="sm" fontWeight="500">
 																		Field Labels and Placeholders
 																	</Box>
 																	<AccordionIcon />
@@ -829,7 +829,7 @@ export const ChatBotsCustomize = ({
 															</AccordionItem>
 															<AccordionItem isDisabled={!values.offlineMessage}>
 																<AccordionButton _focus={{boxShadow:'none'}} pl={0}>
-																	<Box as="span" flex='1' textAlign='left' fontWeight="500" fontSize="md">
+																	<Box as="span" flex='1' textAlign='left' fontWeight="500" fontSize="sm">
 																		Error Messages
 																	</Box>
 																	<AccordionIcon />
