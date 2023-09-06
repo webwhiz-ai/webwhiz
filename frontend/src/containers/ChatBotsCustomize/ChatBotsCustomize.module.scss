@@ -63,7 +63,7 @@
     transition: width 0.35s cubic-bezier(0.215, 0.61, 0.355, 1), left 0.35s cubic-bezier(0.215, 0.61, 0.355, 1),
 }
 .formGroup {
-    margin-bottom: 20px;
+    margin-bottom: 8px;
 }
 .formLabel {
     display: block;
@@ -99,4 +99,10 @@
     color: #FFF;
     border: 1px solid rgba(0, 0, 0, 0.08);
     box-shadow: 0 1px 2px rgba(16, 24, 40, .05);
+}
+.invalidFeedback {
+    font-size: 12px;
+    color: #bf1212;
+    // margin-top: 5px;
+    // display: none;
 }

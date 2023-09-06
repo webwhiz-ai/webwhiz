@@ -65,6 +65,7 @@ export interface ChatBotCustomizeData {
     collectEmail: boolean,
     collectEmailText: string,
     welcomeMessage: string;
+    customCSS: string;
     questionExamples: {
         question: string;
         label: string;
@@ -76,6 +77,15 @@ export interface ChatBotCustomizeData {
     readMoreText: string;
     offlineMsgHeading: string;
     offlineMsgDescription: string;
+    nameFieldLabel: string;
+    nameFieldPlaceholder: string;
+    emailFieldLabel: string;
+    emailFieldPlaceholder: string;
+    msgFieldLabel: string;
+    msgFieldPlaceholder: string;
+    requiredFieldMsg: string;
+    invalidEmailMsg: string;
+    formSubmitBtnLabel: string;
 }
 export interface CrawlDataListPagination {
     pages: number;

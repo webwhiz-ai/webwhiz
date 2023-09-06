@@ -32,6 +32,7 @@ export const chatWidgetDefaultValues = {
     {question: 'How can I contact you?', label: 'Contact'},
   ],
   welcomeMessage: 'Hello! How can I assist you today?',
+  customCSS: '',
   prompt: 'You are a very enthusiastic chatbot who loves to help people! Your name is {{chatbotName}} and you are designed to respond only based on the given context, outputted in Markdown format.',
   defaultAnswer: "I don't know how to answer that",
   launcherIcon: { 
@@ -40,6 +41,15 @@ export const chatWidgetDefaultValues = {
   },
   offlineMsgHeading: "Offlne message",
   offlineMsgDescription: "Please fill out the form below and we will get back to you as soon as possible.",
+  nameFieldLabel: "Name",
+  nameFieldPlaceholder: "Enter your name",
+  emailFieldLabel: "Email",
+  emailFieldPlaceholder: "Enter your email",
+  msgFieldLabel: "Message",
+  msgFieldPlaceholder: "Enter your message",
+  requiredFieldMsg: "This field is required",
+  invalidEmailMsg: "Please enter a valid email",
+  formSubmitBtnLabel: "Submit",
 };
 
 

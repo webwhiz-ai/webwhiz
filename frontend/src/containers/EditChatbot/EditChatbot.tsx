@@ -151,7 +151,8 @@ const EditChatbot = (props: EditChatbotProps) => {
 					placement: chatWidgetDefaultValues.placement,
 					heading: chatWidgetDefaultValues.heading,
 					description: chatWidgetDefaultValues.description,
-					welcomeMessage: chatWidgetDefaultValues.welcomeMessage
+					welcomeMessage: chatWidgetDefaultValues.welcomeMessage,
+					customCSS: chatWidgetDefaultValues.customCSS
 				}
 
 				const _crawlDataResponse = await fetchKnowledgebaseCrawlData(chatBotData._id, 1);
@@ -631,6 +632,7 @@ const EditChatbot = (props: EditChatbotProps) => {
 			collectEmailText: chatBot.chatWidgeData?.collectEmailText || chatWidgetDefaultValues.collectEmailText,
 			collectEmail: chatBot.chatWidgeData?.collectEmail,
 			welcomeMessage: chatBot.chatWidgeData?.welcomeMessage || chatWidgetDefaultValues.welcomeMessage,
+			customCSS: chatBot.chatWidgeData?.customCSS || chatWidgetDefaultValues.customCSS,
 			questionExamples: chatBot.chatWidgeData?.questionExamples || chatWidgetDefaultValues.questionExamples,
 			prompt: chatBot.prompt || chatWidgetDefaultValues.prompt,
 			defaultAnswer: chatBot.defaultAnswer || chatWidgetDefaultValues.defaultAnswer,
@@ -641,6 +643,15 @@ const EditChatbot = (props: EditChatbotProps) => {
 			readMoreText: chatBot.chatWidgeData?.readMoreText || chatWidgetDefaultValues.readMoreText,
 			offlineMsgHeading: chatBot.chatWidgeData?.offlineMsgHeading || chatWidgetDefaultValues.offlineMsgHeading,
 			offlineMsgDescription: chatBot.chatWidgeData?.offlineMsgDescription || chatWidgetDefaultValues.offlineMsgDescription,
+			nameFieldLabel: chatBot.chatWidgeData?.nameFieldLabel || chatWidgetDefaultValues.nameFieldLabel,
+			nameFieldPlaceholder: chatBot.chatWidgeData?.nameFieldPlaceholder || chatWidgetDefaultValues.nameFieldPlaceholder,
+			emailFieldLabel: chatBot.chatWidgeData?.emailFieldLabel || chatWidgetDefaultValues.emailFieldLabel,
+			emailFieldPlaceholder: chatBot.chatWidgeData?.emailFieldPlaceholder || chatWidgetDefaultValues.emailFieldPlaceholder,
+			msgFieldLabel: chatBot.chatWidgeData?.msgFieldLabel || chatWidgetDefaultValues.msgFieldLabel,
+			msgFieldPlaceholder: chatBot.chatWidgeData?.msgFieldPlaceholder || chatWidgetDefaultValues.msgFieldPlaceholder,
+			requiredFieldMsg: chatBot.chatWidgeData?.requiredFieldMsg || chatWidgetDefaultValues.requiredFieldMsg,
+			invalidEmailMsg: chatBot.chatWidgeData?.invalidEmailMsg || chatWidgetDefaultValues.invalidEmailMsg,
+			formSubmitBtnLabel: chatBot.chatWidgeData?.formSubmitBtnLabel || chatWidgetDefaultValues.formSubmitBtnLabel,
 		};
 	}, [chatBot]);
 
@@ -810,8 +821,17 @@ const EditChatbot = (props: EditChatbotProps) => {
                                     customizeWidget(chatBot._id, formData);
                                     updatePrompt(chatBot._id, formData.prompt || '');
                                     updateDefaultAnswer(chatBot._id, formData.defaultAnswer || '');
+									toast({
+										title: `Chatbot customizations have been updated successfully`,
+										status: "success",
+										isClosable: true,
+									});
                                 } catch (error) {
-
+									toast({
+										title: `Oops! Something went wrong`,
+										status: "error",
+										isClosable: true,
+									});
                                 } finally {
                                     setIsSubmitting(false)
                                 }

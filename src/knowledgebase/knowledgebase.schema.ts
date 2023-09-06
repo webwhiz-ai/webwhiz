@@ -138,6 +138,7 @@ export interface ChatQueryAnswer {
   qTokens: number;
   aTokens: number;
   ts: Date;
+  read: boolean;
 }
 
 export const CHAT_SESSION_COLLECTION = 'chatSessions';
