@@ -304,8 +304,8 @@ export const ChatBotsCustomize = ({
 																			</Button>
 																		</PopoverTrigger>
 																		<Portal>
-																			<PopoverContent width="auto">
-																				<SketchPicker onChangeComplete={(color) => form.setFieldValue(field.name, color.hex)}/>
+																			<PopoverContent width="auto" _focus={{boxShadow: 'none'}}>
+																				<SketchPicker color={field.value} onChangeComplete={(color) => form.setFieldValue(field.name, color.hex)}/>
 																			</PopoverContent>
 																		</Portal>
 																		</Popover>
@@ -342,8 +342,8 @@ export const ChatBotsCustomize = ({
 																			</Button>
 																		</PopoverTrigger>
 																		<Portal>
-																			<PopoverContent width="auto">
-																				<SketchPicker onChangeComplete={(color) => form.setFieldValue(field.name, color.hex)}/>
+																			<PopoverContent width="auto" _focus={{boxShadow: 'none'}}>
+																				<SketchPicker color={field.value} onChangeComplete={(color) => form.setFieldValue(field.name, color.hex)}/>
 																			</PopoverContent>
 																		</Portal>
 																		</Popover>
