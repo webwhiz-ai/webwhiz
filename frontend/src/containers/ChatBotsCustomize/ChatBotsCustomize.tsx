@@ -170,27 +170,6 @@ export const ChatBotsCustomize = ({
 																</FormControl>
 															)}
 														</Field>
-														<Field type="text" name="welcomeMessage">
-															{({ field, form }: any) => (
-																<FormControl
-																	mb="6"
-																	isInvalid={
-																		form.errors.welcomeMessage && form.touched.welcomeMessage
-																	}
-																>
-																	<FormLabel fontSize="sm" htmlFor="welcomeMessage" color="gray.700" fontWeight="400" >
-																		Welcome message
-																	</FormLabel>
-																	<Input
-																		{...field}
-																		placeholder={(defaultCustomizationValues || chatWidgetDefaultValues).welcomeMessage}
-																	/>
-																	<FormErrorMessage>
-																		{form.errors.welcomeMessage}
-																	</FormErrorMessage>
-																</FormControl>
-															)}
-														</Field>
 														<Field type="text" name="chatInputPlaceholderText">
 															{({ field, form }: any) => (
 																<FormControl
@@ -208,6 +187,95 @@ export const ChatBotsCustomize = ({
 																	/>
 																	<FormErrorMessage>
 																		{form.errors.chatInputPlaceholderText}
+																	</FormErrorMessage>
+																</FormControl>
+															)}
+														</Field>
+														<Box className={styles.nestedFormCont} mt="8">
+															<Text className={styles.nestedFormHeading} fontSize="md" mb="4" pb="2" fontWeight="500" borderBottom={"1px solid"} borderBottomColor="gray.200">Welcome Messages</Text>
+
+															<FieldArray name="welcomeMessages">
+																{({ insert, remove, push }) => (
+																	<Box className={styles.nestedForm}>
+																		{values.welcomeMessages.length > 0 &&
+																			values.welcomeMessages.map((friend, index) => (
+																				<Box key={index} mb="4" pos="relative">
+																					<IconButton
+																						className={styles.questionDeleteBtn}
+																						variant='outline'
+																						colorScheme='gray'
+																						aria-label='Delete Question'
+																						fontSize='14px'
+																						size="xs"
+																						onClick={() => remove(index)}
+																						icon={<RiDeleteBin5Line />}
+																					/>
+																					<Field type="text" name={`welcomeMessages.${index}`}>
+																						{({ field, form }: any) => (
+																							<FormControl
+																								mb="2"
+																							>
+																								<FormLabel fontWeight="400" color="gray.700" fontSize="sm" htmlFor={`welcomeMessages.${index}`}>
+																									Message
+																								</FormLabel>
+																								<Input
+																									{...field}
+																								/>
+																							</FormControl>
+																						)}
+																					</Field>
+																				</Box>
+																			))}
+																		<Button
+																			colorScheme="teal"
+																			variant="solid"
+																			size="xs"
+																			mb="8"
+																			onClick={() => push('')}
+																		>
+																			Add welcome message
+																		</Button>
+																	</Box>
+																)}
+															</FieldArray>
+														</Box>
+														<Field type="text" name="showAsPopup">
+															{({ field, form }: any) => (
+																<FormControl mb="6">
+																	<Flex justifyContent="space-between" w="100%" alignItems="center">
+
+																		<FormLabel fontWeight="400" fontSize="sm" color="gray.700" htmlFor="showAsPopup">
+																			Show welcome messages as popup
+																		</FormLabel>
+																		<Switch
+																			{...field}
+																			defaultChecked={(defaultCustomizationValues || chatWidgetDefaultValues).showAsPopup}
+																			onChange={(event) => { handleSwitchChange(event, form) }}
+																			colorScheme="teal"
+																			size="md"
+																			mr="2"
+																		/>
+																	</Flex>
+																</FormControl>
+															)}
+														</Field>
+														<Field type="text" name="popupDelay">
+															{({ field, form }: any) => (
+																<FormControl
+																	mb="6"
+																	isInvalid={
+																		form.errors.popupDelay && form.touched.popupDelay
+																	}
+																>
+																	<FormLabel fontSize="sm" htmlFor="popupDelay" color="gray.700" fontWeight="400" >
+																		Show popup after (ms)
+																	</FormLabel>
+																	<Input
+																		{...field}
+																		placeholder={(defaultCustomizationValues || chatWidgetDefaultValues).popupDelay}
+																	/>
+																	<FormErrorMessage>
+																		{form.errors.popupDelay}
 																	</FormErrorMessage>
 																</FormControl>
 															)}
@@ -922,7 +990,7 @@ export const ChatBotsCustomize = ({
 									<div className="chat-wrap widget-open" id="chat-wrap" style={{ marginTop: '0', minHeight: "550px" }}>
 
 
-										<div className="chat-widget" style={{ borderRadius: values.borderRadius, height: "520px", width: "400px" }}>
+										<div className="chat-widget" style={{ borderRadius: values.borderRadius, width: "400px", height: "570px" }}>
 											<div className="chat-header" style={{ backgroundColor: values.backgroundColor, color: values.fontColor }}>
 												
 													<div className="chat-header-top" style={{ display: "flex", alignItems: "center", marginBottom: "12px" }}>
@@ -999,11 +1067,19 @@ export const ChatBotsCustomize = ({
 											</div>
 											<div id="chat-container" className="chat-container" style={{ minHeight: "140px"}}>
 												{selectedTab === 0 && (
-													<div>
+													<div style={{display: 'flex',
+													flexDirection: 'column',
+													height: '100%'}}>
 														<div id="chat-messages" className="chat-messages">
-															<div className="chat-message chatbot">
-																<div className="chat-message-text">{values.welcomeMessage}</div>
-															</div>
+															{
+																values.welcomeMessages.map((item: any, index: number) => (
+
+																	<div className="chat-message chatbot">
+																		<div className="chat-message-text">{item}</div>
+																	</div>
+
+																))
+															}
 															<div className="chat-message user" >
 																<div className="chat-message-text" style={{ backgroundColor: values.backgroundColor, color: values.fontColor }}>What is webwhiz?</div>
 															</div>

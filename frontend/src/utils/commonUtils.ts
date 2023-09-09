@@ -26,10 +26,15 @@ export const chatWidgetDefaultValues = {
 	placement: "right",
 	offlineMessage: false,
 	showReadMore: true,
+  showAsPopup: false,
+  popupDelay: 3000,
   collectEmail: false,
   collectEmailText: 'What is your email address?',
   questionExamples: [
     {question: 'How can I contact you?', label: 'Contact'},
+  ],
+  welcomeMessages: [
+    'Hello! How can I assist you today?'
   ],
   welcomeMessage: 'Hello! How can I assist you today?',
   customCSS: '',
