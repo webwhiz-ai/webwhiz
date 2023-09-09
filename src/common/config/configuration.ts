@@ -8,8 +8,9 @@ interface AppConfig {
   encryptionKey: string;
   mongoUri: string;
   mongoDbName: string;
-  redisHost: string;
-  redisPort: number;
+  redisHost?: string;
+  redisPort?: number;
+  redisUrl?: string;
   openaiKey: string;
   openaiKey2: string;
   googleClientId: string;
@@ -33,6 +34,7 @@ const config = (): AppConfig => ({
   mongoDbName: process.env.MONGO_DBNAME || 'sitemine',
   redisHost: process.env.REDIS_HOST || 'localhost',
   redisPort: parseInt(process.env.REDIS_PORT as string, 10) || 6379,
+  redisUrl: process.env.REDIS_URL,
   openaiKey: process.env.OPENAI_KEY || '',
   openaiKey2: process.env.OPENAI_KEY_2 || '',
   googleClientId: process.env.GOOGLE_CLIENT_ID || '',
