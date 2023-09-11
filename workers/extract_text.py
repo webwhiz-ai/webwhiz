@@ -11,6 +11,7 @@ class DataStoreType(Enum):
     WEBPAGE = "WEBPAGE"
     CUSTOM = "CUSTOM"
     DOCUMENT = "DOCUMENT"
+    PDF = "PDF"
 
 
 class DataStoreStatus(Enum):
@@ -52,12 +53,13 @@ def get_text_from_pdf(
         "knowledgebaseId": ObjectId(knowledgebase_id),
         "content": pdf_text,
         "url": pdf_file_path,
-        "type": DataStoreType.DOCUMENT.value,
+        "type": DataStoreType.PDF.value,
         "status": DataStoreStatus.CREATED.value,
         "createdAt": ts,
         "updatedAt": ts,
     }
-    data_store_collection.insert_one(ds_item)
+    res = data_store_collection.insert_one(ds_item)
+    return str(res.inserted_id)
 
 
 def get_text_from_html(html: str) -> str:

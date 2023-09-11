@@ -11,6 +11,8 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { RequestWithUser } from '../common/@types/nest.types';
+import { AppConfigService } from '../common/config/appConfig.service';
+import LocalFilesInterceptor from '../common/local-flie-interceptor';
 import { AddDocumentDTO } from './importers.dto';
 import { PdfImporterService } from './pdf/pdf-importer.service';
 import { TextractImporterService } from './textract/textract-importer.service';
@@ -20,10 +22,16 @@ export class ImportersController {
   constructor(
     private readonly pdfImporterService: PdfImporterService,
     private readonly textractService: TextractImporterService,
+    private readonly appConfigService: AppConfigService,
   ) {}
 
   @Post('/pdf')
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(
+    LocalFilesInterceptor({
+      fieldName: 'file',
+      path: 'pdfs',
+    }),
+  )
   async addPdf(
     @Req() req: RequestWithUser,
     @Body() data: AddDocumentDTO,
