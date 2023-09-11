@@ -22,6 +22,7 @@ import {
   Prompt,
   PROMPT_COLLECTION,
   ChatSessionSparse,
+  ChatAnswerFeedbackType,
 } from './knowledgebase.schema';
 
 @Injectable()
@@ -466,6 +467,7 @@ export class KnowledgebaseDbService {
       startedAt: 1,
       updatedAt: 1,
       userData: 1,
+      isUnread: 1,
       firstMessage: { $first: '$messages' },
     };
 
@@ -499,6 +501,23 @@ export class KnowledgebaseDbService {
         _id: id,
       },
       { $set: session },
+    );
+  }
+
+  async setChatSessionMessageFeedback(
+    id: ObjectId,
+    msgIdx: number,
+    feedback: ChatAnswerFeedbackType,
+  ) {
+    await this.chatSessionCollection.updateOne(
+      {
+        _id: id,
+      },
+      {
+        $set: {
+          [`messages.${msgIdx}.feedback`]: feedback,
+        },
+      },
     );
   }
 

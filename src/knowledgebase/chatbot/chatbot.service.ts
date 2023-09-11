@@ -26,6 +26,7 @@ import { CustomKeyService } from '../custom-key.service';
 import { KnowledgebaseDbService } from '../knowledgebase-db.service';
 import { checkUserIsOwnerOfKb } from '../knowledgebase-utils';
 import {
+  ChatAnswerFeedbackType,
   ChatQueryAnswer,
   ChatSession,
   ChatSessionSparse,
@@ -594,7 +595,22 @@ export class ChatbotService {
    * Mark all the messages in the Session as Read
    * @param sessionId
    */
-  async markSessionAsRead(sessionId: string) {
+  async markSessionAsRead(user: UserSparse, sessionId: string) {
+    const session: ChatSessionSparse =
+      await this.kbDbService.getChatSessionSparseById(new ObjectId(sessionId));
+
+    if (!session) {
+      throw new HttpException('Invalid Session', HttpStatus.NOT_FOUND);
+    }
+
+    const kb = await this.kbDbService.getKnowledgebaseSparseById(
+      session.knowledgebaseId,
+    );
+
+    if (!user._id.equals(kb.owner)) {
+      throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
+    }
+
     try {
       this.kbDbService.updateChatSession(new ObjectId(sessionId), {
         isUnread: false,
@@ -609,11 +625,48 @@ export class ChatbotService {
    * @param sessionId
    * @param ts
    */
-  async markMessageAsUnread(sessionId: string) {
+  async markSessionAsUnread(user: UserSparse, sessionId: string) {
+    const session: ChatSessionSparse =
+      await this.kbDbService.getChatSessionSparseById(new ObjectId(sessionId));
+
+    if (!session) {
+      throw new HttpException('Invalid Session', HttpStatus.NOT_FOUND);
+    }
+
+    const kb = await this.kbDbService.getKnowledgebaseSparseById(
+      session.knowledgebaseId,
+    );
+
+    if (!user._id.equals(kb.owner)) {
+      throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
+    }
+
     try {
       this.kbDbService.updateChatSession(new ObjectId(sessionId), {
         isUnread: true,
       });
+    } catch {
+      throw new HttpException('Invalid Session', HttpStatus.NOT_FOUND);
+    }
+  }
+
+  /**
+   * Set Feedback for Chat Session Msg by Msg Idx
+   * @param sessionId
+   * @param msgIdx
+   * @param feedback
+   */
+  async setSessionMessageFeedback(
+    sessionId: string,
+    msgIdx: number,
+    feedback: ChatAnswerFeedbackType,
+  ) {
+    try {
+      await this.kbDbService.setChatSessionMessageFeedback(
+        new ObjectId(sessionId),
+        msgIdx,
+        feedback,
+      );
     } catch {
       throw new HttpException('Invalid Session', HttpStatus.NOT_FOUND);
     }

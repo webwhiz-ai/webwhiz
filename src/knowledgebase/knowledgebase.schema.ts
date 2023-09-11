@@ -132,12 +132,18 @@ export interface KbEmbedding {
  * CHAT SESSION
  *********************************************************/
 
+export enum ChatAnswerFeedbackType {
+  BAD,
+  GOOD,
+}
+
 export interface ChatQueryAnswer {
   q: string;
   a: string;
   qTokens: number;
   aTokens: number;
   ts: Date;
+  feedback?: ChatAnswerFeedbackType;
 }
 
 export const CHAT_SESSION_COLLECTION = 'chatSessions';

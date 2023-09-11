@@ -1,10 +1,12 @@
 import {
   IsArray,
+  IsEnum,
   IsNotEmpty,
   IsOptional,
   IsString,
   ValidateNested,
 } from 'class-validator';
+import { ChatAnswerFeedbackType } from '../knowledgebase.schema';
 
 export class CreateChatbotSessionDTO {
   @IsNotEmpty()
@@ -15,6 +17,14 @@ export class CreateChatbotSessionDTO {
 
 export class UpdateChatbotSessionDTO {
   userData: any;
+}
+
+export class SetChatbotSessionMsgFeedbackDTO {
+  @IsNotEmpty()
+  msgIdx: number;
+
+  @IsEnum(ChatAnswerFeedbackType)
+  feedback: ChatAnswerFeedbackType;
 }
 
 export class ChatbotQueryDTO {
