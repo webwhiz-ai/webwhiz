@@ -25,12 +25,6 @@ export class ChatbotQueryDTO {
   query: string;
 }
 
-export class ChatMarkAsUnreadDTO {
-  @IsString()
-  @IsNotEmpty()
-  ts: string;
-}
-
 export class PromptTestDTO {
   @IsString()
   @IsOptional()

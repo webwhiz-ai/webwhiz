@@ -138,7 +138,6 @@ export interface ChatQueryAnswer {
   qTokens: number;
   aTokens: number;
   ts: Date;
-  read: boolean;
 }
 
 export const CHAT_SESSION_COLLECTION = 'chatSessions';
@@ -153,6 +152,7 @@ export interface ChatSession {
   subscriptionData: SubscriptionPlanInfo;
   customKeys?: CustomKeyData;
   userId: ObjectId;
+  isUnread?: boolean;
   messages: ChatQueryAnswer[];
   userData?: any;
   startedAt: Date;
