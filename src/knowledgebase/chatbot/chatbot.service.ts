@@ -590,6 +590,10 @@ export class ChatbotService {
     );
   }
 
+  /**
+   * Mark all the messages in the Session as Read
+   * @param sessionId
+   */
   async markSessionAsRead(sessionId: ObjectId) {
     try {
       this.kbDbService.markMessageAsRead(sessionId, new Date().toISOString());
@@ -598,6 +602,11 @@ export class ChatbotService {
     }
   }
 
+  /**
+   * Mark all messages before the given msg as unread
+   * @param sessionId
+   * @param ts
+   */
   async markMessageAsUnread(sessionId: string, ts: string) {
     try {
       if (ts == undefined) {
