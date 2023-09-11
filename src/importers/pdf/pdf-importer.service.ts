@@ -1,22 +1,23 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { ObjectId } from 'mongodb';
+import { resolve } from 'node:path';
 import {
   CELERY_CLIENT,
-  CeleryClientService,
   CeleryClientQueue,
+  CeleryClientService,
 } from '../../common/celery/celery-client.module';
+import { DataStoreService } from '../../knowledgebase/datastore.service';
 import { KnowledgebaseDbService } from '../../knowledgebase/knowledgebase-db.service';
 import { checkUserIsOwnerOfKb } from '../../knowledgebase/knowledgebase-utils';
 import { UserSparse } from '../../user/user.schema';
-import * as fsPromises from 'node:fs/promises';
-import { resolve } from 'node:path';
-import { AppConfigService } from '../../common/config/appConfig.service';
+
+const MAX_PDF_PAGES = 50;
 
 @Injectable()
 export class PdfImporterService {
   constructor(
     private readonly kbDbService: KnowledgebaseDbService,
-    private readonly appConfig: AppConfigService,
+    private readonly datastoreService: DataStoreService,
     @Inject(CELERY_CLIENT) private celeryClient: CeleryClientService,
   ) {}
 
@@ -24,7 +25,19 @@ export class PdfImporterService {
     const client = this.celeryClient.get(CeleryClientQueue.DEFAULT);
     const task = client.createTask('worker.extract_pdf_text');
 
-    await task.applyAsync([knowledgebaeId, pdfPath, 20]); // max pages = 20
+    // Extract pdf content and add to KbDataStore
+    const datastoreId = await task
+      .applyAsync([knowledgebaeId, pdfPath, MAX_PDF_PAGES])
+      .get();
+
+    const dsItem = await this.kbDbService.getKbDataStoreItemById(
+      new ObjectId(datastoreId),
+    );
+
+    // Create embeddings for dsItem
+    await this.datastoreService.generateChunksAndEmbeddingsForDataStoreItem(
+      dsItem,
+    );
   }
 
   async addPdfToDataStore(
@@ -37,17 +50,7 @@ export class PdfImporterService {
     const kb = await this.kbDbService.getKnowledgebaseSparseById(kbId);
     checkUserIsOwnerOfKb(user, kb);
 
-    // Save the file
-    try {
-      await fsPromises.mkdir(this.appConfig.get('docStorageLocation'));
-    } catch {}
-    const filePath = `${this.appConfig.get('docStorageLocation')}/${
-      file.originalname
-    }-${Date.now()}`;
-    await fsPromises.writeFile(filePath, file.buffer);
-
-    const absPath = resolve(filePath);
-
+    const absPath = resolve(file.path);
     await this.addPdfToDataStoreTask(knowledgebaseId, absPath);
   }
 }

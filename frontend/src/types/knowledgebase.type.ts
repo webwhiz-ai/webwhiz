@@ -61,15 +61,18 @@ export interface ChatBotCustomizeData {
     defaultAnswer?: string;
     placement: 'left' | 'right';
     showReadMore: boolean;
+    showAsPopup: boolean;
+    popupDelay: number;
     offlineMessage: boolean;
     collectEmail: boolean,
     collectEmailText: string,
-    welcomeMessage: string;
+    welcomeMessage?: string;
     customCSS: string;
     questionExamples: {
         question: string;
         label: string;
     },
+    welcomeMessages: string[]
     launcherIcon: launcherIcon;
     chatInputPlaceholderText: string;
     assistantTabHeader: string;

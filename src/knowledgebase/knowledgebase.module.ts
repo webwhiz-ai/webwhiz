@@ -49,6 +49,6 @@ import { WebhookModule } from '../webhook/webhook.module';
     PromptService,
     CustomKeyService,
   ],
-  exports: [KnowledgebaseDbService],
+  exports: [KnowledgebaseDbService, DataStoreService],
 })
 export class KnowledgebaseModule {}

@@ -151,7 +151,7 @@ const EditChatbot = (props: EditChatbotProps) => {
 					placement: chatWidgetDefaultValues.placement,
 					heading: chatWidgetDefaultValues.heading,
 					description: chatWidgetDefaultValues.description,
-					welcomeMessage: chatWidgetDefaultValues.welcomeMessage,
+					welcomeMessages: chatWidgetDefaultValues.welcomeMessages,
 					customCSS: chatWidgetDefaultValues.customCSS
 				}
 
@@ -629,11 +629,13 @@ const EditChatbot = (props: EditChatbotProps) => {
 			description: chatBot.chatWidgeData?.description,
 			offlineMessage: chatBot.chatWidgeData?.offlineMessage,
 			showReadMore: chatBot.chatWidgeData?.showReadMore === undefined ? chatWidgetDefaultValues.showReadMore : chatBot.chatWidgeData?.showReadMore,
+			showAsPopup: chatBot.chatWidgeData?.showAsPopup === undefined ? chatWidgetDefaultValues.showAsPopup : chatBot.chatWidgeData?.showAsPopup,
+			popupDelay: chatBot.chatWidgeData?.popupDelay || chatWidgetDefaultValues.popupDelay,
 			collectEmailText: chatBot.chatWidgeData?.collectEmailText || chatWidgetDefaultValues.collectEmailText,
 			collectEmail: chatBot.chatWidgeData?.collectEmail,
-			welcomeMessage: chatBot.chatWidgeData?.welcomeMessage || chatWidgetDefaultValues.welcomeMessage,
 			customCSS: chatBot.chatWidgeData?.customCSS || chatWidgetDefaultValues.customCSS,
 			questionExamples: chatBot.chatWidgeData?.questionExamples || chatWidgetDefaultValues.questionExamples,
+			welcomeMessages: chatBot.chatWidgeData?.welcomeMessage ? [chatBot.chatWidgeData?.welcomeMessage] : chatBot.chatWidgeData?.welcomeMessages || chatWidgetDefaultValues.welcomeMessages,
 			prompt: chatBot.prompt || chatWidgetDefaultValues.prompt,
 			defaultAnswer: chatBot.defaultAnswer || chatWidgetDefaultValues.defaultAnswer,
 			launcherIcon: chatBot.chatWidgeData?.launcherIcon || chatWidgetDefaultValues.launcherIcon,

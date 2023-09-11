@@ -92,13 +92,6 @@
 
             </div>
             <div id="chat-messages" class="chat-messages">
-                <div class="chat-message chatbot">
-                    <div class="chat-message-text">
-                        <p id="chat-welcome-msg">
-                            Hello! How can I assist you today?
-                        </p>
-                    </div>
-                </div>
             </div>
             <div id="offline-message" class="offline-message">
                 <div class="form-group">
@@ -186,6 +179,8 @@
         
         let collectEmail = false;
         let collectEmailText = 'Read More:';
+
+        const defaultWelcomeMessage = 'Hello! How can I assist you today?';
 
         let sessionId = '';
 
@@ -362,7 +357,6 @@
             const offlineMsgHeading = document.getElementById('offline-message-heading');
             const offlineMsgDescription = document.getElementById('offline-message-description');
             const branding = document.getElementById('powered-by');
-            const welcomeMsg = document.getElementById('chat-welcome-msg');
             const buttonElement = document.getElementById("chat-launcher-btn");
             const chatInputElement = document.getElementById("chat-input");
             const offlineMsgNameLabel = document.getElementById("label-offline-message-name");
@@ -424,9 +418,19 @@
                 chatInputElement.placeholder = chatWidgetData.chatInputPlaceholderText;
             }
 
+            let welcomeMessages = [];
+
             if (chatWidgetData.welcomeMessage) {
-                welcomeMsg.innerText = chatWidgetData.welcomeMessage;
+                welcomeMessages.push(chatWidgetData.welcomeMessage);
+            } else {
+                welcomeMessages = chatWidgetData.welcomeMessages || [defaultWelcomeMessage];
             }
+            const welcomeMessagesHTML = welcomeMessages.map(msg => {
+                return `<div class="chat-message chatbot"><div class="chat-message-text">${msg}</div></div>`
+            }).join('');
+
+            const chatMessages = document.getElementById('chat-messages');
+            chatMessages.insertAdjacentHTML("afterbegin", welcomeMessagesHTML)
 
             if (chatWidgetData.offlineMessage) {
                 const chatWrap = document.getElementById('chat-wrap');
@@ -526,12 +530,21 @@
                 }
             });
 
+
+            const widgetConfig = {}
+
             if (chatWidgetData.placement === 'left') {
-                notifyParentWidgetLeftPosition();
                 const chatLauncher = document.getElementById('chat-launcher');
                 chatLauncher.style.left = '20px';
                 chatLauncher.style.right = 'auto';
+                widgetConfig.position = 'left';
             }
+            if(chatWidgetData.showAsPopup) {
+                widgetConfig.showAsPopup = true;
+                widgetConfig.popupDelay = chatWidgetData.popupDelay;
+                widgetConfig.welcomeMessages = chatWidgetData.welcomeMessages;
+            }
+            notifyWidgetConfig(widgetConfig);
 
             setTimeout(() => {
                 document.head.appendChild(styleSheet);
@@ -865,8 +878,11 @@
             window.top.postMessage('webwhiz:widget_collapse', '*');
         }
 
-        function notifyParentWidgetLeftPosition() {
-            window.top.postMessage('webwhiz:widget_align_left', '*');
+        function notifyWidgetConfig(config) {
+            window.top.postMessage({
+                messageType: 'webwhiz:widget_config',
+                config: config
+            }, '*');
         }
 
         function notifyNewMessage(message) {
