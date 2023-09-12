@@ -175,9 +175,14 @@ export const ChatBotProductSetup = ({
 			// excludePaths = excludePaths.map((path) => {
 			// 	return (website.endsWith('/') ? website.slice(0, -1) : website) + path + '!/**/*';
 			// });
-
+			let chatbotName = '';
+			if (websiteUrl) {
+				chatbotName = getDomainFromUrl(websiteUrl);
+			} else if (files.length) {
+				chatbotName = files[0].name;
+			}
 			const websiteData: WebsiteData = {
-				name: websiteUrl ? getDomainFromUrl(websiteUrl) : files[0].name,
+				name: chatbotName,
 				websiteUrl: websiteUrl,
 				urls: [],
 				include: targetPaths,
@@ -390,11 +395,11 @@ export const ChatBotProductSetup = ({
 				justifyContent="center"
 				w="100%"
 				h="100%"
-				pt={32}
-				pb={32}
+				pt={12}
+				pb={12}
 				spacing="9"
 			>
-				<NoDataFineTuneIcon width="auto" height="250px" />
+				<NoDataFineTuneIcon />
 				<Box textAlign="center">
 					<Heading
 						maxW="580px"
@@ -435,7 +440,7 @@ export const ChatBotProductSetup = ({
 													{doc.url}
 													{crawlDatLoading === doc._id ? <Box className={styles.urlSpinner}><Spinner color='gray.700' size="xs" /></Box> : ''}
 
-													<Box float="right">
+													<Box right="5px" top="5px" position="absolute">
 														<Button colorScheme='gray' size='xs' mr={2}
 															onClick={() => {
 																handleURLClick(localDocsData?.knowledgebaseId, doc._id)
@@ -652,14 +657,14 @@ export const ChatBotProductSetup = ({
 										colorScheme="blue"
 										variant="solid"
 										isLoading={isSubmitting}
-										// disabled={
-										// 	isSubmitting || disableSubmitBtnByDefault
-										// 		? !(isValid && dirty)
-										// 		: !isValid
-										// }
+
 										disabled={
-											isSubmitting || !isValid || (values.files.length === 0 && !values.websiteUrl)
+											!isValid ||
+											((localDocsData === undefined || localDocsData.docs.length === 0) &&
+												values.files.length === 0 &&
+												!values.websiteUrl)
 										}
+
 										onClick={() => {
 											onNextButtonClick(values, "primary");
 										}}

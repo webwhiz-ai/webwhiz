@@ -70,7 +70,7 @@ export async function fetchKnowledgebaseCrawlDataForDocs(id:string, page: number
 	return await axios({
 		baseURL: baseURL,
 		method: 'get',
-		url: `/knowledgebase/${id}/datastore?type=DOCUMENT&page=${page}`,
+		url: `/knowledgebase/${id}/datastore?type=PDF&page=${page}`,
 	});
 }
 export async function fetchKnowledgebaseCrawlDataDetails(id:string, crawlId:string): Promise<AxiosResponse<CrawlDataDetail>> {

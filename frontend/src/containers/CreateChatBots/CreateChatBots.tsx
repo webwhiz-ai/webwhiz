@@ -11,7 +11,7 @@ import { Link, useHistory } from "react-router-dom";
 import {
 	ChatBotProductSetup,
 } from "../ChatBotProductSetup/ChatBotProductSetup";
-import { createKnowledgebase, deleteKnowledgebase, fetchKnowledgebaseCrawlData, fetchKnowledgebaseDetails, generateEmbeddings, addTrainingDocs, fetchKnowledgebaseCrawlDataForDocs, addTrainingDoc } from "../../services/knowledgebaseService";
+import { createKnowledgebase, deleteKnowledgebase, fetchKnowledgebaseCrawlData, fetchKnowledgebaseDetails, generateEmbeddings, addTrainingDocs, fetchKnowledgebaseCrawlDataForDocs, addTrainingDoc, updateWebsiteData } from "../../services/knowledgebaseService";
 import { ProductSetupData, DocsKnowledgeData } from "../../types/knowledgebase.type";
 
 
@@ -207,42 +207,45 @@ export const CreateChatBots = () => {
 		try {
 			setProductSetupLoadingText('Crawling your website data... This may take some time based on the amount of the data...');
 
-			await deleteKnowledgebase(knowledgeBaseId as string);
-			
-			const response = await createKnowledgebase(payLoad.websiteData);
-
-			setKnowledgeBaseId(response.data._id);
+			if (payLoad.websiteData.websiteUrl) {
+				const response = await updateWebsiteData(knowledgeBaseId, {
+					urls: [],
+					websiteUrl: payLoad.websiteData.websiteUrl,
+					include: payLoad.websiteData.include,
+					exclude: payLoad.websiteData.exclude,
+				})
+			}
 
 			if (payLoad.files?.length && payLoad.files.length > 0) {
 				setIsUploadingDocs(true);
 				for (const file of payLoad.files) {
 					try {
-						const addDocResponse = await addTrainingDoc(response.data._id, file);
+						const addDocResponse = await addTrainingDoc(knowledgeBaseId, file);
 					} catch (error) {
 						console.log('error', error)
 					}
 				}
 				setIsUploadingDocs(false);
 				setDocsDataLoading(true);
-				const _docsDataResponse = await fetchKnowledgebaseCrawlDataForDocs(response.data._id, 1); 
+				const _docsDataResponse = await fetchKnowledgebaseCrawlDataForDocs(knowledgeBaseId, 1); 
 				const _docsData: DocsKnowledgeData = {
 					docs: _docsDataResponse.data.results,
 					pages: _docsDataResponse.data.pages,
-					knowledgebaseId: response.data._id
+					knowledgebaseId: knowledgeBaseId
 				}
 				setDocsData(_docsData);
 				setDocsDataLoading(false);
 			}
 
 			let interval = setInterval(async () => {
-				const details = await fetchKnowledgebaseDetails(response.data._id);
+				const details = await fetchKnowledgebaseDetails(knowledgeBaseId);
 				console.log("details", details);
 				if(details.data.status === 'CRAWLED' || !details.data.websiteData) {
 					clearInterval(interval);
 					console.log('details.data', details.data.crawlData)
 					
 					
-					const _crawlDataResponse = await fetchKnowledgebaseCrawlData(response.data._id, 1);
+					const _crawlDataResponse = await fetchKnowledgebaseCrawlData(knowledgeBaseId, 1);
 					
 					const _data = {
 						stats: details.data.crawlData?.stats,
@@ -280,6 +283,7 @@ export const CreateChatBots = () => {
 		} catch (error) {
 			setIsSubmitting(false);
 			setDocsDataLoading(false);
+			setIsSecondaryBtnSubmitting(false);
 			const errorData = error?.response?.data?.message
 			toast({
 				title:  (errorData) || 'Oops! Something went wrong',

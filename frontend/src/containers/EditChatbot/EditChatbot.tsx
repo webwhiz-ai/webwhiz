@@ -756,12 +756,14 @@ const EditChatbot = (props: EditChatbotProps) => {
 
 							try {
 
-								const response = await updateWebsiteData(chatBot._id, {
-									urls: [],
-									websiteUrl: formValues.websiteData.websiteUrl,
-									include: formValues.websiteData.include,
-									exclude: formValues.websiteData.exclude,
-								})
+								if (formValues.websiteData.websiteUrl) {
+									const response = await updateWebsiteData(chatBot._id, {
+										urls: [],
+										websiteUrl: formValues.websiteData.websiteUrl,
+										include: formValues.websiteData.include,
+										exclude: formValues.websiteData.exclude,
+									})
+								}
 
 								if (formValues.files?.length && formValues.files.length > 0) {
 									setIsUploadingDocs(true);
@@ -783,10 +785,10 @@ const EditChatbot = (props: EditChatbotProps) => {
 								}
 
 								let interval = setInterval(async () => {
-									const details = await fetchKnowledgebaseDetails(response.data._id);
+									const details = await fetchKnowledgebaseDetails(chatBot._id);
 									console.log("details", details);
 									const chatBotId = details.data._id
-									if (details.data.status === 'CRAWLED' || !details.data.websiteData) {
+									if (details.data.status === 'CRAWLED') {
 										//setDefaultCrauledData(details.data.)
 										//Training ChatGPT with your website data...
 
