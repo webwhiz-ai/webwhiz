@@ -384,7 +384,7 @@ const EditChatbot = (props: EditChatbotProps) => {
 				<Text color="gray.500" fontSize="sm">A launcher icon will be displayed at the corner of your website. Once clicked, the full chat interface will appear.</Text>
 				<Box className={styles.codeBlock}>
 					<span style={{ color: '#808080' }}>&lt;<span style={{ color: '#ed6a43' }}>script</span>
-						<span style={{ color: '#0086b3' }}> id</span>=<span style={{ color: '#183691' }}>"__webwhizSdk__"</span><span style={{ color: '#0086b3', paddingLeft: '4px' }}> chatbotId</span>=<span style={{ color: '#183691' }}>"{chatBot._id}"</span>
+						<span style={{ color: '#0086b3' }}> id</span>=<span style={{ color: '#183691' }}>"__webwhizSdk__"</span><span style={{ color: '#0086b3', paddingLeft: '4px' }}> data-chatbot-id</span>=<span style={{ color: '#183691' }}>"{chatBot._id}"</span>
 						<br></br>
 						<span style={{ color: '#0086b3', paddingLeft: '20px' }}> src</span>=<span style={{ color: '#183691' }}>"https://widget.webwhiz.ai/webwhiz-sdk.js"</span>
 						&gt;</span>
@@ -400,7 +400,7 @@ const EditChatbot = (props: EditChatbotProps) => {
 						isDisabled={isSubmitting}
 						onClick={() => {
 							navigator.clipboard.writeText(
-								`<script id="__webwhizSdk__" src="https://widget.webwhiz.ai/webwhiz-sdk.js" chatbotId="${chatBot._id}"></script>`
+								`<script id="__webwhizSdk__" src="https://widget.webwhiz.ai/webwhiz-sdk.js" data-chatbot-id="${chatBot._id}"></script>`
 							);
 							toast({
 								title: `Copied to Clipboard`,
