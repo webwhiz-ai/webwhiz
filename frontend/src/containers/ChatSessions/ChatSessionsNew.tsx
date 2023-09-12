@@ -84,7 +84,7 @@ export const ChatSessionsNew = ({ isChatListLoading, chatSessionsPage, onPageCha
                 onSelectChat={handleSelectChat}
                 onPageChange={onPageChange}
             />
-            <ChatWindow messages={chatData?.messages} isMessagesLoading={isChatLoading} />
+            <ChatWindow chatData={chatData} userData={chatData?.userData} messages={chatData?.messages} isMessagesLoading={isChatLoading} />
         </Flex>
     )
 }

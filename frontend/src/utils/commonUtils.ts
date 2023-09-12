@@ -13,6 +13,47 @@ export const uuidv4 = ()=> {
     );
   }
 
+export function getBrowserName(userAgent: string) {
+
+  // Detect ARC Welder
+  if (userAgent.indexOf('ARC') > -1) {
+    return 'ARC Welder';
+  }
+
+  // Detect Chrome
+  if (userAgent.indexOf("Chrome") > -1 && userAgent.indexOf("Edg") === -1 && userAgent.indexOf("OPR") === -1) {
+    return "Google Chrome";
+  }
+
+  // Detect Firefox
+  if (userAgent.indexOf("Firefox") > -1) {
+    return "Mozilla Firefox";
+  }
+
+  // Detect Safari
+  if (userAgent.indexOf("Safari") > -1 && userAgent.indexOf("Chrome") === -1) {
+    return "Safari";
+  }
+
+  // Detect Internet Explorer or Legacy Edge
+  if (userAgent.indexOf("MSIE") > -1 || userAgent.indexOf("Trident") > -1) {
+    return "Microsoft Internet Explorer";
+  }
+
+  // Detect Edge (Chromium)
+  if (userAgent.indexOf("Edg") > -1) {
+    return "Microsoft Edge";
+  }
+
+  // Detect Opera
+  if (userAgent.indexOf("Opera") > -1 || userAgent.indexOf("OPR") > -1) {
+    return "Opera";
+  }
+
+  // Other
+  return 'Other';
+}
+
 export const chatWidgetDefaultValues = {
 	backgroundColor: "#000",
 	heading: 'I am your AI assistant',
