@@ -31,7 +31,7 @@ class KbDataStore(TypedDict):
 
 
 def get_text_from_pdf(
-    knowledgebase_id: str, pdf_file_path: str, max_pages: int, db: Database
+    knowledgebase_id: str, pdf_file_path: str, max_pages: int, filename: str, db: Database
 ) -> str:
     pdf_text = ""
 
@@ -53,6 +53,7 @@ def get_text_from_pdf(
         "knowledgebaseId": ObjectId(knowledgebase_id),
         "content": pdf_text,
         "url": pdf_file_path,
+        "title": filename,
         "type": DataStoreType.PDF.value,
         "status": DataStoreStatus.CREATED.value,
         "createdAt": ts,
