@@ -46,7 +46,7 @@ import { ChatBotsCustomize } from "../ChatBotsCustomize/ChatBotsCustomize";
 import { useLocation } from "react-router-dom";
 
 import styles from "./EditChatbot.module.scss";
-import { fetchKnowledgebaseCrawlData, customizeWidget, deleteTrainingData, fetcKnowledgebase, fetchKnowledgebaseDetails, generateEmbeddings, getTrainingData, getTrainingDataDetails, updateWebsiteData, getChatSessions, getOfflineMessages, updatePrompt, updateDefaultAnswer, addTrainingDocs, fetchKnowledgebaseCrawlDataForDocs, addTrainingDoc } from "../../services/knowledgebaseService";
+import { fetchKnowledgebaseCrawlData, customizeWidget, deleteTrainingData, fetcKnowledgebase, fetchKnowledgebaseDetails, generateEmbeddings, getTrainingData, getTrainingDataDetails, updateWebsiteData, getChatSessions, getOfflineMessages, updatePrompt, updateDefaultAnswer, fetchKnowledgebaseCrawlDataForDocs, addTrainingDoc } from "../../services/knowledgebaseService";
 import { ChatBot } from "../../components/ChatBot/ChatBot";
 import { chatWidgetDefaultValues, getDomainFromUrl } from "../../utils/commonUtils";
 import { AddTrainingData } from "../AddTrainingData/AddTrainingData";
@@ -109,13 +109,16 @@ const EditChatbot = (props: EditChatbotProps) => {
 		defaultStep || "product-setup"
 	);
 	
-	const [primaryButtonLabel, setPrimaryButtonLabel] = React.useState<string>("Update Website data");
+	const [primaryButtonLabel, setPrimaryButtonLabel] = React.useState<string>("Update Website Data");
+	const [productSetupTab, setProductSetupTab] = React.useState<number>(0);
 
 	const handleTabChange = React.useCallback((tabIndex: number) => {
 		if(tabIndex === 0) {
-			setPrimaryButtonLabel("Update Website data")
+			setPrimaryButtonLabel("Update Website Data");
+			setProductSetupTab(0);
 		} else {
-			setPrimaryButtonLabel("Update files")
+			setPrimaryButtonLabel("Upload Files");
+			setProductSetupTab(1);
 		}
 	}, []);
 
@@ -265,10 +268,6 @@ const EditChatbot = (props: EditChatbotProps) => {
 	}, [props.match.params.chatbotId]);
 
 	const [deleteCustomDataLoading, setDeleteCustomDataLoading] = React.useState(false);
-
-	const [trainingData, setTrainingData] = React.useState<TrainingData[]>(
-		[] as TrainingData[]
-	);
 
 	const [customTrainingDataPage, setCustomTrainingDataPage] = React.useState<CustomDataPagination>({
 		pages: 0,
@@ -732,62 +731,20 @@ const EditChatbot = (props: EditChatbotProps) => {
 						disableWebsiteInput={true}
 						onPrimaryBtnClick={async (formValues : ProductSetupData, hasWebsiteDataChanged: boolean) => {
 
-
-
-							setProductSetupLoadingText('Crawling your website data.. This may take some time based on the amount of the data...');
 							setIsSubmitting(true);
-							console.log('payload', formValues)
-							// try {
-							// 	const response = await createKnowledgebase(payLoad);
-							// 	setIsChatbotCreated(true);
-
-							// 	let interval = setInterval(async () => {
-							// 		const details = await fetchKnowledgebaseDetails(response.data._id);
-							// 		console.log("details", details);
-							// 		if(details.data.status === 'CRAWL_ERROR') {
-							// 			clearInterval(interval);
-							// 			setIsChatbotCreated(false);
-							// 			toast({
-							// 				title: `Oops! Something went wrong`,
-							// 				status: "error",
-							// 				isClosable: true,
-							// 			});
-							// 			//setCrauledData(details.data.crawlData);
-							// 		} else if (details.data.status === 'CRAWLED') {
-							// 			clearInterval(interval);
-							// 			setIsChatbotCreated(false);
-							// 			setCreatingEmbeding(true);
-							// 			await generateEmbeddings(details._id);
-							// 		}
-							// 	}, 2000);
-
-
-							// } catch (error) {
-							// }
-
-
-							try {
-
-								if (formValues.websiteData.websiteUrl && hasWebsiteDataChanged) {
-									const response = await updateWebsiteData(chatBot._id, {
-										urls: [],
-										websiteUrl: formValues.websiteData.websiteUrl,
-										include: formValues.websiteData.include,
-										exclude: formValues.websiteData.exclude,
-									})
-								}
-
+							if (productSetupTab === 1) {
+								setProductSetupLoadingText('Uploading files...');
 								if (formValues.files?.length && formValues.files.length > 0) {
 									setIsUploadingDocs(true);
 									for (const file of formValues.files) {
 										try {
-											const addDocResponse = await addTrainingDoc(chatBot._id, file);
+											await addTrainingDoc(chatBot._id, file);
 										} catch (error) {
 											console.log('error', error)
 										}
 									}
 									setIsUploadingDocs(false);
-									const _docsDataResponse = await fetchKnowledgebaseCrawlDataForDocs(chatBot._id, 1); 
+									const _docsDataResponse = await fetchKnowledgebaseCrawlDataForDocs(chatBot._id, 1);
 									const _docsData: DocsKnowledgeData = {
 										docs: _docsDataResponse.data.results,
 										pages: _docsDataResponse.data.pages,
@@ -795,19 +752,29 @@ const EditChatbot = (props: EditChatbotProps) => {
 									}
 									setDocsData(_docsData);
 								}
+								setIsSubmitting(false);
+								return;
+							}
+
+							setProductSetupLoadingText('Crawling your website data.. This may take some time based on the amount of the data...');
+
+							try {
+
+								if (formValues.websiteData.websiteUrl) {
+									await updateWebsiteData(chatBot._id, {
+										urls: [],
+										websiteUrl: formValues.websiteData.websiteUrl,
+										include: formValues.websiteData.include,
+										exclude: formValues.websiteData.exclude,
+									})
+								}
 
 								let interval = setInterval(async () => {
 									const details = await fetchKnowledgebaseDetails(chatBot._id);
 									console.log("details", details);
 									const chatBotId = details.data._id
-									if (details.data.status === 'CRAWLED') {
-										//setDefaultCrauledData(details.data.)
-										//Training ChatGPT with your website data...
-
-										if (hasWebsiteDataChanged) {
-											await generateEmbeddings(chatBotId);
-										}
-
+									if (details.data.status === 'CRAWLED' || (details.data.websiteData === null && details.data.status === 'CREATED')) {
+										await generateEmbeddings(chatBotId);
 									} else if (details.data.status === 'CRAWL_ERROR' || details.data.status === 'EMBEDDING_ERROR') {
 										clearInterval(interval);
 										setIsSubmitting(false);
@@ -823,8 +790,6 @@ const EditChatbot = (props: EditChatbotProps) => {
 
 										const _crawlDataResponse = await fetchKnowledgebaseCrawlData(chatBotId, 1);
 
-
-
 										const _data = {
 											stats: details.data.crawlData?.stats,
 											urls: _crawlDataResponse.data.results,
@@ -833,7 +798,6 @@ const EditChatbot = (props: EditChatbotProps) => {
 										}
 
 										setDefaultCrauledData(_data)
-
 
 										setIsSubmitting(false);
 										toast({
@@ -1007,7 +971,7 @@ const EditChatbot = (props: EditChatbotProps) => {
 				</Flex>
 			</>
 		);
-	}, [chatBot._id, chatBot.websiteData?.websiteUrl, chatBot.chatWidgeData, currentStep, getCrawlDataPagination, getDocsDataPagination, getExcludedPaths, getIncludedPaths, handleTabChange, defaultCrauledData, isSubmitting, isUploadingDocs, docsDataLoading, docsData, crawlDataLoading, productSetupLoadingText, primaryButtonLabel, getDefaultCustomizationValues, getAddToWebsiteContent, props.match.params.chatbotId, handleTrainingDataSave, getCustomDataComponent, chatSessions, isChatLoading, handlePageClick, offlineMessages, handleOfflinePageClick, history, toast, goToStep]);
+	}, [chatBot._id, chatBot.websiteData?.websiteUrl, chatBot.chatWidgeData, currentStep, getCrawlDataPagination, getDocsDataPagination, getExcludedPaths, getIncludedPaths, handleTabChange, defaultCrauledData, isSubmitting, isUploadingDocs, docsDataLoading, docsData, crawlDataLoading, productSetupLoadingText, primaryButtonLabel, getDefaultCustomizationValues, getAddToWebsiteContent, props.match.params.chatbotId, handleTrainingDataSave, getCustomDataComponent, chatSessions, isChatLoading, handlePageClick, offlineMessages, handleOfflinePageClick, history, productSetupTab, toast, goToStep]);
 
 	return (
 		<VStack w="100%" h="100vh" overflow="hidden" spacing={0}>

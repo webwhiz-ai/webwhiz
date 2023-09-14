@@ -146,10 +146,10 @@ export const ChatBotProductSetup = ({
 
 	const [crauledDataDetail, setCrauledDataDetail] = React.useState<string>(defaultCrauledData as unknown as string)
 
-	const [selectedTab, setSelectedTab] = React.useState<number>(0);
 	const [deleteDocLoading, setDeleteDocLoading] = React.useState<boolean>(false);
 	const [localDocsData, setLocalDocsData] = React.useState<DocsKnowledgeData>(docsData as unknown as DocsKnowledgeData);
 	const [docToDelete, setDocToDelete] = React.useState<string>('0');
+	const [selectedTab, setSelectedTab] = React.useState<number>(0);
 
 	useEffect(() => {
 		setLocalDocsData(docsData as unknown as DocsKnowledgeData);
@@ -208,8 +208,8 @@ export const ChatBotProductSetup = ({
 			// }
 
 			const hasWebsiteDataChanged = (defaultWebsite !== websiteUrl ||
-				defaultIncludedPaths != targetPaths.join(',') ||
-				defaultExcludedPaths != excludePaths.join(',')) ? true : false;
+				defaultIncludedPaths !== targetPaths.join(',') ||
+				defaultExcludedPaths !== excludePaths.join(',')) ? true : false;
 
 			if (type === 'primary') {
 				onPrimaryBtnClick(payLoad, hasWebsiteDataChanged);
@@ -522,10 +522,10 @@ export const ChatBotProductSetup = ({
 								<Form style={{ width: '100%' }}>
 									<HStack spacing="16" alignItems="start">
 											<Tabs variant="enclosed" w="100%" colorScheme='gray' mt="1" size="md" onChange={handleTabChange}>
-												<TabList>
-													<Tab isDisabled={disableTabs} _focus={{ outline: "none" }}>Website</Tab>
-													<Tab isDisabled={disableTabs} _focus={{ outline: "none" }}>PDF</Tab>
-												</TabList>
+											<TabList>
+												<Tab isDisabled={isSubmitting} _focus={{ outline: "none" }} _disabled={{ cursor: "not-allowed", opacity: "0.4" }}>Website</Tab>
+												<Tab isDisabled={isSubmitting} _focus={{ outline: "none" }} _disabled={{ cursor: "not-allowed", opacity: "0.4" }}>PDF</Tab>
+											</TabList>
 												<TabPanels>
 													<TabPanel pt="8" px={0}>
 													{/* <Flex w="100%" mb="4" pb="4" borderBottom="1px solid" borderBottomColor="gray.100">
@@ -637,7 +637,7 @@ export const ChatBotProductSetup = ({
 													</TabPanel>
 													<TabPanel pt="8">
 														<SectionTitle title="PDFs" description="Upload pdf documents to train your chatbot" />
-														<HStack spacing="10">
+														<HStack spacing="10" alignItems="flex-start">
 															<Box w="50%">
 																<CustomDropzone 
 																	ref={customDropzoneRef} 
@@ -647,7 +647,7 @@ export const ChatBotProductSetup = ({
 																/>
 																</Box>
 															<Box w="50%">
-																	{ getCrawledDocs()}
+																	{ getCrawledDocs() }
 															</Box>
 														</HStack>
 													</TabPanel>
@@ -694,14 +694,10 @@ export const ChatBotProductSetup = ({
 										colorScheme="blue"
 										variant="solid"
 										isLoading={isSubmitting}
-
 										disabled={
-											!isValid ||
-											((localDocsData === undefined || localDocsData.docs.length === 0) &&
-												values.files.length === 0 &&
-												!values.websiteUrl)
+											!isValid || (disableSubmitBtnByDefault && (values.files.length === 0 && !values.websiteUrl)) ||
+											(!disableSubmitBtnByDefault && ((selectedTab === 0 && !values.websiteUrl) || (selectedTab === 1 && values.files.length === 0)))
 										}
-
 										onClick={() => {
 											onNextButtonClick(values, "primary");
 										}}
