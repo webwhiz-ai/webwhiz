@@ -76,6 +76,7 @@ interface ChatBotProductSetupProps {
 	onSecondaryBtnClick: (finalFormValues: ProductSetupData, hasWebsiteDataChanged: boolean) => void;
 	onCrawlDataPaginationClick: (pageNo: number) => void;
 	onDocsDataPaginationClick: (pageNo: number) => void;
+	onTabsChange: (tabIndex: number) => void;
 	primaryButtonLabel?: string;
 	secondaryBtnLabel?: string;
 	showSecondaryButton?: boolean;
@@ -87,6 +88,7 @@ interface ChatBotProductSetupProps {
 	crawlDataLoading?: boolean;
 	defaultCrauledData: CrawlData;
 	defaultFiles?: File[];
+	disableTabs: boolean;
 	isSubmitting?: boolean;
 	isUploadingDocs?: boolean;
 	isSecondaryBtnSubmitting?: boolean;
@@ -115,6 +117,7 @@ export const ChatBotProductSetup = ({
 	onSecondaryBtnClick,
 	onCrawlDataPaginationClick,
 	onDocsDataPaginationClick,
+	onTabsChange,
 	crawlDataLoading,
 	defaultWebsite = "",
 	primaryButtonLabel = "Create Chat bot",
@@ -128,6 +131,7 @@ export const ChatBotProductSetup = ({
 	disableWebsiteInput = false,
 	loadingText = '',
 	isSubmitting = false,
+	disableTabs = false,
 	isUploadingDocs = false,
 	isSecondaryBtnSubmitting = false,
 	docsDataLoading = false,
@@ -213,7 +217,7 @@ export const ChatBotProductSetup = ({
 				onSecondaryBtnClick(payLoad, hasWebsiteDataChanged);
 			}
 		},
-		[onPrimaryBtnClick, onSecondaryBtnClick, customDropzoneRef, customDropzoneRef.current]
+		[defaultWebsite, defaultIncludedPaths, defaultExcludedPaths, onPrimaryBtnClick, onSecondaryBtnClick]
 	);
 
 
@@ -303,7 +307,7 @@ export const ChatBotProductSetup = ({
 			const crawledPercentage = (crauledData?.stats?.crawledPages * 100) / totalPages;
 			const failedPercentage = (crauledData?.stats?.failedPages * 100) / totalPages;
 			return <>
-				<Alert status='info' mb="10" fontSize='sm' borderRadius="sm">
+				{/* <Alert status='info' mb="10" fontSize='sm' borderRadius="sm">
 					<Text as="span" color="blue.500" mt="2px" mr="6px">
 						<svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
 							<path d="M12 16V12M12 8H12.01M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
@@ -311,8 +315,8 @@ export const ChatBotProductSetup = ({
 					</Text>
 
 					Verify that all the required pages are crawled. If not, you can adjust the target paths and try again
-				</Alert>
-				<StatGroup mb={10}>
+				</Alert> */}
+				{/* <StatGroup mb={10}>
 					<Stat>
 						<StatLabel>Crawled pages</StatLabel>
 						<StatNumber>{crauledData?.stats?.crawledPages}</StatNumber>
@@ -330,7 +334,7 @@ export const ChatBotProductSetup = ({
 							{failedPercentage.toFixed(2)}%
 						</StatHelpText>
 					</Stat>
-				</StatGroup>
+				</StatGroup> */}
 
 				<Box>
 					<Box position="relative">
@@ -339,7 +343,7 @@ export const ChatBotProductSetup = ({
 							<Table size='sm'>
 								<Thead>
 									<Tr>
-										<Th>URLs</Th>
+										<Th>Crawled URLs</Th>
 									</Tr>
 								</Thead>
 								<Tbody>
@@ -486,7 +490,12 @@ export const ChatBotProductSetup = ({
 			</>
 		}
 		return null
-	}, [isUploadingDocs, localDocsData, crawlDataLoading, handleDocsPageClick, handleURLClick, handleDocDelete, deleteDocLoading, docToDelete, crawlDatLoading, docsDataLoading, loadingText, isSubmitting]);
+	}, [isUploadingDocs, localDocsData, handleDocsPageClick, handleURLClick, handleDocDelete, deleteDocLoading, docToDelete, crawlDatLoading, docsDataLoading, loadingText, isSubmitting]);
+
+	const handleTabChange = React.useCallback((index) => {
+		setSelectedTab(index);
+		onTabsChange(index);
+	}, [onTabsChange]);
 
 	return (
 		<>
@@ -510,117 +519,140 @@ export const ChatBotProductSetup = ({
 								p={2}
 								mb="51"
 							>
-								<SectionTitle title="Product setup" description="Enter your website URL and path, will automatically fetch data from your website" />
 								<Form style={{ width: '100%' }}>
 									<HStack spacing="16" alignItems="start">
-										<Box w="50%" maxW="520px">
-
-											<Tabs variant='soft-rounded' colorScheme='gray' mt="1" size="sm" onChange={(index) => setSelectedTab(index)}>
+											<Tabs variant="enclosed" w="100%" colorScheme='gray' mt="1" size="md" onChange={handleTabChange}>
 												<TabList>
-													<Tab>Website</Tab>
-													<Tab>Files</Tab>
+													<Tab isDisabled={disableTabs} _focus={{ outline: "none" }}>Website</Tab>
+													<Tab isDisabled={disableTabs} _focus={{ outline: "none" }}>PDF</Tab>
 												</TabList>
 												<TabPanels>
-													<TabPanel pt="8">
-														<Field
-															type="text"
-															name="websiteUrl"
-															validate={validateWebsite}
-														>
-															{({ field, form }: any) => (
-																<FormControl 
-																// isRequired 
-																mb="8">
-																	<FormLabel fontWeight={400} color="gray.700" fontSize="sm" htmlFor="websiteUrl">
-																		Website URL
-														</FormLabel>
-																	<Input
-																		color="gray.700"
-																		{...field}
-																		id="websiteUrl"
-																		isDisabled={disableWebsiteInput}
-																		// required
-																		placeholder="https://www.paritydeals.com"
-																	/>
-																	{disableWebsiteInput && (<FormHelperText fontSize="smaller" color="gray.400">
-																		The website name can not be edited once the product is created.
-																	</FormHelperText>)}
-																	{form.touched.websiteUrl && form.errors.websiteUrl && (
-																		<FormHelperText color="red">
-																			{form.errors.websiteUrl}
-																		</FormHelperText>
+													<TabPanel pt="8" px={0}>
+													{/* <Flex w="100%" mb="4" pb="4" borderBottom="1px solid" borderBottomColor="gray.100">
+															<Flex maxW="620px" direction="column">
+
+															<Heading as="h2" fontSize="lg" mb="2" fontWeight="600" color="gray.800" isTruncated>
+																Website Details
+															</Heading>
+															<Text color="gray.500">
+															
+															</Text>
+															</Flex>
+													</Flex> */}
+														<SectionTitle title="Website Details" description="Enter your website URL and path, will automatically fetch data from your website" />
+													
+														<HStack alignItems="start" spacing="10" w="100%">
+														<Box w="50%" maxW="520px">
+															
+																<Field
+																	type="text"
+																	name="websiteUrl"
+																	validate={validateWebsite}
+																>
+																	{({ field, form }: any) => (
+																		<FormControl 
+																		// isRequired 
+																		mb="8">
+																			<FormLabel fontWeight={400} color="gray.700" fontSize="sm" htmlFor="websiteUrl">
+																				Website URL
+																</FormLabel>
+																			<Input
+																				color="gray.700"
+																				{...field}
+																				id="websiteUrl"
+																				isDisabled={disableWebsiteInput}
+																				// required
+																				placeholder="https://www.paritydeals.com"
+																			/>
+																			{disableWebsiteInput && (<FormHelperText fontSize="smaller" color="gray.400">
+																				The website name can not be edited once the product is created.
+																			</FormHelperText>)}
+																			{form.touched.websiteUrl && form.errors.websiteUrl && (
+																				<FormHelperText color="red">
+																					{form.errors.websiteUrl}
+																				</FormHelperText>
+																			)}
+																			<FormErrorMessage>
+																				{form.errors.websiteUrl}
+																			</FormErrorMessage>
+																		</FormControl>
 																	)}
-																	<FormErrorMessage>
-																		{form.errors.websiteUrl}
-																	</FormErrorMessage>
-																</FormControl>
-															)}
-														</Field>
-														<Field type="text" name="target">
-															{({ field, form }: any) => (
-																<FormControl
-																	mb="8"
-																	isInvalid={form.errors.target && form.touched.target}
-																>
-																	<FormLabel fontWeight={400} color="gray.700" fontSize="sm" htmlFor="target">
-																		Included paths
-														</FormLabel>
-																	<Input
-																		color="gray.700"
-																		{...field}
-																		id="target"
-																		placeholder="/docs"
-																	/>
-																	<FormHelperText fontSize="smaller" color="gray.400">
-																		Add only the path after the domain separated by a comma. For e.g. /docs, /features.
-														</FormHelperText>
+																</Field>
+																<Field type="text" name="target">
+																	{({ field, form }: any) => (
+																		<FormControl
+																			mb="8"
+																			isInvalid={form.errors.target && form.touched.target}
+																		>
+																			<FormLabel fontWeight={400} color="gray.700" fontSize="sm" htmlFor="target">
+																				Included paths
+																</FormLabel>
+																			<Input
+																				color="gray.700"
+																				{...field}
+																				id="target"
+																				placeholder="/docs"
+																			/>
+																			<FormHelperText fontSize="smaller" color="gray.400">
+																				Add only the path after the domain separated by a comma. For e.g. /docs, /features.
+																</FormHelperText>
 
-																	<FormErrorMessage>
-																		{form.errors.target}
-																	</FormErrorMessage>
-																</FormControl>
-															)}
-														</Field>
-														<Field type="text" name="exclude">
-															{({ field, form }: any) => (
-																<FormControl
-																	mb="8"
-																	isInvalid={form.errors.exclude && form.touched.exclude}
-																>
-																	<FormLabel fontWeight={400} color="gray.700" fontSize="sm" htmlFor="exclude">
-																		Excluded paths
-																	</FormLabel>
-																	<Input
-																		color="gray.700"
-																		{...field}
-																		id="exclude"
-																		placeholder="/privacy"
-																	/>
-																	<FormHelperText fontSize="smaller" color="gray.400">
-																		Add only the path after the domain separated by a comma. For e.g. /privacy, /terms-and-conditions.
-																	</FormHelperText>
+																			<FormErrorMessage>
+																				{form.errors.target}
+																			</FormErrorMessage>
+																		</FormControl>
+																	)}
+																</Field>
+																<Field type="text" name="exclude">
+																	{({ field, form }: any) => (
+																		<FormControl
+																			mb="8"
+																			isInvalid={form.errors.exclude && form.touched.exclude}
+																		>
+																			<FormLabel fontWeight={400} color="gray.700" fontSize="sm" htmlFor="exclude">
+																				Excluded paths
+																			</FormLabel>
+																			<Input
+																				color="gray.700"
+																				{...field}
+																				id="exclude"
+																				placeholder="/privacy"
+																			/>
+																			<FormHelperText fontSize="smaller" color="gray.400">
+																				Add only the path after the domain separated by a comma. For e.g. /privacy, /terms-and-conditions.
+																			</FormHelperText>
 
-																	<FormErrorMessage>
-																		{form.errors.exclude}
-																	</FormErrorMessage>
-																</FormControl>
-															)}
-														</Field>
+																			<FormErrorMessage>
+																				{form.errors.exclude}
+																			</FormErrorMessage>
+																		</FormControl>
+																	)}
+																</Field>
+															</Box>
+															<Box w="50%">
+																{getCrauledPaths()}
+															</Box>
+														</HStack>
+														
 													</TabPanel>
 													<TabPanel pt="8">
-														<CustomDropzone 
-															ref={customDropzoneRef} 
-															name="files" label="Upload Files" 
-															helperText="Upload files to be crawled. For e.g. sitemap.xml, robots.txt."
-														/>
+														<SectionTitle title="PDFs" description="Upload pdf documents to train your chatbot" />
+														<HStack spacing="10">
+															<Box w="50%">
+																<CustomDropzone 
+																	ref={customDropzoneRef} 
+																	name="files" 
+																	label="Upload Files" 
+																	helperText=""
+																/>
+																</Box>
+															<Box w="50%">
+																	{ getCrawledDocs()}
+															</Box>
+														</HStack>
 													</TabPanel>
 												</TabPanels>
 											</Tabs>
-
-										</Box>
-										<Box w="50%">
-											{selectedTab === 0 ? getCrauledPaths() : getCrawledDocs()}
-										</Box>
 									</HStack>
 
 								</Form>

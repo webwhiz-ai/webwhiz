@@ -293,6 +293,14 @@ export const CreateChatBots = () => {
 		}
 	}, [knowledgeBaseId, toast]);
 
+	const handleTabChange = React.useCallback((tabIndex: number) => {
+		if(tabIndex === 0) {
+			//setPrimaryButtonLabel("Verify pages")
+		} else {
+			//setPrimaryButtonLabel("Upload files")
+		}
+	}, []);
+
 
 
 	const getProductSetupComponent = React.useCallback(() => {
@@ -303,6 +311,8 @@ export const CreateChatBots = () => {
 				onDocsDataPaginationClick={getDocsDataPagination}
 				crawlDataLoading={crawlDataLoading}
 				isSubmitting={isSubmitting}
+				disableTabs={isSubmitting}
+				onTabsChange={handleTabChange}
 				isSecondaryBtnSubmitting={isSecondaryBtnSubmitting}
 				showSecondaryButton={savingStep === 'EMBED'}
 				loadingText={productSetupLoadingText}
@@ -316,7 +326,7 @@ export const CreateChatBots = () => {
 				docsDataLoading={docsDataLoading}
 			/>
 		);
-	}, [crawlDataLoading, defaultCrauledData, getCrawlDataPagination, getDocsDataPagination, handlePrimaryButtonClick, handleSecondaryButtonClick, isSecondaryBtnSubmitting, isSubmitting, isUploadingDocs, primaryButtonLabel, productSetupLoadingText, savingStep]);
+	}, [crawlDataLoading, defaultCrauledData, docsData, docsDataLoading, getCrawlDataPagination, getDocsDataPagination, handlePrimaryButtonClick, handleSecondaryButtonClick, handleTabChange, isSecondaryBtnSubmitting, isSubmitting, isUploadingDocs, primaryButtonLabel, productSetupLoadingText, savingStep]);
 
 	const getMainComponent = React.useCallback(() => {
 		return (

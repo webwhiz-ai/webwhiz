@@ -41,11 +41,11 @@ const CustomDropzone = React.forwardRef(({name, label, helperText}: CustomDropzo
     const { getRootProps, getInputProps, isDragActive } = useDropzone({
         onDrop: handleDrop,
         accept: {
-            'text/html': ['.html'],
+            //'text/html': ['.html'],
             'application/pdf': ['.pdf'],
-            'application/vdn.openxmlformats-officedocument.wordprocessingml.document': ['.docx', '.doc'],
-            'application/ms-word': ['.docx', '.doc'],
-            'application/vnd.openxmlformats-officedocument.presentationml.presentation': ['.pptx']
+            // 'application/vdn.openxmlformats-officedocument.wordprocessingml.document': ['.docx', '.doc'],
+            // 'application/ms-word': ['.docx', '.doc'],
+            // 'application/vnd.openxmlformats-officedocument.presentationml.presentation': ['.pptx']
         },
         multiple: true,
         // maxFiles: 5,
@@ -62,7 +62,7 @@ const CustomDropzone = React.forwardRef(({name, label, helperText}: CustomDropzo
 
     return (
         <Box>
-            <Text mb={2} color="gray.700" fontSize="sm">{label}</Text>
+            {/* <Text mb={2} color="gray.700" fontSize="sm">{label}</Text> */}
             <Box
                 w="100%"
                 justify="center"
@@ -81,7 +81,7 @@ const CustomDropzone = React.forwardRef(({name, label, helperText}: CustomDropzo
                 {isDragActive ? (
                     <Text fontSize="sm" color="gray.500">Drop the files here ...</Text>
                 ) : (
-                        <Text fontSize="sm" color="gray.500">Drag 'n' drop some files here, or click to select files</Text>
+                        <Text fontSize="sm" color="gray.500">Drag and drop PDF files</Text>
                     )}
                 {meta.error ? (
                     <Text fontSize="sm" color="red.400">{meta.error}</Text>
