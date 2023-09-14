@@ -718,7 +718,7 @@ const EditChatbot = (props: EditChatbotProps) => {
 						loadingText={productSetupLoadingText}
 						primaryButtonLabel="Update Data"
 						disableWebsiteInput={true}
-						onPrimaryBtnClick={async (formValues : ProductSetupData) => {
+						onPrimaryBtnClick={async (formValues : ProductSetupData, hasWebsiteDataChanged: boolean) => {
 
 
 
@@ -756,7 +756,7 @@ const EditChatbot = (props: EditChatbotProps) => {
 
 							try {
 
-								if (formValues.websiteData.websiteUrl) {
+								if (formValues.websiteData.websiteUrl && hasWebsiteDataChanged) {
 									const response = await updateWebsiteData(chatBot._id, {
 										urls: [],
 										websiteUrl: formValues.websiteData.websiteUrl,
@@ -792,7 +792,9 @@ const EditChatbot = (props: EditChatbotProps) => {
 										//setDefaultCrauledData(details.data.)
 										//Training ChatGPT with your website data...
 
-										await generateEmbeddings(chatBotId);
+										if (hasWebsiteDataChanged) {
+											await generateEmbeddings(chatBotId);
+										}
 
 									} else if (details.data.status === 'CRAWL_ERROR' || details.data.status === 'EMBEDDING_ERROR') {
 										clearInterval(interval);

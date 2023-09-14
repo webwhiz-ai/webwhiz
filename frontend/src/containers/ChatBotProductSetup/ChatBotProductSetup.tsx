@@ -72,8 +72,8 @@ interface FormValues {
 	files: File[];
 }
 interface ChatBotProductSetupProps {
-	onPrimaryBtnClick: (finalFormValues: ProductSetupData) => void;
-	onSecondaryBtnClick: (finalFormValues: ProductSetupData) => void;
+	onPrimaryBtnClick: (finalFormValues: ProductSetupData, hasWebsiteDataChanged: boolean) => void;
+	onSecondaryBtnClick: (finalFormValues: ProductSetupData, hasWebsiteDataChanged: boolean) => void;
 	onCrawlDataPaginationClick: (pageNo: number) => void;
 	onDocsDataPaginationClick: (pageNo: number) => void;
 	primaryButtonLabel?: string;
@@ -202,10 +202,15 @@ export const ChatBotProductSetup = ({
 			// if((!formValues.targetPagesBar || !formValues.targetPagesBar.length) && target) {
 			// 	formValues.targetPagesBar = [{ action: "include", path: target }]
 			// }
+
+			const hasWebsiteDataChanged = (defaultWebsite !== websiteUrl ||
+				defaultIncludedPaths != targetPaths.join(',') ||
+				defaultExcludedPaths != excludePaths.join(',')) ? true : false;
+
 			if (type === 'primary') {
-				onPrimaryBtnClick(payLoad);
+				onPrimaryBtnClick(payLoad, hasWebsiteDataChanged);
 			} else {
-				onSecondaryBtnClick(payLoad);
+				onSecondaryBtnClick(payLoad, hasWebsiteDataChanged);
 			}
 		},
 		[onPrimaryBtnClick, onSecondaryBtnClick, customDropzoneRef, customDropzoneRef.current]

@@ -199,7 +199,7 @@ export const CreateChatBots = () => {
 	}, [history, knowledgeBaseId, savingStep, toast]);
 
 
-	const handleSecondaryButtonClick = React.useCallback(async (payLoad: ProductSetupData) => {
+	const handleSecondaryButtonClick = React.useCallback(async (payLoad: ProductSetupData, hasWebsiteDataChanged: boolean) => {
 		console.log('payload', payLoad)
 		setIsSubmitting(true);
 		setIsSecondaryBtnSubmitting(true);
@@ -207,7 +207,7 @@ export const CreateChatBots = () => {
 		try {
 			setProductSetupLoadingText('Crawling your website data... This may take some time based on the amount of the data...');
 
-			if (payLoad.websiteData.websiteUrl) {
+			if (payLoad.websiteData.websiteUrl && hasWebsiteDataChanged) {
 				const response = await updateWebsiteData(knowledgeBaseId, {
 					urls: [],
 					websiteUrl: payLoad.websiteData.websiteUrl,
