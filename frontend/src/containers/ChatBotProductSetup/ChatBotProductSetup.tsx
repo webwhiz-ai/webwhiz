@@ -369,10 +369,12 @@ export const ChatBotProductSetup = ({
 							</Table>
 						</TableContainer>
 					</Box>
-					<Box mt="4">
-						<Paginator onPageChange={handlePageClick} pageRangeDisplayed={5}
-							pageCount={crauledData.pages} />
-					</Box>
+					{
+						crauledData.pages > 10 && <Box mt="4">
+							<Paginator onPageChange={handlePageClick} pageRangeDisplayed={5}
+								pageCount={crauledData.pages} />
+						</Box>
+					}
 				</Box>
 			</>
 		}
@@ -452,10 +454,13 @@ export const ChatBotProductSetup = ({
 						</Table>
 					</TableContainer>
 				</Box>
-				<Box mt="4">
-					<Paginator onPageChange={handleDocsPageClick} pageRangeDisplayed={5}
-						pageCount={localDocsData.pages} />
-				</Box>
+				{
+					localDocsData.pages > 10 && <Box mt="4">
+						<Paginator onPageChange={handleDocsPageClick} pageRangeDisplayed={5}
+							pageCount={localDocsData.pages} />
+					</Box>
+				}
+				
 			</Box>
 			</>
 		}
