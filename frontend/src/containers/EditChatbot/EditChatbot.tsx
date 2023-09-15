@@ -46,7 +46,7 @@ import { ChatBotsCustomize } from "../ChatBotsCustomize/ChatBotsCustomize";
 import { useLocation } from "react-router-dom";
 
 import styles from "./EditChatbot.module.scss";
-import { fetchKnowledgebaseCrawlData, customizeWidget, deleteTrainingData, fetcKnowledgebase, fetchKnowledgebaseDetails, generateEmbeddings, getTrainingData, getTrainingDataDetails, updateWebsiteData, getChatSessions, getOfflineMessages, updatePrompt, updateDefaultAnswer } from "../../services/knowledgebaseService";
+import { fetchKnowledgebaseCrawlData, customizeWidget, deleteTrainingData, fetcKnowledgebase, fetchKnowledgebaseDetails, generateEmbeddings, getTrainingData, getTrainingDataDetails, updateWebsiteData, getChatSessions, getOfflineMessages, updatePrompt, updateDefaultAnswer, fetchKnowledgebaseCrawlDataForDocs, addTrainingDoc } from "../../services/knowledgebaseService";
 import { ChatBot } from "../../components/ChatBot/ChatBot";
 import { chatWidgetDefaultValues, getDomainFromUrl } from "../../utils/commonUtils";
 import { AddTrainingData } from "../AddTrainingData/AddTrainingData";
@@ -54,7 +54,7 @@ import { AddTrainingDataForm } from "../AddTrainingDataForm/AddTrainingDataForm"
 import { NoDataSubscribeIcon } from "../../components/Icons/noData/NoDataSubscribeIcon";
 import { SectionTitle } from "../../components/SectionTitle/SectionTitle";
 import { CurrentUser, User } from "../../services/appConfig";
-import { ChatBotCustomizeData, TrainingData, OfflineMessagePagination, ChatSessionPagination, CustomDataPagination } from "../../types/knowledgebase.type";
+import { ChatBotCustomizeData, TrainingData, OfflineMessagePagination, ChatSessionPagination, CustomDataPagination, ProductSetupData, DocsKnowledgeData } from "../../types/knowledgebase.type";
 import { OfflineMessagesNew } from "../OfflineMessages/OfflineMessagesNew";
 import { ChatSessionsNew } from "../ChatSessions/ChatSessionsNew";
 import { Paginator } from "../../widgets/Paginator/Paginator";
@@ -99,6 +99,7 @@ const EditChatbot = (props: EditChatbotProps) => {
 	const defaultStep = new URLSearchParams(search).get("step") as Steps;
 
 	const [isSubmitting, setIsSubmitting] = React.useState<boolean>(false);
+	const [isUploadingDocs, setIsUploadingDocs] = React.useState<boolean>(false);
 	const [questionsToDelete, setQuestionsToDelete] = React.useState<string>('0');
 	const [chatBot, setChatbot] = React.useState({} as any);
 	const [defaultCrauledData, setDefaultCrauledData] = React.useState<any>();
@@ -107,6 +108,19 @@ const EditChatbot = (props: EditChatbotProps) => {
 	const [currentStep, setCurrentStep] = React.useState<Steps>(
 		defaultStep || "product-setup"
 	);
+	
+	const [primaryButtonLabel, setPrimaryButtonLabel] = React.useState<string>("Update Website Data");
+	const [productSetupTab, setProductSetupTab] = React.useState<number>(0);
+
+	const handleTabChange = React.useCallback((tabIndex: number) => {
+		if(tabIndex === 0) {
+			setPrimaryButtonLabel("Update Website Data");
+			setProductSetupTab(0);
+		} else {
+			setPrimaryButtonLabel("Upload Files");
+			setProductSetupTab(1);
+		}
+	}, []);
 
 
 	const { isOpen: isDeleteDialogOpen, onOpen: onDeleteDialogOpen, onClose: onDeleteDialogClose } = useDisclosure();
@@ -117,6 +131,10 @@ const EditChatbot = (props: EditChatbotProps) => {
 	const [isChatLoading, setIsChatLoading] = React.useState<boolean>(false);
 
 	const [crawlDataLoading, setIrawlDataLoading] = React.useState<boolean>(false);
+
+	const [docsDataLoading, setDocsDataLoading] = React.useState<boolean>(false);
+	const [docsData, setDocsData] = React.useState<DocsKnowledgeData>();
+
 	const getCrawlDataPagination = React.useCallback(async (pageNo: number) => {
 		try {
 			setIrawlDataLoading(true);
@@ -133,6 +151,24 @@ const EditChatbot = (props: EditChatbotProps) => {
 			console.log(error);
 		} finally {
 			setIrawlDataLoading(false);
+		}
+	}, [defaultCrauledData]);
+
+	const getDocsDataPagination = React.useCallback(async (pageNo: number) => {
+		try {
+			setDocsDataLoading(true);
+			const _docsDataResponse = await fetchKnowledgebaseCrawlDataForDocs(defaultCrauledData.knowledgebaseId, pageNo);
+			console.log("_docsDataResponse", _docsDataResponse);
+			const _data: DocsKnowledgeData = {
+				docs: _docsDataResponse.data.results,
+				pages: _docsDataResponse.data.pages,
+				knowledgebaseId: defaultCrauledData.knowledgebaseId
+			}
+			setDocsData(_data)
+		} catch (error) {
+			console.log(error);
+		} finally {
+			setDocsDataLoading(false);
 		}
 	}, [defaultCrauledData]);
 
@@ -164,6 +200,15 @@ const EditChatbot = (props: EditChatbotProps) => {
 					knowledgebaseId: chatBotData._id
 				}
 
+				const _docsDataResponse = await fetchKnowledgebaseCrawlDataForDocs(chatBotData._id, 1);
+
+				const _docsData: DocsKnowledgeData = {
+					docs: _docsDataResponse.data.results,
+					pages: _docsDataResponse.data.pages,
+					knowledgebaseId: chatBotData._id
+				}
+
+				setDocsData(_docsData);
 				setDefaultCrauledData(_data)
 				setChatbot(response.data);
 			} catch (error) {
@@ -224,10 +269,6 @@ const EditChatbot = (props: EditChatbotProps) => {
 	}, [props.match.params.chatbotId]);
 
 	const [deleteCustomDataLoading, setDeleteCustomDataLoading] = React.useState(false);
-
-	const [trainingData, setTrainingData] = React.useState<TrainingData[]>(
-		[] as TrainingData[]
-	);
 
 	const [customTrainingDataPage, setCustomTrainingDataPage] = React.useState<CustomDataPagination>({
 		pages: 0,
@@ -609,12 +650,12 @@ const EditChatbot = (props: EditChatbotProps) => {
 
 
 	const getExcludedPaths = React.useCallback(() => {
-		if (!chatBot._id) return;
+		if (!chatBot._id || !chatBot.websiteData) return;
 		const excludedPaths = chatBot.websiteData.exclude.join(',')
 		return excludedPaths;
 	}, [chatBot]);
 	const getIncludedPaths = React.useCallback(() => {
-		if (!chatBot._id) return;
+		if (!chatBot._id || !chatBot.websiteData) return;
 		const includedPaths = chatBot.websiteData.include.join(',')
 		return includedPaths;
 	}, [chatBot]);
@@ -682,74 +723,71 @@ const EditChatbot = (props: EditChatbotProps) => {
 				>
 					<ChatBotProductSetup
 						onCrawlDataPaginationClick={getCrawlDataPagination}
-						defaultWebsite={chatBot.websiteData.websiteUrl}
+						onDocsDataPaginationClick={getDocsDataPagination}
+						defaultWebsite={chatBot.websiteData?.websiteUrl}
 						defaultExcludedPaths={getExcludedPaths()}
 						defaultIncludedPaths={getIncludedPaths()}
+						onTabsChange={handleTabChange}
 						showSecondaryButton
+						disableTabs={false}
 						onSecondaryBtnClick={() => {
 							history.push("/app/chat-bots/");
 						}}
 						defaultCrauledData={defaultCrauledData}
 						isSubmitting={isSubmitting}
+						isUploadingDocs={isUploadingDocs}
+						docsDataLoading={docsDataLoading}
+						docsData={docsData}
 						crawlDataLoading={crawlDataLoading}
 						loadingText={productSetupLoadingText}
-						primaryButtonLabel="Update Data"
+						primaryButtonLabel={primaryButtonLabel}
 						disableWebsiteInput={true}
-						onPrimaryBtnClick={async (formValues) => {
+						onPrimaryBtnClick={async (formValues : ProductSetupData, hasWebsiteDataChanged: boolean) => {
 
-
+							setIsSubmitting(true);
+							if (productSetupTab === 1) {
+								setProductSetupLoadingText('Uploading files...');
+								if (formValues.files?.length && formValues.files.length > 0) {
+									setIsUploadingDocs(true);
+									for (const file of formValues.files) {
+										try {
+											await addTrainingDoc(chatBot._id, file);
+										} catch (error) {
+											console.log('error', error)
+										}
+									}
+									setIsUploadingDocs(false);
+									const _docsDataResponse = await fetchKnowledgebaseCrawlDataForDocs(chatBot._id, 1);
+									const _docsData: DocsKnowledgeData = {
+										docs: _docsDataResponse.data.results,
+										pages: _docsDataResponse.data.pages,
+										knowledgebaseId: chatBot._id
+									}
+									setDocsData(_docsData);
+								}
+								setIsSubmitting(false);
+								return;
+							}
 
 							setProductSetupLoadingText('Crawling your website data.. This may take some time based on the amount of the data...');
-							setIsSubmitting(true);
-							console.log('payload', formValues)
-							// try {
-							// 	const response = await createKnowledgebase(payLoad);
-							// 	setIsChatbotCreated(true);
-
-							// 	let interval = setInterval(async () => {
-							// 		const details = await fetchKnowledgebaseDetails(response.data._id);
-							// 		console.log("details", details);
-							// 		if(details.data.status === 'CRAWL_ERROR') {
-							// 			clearInterval(interval);
-							// 			setIsChatbotCreated(false);
-							// 			toast({
-							// 				title: `Oops! Something went wrong`,
-							// 				status: "error",
-							// 				isClosable: true,
-							// 			});
-							// 			//setCrauledData(details.data.crawlData);
-							// 		} else if (details.data.status === 'CRAWLED') {
-							// 			clearInterval(interval);
-							// 			setIsChatbotCreated(false);
-							// 			setCreatingEmbeding(true);
-							// 			await generateEmbeddings(details._id);
-							// 		}
-							// 	}, 2000);
-
-
-							// } catch (error) {
-							// }
-
 
 							try {
 
-								const response = await updateWebsiteData(chatBot._id, {
-									urls: [],
-									websiteUrl: formValues.websiteUrl,
-									include: formValues.include,
-									exclude: formValues.exclude,
-								})
+								if (formValues.websiteData.websiteUrl) {
+									await updateWebsiteData(chatBot._id, {
+										urls: [],
+										websiteUrl: formValues.websiteData.websiteUrl,
+										include: formValues.websiteData.include,
+										exclude: formValues.websiteData.exclude,
+									})
+								}
 
 								let interval = setInterval(async () => {
-									const details = await fetchKnowledgebaseDetails(response.data._id);
+									const details = await fetchKnowledgebaseDetails(chatBot._id);
 									console.log("details", details);
 									const chatBotId = details.data._id
-									if (details.data.status === 'CRAWLED') {
-										//setDefaultCrauledData(details.data.)
-										//Training ChatGPT with your website data...
-
+									if (details.data.status === 'CRAWLED' || (details.data.websiteData === null && details.data.status === 'CREATED')) {
 										await generateEmbeddings(chatBotId);
-
 									} else if (details.data.status === 'CRAWL_ERROR' || details.data.status === 'EMBEDDING_ERROR') {
 										clearInterval(interval);
 										setIsSubmitting(false);
@@ -765,8 +803,6 @@ const EditChatbot = (props: EditChatbotProps) => {
 
 										const _crawlDataResponse = await fetchKnowledgebaseCrawlData(chatBotId, 1);
 
-
-
 										const _data = {
 											stats: details.data.crawlData?.stats,
 											urls: _crawlDataResponse.data.results,
@@ -775,7 +811,6 @@ const EditChatbot = (props: EditChatbotProps) => {
 										}
 
 										setDefaultCrauledData(_data)
-
 
 										setIsSubmitting(false);
 										toast({
@@ -940,7 +975,7 @@ const EditChatbot = (props: EditChatbotProps) => {
 									<Heading className={styles.resultTipHeading} fontSize="medium">Ensure Correct Crawling of Website Pages.</Heading>
 									<Text className={styles.resultTipDescg}>verify that all the necessary pages on your website are crawled correctly. To do this, head to the <Text as="span" cursor="pointer" textDecoration="underline" onClick={() => {
 										goToStep("product-setup");
-									}}>product setup</Text> tab and click on the "View Crawled Data" button. </Text>
+									}}>Data sources</Text> tab and click on the "View Crawled Data" button. </Text>
 								</Box>
 								<Box className={styles.resultTip}>
 									<Box className={styles.resultTipNumber} > 3</Box>
@@ -958,7 +993,7 @@ const EditChatbot = (props: EditChatbotProps) => {
 				</Flex>
 			</>
 		);
-	}, [chatBot, currentStep, getCrawlDataPagination, getExcludedPaths, getIncludedPaths, defaultCrauledData, isSubmitting, crawlDataLoading, productSetupLoadingText, getDefaultCustomizationValues, getAddToWebsiteContent, props.match.params.chatbotId, handleTrainingDataSave, getCustomDataComponent, chatSessions, isChatLoading, handlePageClick, offlineMessages, handleOfflinePageClick, history, toast, goToStep]);
+	}, [chatBot._id, chatBot.websiteData?.websiteUrl, chatBot.chatWidgeData, currentStep, getCrawlDataPagination, getDocsDataPagination, getExcludedPaths, getIncludedPaths, handleTabChange, defaultCrauledData, isSubmitting, isUploadingDocs, docsDataLoading, docsData, crawlDataLoading, productSetupLoadingText, primaryButtonLabel, getDefaultCustomizationValues, getAddToWebsiteContent, props.match.params.chatbotId, handleTrainingDataSave, getCustomDataComponent, chatSessions, isChatLoading, handlePageClick, offlineMessages, handleOfflinePageClick, history, productSetupTab, toast, goToStep]);
 
 	return (
 		<VStack w="100%" h="100vh" overflow="hidden" spacing={0}>
@@ -998,7 +1033,7 @@ const EditChatbot = (props: EditChatbotProps) => {
 									<path d="M9 21V13.6C9 13.0399 9 12.7599 9.10899 12.546C9.20487 12.3578 9.35785 12.2049 9.54601 12.109C9.75992 12 10.0399 12 10.6 12H13.4C13.9601 12 14.2401 12 14.454 12.109C14.6422 12.2049 14.7951 12.3578 14.891 12.546C15 12.7599 15 13.0399 15 13.6V21M11.0177 2.764L4.23539 8.03912C3.78202 8.39175 3.55534 8.56806 3.39203 8.78886C3.24737 8.98444 3.1396 9.20478 3.07403 9.43905C3 9.70352 3 9.9907 3 10.5651V17.8C3 18.9201 3 19.4801 3.21799 19.908C3.40973 20.2843 3.71569 20.5903 4.09202 20.782C4.51984 21 5.07989 21 6.2 21H17.8C18.9201 21 19.4802 21 19.908 20.782C20.2843 20.5903 20.5903 20.2843 20.782 19.908C21 19.4801 21 18.9201 21 17.8V10.5651C21 9.9907 21 9.70352 20.926 9.43905C20.8604 9.20478 20.7526 8.98444 20.608 8.78886C20.4447 8.56806 20.218 8.39175 19.7646 8.03913L12.9823 2.764C12.631 2.49075 12.4553 2.35412 12.2613 2.3016C12.0902 2.25526 11.9098 2.25526 11.7387 2.3016C11.5447 2.35412 11.369 2.49075 11.0177 2.764Z" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
 								</svg>
 
-								Product setup
+								Data sources
 							</ListItem>
 							<ListItem
 								display="flex"
