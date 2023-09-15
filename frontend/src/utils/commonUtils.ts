@@ -15,6 +15,8 @@ export const uuidv4 = ()=> {
 
 export function getBrowserName(userAgent: string) {
 
+  if(!userAgent) return 'Other';
+
   // Detect ARC Welder
   if (userAgent.indexOf('ARC') > -1) {
     return 'ARC Welder';
