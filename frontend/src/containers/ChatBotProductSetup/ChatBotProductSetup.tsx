@@ -396,37 +396,7 @@ export const ChatBotProductSetup = ({
 			</>
 		}
 
-		if (localDocsData && !localDocsData?.docs.length) {
-
-			return <VStack
-				alignItems="center"
-				direction="column"
-				justifyContent="center"
-				w="100%"
-				h="100%"
-				pt={12}
-				pb={12}
-				spacing="9"
-			>
-				<NoDataFineTuneIcon />
-				<Box textAlign="center">
-					<Heading
-						maxW="580px"
-						fontSize="xl"
-						fontWeight="500"
-						as="h3"
-						mb="4"
-						color="gray.500"
-						lineHeight="medium"
-						textAlign="center"
-					>
-						The more data you add, the better your chatbot response will be.
-					</Heading>
-				</Box>
-			</VStack>
-		}
-
-		if (localDocsData) {
+		if (localDocsData && localDocsData?.docs.length) {
 			return <>
 			<Box>
 				<Box position="relative">
