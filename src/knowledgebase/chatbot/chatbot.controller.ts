@@ -43,6 +43,16 @@ export class ChatbotController {
     );
   }
 
+  @Post('/session/:sessionId/delete')
+  @HttpCode(200)
+  async removeSession(
+    @Req() req: RequestWithUser,
+    @Param('sessionId') sessionId: string,
+  ) {
+    const { user } = req;
+    return this.chatbotService.deleteSessionBySession(user, sessionId);
+  }
+
   @Post('/session/:sessionId/read')
   @HttpCode(200)
   async markMessageAsRead(

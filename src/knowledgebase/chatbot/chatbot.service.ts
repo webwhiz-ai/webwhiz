@@ -592,6 +592,34 @@ export class ChatbotService {
   }
 
   /**
+   * Remove session
+   * @param sessionId
+   */
+
+  async deleteSessionBySession(user: UserSparse, sessionId: string) {
+    const session: ChatSessionSparse =
+      await this.kbDbService.getChatSessionSparseById(new ObjectId(sessionId));
+
+    if (!session) {
+      throw new HttpException('Invalid Session', HttpStatus.NOT_FOUND);
+    }
+
+    const kb = await this.kbDbService.getKnowledgebaseSparseById(
+      session.knowledgebaseId,
+    );
+
+    if (!user._id.equals(kb.owner)) {
+      throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
+    }
+
+    try {
+      await this.kbDbService.deleteChatSession(new ObjectId(sessionId));
+    } catch {
+      throw new HttpException('Invalid Session', HttpStatus.NOT_FOUND);
+    }
+  }
+
+  /**
    * Mark all the messages in the Session as Read
    * @param sessionId
    */
