@@ -72,7 +72,7 @@ export class SubscriptionService {
       return;
     }
 
-    const email = payload.data.attributes.user_email;
+    const email = payload.data.attributes.user_email.toLowerCase();
 
     let plan;
     // Check if the variant id is for App Sumo Life Time Deals
@@ -118,7 +118,7 @@ export class SubscriptionService {
   async subscriptionCreatedHandler(
     payload: LemonSqueezyWebhookSubscriptionCreatedEvent,
   ) {
-    const email = payload.data.attributes.user_email;
+    const email = payload.data.attributes.user_email.toLowerCase();
     const variantId = payload.data.attributes.variant_id;
 
     if (isVariantForWhileLabelling(variantId)) {

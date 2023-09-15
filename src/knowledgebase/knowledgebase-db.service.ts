@@ -22,6 +22,7 @@ import {
   Prompt,
   PROMPT_COLLECTION,
   ChatSessionSparse,
+  ChatAnswerFeedbackType,
 } from './knowledgebase.schema';
 
 @Injectable()
@@ -466,6 +467,7 @@ export class KnowledgebaseDbService {
       startedAt: 1,
       updatedAt: 1,
       userData: 1,
+      isUnread: 1,
       firstMessage: { $first: '$messages' },
     };
 
@@ -493,36 +495,29 @@ export class KnowledgebaseDbService {
     );
   }
 
-  async markMessageAsUnread(sessionId: ObjectId, ts: string) {
-    await this.chatSessionCollection.updateMany(
-      {
-        _id: sessionId,
-      },
-      { $set: { 'messages.$[element].read': false } },
-      {
-        arrayFilters: [{ 'element.ts': { $gte: new Date(ts) } }],
-      },
-    );
-  }
-
-  async markMessageAsRead(sessionId: ObjectId, ts: string) {
-    await this.chatSessionCollection.updateMany(
-      {
-        _id: sessionId,
-      },
-      { $set: { 'messages.$[element].read': true } },
-      {
-        arrayFilters: [{ 'element.ts': { $lte: new Date(ts) } }],
-      },
-    );
-  }
-
   async updateChatSession(id: ObjectId, session: Partial<ChatSession>) {
     await this.chatSessionCollection.updateOne(
       {
         _id: id,
       },
       { $set: session },
+    );
+  }
+
+  async setChatSessionMessageFeedback(
+    id: ObjectId,
+    msgIdx: number,
+    feedback: ChatAnswerFeedbackType,
+  ) {
+    await this.chatSessionCollection.updateOne(
+      {
+        _id: id,
+      },
+      {
+        $set: {
+          [`messages.${msgIdx}.feedback`]: feedback,
+        },
+      },
     );
   }
 

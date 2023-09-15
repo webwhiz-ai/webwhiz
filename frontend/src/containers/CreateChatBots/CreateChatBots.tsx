@@ -11,7 +11,8 @@ import { Link, useHistory } from "react-router-dom";
 import {
 	ChatBotProductSetup,
 } from "../ChatBotProductSetup/ChatBotProductSetup";
-import { createKnowledgebase, deleteKnowledgebase, fetchKnowledgebaseCrawlData, fetchKnowledgebaseDetails, generateEmbeddings } from "../../services/knowledgebaseService";
+import { createKnowledgebase, fetchKnowledgebaseCrawlData, fetchKnowledgebaseDetails, generateEmbeddings, fetchKnowledgebaseCrawlDataForDocs, addTrainingDoc, updateWebsiteData } from "../../services/knowledgebaseService";
+import { ProductSetupData, DocsKnowledgeData } from "../../types/knowledgebase.type";
 
 
 export const CreateChatBots = () => {
@@ -27,6 +28,9 @@ export const CreateChatBots = () => {
 
 	const [productSetupLoadingText, setProductSetupLoadingText] = React.useState("Setting up your product");
 
+	const [docsDataLoading, setDocsDataLoading] = React.useState<boolean>(false);
+	const [docsData, setDocsData] = React.useState<any>();
+	const [isUploadingDocs, setIsUploadingDocs] = React.useState<boolean>(false);
 
 	const [crawlDataLoading, setIrawlDataLoading] = React.useState<boolean>(false);
 	const getCrawlDataPagination = React.useCallback(async (pageNo: number) => {
@@ -49,22 +53,148 @@ export const CreateChatBots = () => {
 		}
 	}, [defaultCrauledData]);
 
-	const handlePrimaryButtonClick = React.useCallback(async (payLoad) => {
+	const getDocsDataPagination = React.useCallback(async (pageNo: number) => {
+		try {
+			setDocsDataLoading(true);
+			const _docsDataResponse = await fetchKnowledgebaseCrawlDataForDocs(defaultCrauledData.knowledgebaseId, pageNo);
+			console.log("_docsDataResponse", _docsDataResponse);
+			const _data: DocsKnowledgeData = {
+				docs: _docsDataResponse.data.results,
+				pages: _docsDataResponse.data.pages,
+				knowledgebaseId: defaultCrauledData.knowledgebaseId
+			}
+			setDocsData(_data)
+		} catch (error) {
+			console.log(error);
+		} finally {
+			setDocsDataLoading(false);
+		}
+	}, [defaultCrauledData]);
+
+	const handlePrimaryButtonClick = React.useCallback(async (payLoad: ProductSetupData) => {
+		setIsSubmitting(true);
+		setProductSetupLoadingText('Creating Knowledgebase...');
+
+		try {
+			const response = await createKnowledgebase(payLoad.websiteData);
+			setKnowledgeBaseId(response.data._id);
+
+			if (payLoad.files?.length && payLoad.files.length > 0) {
+				setIsUploadingDocs(true);
+				for (const file of payLoad.files) {
+					try {
+						await addTrainingDoc(response.data._id, file);
+					} catch (error) {
+						console.log('error', error)
+					}
+				}
+				setIsUploadingDocs(false);
+
+				setDocsDataLoading(true);
+				const _docsDataResponse = await fetchKnowledgebaseCrawlDataForDocs(response.data._id, 1);
+				const _docsData: DocsKnowledgeData = {
+					docs: _docsDataResponse.data.results,
+					pages: _docsDataResponse.data.pages,
+					knowledgebaseId: response.data._id
+				}
+				setDocsData(_docsData);
+				setDocsDataLoading(false);
+			}
+
+			let interval = setInterval(async () => {
+				const details = await fetchKnowledgebaseDetails(response.data._id);
+				console.log("details", details);
+				if(details.data.websiteData !== null) {
+					setProductSetupLoadingText('Crawling your website data.. This may take some time based on the amount of the data...');
+				}
+				const chatBotId = details.data._id
+				if (details.data.status === 'CRAWLED' || (details.data.websiteData === null && details.data.status === 'CREATED')) {
+					setProductSetupLoadingText('Training ChatGPT with your data... This may take some time based on the amount of the data...');
+					await generateEmbeddings(chatBotId);
+				} else if (details.data.status === 'CRAWL_ERROR' || details.data.status === 'EMBEDDING_ERROR') {
+					clearInterval(interval);
+					setIsSubmitting(false);
+					toast({
+						title: `Oops! Something went wrong`,
+						status: "error",
+						isClosable: true,
+					});
+				} else if (details.data.status === 'GENERATING_EMBEDDINGS') {
+					setProductSetupLoadingText('Training ChatGPT with your data... This may take some time based on the amount of the data...');
+				} else if (details.data.status === 'READY') {
+					clearInterval(interval);
+
+					const _crawlDataResponse = await fetchKnowledgebaseCrawlData(chatBotId, 1);
+
+					const _data = {
+						stats: details.data.crawlData?.stats,
+						urls: _crawlDataResponse.data.results,
+						pages: _crawlDataResponse.data.pages,
+						knowledgebaseId: details.data._id
+					}
+					setDefaultCrauledData(_data)
+
+					setIsSubmitting(false);
+					toast({
+						title: `Successfully created your chatbot`,
+						status: "success",
+						isClosable: true,
+					});
+					history.push(`/app/edit-chatbot/${chatBotId}/?step=chatbot`);
+				}
+			}, 2000);
+		} catch (error) {
+			setIsSubmitting(false);
+			setDocsDataLoading(false);
+			const errorData = error?.response?.data?.message
+			toast({
+				title: (errorData) || 'Oops! Something went wrong',
+				status: "error",
+				isClosable: true,
+			});
+		}
+	}, [toast, history]);
+
+	// TODO: remove if unused
+	/*
+	const handlePrimaryButtonClick = React.useCallback(async (payLoad: ProductSetupData) => {
 		setIsSubmitting(true);
 		console.log('payload', payLoad)
 
 		if(savingStep ==='CRAWL') {
 			try {
 				setProductSetupLoadingText('Crawling your website data.. This may take some time based on the amount of the data...');
-				const response = await createKnowledgebase(payLoad);
+				const response = await createKnowledgebase(payLoad.websiteData);
 
 				setKnowledgeBaseId(response.data._id);
 
+				if (payLoad.files?.length && payLoad.files.length > 0) {
+					setIsUploadingDocs(true);
+					for (const file of payLoad.files) {
+						try {
+							await addTrainingDoc(response.data._id, file);
+						} catch (error) {
+							console.log('error', error)
+						}
+					}
+					setIsUploadingDocs(false);
+
+
+					setDocsDataLoading(true);
+					const _docsDataResponse = await fetchKnowledgebaseCrawlDataForDocs(response.data._id, 1); 
+					const _docsData: DocsKnowledgeData = {
+						docs: _docsDataResponse.data.results,
+						pages: _docsDataResponse.data.pages,
+						knowledgebaseId: response.data._id
+					}
+					setDocsData(_docsData);
+					setDocsDataLoading(false);
+				}
 
 				let interval = setInterval(async () => {
 					const details = await fetchKnowledgebaseDetails(response.data._id);
 					console.log("details", details);
-					if(details.data.status === 'CRAWLED') {
+					if(details.data.status === 'CRAWLED' || !details.data.websiteData) {
 						clearInterval(interval);
 						
 						const _crawlDataResponse = await fetchKnowledgebaseCrawlData(response.data._id, 1);
@@ -143,6 +273,7 @@ export const CreateChatBots = () => {
 				
 			} catch (error) {
 				setIsSubmitting(false);
+				setDocsDataLoading(false);
 				const errorData = error?.response?.data?.message
 				toast({
 					title:  (errorData) || 'Oops! Something went wrong',
@@ -152,9 +283,10 @@ export const CreateChatBots = () => {
 			}
 		}
 	}, [history, knowledgeBaseId, savingStep, toast]);
+    */
 
-
-	const handleSecondaryButtonClick = React.useCallback(async (payLoad) => {
+	// TODO: remove if unused
+	const handleSecondaryButtonClick = React.useCallback(async (payLoad: ProductSetupData, hasWebsiteDataChanged: boolean) => {
 		console.log('payload', payLoad)
 		setIsSubmitting(true);
 		setIsSecondaryBtnSubmitting(true);
@@ -162,22 +294,45 @@ export const CreateChatBots = () => {
 		try {
 			setProductSetupLoadingText('Crawling your website data... This may take some time based on the amount of the data...');
 
-			await deleteKnowledgebase(knowledgeBaseId as string);
-			
-			const response = await createKnowledgebase(payLoad);
+			if (payLoad.websiteData.websiteUrl && hasWebsiteDataChanged) {
+				updateWebsiteData(knowledgeBaseId, {
+					urls: [],
+					websiteUrl: payLoad.websiteData.websiteUrl,
+					include: payLoad.websiteData.include,
+					exclude: payLoad.websiteData.exclude,
+				})
+			}
 
-			setKnowledgeBaseId(response.data._id);
-
+			if (payLoad.files?.length && payLoad.files.length > 0) {
+				setIsUploadingDocs(true);
+				for (const file of payLoad.files) {
+					try {
+						await addTrainingDoc(knowledgeBaseId, file);
+					} catch (error) {
+						console.log('error', error)
+					}
+				}
+				setIsUploadingDocs(false);
+				setDocsDataLoading(true);
+				const _docsDataResponse = await fetchKnowledgebaseCrawlDataForDocs(knowledgeBaseId, 1); 
+				const _docsData: DocsKnowledgeData = {
+					docs: _docsDataResponse.data.results,
+					pages: _docsDataResponse.data.pages,
+					knowledgebaseId: knowledgeBaseId
+				}
+				setDocsData(_docsData);
+				setDocsDataLoading(false);
+			}
 
 			let interval = setInterval(async () => {
-				const details = await fetchKnowledgebaseDetails(response.data._id);
+				const details = await fetchKnowledgebaseDetails(knowledgeBaseId);
 				console.log("details", details);
-				if(details.data.status === 'CRAWLED') {
+				if(details.data.status === 'CRAWLED' || !details.data.websiteData) {
 					clearInterval(interval);
 					console.log('details.data', details.data.crawlData)
 					
 					
-					const _crawlDataResponse = await fetchKnowledgebaseCrawlData(response.data._id, 1);
+					const _crawlDataResponse = await fetchKnowledgebaseCrawlData(knowledgeBaseId, 1);
 					
 					const _data = {
 						stats: details.data.crawlData?.stats,
@@ -214,6 +369,8 @@ export const CreateChatBots = () => {
 			
 		} catch (error) {
 			setIsSubmitting(false);
+			setDocsDataLoading(false);
+			setIsSecondaryBtnSubmitting(false);
 			const errorData = error?.response?.data?.message
 			toast({
 				title:  (errorData) || 'Oops! Something went wrong',
@@ -223,26 +380,30 @@ export const CreateChatBots = () => {
 		}
 	}, [knowledgeBaseId, toast]);
 
-
-
 	const getProductSetupComponent = React.useCallback(() => {
 		return (
 			<ChatBotProductSetup
 				defaultCrauledData={defaultCrauledData}
 				onCrawlDataPaginationClick={getCrawlDataPagination}
+				onDocsDataPaginationClick={getDocsDataPagination}
 				crawlDataLoading={crawlDataLoading}
 				isSubmitting={isSubmitting}
+				disableTabs={isSubmitting}
+				onTabsChange={() => {}}
 				isSecondaryBtnSubmitting={isSecondaryBtnSubmitting}
-				showSecondaryButton={savingStep === 'EMBED'}
+				// showSecondaryButton={savingStep === 'EMBED'}
 				loadingText={productSetupLoadingText}
 				disableSubmitBtnByDefault
-				primaryButtonLabel={primaryButtonLabel}
+				primaryButtonLabel={"Create Chatbot"}
 				secondaryBtnLabel={"Update paths"}
 				onPrimaryBtnClick={handlePrimaryButtonClick}
 				onSecondaryBtnClick={handleSecondaryButtonClick}
+				docsData={docsData}
+				isUploadingDocs={isUploadingDocs}
+				docsDataLoading={docsDataLoading}
 			/>
 		);
-	}, [crawlDataLoading, defaultCrauledData, getCrawlDataPagination, handlePrimaryButtonClick, handleSecondaryButtonClick, isSecondaryBtnSubmitting, isSubmitting, primaryButtonLabel, productSetupLoadingText, savingStep]);
+	}, [crawlDataLoading, defaultCrauledData, docsData, docsDataLoading, getCrawlDataPagination, getDocsDataPagination, handlePrimaryButtonClick, handleSecondaryButtonClick, isSecondaryBtnSubmitting, isSubmitting, isUploadingDocs, productSetupLoadingText]);
 
 	const getMainComponent = React.useCallback(() => {
 		return (

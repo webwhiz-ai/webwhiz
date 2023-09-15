@@ -1,4 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
+import { unlink } from 'fs/promises';
 import { ObjectId } from 'mongodb';
 import { resolve } from 'node:path';
 import {
@@ -21,13 +22,17 @@ export class PdfImporterService {
     @Inject(CELERY_CLIENT) private celeryClient: CeleryClientService,
   ) {}
 
-  private async addPdfToDataStoreTask(knowledgebaeId: string, pdfPath: string) {
+  private async addPdfToDataStoreTask(
+    knowledgebaeId: string,
+    pdfPath: string,
+    filename: string,
+  ) {
     const client = this.celeryClient.get(CeleryClientQueue.DEFAULT);
     const task = client.createTask('worker.extract_pdf_text');
 
     // Extract pdf content and add to KbDataStore
     const datastoreId = await task
-      .applyAsync([knowledgebaeId, pdfPath, MAX_PDF_PAGES])
+      .applyAsync([knowledgebaeId, pdfPath, MAX_PDF_PAGES, filename])
       .get();
 
     const dsItem = await this.kbDbService.getKbDataStoreItemById(
@@ -51,6 +56,13 @@ export class PdfImporterService {
     checkUserIsOwnerOfKb(user, kb);
 
     const absPath = resolve(file.path);
-    await this.addPdfToDataStoreTask(knowledgebaseId, absPath);
+    await this.addPdfToDataStoreTask(
+      knowledgebaseId,
+      absPath,
+      file.originalname,
+    );
+
+    // Delete the file after processing
+    await unlink(absPath);
   }
 }

@@ -41,8 +41,8 @@ def get_top_n_chunks(
 
 
 @app.task
-def extract_pdf_text(knowledgebase_id: str, pdf_path: str, max_pages: int) -> str:
-    return get_text_from_pdf(knowledgebase_id, pdf_path, max_pages, db)
+def extract_pdf_text(knowledgebase_id: str, pdf_path: str, max_pages: int, filename: str) -> str:
+    return get_text_from_pdf(knowledgebase_id, pdf_path, max_pages, filename, db)
 
 
 @app.task

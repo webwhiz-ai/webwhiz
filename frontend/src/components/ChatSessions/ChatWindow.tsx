@@ -1,23 +1,117 @@
-import React from 'react'
-import { Box, Spinner, Flex } from '@chakra-ui/react'
-import { MessageList } from '../../types/knowledgebase.type'
-import { ChatBubble } from './ChatBubble'
+import React from 'react';
+import { Box, Spinner, Flex, VStack, HStack, Text } from '@chakra-ui/react';
+import { MessageList } from '../../types/knowledgebase.type';
+import { ChatBubble } from './ChatBubble';
+import { getBrowserName } from '../../utils/commonUtils';
+import { format } from 'date-fns';
+import styles from "./ChatWindow.module.scss";
 
 type ChatWindowProps = {
     messages?: MessageList[];
     isMessagesLoading?: boolean;
-}
+    userData: any;
+    chatData: any;
+};
 
-export const ChatWindow = ({ messages, isMessagesLoading }: ChatWindowProps) => {
+export const ChatWindow = ({
+    chatData,
+    messages,
+    isMessagesLoading,
+    userData,
+}: ChatWindowProps) => {
+    const getChatHeader = React.useCallback(() => {
+        if (!userData || !chatData) return null;
+        return (
+            <Box>
+                <VStack className={styles.meta} alignItems={"start"} spacing="3" pb="4" mb="4" borderBottom="1px solid" borderColor="gray.100">
+                    <HStack className={styles.metaItemGroup} fontSize="sm" color="gray.500">
+                        <Flex className={styles.metaItem}>
+                            <svg
+                                width="18"
+                                height="18"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                xmlns="http://www.w3.org/2000/svg"
+                            >
+                                <path
+                                    d="M21 10H3M16 2V6M8 2V6M10.5 14L12 13V18M10.75 18H13.25M7.8 22H16.2C17.8802 22 18.7202 22 19.362 21.673C19.9265 21.3854 20.3854 20.9265 20.673 20.362C21 19.7202 21 18.8802 21 17.2V8.8C21 7.11984 21 6.27976 20.673 5.63803C20.3854 5.07354 19.9265 4.6146 19.362 4.32698C18.7202 4 17.8802 4 16.2 4H7.8C6.11984 4 5.27976 4 4.63803 4.32698C4.07354 4.6146 3.6146 5.07354 3.32698 5.63803C3 6.27976 3 7.11984 3 8.8V17.2C3 18.8802 3 19.7202 3.32698 20.362C3.6146 20.9265 4.07354 21.3854 4.63803 21.673C5.27976 22 6.11984 22 7.8 22Z"
+                                    stroke="currentcolor"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                />
+                            </svg>
+                            <Text>
+                                {format(new Date(chatData.updatedAt), 'yyy-MM-dd, iiii')}
+                            </Text>
+                        </Flex>
+                        <Flex className={styles.metaItem}>
+                            <svg
+                                width="18"
+                                height="18"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                xmlns="http://www.w3.org/2000/svg"
+                            >
+                                <path
+                                    d="M12 6V12L16 14M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
+                                    stroke="currentcolor"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                />
+                            </svg>
+
+                            <Text>{format(new Date(chatData.updatedAt), 'hh:mm aaa	')}</Text>
+                        </Flex>
+                    </HStack>
+                    <HStack className={styles.metaItemGroup} fontSize="sm" color="gray.500">
+                        <Flex className={styles.metaItem}>
+                            <svg
+                                width="18"
+                                height="18"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                xmlns="http://www.w3.org/2000/svg"
+                            >
+                                <path
+                                    d="M22 9H2M2 7.8L2 16.2C2 17.8802 2 18.7202 2.32698 19.362C2.6146 19.9265 3.07354 20.3854 3.63803 20.673C4.27976 21 5.11984 21 6.8 21H17.2C18.8802 21 19.7202 21 20.362 20.673C20.9265 20.3854 21.3854 19.9265 21.673 19.362C22 18.7202 22 17.8802 22 16.2V7.8C22 6.11984 22 5.27977 21.673 4.63803C21.3854 4.07354 20.9265 3.6146 20.362 3.32698C19.7202 3 18.8802 3 17.2 3L6.8 3C5.11984 3 4.27976 3 3.63803 3.32698C3.07354 3.6146 2.6146 4.07354 2.32698 4.63803C2 5.27976 2 6.11984 2 7.8Z"
+                                    stroke="currentcolor"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                ></path>
+                            </svg>{' '}
+                            <Text>{getBrowserName(userData.userAgent)}</Text>
+                        </Flex>
+                        {userData.email ? <Flex className={styles.metaItem}>
+                            <svg
+                                width="18"
+                                height="18"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                xmlns="http://www.w3.org/2000/svg"
+                            >
+                                <path
+                                    d="M2 7L10.1649 12.7154C10.8261 13.1783 11.1567 13.4097 11.5163 13.4993C11.8339 13.5785 12.1661 13.5785 12.4837 13.4993C12.8433 13.4097 13.1739 13.1783 13.8351 12.7154L22 7M6.8 20H17.2C18.8802 20 19.7202 20 20.362 19.673C20.9265 19.3854 21.3854 18.9265 21.673 18.362C22 17.7202 22 16.8802 22 15.2V8.8C22 7.11984 22 6.27976 21.673 5.63803C21.3854 5.07354 20.9265 4.6146 20.362 4.32698C19.7202 4 18.8802 4 17.2 4H6.8C5.11984 4 4.27976 4 3.63803 4.32698C3.07354 4.6146 2.6146 5.07354 2.32698 5.63803C2 6.27976 2 7.11984 2 8.8V15.2C2 16.8802 2 17.7202 2.32698 18.362C2.6146 18.9265 3.07354 19.3854 3.63803 19.673C4.27976 20 5.11984 20 6.8 20Z"
+                                    stroke="currentcolor"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                />
+                            </svg>
+                            <Text>{userData.email}</Text>
+                        </Flex> : null}
+
+                    </HStack>
+                </VStack>
+            </Box>
+        );
+    }, [chatData, userData]);
     return (
-        <Box
-            w="calc(100% - 450px)"
-            h="100%"
-            maxW="620px"
-            position="relative"
-        >
-            {
-                isMessagesLoading && <Flex
+        <Box w="calc(100% - 450px)" h="100%" maxW="620px" position="relative">
+            {isMessagesLoading && (
+                <Flex
                     pos="absolute"
                     align="center"
                     justify="center"
@@ -30,23 +124,20 @@ export const ChatWindow = ({ messages, isMessagesLoading }: ChatWindowProps) => 
                 >
                     <Spinner />
                 </Flex>
-            }
+            )}
 
-            <Box
-                h="100%"
-                overflowX="hidden"
-                overflowY="auto"
-                p={4}
-            >
-                {
-                    messages && messages.map((message) => {
-                        return <Box key={message.ts.toString()}>
-                            <ChatBubble message={message.q} type={'user'} />
-                            <ChatBubble message={message.a} type={'bot'} />
-                        </Box>
-                    })
-                }
+            <Box h="100%" overflowX="hidden" overflowY="auto" p={4}>
+                {getChatHeader()}
+                {messages &&
+                    messages.map((message) => {
+                        return (
+                            <Box key={message.ts.toString()}>
+                                <ChatBubble message={message.q} type={'user'} />
+                                <ChatBubble message={message.a} type={'bot'} />
+                            </Box>
+                        );
+                    })}
             </Box>
         </Box>
-    )
-}
+    );
+};

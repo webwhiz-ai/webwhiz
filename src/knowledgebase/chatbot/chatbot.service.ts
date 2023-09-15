@@ -26,6 +26,7 @@ import { CustomKeyService } from '../custom-key.service';
 import { KnowledgebaseDbService } from '../knowledgebase-db.service';
 import { checkUserIsOwnerOfKb } from '../knowledgebase-utils';
 import {
+  ChatAnswerFeedbackType,
   ChatQueryAnswer,
   ChatSession,
   ChatSessionSparse,
@@ -108,7 +109,6 @@ export class ChatbotService {
         session.knowledgebaseId,
         totalTokens,
       ),
-      this.markSessionAsRead(session._id),
     ]);
   }
 
@@ -487,6 +487,7 @@ export class ChatbotService {
       userId: kb.owner,
       startedAt: new Date(),
       updatedAt: new Date(),
+      isUnread: true,
       messages: [],
       userData,
       src,
@@ -590,20 +591,82 @@ export class ChatbotService {
     );
   }
 
-  async markSessionAsRead(sessionId: ObjectId) {
+  /**
+   * Mark all the messages in the Session as Read
+   * @param sessionId
+   */
+  async markSessionAsRead(user: UserSparse, sessionId: string) {
+    const session: ChatSessionSparse =
+      await this.kbDbService.getChatSessionSparseById(new ObjectId(sessionId));
+
+    if (!session) {
+      throw new HttpException('Invalid Session', HttpStatus.NOT_FOUND);
+    }
+
+    const kb = await this.kbDbService.getKnowledgebaseSparseById(
+      session.knowledgebaseId,
+    );
+
+    if (!user._id.equals(kb.owner)) {
+      throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
+    }
+
     try {
-      this.kbDbService.markMessageAsRead(sessionId, new Date().toISOString());
+      this.kbDbService.updateChatSession(new ObjectId(sessionId), {
+        isUnread: false,
+      });
     } catch {
       throw new HttpException('Invalid Session', HttpStatus.NOT_FOUND);
     }
   }
 
-  async markMessageAsUnread(sessionId: string, ts: string) {
+  /**
+   * Mark all messages before the given msg as unread
+   * @param sessionId
+   * @param ts
+   */
+  async markSessionAsUnread(user: UserSparse, sessionId: string) {
+    const session: ChatSessionSparse =
+      await this.kbDbService.getChatSessionSparseById(new ObjectId(sessionId));
+
+    if (!session) {
+      throw new HttpException('Invalid Session', HttpStatus.NOT_FOUND);
+    }
+
+    const kb = await this.kbDbService.getKnowledgebaseSparseById(
+      session.knowledgebaseId,
+    );
+
+    if (!user._id.equals(kb.owner)) {
+      throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
+    }
+
     try {
-      if (ts == undefined) {
-        ts = new Date().toISOString();
-      }
-      this.kbDbService.markMessageAsUnread(new ObjectId(sessionId), ts);
+      this.kbDbService.updateChatSession(new ObjectId(sessionId), {
+        isUnread: true,
+      });
+    } catch {
+      throw new HttpException('Invalid Session', HttpStatus.NOT_FOUND);
+    }
+  }
+
+  /**
+   * Set Feedback for Chat Session Msg by Msg Idx
+   * @param sessionId
+   * @param msgIdx
+   * @param feedback
+   */
+  async setSessionMessageFeedback(
+    sessionId: string,
+    msgIdx: number,
+    feedback: ChatAnswerFeedbackType,
+  ) {
+    try {
+      await this.kbDbService.setChatSessionMessageFeedback(
+        new ObjectId(sessionId),
+        msgIdx,
+        feedback,
+      );
     } catch {
       throw new HttpException('Invalid Session', HttpStatus.NOT_FOUND);
     }

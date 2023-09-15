@@ -164,9 +164,10 @@ export class OpenaiChatbotService {
       await task.applyAsync([queryEmbedding, kbId.toString(), 3]).get(),
     );
 
-    const filteredChunks = topChunks.filter(
-      (chunk) => chunk.similarity > threshold,
-    );
+    const filteredChunks =
+      topChunks.length > 2
+        ? topChunks.filter((chunk) => chunk.similarity > threshold)
+        : topChunks;
 
     const chunksScoreMap = filteredChunks.reduce((map, chunk) => {
       map[chunk.chunkId.$oid] = chunk.similarity;

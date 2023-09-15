@@ -1,0 +1,12 @@
+.meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.metaItem {
+    margin-right: 12px;
+    align-items: center;
+    svg {
+        margin-right: 8px;
+    }
+}

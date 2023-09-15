@@ -9,7 +9,7 @@ import {
 import { CrawlConfig } from '../importers/crawler/crawlee/crawler.types';
 import { SubscriptionPlanInfoService } from '../subscription/subscription-plan.service';
 import { SubscriptionPlanInfo } from '../subscription/subscription.const';
-import { UserSparse } from '../user/user.schema';
+import { Subscription, UserSparse } from '../user/user.schema';
 import { DEFAULT_CHATGPT_PROMPT } from './chatbot/openaiChatbot.constant';
 import { KnowledgebaseDbService } from './knowledgebase-db.service';
 import { checkUserIsOwnerOfKb } from './knowledgebase-utils';
@@ -409,10 +409,21 @@ export class KnowledgebaseService {
       kbData.owner.toHexString(),
     );
 
+    const whitelabelling = {
+      removeBranding: userData.whitelabelling?.removeBranding || false,
+    };
+
+    if (
+      userData.activeSubscription === Subscription.APPSUMO_TIER3 &&
+      userData.customKeys?.useOwnKey === true
+    ) {
+      whitelabelling.removeBranding = true;
+    }
+
     const widgetData = {
       chatWidgeData: kbData.chatWidgeData,
       customKey: userData.customKeys?.useOwnKey,
-      whitelabelling: userData.whitelabelling,
+      whitelabelling,
     };
 
     return widgetData;
