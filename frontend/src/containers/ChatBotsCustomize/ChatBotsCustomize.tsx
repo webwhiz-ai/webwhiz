@@ -987,7 +987,7 @@ export const ChatBotsCustomize = ({
 									</Form>
 								</Box>
 								<Flex w="50%" height="100%" pos="absolute" right="0" top="0" bottom="74px" justifyContent="center" overflow="auto">
-									<div className="chat-wrap widget-open" id="chat-wrap" style={{ marginTop: '0', minHeight: "550px" }}>
+									<div className="chat-wrap widget-open" id="chat-wrap" style={{ marginTop: '0', minHeight: "600px" }}>
 
 
 										<div className="chat-widget" style={{ borderRadius: values.borderRadius, width: "400px", height: "570px" }}>
