@@ -418,7 +418,7 @@ export const ChatBotProductSetup = ({
 												[styles.firstUrl]: index === 0,
 											})} maxW="400px" overflow="hidden" whiteSpace="nowrap" textOverflow="ellipsis" align="center">
 												<Flex alignItems="center" justifyContent="space-between">
-													{(doc.url || '').split('/')[(doc.url || '').split('/').length - 1]}
+													{doc.title || (doc.url || '').split('/')[(doc.url || '').split('/').length - 1]}
 													{crawlDatLoading === doc._id ? <Box className={styles.urlSpinner}><Spinner color='gray.700' size="xs" /></Box> : ''}
 
 													<Box right="5px" top="5px" position="absolute">
