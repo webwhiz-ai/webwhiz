@@ -21,7 +21,7 @@ export const subscriptionPlanData: Record<Subscription, SubscriptionPlanInfo> =
       name: 'FREE',
       type: SubscriptionType.MONTHLY,
       maxChatbots: 1,
-      maxTokens: 5000,
+      maxTokens: 20000,
       maxPages: 25,
       maxChunksPerPage: 50,
     },
