@@ -352,13 +352,14 @@ export const ChatBotProductSetup = ({
 											<Tr key={url._id}>
 												<Td className={classNames(styles.urls, {
 													[styles.firstUrl]: index === 0,
-												})} onClick={() => {
-													handleURLClick(crauledData?.knowledgebaseId, url._id)
-												}} maxW="400px" overflow="hidden" whiteSpace="nowrap" textOverflow="ellipsis">
+												})} maxW="400px" overflow="hidden" whiteSpace="nowrap" textOverflow="ellipsis">
 													{url.url}
 													{crawlDatLoading === url._id ? <Box className={styles.urlSpinner}><Spinner color='gray.700' size="xs" /></Box> : ''}
 
-													<Button className={styles.urlBtn} colorScheme='gray' size='xs'>
+													<Button className={styles.urlBtn} colorScheme='gray' size='xs'
+														onClick={() => {
+															handleURLClick(crauledData?.knowledgebaseId, url._id)
+														}}>
 														View Crawled data
 													</Button>
 												</Td>
