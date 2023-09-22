@@ -1017,7 +1017,7 @@ const EditChatbot = (props: EditChatbotProps) => {
 						pt="8"
 						className={styles.sidebar}
 					>
-						<Box className={styles.title}>{getDomainFromUrl(chatBot?.websiteData?.websiteUrl)}</Box>
+						<Box className={styles.title}>{chatBot.name}</Box>
 						<List spacing={2}>
 							<ListItem
 								display="flex"
