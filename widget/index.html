@@ -187,7 +187,16 @@
         let messages = [];
 
         const urlParams = new URLSearchParams(window.location.search);
-        const knowledgebaseId = urlParams.get('kbId');
+        let knowledgebaseId = urlParams.get('kbId');
+
+        if(!knowledgebaseId){
+            const hostname = window.location.hostname;
+            const parts = hostname.split('.');
+            const subdomain = parts.length > 2 ? parts[0] : null;
+            if(subdomain && subdomain.includes('wb-')) {
+                knowledgebaseId = subdomain.replace('wb-', '');
+            }
+        }
         const baseURL = urlParams.get('baseUrl') || 'https://api.webwhiz.ai';
         const chatWidget = document.querySelector('.chat-wrap');
 
