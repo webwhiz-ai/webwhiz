@@ -105,3 +105,24 @@ pm2 start ecosystem.config.js
 ```
 
 This will start the backend http server, the js worker and the python worker
+
+# Dev Setup
+
+### Prerequisites
+
+1. .env to be configured
+2. nodejs (18+), python3.8+
+3. mongodb, redis to be running (preferabily using docker)
+
+```bash
+# JS Setup
+yarn install
+yarn start:dev
+yarn crawler:worker
+
+# Python worker setup (inside workers folder)
+python -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt # Only for the first time
+celery -A worker worker -l info --concurrency 1
+```

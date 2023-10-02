@@ -20,6 +20,7 @@ import {
   CreateKnowledgebaseDTO,
   KbCustomKeysDTO,
   SetAdminEmailDTO,
+  SetCustomDomainDTO,
   SetKnowledgebaseDefaultAnswerDTO,
   SetPromptDTO,
   UpdateKnowledgebaseWebsiteDataDTO,
@@ -48,6 +49,12 @@ export class KnowledgebaseController {
       useOwnKey: data.useOwnKey,
       keys: data.keys,
     });
+  }
+
+  @Public()
+  @Get('/chat_widget_data_for_domain')
+  async getChatWidgetDataForDomain(@Query('domain') domain: string) {
+    return this.kbService.getChatWidgetDataForDomain(domain);
   }
 
   /**
@@ -138,6 +145,19 @@ export class KnowledgebaseController {
       id,
       data.defaultAnswer,
     );
+  }
+
+  /**
+   * Set custom domains for kb
+   */
+  @Put('/:id/custom_domain')
+  async setCustomDomains(
+    @Req() req: RequestWithUser,
+    @Param('id') id: string,
+    @Body() data: SetCustomDomainDTO,
+  ) {
+    const { user } = req;
+    return this.kbService.setCustomDomain(user, id, data.domain);
   }
 
   /**

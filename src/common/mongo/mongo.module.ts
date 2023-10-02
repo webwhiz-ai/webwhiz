@@ -35,6 +35,9 @@ export const MONGODB = 'MONGODB';
             .createIndex({ knowledgebaseId: 1 });
 
           await db.collection('knowledgebase').createIndex({ owner: 1 });
+          await db
+            .collection('knowledgebase')
+            .createIndex({ customDomain: 1 }, { sparse: true, unique: true });
 
           await db
             .collection('offlineMessages')

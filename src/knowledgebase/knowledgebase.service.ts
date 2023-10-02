@@ -421,12 +421,23 @@ export class KnowledgebaseService {
     }
 
     const widgetData = {
+      id,
       chatWidgeData: kbData.chatWidgeData,
       customKey: userData.customKeys?.useOwnKey,
       whitelabelling,
     };
 
     return widgetData;
+  }
+
+  async getChatWidgetDataForDomain(domain: string) {
+    // Get knowldgebase from domain
+    const kb = await this.kbDbService.getKnowledgebaseSparseByDomain(domain);
+    if (!kb) {
+      throw new HttpException('Invalid Domain', HttpStatus.NOT_FOUND);
+    }
+
+    return this.getKnowledgebaseChatWidgetData(kb._id.toHexString());
   }
 
   /**
@@ -489,5 +500,24 @@ export class KnowledgebaseService {
     checkUserIsOwnerOfKb(user, kb);
 
     await this.kbDbService.updateKnowledgebase(kbId, { adminEmail: email });
+  }
+
+  /**
+   * Set custom domain for kb
+   * @param user
+   * @param id
+   * @param domain
+   * @returns
+   */
+  async setCustomDomain(user: UserSparse, id: string, domain: string) {
+    const kbId = new ObjectId(id);
+    const kb = await this.kbDbService.getKnowledgebaseSparseById(kbId);
+    checkUserIsOwnerOfKb(user, kb);
+
+    await this.kbDbService.updateKnowledgebase(kbId, {
+      customDomain: domain,
+    });
+
+    return 'Done';
   }
 }
