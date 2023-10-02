@@ -98,6 +98,11 @@ export const chatWidgetDefaultValues = {
   requiredFieldMsg: "This field is required",
   invalidEmailMsg: "Please enter a valid email",
   formSubmitBtnLabel: "Submit",
+  formSubmitBtnSubmittingText: "Submitting...",
+  formSubmitSuccessMsg: "Your message sent successfully!",
+  formSubmitErrorMsg: "Oops! Something went wrong",
+  formSendAgainBtnLabel: "Send again",
+  formTryAgainBtnLabel: "Try again",
 };
 
 

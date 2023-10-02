@@ -100,6 +100,11 @@ export interface ChatBotCustomizeData {
     requiredFieldMsg: string;
     invalidEmailMsg: string;
     formSubmitBtnLabel: string;
+    formSubmitBtnSubmittingText: string;
+    formSubmitSuccessMsg: string;
+    formSubmitErrorMsg: string;
+    formSendAgainBtnLabel: string;
+    formTryAgainBtnLabel: string;
 }
 export interface CrawlDataListPagination {
     pages: number;
