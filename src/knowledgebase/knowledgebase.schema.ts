@@ -48,6 +48,8 @@ export interface Knowledgebase {
   // Custom prompt fields
   defaultAnswer?: string;
   prompt?: string;
+  // Custom domain
+  customDomain?: string;
 }
 
 export type KnowledgebaseSparse = Pick<

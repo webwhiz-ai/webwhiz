@@ -99,3 +99,9 @@ export class SetAdminEmailDTO {
   @IsEmail()
   email: string;
 }
+
+export class SetCustomDomainDTO {
+  @IsString()
+  @IsNotEmpty()
+  domain: string;
+}

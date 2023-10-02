@@ -81,6 +81,25 @@ export class KnowledgebaseDbService {
     return res as KnowledgebaseSparse;
   }
 
+  async getKnowledgebaseSparseByDomain(
+    domain: string,
+  ): Promise<KnowledgebaseSparse> {
+    const res = await this.knowledgebaseCollection.findOne(
+      { customDomain: domain },
+      {
+        projection: {
+          _id: 1,
+          name: 1,
+          status: 1,
+          monthUsage: 1,
+          crawlData: 1,
+          owner: 1,
+        },
+      },
+    );
+    return res as KnowledgebaseSparse;
+  }
+
   async getKnowledgebaseById(id: ObjectId): Promise<Knowledgebase> {
     const res = await this.knowledgebaseCollection.findOne({ _id: id });
     return res;
