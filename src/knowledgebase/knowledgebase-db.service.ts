@@ -514,6 +514,10 @@ export class KnowledgebaseDbService {
     );
   }
 
+  async deleteChatSession(id: ObjectId) {
+    await this.chatSessionCollection.deleteOne({ _id: id });
+  }
+
   async updateChatSession(id: ObjectId, session: Partial<ChatSession>) {
     await this.chatSessionCollection.updateOne(
       {
