@@ -186,17 +186,16 @@
 
         let messages = [];
 
-        const urlParams = new URLSearchParams(window.location.search);
-        let knowledgebaseId = urlParams.get('kbId');
-
-        if(!knowledgebaseId){
-            const hostname = window.location.hostname;
-            const parts = hostname.split('.');
-            const subdomain = parts.length > 2 ? parts[0] : null;
-            if(subdomain && subdomain.includes('wb-')) {
-                knowledgebaseId = subdomain.replace('wb-', '');
-            }
+        function getDomainFromUrl(url) {
+            if (!url) return '';
+            const matches = url.match(/^https?\:\/\/([^\/?#]+)(?:[\/?#]|$)/i);
+            const domain = matches && matches[1]; // domain will be null if no match is found
+            return (domain || '').replace('www.', '');
         }
+
+        const urlParams = new URLSearchParams(window.location.search);
+
+        let knowledgebaseId;
         const baseURL = urlParams.get('baseUrl') || 'https://api.webwhiz.ai';
         const chatWidget = document.querySelector('.chat-wrap');
 
@@ -328,8 +327,17 @@
         });
 
         async function getWidgetData() {
+            const domain = getDomainFromUrl(window.location.href);
+            //const domain = 'chat.timemaster.ai';
+            let url;
+            if(domain === 'widget.webwhiz.ai') {
+                knowledgebaseId = urlParams.get('kbId');
+                url = `${baseURL}/knowledgebase/${knowledgebaseId}/chat_widget_data`;
+            } else {
+                url = `${baseURL}/knowledgebase/chat_widget_data_for_domain?domain=${domain}`;
+            }
             const response = await fetch(
-                `${baseURL}/knowledgebase/${knowledgebaseId}/chat_widget_data`,
+                url,
                 {
                     method: 'GET', // *GET, POST, PUT, DELETE, etc.
                     headers: {
@@ -356,6 +364,9 @@
 
         (async () => {
             const data = await getWidgetData();
+            if(!knowledgebaseId) {
+                knowledgebaseId = data.id;
+            }
             const chatWidgetData = data.chatWidgeData;
             showReadMore = chatWidgetData.showReadMore;
             collectEmail = chatWidgetData.collectEmail;
