@@ -127,7 +127,7 @@
                         </path>
                     </svg>
 
-                    Your message sent successfully!
+                    <span id="message-success-text">Your message sent successfully!</span>
 
                     <button class="btn btn-primary" id="offline-message-success-close" type="button">Send Again</button>
                 </div>
@@ -138,7 +138,7 @@
                             stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                     </svg>
 
-                    Oops! Something went wrong
+                    <span id="message-error-text">Oops! Something went wrong</span>
 
                     <button class="btn btn-primary" id="offline-message-error-close" type="button">Try Again</button>
                 </div>
@@ -181,6 +181,7 @@
         let collectEmailText = 'Read More:';
 
         const defaultWelcomeMessage = 'Hello! How can I assist you today?';
+        const submitBtnSubmittingText = 'Submitting...';
 
         let sessionId = '';
 
@@ -387,6 +388,10 @@
             const offlineMsgMessageInput = document.getElementById("offline-message-message");
             const requiredFieldErrorMsg = document.querySelectorAll('.required-field');
             const invalidEmailErrorMsg = document.getElementById('invalid-feedback-email-invalid');
+            const formSubmitSuccessMsg = document.getElementById("message-success-text");
+            const formSubmitErrorMsg = document.getElementById("message-error-text");
+            const formSendAgainBtn = document.getElementById("offline-message-success-close");
+            const formTryAgainBtn = document.getElementById("offline-message-error-close");
 
             const defaultLauncherIcon = `<svg 
                 focusable="false" 
@@ -507,6 +512,24 @@
 
             if(chatWidgetData.formSubmitBtnLabel) {
                 offlineMessageBtn.innerText = chatWidgetData.formSubmitBtnLabel;
+            }
+
+            formSubmitBtnSubmittingText = chatWidgetData.formSubmitBtnSubmittingText ?? submitBtnSubmittingText;
+
+            if (chatWidgetData.formSubmitSuccessMsg) {
+                formSubmitSuccessMsg.innerText = chatWidgetData.formSubmitSuccessMsg;
+            }
+
+            if (chatWidgetData.formSubmitErrorMsg) {
+                formSubmitErrorMsg.innerText = chatWidgetData.formSubmitErrorMsg;
+            }
+
+            if (chatWidgetData.formSendAgainBtnLabel) {
+                formSendAgainBtn.innerText = chatWidgetData.formSendAgainBtnLabel;
+            }
+
+            if (chatWidgetData.formTryAgainBtnLabel) {
+                formTryAgainBtn.innerText = chatWidgetData.formTryAgainBtnLabel;
             }
 
             var styleSheet = document.createElement('style');
@@ -987,7 +1010,7 @@
                 if (isValidEmail && name && message) {
 
                     const prevBtnText = offlineMessageBtn.innerHTML;
-                    offlineMessageBtn.innerHTML = 'Submitting...';
+                    offlineMessageBtn.innerHTML = formSubmitBtnSubmittingText;
                     offlineMessageBtn.setAttribute('disabled', true);
                     if (!sessionId) {
                         sessionId = await createSession({
