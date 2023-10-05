@@ -4,6 +4,7 @@ import { AppModule } from './app.module';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { RolesGuard } from './auth/guards/role.enum';
 import { NestExpressApplication } from '@nestjs/platform-express';
+import { SlackService } from './slack/slack.service';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
@@ -35,6 +36,9 @@ async function bootstrap() {
 
   // const document = SwaggerModule.createDocument(app, config);
   // SwaggerModule.setup('docs', app, document);
+
+  const slack = app.get(SlackService);
+  app.use('/slack/events', slack.use());
 
   const host = process.env.HOST || '127.0.0.1';
   const appPort = Number.parseInt(process.env.PORT || '3000', 10);

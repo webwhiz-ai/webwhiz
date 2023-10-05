@@ -49,6 +49,9 @@ export const MONGODB = 'MONGODB';
 
           await db.collection('task').createIndex({ name: 1 });
 
+          await db.collection('slackTokens').createIndex({ teamId: 1 });
+          await db.collection('slackTokens').createIndex({ enterpriseId: 1 });
+
           return db;
         } catch (e) {
           throw e;
