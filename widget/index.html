@@ -552,7 +552,7 @@
                 }
                 .chat-message.user .chat-message-text {background-color: ${chatWidgetData.backgroundColor}!important; color: ${chatWidgetData.fontColor}!important}
             `
-            styleSheet.textContent = styles + (chatWidgetData?.customCSS || '');
+            styleSheet.textContent = (chatWidgetData?.customCSS || '') + styles;
 
 
             if (chatWidgetData.questionExamples && chatWidgetData.questionExamples.length > 0) {
