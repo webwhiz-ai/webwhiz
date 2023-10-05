@@ -63,7 +63,7 @@ export const AddTrainingDataForm = ({
 			<FormControl mt={6}>
 				<FormLabel fontSize="sm">Data</FormLabel>
 				<Box data-color-mode="light">
-					<MDEditor height={200} value={answer} preview="preview" onChange={handleAnswerChange} />
+					<MDEditor height={200} value={answer} preview="edit" onChange={handleAnswerChange} />
 				</Box>
 			</FormControl>
 			<Flex mt="8" justifyContent="end">
