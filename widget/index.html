@@ -328,13 +328,14 @@
         });
 
         async function getWidgetData() {
-            const domain = getDomainFromUrl(window.location.href);
             //const domain = 'chat.timemaster.ai';
             let url;
-            if(domain === 'widget.webwhiz.ai') {
-                knowledgebaseId = urlParams.get('kbId');
+            const kbId = urlParams.get('kbId');
+            if(kbId) {
+                knowledgebaseId = kbId;
                 url = `${baseURL}/knowledgebase/${knowledgebaseId}/chat_widget_data`;
             } else {
+                const domain = getDomainFromUrl(window.location.href);
                 url = `${baseURL}/knowledgebase/chat_widget_data_for_domain?domain=${domain}`;
             }
             const response = await fetch(
