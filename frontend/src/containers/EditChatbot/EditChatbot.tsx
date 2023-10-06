@@ -48,16 +48,16 @@ import { useLocation } from "react-router-dom";
 import styles from "./EditChatbot.module.scss";
 import { fetchKnowledgebaseCrawlData, customizeWidget, deleteTrainingData, fetcKnowledgebase, fetchKnowledgebaseDetails, generateEmbeddings, getTrainingData, getTrainingDataDetails, updateWebsiteData, getChatSessions, getOfflineMessages, updatePrompt, updateDefaultAnswer, fetchKnowledgebaseCrawlDataForDocs, addTrainingDoc } from "../../services/knowledgebaseService";
 import { ChatBot } from "../../components/ChatBot/ChatBot";
-import { chatWidgetDefaultValues, getDomainFromUrl } from "../../utils/commonUtils";
+import { chatWidgetDefaultValues } from "../../utils/commonUtils";
 import { AddTrainingData } from "../AddTrainingData/AddTrainingData";
 import { AddTrainingDataForm } from "../AddTrainingDataForm/AddTrainingDataForm";
-import { NoDataSubscribeIcon } from "../../components/Icons/noData/NoDataSubscribeIcon";
 import { SectionTitle } from "../../components/SectionTitle/SectionTitle";
 import { CurrentUser, User } from "../../services/appConfig";
 import { ChatBotCustomizeData, TrainingData, OfflineMessagePagination, ChatSessionPagination, CustomDataPagination, ProductSetupData, DocsKnowledgeData } from "../../types/knowledgebase.type";
 import { OfflineMessagesNew } from "../OfflineMessages/OfflineMessagesNew";
 import { ChatSessionsNew } from "../ChatSessions/ChatSessionsNew";
 import { Paginator } from "../../widgets/Paginator/Paginator";
+import { CustomDomain } from "../CustomDomain/CustomDomain";
 export function validateEmailAddress(email: string) {
 	return email && !/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(email);
 }
@@ -69,11 +69,13 @@ type Steps =
 	| "train-custom-data"
 	| "chat-sessions"
 	| "offline-messages"
-	| "chatbot";
+	| "chatbot"
+	| "custom-domain";
 
 interface MatchParams {
 	chatbotId: string;
 }
+
 
 export type EditChatbotProps = RouteComponentProps<MatchParams>;
 
@@ -384,6 +386,8 @@ const EditChatbot = (props: EditChatbotProps) => {
 		}
 
 	}, [customTrainingDataPage]);
+
+	
 
 
 	const getAddToWebsiteContent = React.useCallback(() => {
@@ -929,6 +933,20 @@ const EditChatbot = (props: EditChatbotProps) => {
 				<Flex
 					direction="column"
 					style={{
+						display: currentStep === 'custom-domain' ? 'flex' : 'none',
+					}}
+					h="100%"
+					overflow="auto"
+					>
+					<SectionTitle
+						title="Set custom domain"
+						description="Access the chatbot from your domain"
+					/>
+						{chatBot._id? <CustomDomain defaultCustomDomain={chatBot.customDomain} chatBotId={chatBot._id}></CustomDomain>: null}
+					</Flex>
+				<Flex
+					direction="column"
+					style={{
 						display: currentStep === "offline-messages" ? "flex" : "none",
 					}}
 					alignItems="center"
@@ -1141,6 +1159,23 @@ const EditChatbot = (props: EditChatbotProps) => {
 								</svg>
 
 								Try ChatBot
+							</ListItem>
+							<ListItem
+								display="flex"
+								alignItems="center"
+								fontSize="md"
+								cursor="pointer"
+								onClick={() => {
+									goToStep("custom-domain");
+								}}
+								className={currentStep === "custom-domain" ? styles.active : ""}
+							>
+								<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+									<path d="M12 2C15 4 15.9228 8.29203 16 12C15.9228 15.708 15 20 12 22M12 2C9 4 8.07725 8.29203 8 12C8.07725 15.708 9 20 12 22M12 2C6.47715 2 2 6.47715 2 12M12 2C17.5228 2 22 6.47715 22 12M12 22C17.5229 22 22 17.5228 22 12M12 22C6.47716 22 2 17.5228 2 12M22 12C20 15 15.708 15.9228 12 16C8.29203 15.9228 4 15 2 12M22 12C20 9 15.708 8.07725 12 8C8.29203 8.07725 4 9 2 12" stroke="currentcolor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+								</svg>
+
+
+								Custom domain
 							</ListItem>
 						</List>
 					</Box>

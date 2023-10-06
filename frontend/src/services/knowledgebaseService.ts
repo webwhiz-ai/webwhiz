@@ -216,6 +216,17 @@ export async function getTrainingDataDetails(knowledgebaseId: string, id: string
 	});
 }
 
+export async function setCustomDomain(knowledgebaseId: string, domain: string): Promise<AxiosResponse<TrainingDataDetail>> {
+	return await axios({
+		baseURL: baseURL,
+		data: {
+			domain: domain
+		},
+		method: 'put',
+		url: `/knowledgebase/${knowledgebaseId}/custom_domain`,
+	});
+}
+
 
 export async function getChatSessions(id: string, page: string): Promise<AxiosResponse<ChatSessionPagination>> {
 	return await axios({
@@ -229,6 +240,15 @@ export async function getOfflineMessages(id: string, page: string): Promise<Axio
 		baseURL: baseURL,
 		method: 'get',
 		url: `/offline_msg/${id}?page_size=10&page=${page}`,
+	});
+}
+
+export async function sendOfflineMessage(data: any): Promise<AxiosResponse<any>> {
+	return await axios({
+		baseURL: baseURL,
+		method: 'post',
+		data: data,
+		url: `/offline_msg`,
 	});
 }
 export async function getChatSessionDetails(sessionId: string): Promise<AxiosResponse<ChatSessionDetail>> {
