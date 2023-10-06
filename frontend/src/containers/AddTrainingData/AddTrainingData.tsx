@@ -20,6 +20,7 @@ import {
 } from "@chakra-ui/react";
 import { FiPlus } from 'react-icons/fi';
 import { addTrainingData } from "../../services/knowledgebaseService";
+import MDEditor from '@uiw/react-md-editor';
 
 
 export const AddTrainingData = ({
@@ -41,8 +42,8 @@ export const AddTrainingData = ({
 	const [isSubmitting, setIsSubmitting] = React.useState<boolean>(false);
 
 
-	const handleAnswerChange = React.useCallback((e) => {
-		setAnswer(e.target.value)
+	const handleAnswerChange = React.useCallback((value) => {
+		setAnswer(value);
 	}, [])
 	const handleQuestionChange = React.useCallback((e) => {
 		setQuestion(e.target.value)
@@ -81,7 +82,7 @@ export const AddTrainingData = ({
 				finalFocusRef={finalRef}
 				isOpen={isOpen}
 				onClose={onClose}
-				size="xl"
+				size="5xl"
 			>
 				<ModalOverlay />
 				<ModalContent>
@@ -96,11 +97,9 @@ export const AddTrainingData = ({
 
 						<FormControl mt={6}>
 							<FormLabel fontSize="sm">Data</FormLabel>
-							<Textarea
-								value={answer} onChange={handleAnswerChange}
-								size='sm'
-								rows="10"
-							/>
+							<Box data-color-mode="light">
+								<MDEditor height={300} value={answer} preview="edit" onChange={handleAnswerChange} />
+							</Box>
 						</FormControl>
 						<Flex mt="8" justifyContent="end">
 							<Button onClick={onClose} mr={3}>Cancel</Button>

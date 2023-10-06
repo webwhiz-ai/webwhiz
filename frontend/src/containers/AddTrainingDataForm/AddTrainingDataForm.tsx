@@ -12,6 +12,7 @@ import {
 	useDisclosure,
 } from "@chakra-ui/react";
 import { updateTrainingData } from "../../services/knowledgebaseService";
+import MDEditor from "@uiw/react-md-editor";
 
 
 export const AddTrainingDataForm = ({
@@ -32,8 +33,8 @@ export const AddTrainingDataForm = ({
 	}, [selectedTrainingData])
 
 
-	const handleAnswerChange = React.useCallback((e) => {
-		setAnswer(e.target.value)
+	const handleAnswerChange = React.useCallback((value) => {
+		setAnswer(value)
 	}, [])
 	const handleQuestionChange = React.useCallback((e) => {
 		setQuestion(e.target.value)
@@ -61,12 +62,9 @@ export const AddTrainingDataForm = ({
 
 			<FormControl mt={6}>
 				<FormLabel fontSize="sm">Data</FormLabel>
-				<Textarea
-					value={answer} onChange={handleAnswerChange}
-					size='sm'
-					rows="10"
-					placeholder='Answer'
-				/>
+				<Box data-color-mode="light">
+					<MDEditor height={200} value={answer} preview="edit" onChange={handleAnswerChange} />
+				</Box>
 			</FormControl>
 			<Flex mt="8" justifyContent="end">
 				<Button onClick={handleSubmit} colorScheme='blue' isLoading={isSubmitting}>

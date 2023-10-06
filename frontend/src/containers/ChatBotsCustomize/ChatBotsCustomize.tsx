@@ -724,31 +724,6 @@ export const ChatBotsCustomize = ({
 															)}
 														</Field>
 
-														<Field type="text" name="formSubmitBtnLabel">
-															{({ field, form }: any) => (
-																<FormControl
-																	mb="6"
-																	isInvalid={
-																		form.errors.formSubmitBtnLabel && form.touched.formSubmitBtnLabel
-																	}
-																>
-																	<FormLabel fontSize="sm" htmlFor="formSubmitBtnLabel" color="gray.700" fontWeight="400" >
-																		Submit Button Label
-																	</FormLabel>
-																	<Input
-																		{...field}
-																		placeholder={(defaultCustomizationValues || chatWidgetDefaultValues).formSubmitBtnLabel}
-																		isDisabled={!values.offlineMessage}
-																	/>
-																	<FormErrorMessage>
-																		{form.errors.formSubmitBtnLabel}
-																	</FormErrorMessage>
-																</FormControl>
-															)}
-														</Field>
-
-														{/* <Text className={styles.nestedFormHeading} fontSize="md" mb="4" pb="2" fontWeight="500" borderBottom={"1px solid"} borderBottomColor="gray.200">Additional</Text> */}
-
 														<Accordion allowToggle allowMultiple>
 															<AccordionItem isDisabled={!values.offlineMessage}>
 																<AccordionButton _focus={{boxShadow:'none'}} pl={0}>
@@ -945,6 +920,153 @@ export const ChatBotsCustomize = ({
 																				/>
 																				<FormErrorMessage>
 																					{form.errors.invalidEmailMsg}
+																				</FormErrorMessage>
+																			</FormControl>
+																		)}
+																	</Field>
+																</AccordionPanel>
+															</AccordionItem>
+															<AccordionItem isDisabled={!values.offlineMessage}>
+																<AccordionButton _focus={{ boxShadow: 'none' }} pl={0}>
+																	<Box as="span" flex='1' textAlign='left' fontWeight="500" fontSize="sm">
+																		Submit Button
+																	</Box>
+																	<AccordionIcon />
+																</AccordionButton>
+																<AccordionPanel>
+																	<Field type="text" name="formSubmitBtnLabel">
+																		{({ field, form }: any) => (
+																			<FormControl
+																				mb="6"
+																				isInvalid={
+																					form.errors.formSubmitBtnLabel && form.touched.formSubmitBtnLabel
+																				}
+																			>
+																				<FormLabel fontSize="sm" htmlFor="formSubmitBtnLabel" color="gray.700" fontWeight="400" >
+																					Submit Button Label
+																				</FormLabel>
+																				<Input
+																					{...field}
+																					placeholder={(defaultCustomizationValues || chatWidgetDefaultValues).formSubmitBtnLabel}
+																					isDisabled={!values.offlineMessage}
+																				/>
+																				<FormErrorMessage>
+																					{form.errors.formSubmitBtnLabel}
+																				</FormErrorMessage>
+																			</FormControl>
+																		)}
+																	</Field>
+
+																	<Field type="text" name="formSubmitBtnSubmittingText">
+																		{({ field, form }: any) => (
+																			<FormControl
+																				mb="6"
+																				isInvalid={
+																					form.errors.formSubmitBtnSubmittingText && form.touched.formSubmitBtnSubmittingText
+																				}
+																			>
+																				<FormLabel fontSize="sm" htmlFor="formSubmitBtnSubmittingText" color="gray.700" fontWeight="400" >
+																					Submitting Text
+																				</FormLabel>
+																				<Input
+																					{...field}
+																					placeholder={(defaultCustomizationValues || chatWidgetDefaultValues).formSubmitBtnSubmittingText}
+																					isDisabled={!values.offlineMessage}
+																				/>
+																				<FormErrorMessage>
+																					{form.errors.formSubmitBtnSubmittingText}
+																				</FormErrorMessage>
+																			</FormControl>
+																		)}
+																	</Field>
+
+																	<Field type="text" name="formSubmitSuccessMsg">
+																		{({ field, form }: any) => (
+																			<FormControl
+																				mb="6"
+																				isInvalid={
+																					form.errors.formSubmitSuccessMsg && form.touched.formSubmitSuccessMsg
+																				}
+																			>
+																				<FormLabel fontSize="sm" htmlFor="formSubmitSuccessMsg" color="gray.700" fontWeight="400" >
+																					Form Submit Success Message
+																				</FormLabel>
+																				<Input
+																					{...field}
+																					placeholder={(defaultCustomizationValues || chatWidgetDefaultValues).formSubmitSuccessMsg}
+																					isDisabled={!values.offlineMessage}
+																				/>
+																				<FormErrorMessage>
+																					{form.errors.formSubmitSuccessMsg}
+																				</FormErrorMessage>
+																			</FormControl>
+																		)}
+																	</Field>
+
+																	<Field type="text" name="formSubmitErrorMsg">
+																		{({ field, form }: any) => (
+																			<FormControl
+																				mb="6"
+																				isInvalid={
+																					form.errors.formSubmitErrorMsg && form.touched.formSubmitErrorMsg
+																				}
+																			>
+																				<FormLabel fontSize="sm" htmlFor="formSubmitErrorMsg" color="gray.700" fontWeight="400" >
+																					Form Submit Error Message
+																				</FormLabel>
+																				<Input
+																					{...field}
+																					placeholder={(defaultCustomizationValues || chatWidgetDefaultValues).formSubmitErrorMsg}
+																					isDisabled={!values.offlineMessage}
+																				/>
+																				<FormErrorMessage>
+																					{form.errors.formSubmitErrorMsg}
+																				</FormErrorMessage>
+																			</FormControl>
+																		)}
+																	</Field>
+
+																	<Field type="text" name="formSendAgainBtnLabel">
+																		{({ field, form }: any) => (
+																			<FormControl
+																				mb="6"
+																				isInvalid={
+																					form.errors.formSendAgainBtnLabel && form.touched.formSendAgainBtnLabel
+																				}
+																			>
+																				<FormLabel fontSize="sm" htmlFor="formSendAgainBtnLabel" color="gray.700" fontWeight="400" >
+																					Send Again Button Label
+																				</FormLabel>
+																				<Input
+																					{...field}
+																					placeholder={(defaultCustomizationValues || chatWidgetDefaultValues).formSendAgainBtnLabel}
+																					isDisabled={!values.offlineMessage}
+																				/>
+																				<FormErrorMessage>
+																					{form.errors.formSendAgainBtnLabel}
+																				</FormErrorMessage>
+																			</FormControl>
+																		)}
+																	</Field>
+
+																	<Field type="text" name="formTryAgainBtnLabel">
+																		{({ field, form }: any) => (
+																			<FormControl
+																				mb="6"
+																				isInvalid={
+																					form.errors.formTryAgainBtnLabel && form.touched.formTryAgainBtnLabel
+																				}
+																			>
+																				<FormLabel fontSize="sm" htmlFor="formTryAgainBtnLabel" color="gray.700" fontWeight="400" >
+																					Try Again Button Label
+																				</FormLabel>
+																				<Input
+																					{...field}
+																					placeholder={(defaultCustomizationValues || chatWidgetDefaultValues).formTryAgainBtnLabel}
+																					isDisabled={!values.offlineMessage}
+																				/>
+																				<FormErrorMessage>
+																					{form.errors.formTryAgainBtnLabel}
 																				</FormErrorMessage>
 																			</FormControl>
 																		)}

@@ -127,7 +127,7 @@
                         </path>
                     </svg>
 
-                    Your message sent successfully!
+                    <span id="message-success-text">Your message sent successfully!</span>
 
                     <button class="btn btn-primary" id="offline-message-success-close" type="button">Send Again</button>
                 </div>
@@ -138,7 +138,7 @@
                             stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                     </svg>
 
-                    Oops! Something went wrong
+                    <span id="message-error-text">Oops! Something went wrong</span>
 
                     <button class="btn btn-primary" id="offline-message-error-close" type="button">Try Again</button>
                 </div>
@@ -181,22 +181,22 @@
         let collectEmailText = 'Read More:';
 
         const defaultWelcomeMessage = 'Hello! How can I assist you today?';
+        const submitBtnSubmittingText = 'Submitting...';
 
         let sessionId = '';
 
         let messages = [];
 
-        const urlParams = new URLSearchParams(window.location.search);
-        let knowledgebaseId = urlParams.get('kbId');
-
-        if(!knowledgebaseId){
-            const hostname = window.location.hostname;
-            const parts = hostname.split('.');
-            const subdomain = parts.length > 2 ? parts[0] : null;
-            if(subdomain && subdomain.includes('wb-')) {
-                knowledgebaseId = subdomain.replace('wb-', '');
-            }
+        function getDomainFromUrl(url) {
+            if (!url) return '';
+            const matches = url.match(/^https?\:\/\/([^\/?#]+)(?:[\/?#]|$)/i);
+            const domain = matches && matches[1]; // domain will be null if no match is found
+            return (domain || '').replace('www.', '');
         }
+
+        const urlParams = new URLSearchParams(window.location.search);
+
+        let knowledgebaseId;
         const baseURL = urlParams.get('baseUrl') || 'https://api.webwhiz.ai';
         const chatWidget = document.querySelector('.chat-wrap');
 
@@ -328,8 +328,18 @@
         });
 
         async function getWidgetData() {
+            //const domain = 'chat.timemaster.ai';
+            let url;
+            const kbId = urlParams.get('kbId');
+            if(kbId) {
+                knowledgebaseId = kbId;
+                url = `${baseURL}/knowledgebase/${knowledgebaseId}/chat_widget_data`;
+            } else {
+                const domain = getDomainFromUrl(window.location.href);
+                url = `${baseURL}/knowledgebase/chat_widget_data_for_domain?domain=${domain}`;
+            }
             const response = await fetch(
-                `${baseURL}/knowledgebase/${knowledgebaseId}/chat_widget_data`,
+                url,
                 {
                     method: 'GET', // *GET, POST, PUT, DELETE, etc.
                     headers: {
@@ -356,6 +366,9 @@
 
         (async () => {
             const data = await getWidgetData();
+            if(!knowledgebaseId) {
+                knowledgebaseId = data.id;
+            }
             const chatWidgetData = data.chatWidgeData;
             showReadMore = chatWidgetData.showReadMore;
             collectEmail = chatWidgetData.collectEmail;
@@ -376,6 +389,10 @@
             const offlineMsgMessageInput = document.getElementById("offline-message-message");
             const requiredFieldErrorMsg = document.querySelectorAll('.required-field');
             const invalidEmailErrorMsg = document.getElementById('invalid-feedback-email-invalid');
+            const formSubmitSuccessMsg = document.getElementById("message-success-text");
+            const formSubmitErrorMsg = document.getElementById("message-error-text");
+            const formSendAgainBtn = document.getElementById("offline-message-success-close");
+            const formTryAgainBtn = document.getElementById("offline-message-error-close");
 
             const defaultLauncherIcon = `<svg 
                 focusable="false" 
@@ -498,6 +515,24 @@
                 offlineMessageBtn.innerText = chatWidgetData.formSubmitBtnLabel;
             }
 
+            formSubmitBtnSubmittingText = chatWidgetData.formSubmitBtnSubmittingText ?? submitBtnSubmittingText;
+
+            if (chatWidgetData.formSubmitSuccessMsg) {
+                formSubmitSuccessMsg.innerText = chatWidgetData.formSubmitSuccessMsg;
+            }
+
+            if (chatWidgetData.formSubmitErrorMsg) {
+                formSubmitErrorMsg.innerText = chatWidgetData.formSubmitErrorMsg;
+            }
+
+            if (chatWidgetData.formSendAgainBtnLabel) {
+                formSendAgainBtn.innerText = chatWidgetData.formSendAgainBtnLabel;
+            }
+
+            if (chatWidgetData.formTryAgainBtnLabel) {
+                formTryAgainBtn.innerText = chatWidgetData.formTryAgainBtnLabel;
+            }
+
             var styleSheet = document.createElement('style');
             styleSheet.type = "text/css";
 
@@ -517,7 +552,7 @@
                 }
                 .chat-message.user .chat-message-text {background-color: ${chatWidgetData.backgroundColor}!important; color: ${chatWidgetData.fontColor}!important}
             `
-            styleSheet.textContent = styles + (chatWidgetData?.customCSS || '');
+            styleSheet.textContent = (chatWidgetData?.customCSS || '') + styles;
 
 
             if (chatWidgetData.questionExamples && chatWidgetData.questionExamples.length > 0) {
@@ -976,7 +1011,7 @@
                 if (isValidEmail && name && message) {
 
                     const prevBtnText = offlineMessageBtn.innerHTML;
-                    offlineMessageBtn.innerHTML = 'Submitting...';
+                    offlineMessageBtn.innerHTML = formSubmitBtnSubmittingText;
                     offlineMessageBtn.setAttribute('disabled', true);
                     if (!sessionId) {
                         sessionId = await createSession({
