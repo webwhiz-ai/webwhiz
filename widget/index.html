@@ -337,6 +337,7 @@
             } else {
                 const domain = getDomainFromUrl(window.location.href);
                 url = `${baseURL}/knowledgebase/chat_widget_data_for_domain?domain=${domain}`;
+                chatWidget.classList.add('hide-chat-actions', 'widget-open');
             }
             const response = await fetch(
                 url,
