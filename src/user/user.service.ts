@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { compare, hash } from 'bcrypt';
-import { Collection, Db, ObjectId } from 'mongodb';
+import { Collection, Db, ObjectId, UpdateFilter } from 'mongodb';
 import { GoogleUserProfile } from '../auth/google-auth';
 import { AppConfigService } from '../common/config/appConfig.service';
 import { MONGODB } from '../common/mongo/mongo.module';
@@ -13,6 +13,7 @@ import {
   UserProfile,
   UserSparse,
   USER_COLLECTION,
+  WebhookData,
 } from './user.schema';
 import { CustomKeyData } from '../knowledgebase/knowledgebase.schema';
 
@@ -281,10 +282,44 @@ export class UserService {
     await this.userCollection.updateOne({ _id: id }, { $set: update });
   }
 
+  async addNewWebhook(id: ObjectId, webhookData: WebhookData) {
+    const update: UpdateFilter<User> = {
+      $push: {
+        webhooks: webhookData,
+      },
+    };
+
+    const result = await this.userCollection.updateOne({ _id: id }, update);
+    if (result.modifiedCount == 1) {
+      return webhookData.id;
+    }
+  }
+
+  async deleteWebhook(userId: ObjectId, webhookId: ObjectId) {
+    const update: UpdateFilter<User> = {
+      $pull: { webhooks: { id: webhookId } },
+    };
+
+    const result = await this.userCollection.updateOne({ _id: userId }, update);
+    if (result.matchedCount === 0) {
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+    } else if (result.modifiedCount === 0) {
+      throw new HttpException('Webhook not found', HttpStatus.NOT_FOUND);
+    }
+  }
+
   async getUserWebhookData(id: ObjectId): Promise<Pick<User, 'webhook'>> {
     const res = await this.userCollection.findOne(
       { _id: id },
       { projection: { webhook: 1 } },
+    );
+    return res;
+  }
+
+  async getUserWebhooksData(id: ObjectId): Promise<Pick<User, 'webhooks'>> {
+    const res = await this.userCollection.findOne(
+      { _id: id },
+      { projection: { webhooks: 1 } },
     );
     return res;
   }
