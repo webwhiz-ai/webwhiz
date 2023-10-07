@@ -97,7 +97,7 @@ export const MediaListItem = ({ onMenuItemClick, showPrimaryActionButton, isPrim
 						showPrimaryActionButton && (<Box mt="4">
 							<Button onClick={onPrimaryActionButtonClick} isLoading={isPrimaryButtonLoading}
 								loadingText='Creating chat bot' colorScheme="blue" size='xs'>
-								Create chat bot
+								Create chatbot
 							</Button>
 						</Box>)
 					}

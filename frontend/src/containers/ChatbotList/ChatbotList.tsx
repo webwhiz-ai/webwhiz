@@ -203,7 +203,7 @@ export const ChatbotList = () => {
 					key={chatbot._id}
 					showPrimaryActionButton={chatbot.status !== 'READY'}
 					actionButtonLeftIcon={null}
-					isPrimaryButtonLoading={createChatBotLoading[chatbot._id]}
+					isPrimaryButtonLoading={createChatBotLoading[chatbot._id] || chatbot.status === 'CRAWLING'}
 					onPrimaryActionButtonClick={() => {
 						createChatBot(chatbot._id)
 					}}
