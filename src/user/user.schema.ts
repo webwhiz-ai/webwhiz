@@ -41,6 +41,12 @@ export interface SubscriptionData {
   };
 }
 
+export interface WebhookData {
+  id: ObjectId;
+  url: string;
+  secret?: string;
+}
+
 export interface User {
   _id?: ObjectId;
   email: string;
@@ -65,6 +71,7 @@ export interface User {
     url: string;
     secret: string;
   };
+  webhooks?: WebhookData[];
   createdAt: Date;
   updatedAt: Date;
   lastLogin?: Date;
