@@ -25,6 +25,7 @@ interface MediaListItemProps extends BoxProps {
 	name: string;
 	imageAlt: string;
 	description: string;
+	showWarning: boolean;
 	showCustomizeMenu: boolean;
 	showGetCodeMenu: boolean;
 	isPrimaryButtonLoading?: boolean;
@@ -36,7 +37,7 @@ interface MediaListItemProps extends BoxProps {
 	onActionButtonClick?: () => void;
 }
 
-export const MediaListItem = ({ onMenuItemClick, showPrimaryActionButton, isPrimaryButtonLoading, onPrimaryActionButtonClick, className, ...restProps }: MediaListItemProps) => {
+export const MediaListItem = ({ onMenuItemClick, showWarning, showPrimaryActionButton, isPrimaryButtonLoading, onPrimaryActionButtonClick, className, ...restProps }: MediaListItemProps) => {
 	useEffect(() => {
 		async function fetchData() {
 			try {
@@ -54,7 +55,7 @@ export const MediaListItem = ({ onMenuItemClick, showPrimaryActionButton, isPrim
 		<HStack
 			shadow='xs'
 			p='4'
-			bg='white'
+			bg={showWarning ? 'orange.50': 'white'}
 			borderRadius='lg'
 			className={className || '' + ' ' + styles.container}
 			spacing='4'

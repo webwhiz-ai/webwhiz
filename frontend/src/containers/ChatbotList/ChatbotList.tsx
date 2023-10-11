@@ -201,6 +201,7 @@ export const ChatbotList = () => {
 					imageUrl={chatbot.imageUrl}
 					description={chatbot.description}
 					key={chatbot._id}
+					showWarning={chatbot.status !== 'READY'}
 					showPrimaryActionButton={chatbot.status !== 'READY'}
 					actionButtonLeftIcon={null}
 					isPrimaryButtonLoading={createChatBotLoading[chatbot._id] || chatbot.status === 'CRAWLING'}

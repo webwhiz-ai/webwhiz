@@ -12,6 +12,7 @@ import {
 	IconButton,
 	useToast,
 	Alert,
+	AlertIcon,
 	Button,
 	useDisclosure,
 	AlertDescription,
@@ -212,10 +213,67 @@ const EditChatbot = (props: EditChatbotProps) => {
 					isClosable: true,
 				});
 
+				setPrimaryButtonLabel("Update Website Data");
 
 			}
 		}, 2000);
 	}, [toast]);
+
+	const [isEmbedError, setIsEmbedError] = React.useState<boolean>(false);
+
+	const handleChatbotUpdate = React.useCallback(async (formValues)=>{
+		setIsSubmitting(true);
+		setIsEmbedError(false)
+		if (productSetupTab === 1) {
+			setProductSetupLoadingText('Uploading files...');
+			if (formValues.files?.length && formValues.files.length > 0) {
+				setIsUploadingDocs(true);
+				for (const file of formValues.files) {
+					try {
+						await addTrainingDoc(chatBot._id, file);
+					} catch (error) {
+						console.log('error', error)
+					}
+				}
+				setIsUploadingDocs(false);
+				const _docsDataResponse = await fetchKnowledgebaseCrawlDataForDocs(chatBot._id, 1);
+				const _docsData: DocsKnowledgeData = {
+					docs: _docsDataResponse.data.results,
+					pages: _docsDataResponse.data.pages,
+					knowledgebaseId: chatBot._id
+				}
+				setDocsData(_docsData);
+			}
+			setIsSubmitting(false);
+			return;
+		}
+
+		setProductSetupLoadingText('Crawling your website data.. This may take some time based on the amount of the data...');
+
+		try {
+
+			if (formValues.websiteData.websiteUrl) {
+				await updateWebsiteData(chatBot._id, {
+					urls: [],
+					websiteUrl: formValues.websiteData.websiteUrl,
+					include: formValues.websiteData.include,
+					exclude: formValues.websiteData.exclude,
+				})
+			}
+
+			startEmbeding(chatBot._id)
+
+
+		} catch (error) {
+			setIsSubmitting(false);
+			const errorData = error?.response?.data?.message
+			toast({
+				title: (errorData && errorData[0]) || 'Oops! Something went wrong',
+				status: "error",
+				isClosable: true,
+			});
+		}
+	}, [chatBot._id, productSetupTab, startEmbeding, toast])
 
 	useEffect(() => {
 		async function fetchData() {
@@ -233,8 +291,10 @@ const EditChatbot = (props: EditChatbotProps) => {
 					welcomeMessages: chatWidgetDefaultValues.welcomeMessages,
 					customCSS: chatWidgetDefaultValues.customCSS
 				}
-
-				if(chatBotData.status !== 'READY') {
+				if(chatBotData.status === 'EMBEDDING_ERROR' || chatBotData.status === 'CRAWL_ERROR') {
+					setIsEmbedError(true)
+					setPrimaryButtonLabel("Create chatbot")
+				} else if(chatBotData.status !== 'READY') {
 					setIsSubmitting(true);
 					startEmbeding(props.match.params.chatbotId)
 				}
@@ -797,58 +857,8 @@ const EditChatbot = (props: EditChatbotProps) => {
 						loadingText={productSetupLoadingText}
 						primaryButtonLabel={primaryButtonLabel}
 						disableWebsiteInput={true}
-						onPrimaryBtnClick={async (formValues : ProductSetupData, hasWebsiteDataChanged: boolean) => {
-
-							setIsSubmitting(true);
-							if (productSetupTab === 1) {
-								setProductSetupLoadingText('Uploading files...');
-								if (formValues.files?.length && formValues.files.length > 0) {
-									setIsUploadingDocs(true);
-									for (const file of formValues.files) {
-										try {
-											await addTrainingDoc(chatBot._id, file);
-										} catch (error) {
-											console.log('error', error)
-										}
-									}
-									setIsUploadingDocs(false);
-									const _docsDataResponse = await fetchKnowledgebaseCrawlDataForDocs(chatBot._id, 1);
-									const _docsData: DocsKnowledgeData = {
-										docs: _docsDataResponse.data.results,
-										pages: _docsDataResponse.data.pages,
-										knowledgebaseId: chatBot._id
-									}
-									setDocsData(_docsData);
-								}
-								setIsSubmitting(false);
-								return;
-							}
-
-							setProductSetupLoadingText('Crawling your website data.. This may take some time based on the amount of the data...');
-
-							try {
-
-								if (formValues.websiteData.websiteUrl) {
-									await updateWebsiteData(chatBot._id, {
-										urls: [],
-										websiteUrl: formValues.websiteData.websiteUrl,
-										include: formValues.websiteData.include,
-										exclude: formValues.websiteData.exclude,
-									})
-								}
-
-								startEmbeding(chatBot._id)
-
-
-							} catch (error) {
-								setIsSubmitting(false);
-								const errorData = error?.response?.data?.message
-								toast({
-									title: (errorData && errorData[0]) || 'Oops! Something went wrong',
-									status: "error",
-									isClosable: true,
-								});
-							}
+						onPrimaryBtnClick={(formValues : ProductSetupData, hasWebsiteDataChanged: boolean) => {
+							handleChatbotUpdate(formValues)
 						}}
 					/>
 				</Flex>
@@ -1023,7 +1033,15 @@ const EditChatbot = (props: EditChatbotProps) => {
 				</Flex>
 			</>
 		);
-	}, [chatBot._id, chatBot.websiteData?.websiteUrl, chatBot.customDomain, chatBot.chatWidgeData, currentStep, getCrawlDataPagination, getDocsDataPagination, getExcludedPaths, getIncludedPaths, handleTabChange, defaultCrauledData, isSubmitting, isUploadingDocs, docsDataLoading, docsData, crawlDataLoading, productSetupLoadingText, primaryButtonLabel, getDefaultCustomizationValues, getAddToWebsiteContent, props.match.params.chatbotId, handleTrainingDataSave, getCustomDataComponent, chatSessions, isChatLoading, handlePageClick, offlineMessages, handleOfflinePageClick, history, productSetupTab, startEmbeding, toast, goToStep]);
+	}, [chatBot._id, chatBot.websiteData?.websiteUrl, chatBot.customDomain, chatBot.chatWidgeData, currentStep, getCrawlDataPagination, getDocsDataPagination, getExcludedPaths, getIncludedPaths, handleTabChange, defaultCrauledData, isSubmitting, isUploadingDocs, docsDataLoading, docsData, crawlDataLoading, productSetupLoadingText, primaryButtonLabel, getDefaultCustomizationValues, getAddToWebsiteContent, props.match.params.chatbotId, handleTrainingDataSave, getCustomDataComponent, chatSessions, isChatLoading, handlePageClick, offlineMessages, handleOfflinePageClick, history, handleChatbotUpdate, toast, goToStep]);
+
+	const getEmbedErrorComponent = React.useCallback(() => {
+		if(!isEmbedError) return null;
+		return <Alert status='warning'>
+			<AlertIcon />
+			Unable to create chatbot. Please try again or contact support
+		</Alert>
+	}, [isEmbedError]);
 
 	return (
 		<VStack w="100%" h="100vh" overflow="hidden" spacing={0}>
@@ -1035,6 +1053,10 @@ const EditChatbot = (props: EditChatbotProps) => {
 					</Flex>
 				</Link>
 			</Flex>
+			{
+				getEmbedErrorComponent()
+			}
+			
 			<Flex flex={1} h="calc(100% - 100px)" w="100%">
 				<HStack spacing="0" w="100%">
 					<Box
