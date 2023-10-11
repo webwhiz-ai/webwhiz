@@ -8,6 +8,8 @@ services:
 
   mongodb:
     image: mongo:latest
+    volumes:
+      - db-data:/data/db
     expose:
       - "27017"
 
@@ -46,3 +48,6 @@ services:
       - "3031:80"
     depends_on:
       - web
+
+volumes:
+  db-data:
