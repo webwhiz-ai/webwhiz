@@ -12,6 +12,7 @@ import {
 	IconButton,
 	useToast,
 	Alert,
+	AlertIcon,
 	Button,
 	useDisclosure,
 	AlertDescription,
@@ -176,6 +177,104 @@ const EditChatbot = (props: EditChatbotProps) => {
 
 	const [productSetupLoadingText, setProductSetupLoadingText] = React.useState("Setting up your product");
 
+	const startEmbeding = React.useCallback((chatBotId) => {
+		let interval = setInterval(async () => {
+			const details = await fetchKnowledgebaseDetails(chatBotId);
+			if (details.data.status === 'CRAWLED' || (details.data.websiteData === null && details.data.status === 'CREATED')) {
+				await generateEmbeddings(chatBotId);
+			} else if (details.data.status === 'CRAWL_ERROR' || details.data.status === 'EMBEDDING_ERROR') {
+				clearInterval(interval);
+				setIsSubmitting(false);
+				toast({
+					title: `Oops! Something went wrong`,
+					status: "error",
+					isClosable: true,
+				});
+			} else if (details.data.status === 'GENERATING_EMBEDDINGS') {
+				setProductSetupLoadingText('Training ChatGPT with your website data... This may take some time based on the amount of the data...');
+			} else if (details.data.status === 'READY') {
+				clearInterval(interval);
+
+				const _crawlDataResponse = await fetchKnowledgebaseCrawlData(chatBotId, 1);
+
+				const _data = {
+					stats: details.data.crawlData?.stats,
+					urls: _crawlDataResponse.data.results,
+					pages: _crawlDataResponse.data.pages,
+					knowledgebaseId: details.data._id
+				}
+
+				setDefaultCrauledData(_data)
+
+				setIsSubmitting(false);
+				toast({
+					title: `Successfully updated your chatbot`,
+					status: "success",
+					isClosable: true,
+				});
+
+				setPrimaryButtonLabel("Update Website Data");
+
+			}
+		}, 2000);
+	}, [toast]);
+
+	const [isEmbedError, setIsEmbedError] = React.useState<boolean>(false);
+
+	const handleChatbotUpdate = React.useCallback(async (formValues)=>{
+		setIsSubmitting(true);
+		setIsEmbedError(false)
+		if (productSetupTab === 1) {
+			setProductSetupLoadingText('Uploading files...');
+			if (formValues.files?.length && formValues.files.length > 0) {
+				setIsUploadingDocs(true);
+				for (const file of formValues.files) {
+					try {
+						await addTrainingDoc(chatBot._id, file);
+					} catch (error) {
+						console.log('error', error)
+					}
+				}
+				setIsUploadingDocs(false);
+				const _docsDataResponse = await fetchKnowledgebaseCrawlDataForDocs(chatBot._id, 1);
+				const _docsData: DocsKnowledgeData = {
+					docs: _docsDataResponse.data.results,
+					pages: _docsDataResponse.data.pages,
+					knowledgebaseId: chatBot._id
+				}
+				setDocsData(_docsData);
+			}
+			setIsSubmitting(false);
+			return;
+		}
+
+		setProductSetupLoadingText('Crawling your website data.. This may take some time based on the amount of the data...');
+
+		try {
+
+			if (formValues.websiteData.websiteUrl) {
+				await updateWebsiteData(chatBot._id, {
+					urls: [],
+					websiteUrl: formValues.websiteData.websiteUrl,
+					include: formValues.websiteData.include,
+					exclude: formValues.websiteData.exclude,
+				})
+			}
+
+			startEmbeding(chatBot._id)
+
+
+		} catch (error) {
+			setIsSubmitting(false);
+			const errorData = error?.response?.data?.message
+			toast({
+				title: (errorData && errorData[0]) || 'Oops! Something went wrong',
+				status: "error",
+				isClosable: true,
+			});
+		}
+	}, [chatBot._id, productSetupTab, startEmbeding, toast])
+
 	useEffect(() => {
 		async function fetchData() {
 			try {
@@ -191,6 +290,13 @@ const EditChatbot = (props: EditChatbotProps) => {
 					description: chatWidgetDefaultValues.description,
 					welcomeMessages: chatWidgetDefaultValues.welcomeMessages,
 					customCSS: chatWidgetDefaultValues.customCSS
+				}
+				if(chatBotData.status === 'EMBEDDING_ERROR' || chatBotData.status === 'CRAWL_ERROR') {
+					setIsEmbedError(true)
+					setPrimaryButtonLabel("Create chatbot")
+				} else if(chatBotData.status !== 'READY') {
+					setIsSubmitting(true);
+					startEmbeding(props.match.params.chatbotId)
 				}
 
 				const _crawlDataResponse = await fetchKnowledgebaseCrawlData(chatBotData._id, 1);
@@ -219,7 +325,7 @@ const EditChatbot = (props: EditChatbotProps) => {
 			}
 		}
 		fetchData();
-	}, [props.match.params.chatbotId]);
+	}, [props.match.params.chatbotId, startEmbeding]);
 
 	const [chatSessions, setChatSessions] = React.useState<ChatSessionPagination>();
 	const [offlineMessages, setOfflineMessages] = React.useState<OfflineMessagePagination>();
@@ -751,97 +857,8 @@ const EditChatbot = (props: EditChatbotProps) => {
 						loadingText={productSetupLoadingText}
 						primaryButtonLabel={primaryButtonLabel}
 						disableWebsiteInput={true}
-						onPrimaryBtnClick={async (formValues : ProductSetupData, hasWebsiteDataChanged: boolean) => {
-
-							setIsSubmitting(true);
-							if (productSetupTab === 1) {
-								setProductSetupLoadingText('Uploading files...');
-								if (formValues.files?.length && formValues.files.length > 0) {
-									setIsUploadingDocs(true);
-									for (const file of formValues.files) {
-										try {
-											await addTrainingDoc(chatBot._id, file);
-										} catch (error) {
-											console.log('error', error)
-										}
-									}
-									setIsUploadingDocs(false);
-									const _docsDataResponse = await fetchKnowledgebaseCrawlDataForDocs(chatBot._id, 1);
-									const _docsData: DocsKnowledgeData = {
-										docs: _docsDataResponse.data.results,
-										pages: _docsDataResponse.data.pages,
-										knowledgebaseId: chatBot._id
-									}
-									setDocsData(_docsData);
-								}
-								setIsSubmitting(false);
-								return;
-							}
-
-							setProductSetupLoadingText('Crawling your website data.. This may take some time based on the amount of the data...');
-
-							try {
-
-								if (formValues.websiteData.websiteUrl) {
-									await updateWebsiteData(chatBot._id, {
-										urls: [],
-										websiteUrl: formValues.websiteData.websiteUrl,
-										include: formValues.websiteData.include,
-										exclude: formValues.websiteData.exclude,
-									})
-								}
-
-								let interval = setInterval(async () => {
-									const details = await fetchKnowledgebaseDetails(chatBot._id);
-									console.log("details", details);
-									const chatBotId = details.data._id
-									if (details.data.status === 'CRAWLED' || (details.data.websiteData === null && details.data.status === 'CREATED')) {
-										await generateEmbeddings(chatBotId);
-									} else if (details.data.status === 'CRAWL_ERROR' || details.data.status === 'EMBEDDING_ERROR') {
-										clearInterval(interval);
-										setIsSubmitting(false);
-										toast({
-											title: `Oops! Something went wrong`,
-											status: "error",
-											isClosable: true,
-										});
-									} else if (details.data.status === 'GENERATING_EMBEDDINGS') {
-										setProductSetupLoadingText('Training ChatGPT with your website data... This may take some time based on the amount of the data...');
-									} else if (details.data.status === 'READY') {
-										clearInterval(interval);
-
-										const _crawlDataResponse = await fetchKnowledgebaseCrawlData(chatBotId, 1);
-
-										const _data = {
-											stats: details.data.crawlData?.stats,
-											urls: _crawlDataResponse.data.results,
-											pages: _crawlDataResponse.data.pages,
-											knowledgebaseId: details.data._id
-										}
-
-										setDefaultCrauledData(_data)
-
-										setIsSubmitting(false);
-										toast({
-											title: `Successfully updated your chatbot`,
-											status: "success",
-											isClosable: true,
-										});
-
-
-									}
-								}, 2000);
-
-
-							} catch (error) {
-								setIsSubmitting(false);
-								const errorData = error?.response?.data?.message
-								toast({
-									title: (errorData && errorData[0]) || 'Oops! Something went wrong',
-									status: "error",
-									isClosable: true,
-								});
-							}
+						onPrimaryBtnClick={(formValues : ProductSetupData, hasWebsiteDataChanged: boolean) => {
+							handleChatbotUpdate(formValues)
 						}}
 					/>
 				</Flex>
@@ -1016,7 +1033,15 @@ const EditChatbot = (props: EditChatbotProps) => {
 				</Flex>
 			</>
 		);
-	}, [chatBot._id, chatBot.websiteData?.websiteUrl, chatBot.chatWidgeData, currentStep, getCrawlDataPagination, getDocsDataPagination, getExcludedPaths, getIncludedPaths, handleTabChange, defaultCrauledData, isSubmitting, isUploadingDocs, docsDataLoading, docsData, crawlDataLoading, productSetupLoadingText, primaryButtonLabel, getDefaultCustomizationValues, getAddToWebsiteContent, props.match.params.chatbotId, handleTrainingDataSave, getCustomDataComponent, chatSessions, isChatLoading, handlePageClick, offlineMessages, handleOfflinePageClick, history, productSetupTab, toast, goToStep]);
+	}, [chatBot._id, chatBot.websiteData?.websiteUrl, chatBot.customDomain, chatBot.chatWidgeData, currentStep, getCrawlDataPagination, getDocsDataPagination, getExcludedPaths, getIncludedPaths, handleTabChange, defaultCrauledData, isSubmitting, isUploadingDocs, docsDataLoading, docsData, crawlDataLoading, productSetupLoadingText, primaryButtonLabel, getDefaultCustomizationValues, getAddToWebsiteContent, props.match.params.chatbotId, handleTrainingDataSave, getCustomDataComponent, chatSessions, isChatLoading, handlePageClick, offlineMessages, handleOfflinePageClick, history, handleChatbotUpdate, toast, goToStep]);
+
+	const getEmbedErrorComponent = React.useCallback(() => {
+		if(!isEmbedError) return null;
+		return <Alert status='warning'>
+			<AlertIcon />
+			Unable to create chatbot. Please try again or contact support
+		</Alert>
+	}, [isEmbedError]);
 
 	return (
 		<VStack w="100%" h="100vh" overflow="hidden" spacing={0}>
@@ -1024,10 +1049,14 @@ const EditChatbot = (props: EditChatbotProps) => {
 				<Link to="/app/chat-bots/">
 					<Flex alignItems="center">
 						<svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
-						<Heading ml="2" color="white" fontSize="14" fontWeight="400">Chat bots</Heading>
+						<Heading ml="2" color="white" fontSize="14" fontWeight="400">Chatbots</Heading>
 					</Flex>
 				</Link>
 			</Flex>
+			{
+				getEmbedErrorComponent()
+			}
+			
 			<Flex flex={1} h="calc(100% - 100px)" w="100%">
 				<HStack spacing="0" w="100%">
 					<Box

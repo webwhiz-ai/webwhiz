@@ -70,9 +70,9 @@ export const CustomDomain = ({
 			"sessionId": res.data,
 			"name": "Custom Domain",
 			"email": "admin@webwhiz.ai",
-			"message": domainName
+			"message": domainName + '---'+ chatBotId,
 		})
-	}, [domainName, recordName, toast]);
+	}, [chatBotId, domainName, recordName, toast]);
 	const handleNameCopy = React.useCallback(() => {
 		navigator.clipboard.writeText(
 			recordName || ''

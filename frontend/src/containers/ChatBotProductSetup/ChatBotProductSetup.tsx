@@ -120,7 +120,7 @@ export const ChatBotProductSetup = ({
 	onTabsChange,
 	crawlDataLoading,
 	defaultWebsite = "",
-	primaryButtonLabel = "Create Chat bot",
+	primaryButtonLabel = "Create Chatbot",
 	secondaryBtnLabel = "Go Back",
 	showSecondaryButton = false,
 	disableSubmitBtnByDefault = false,
