@@ -32,6 +32,7 @@ import {
   ChatSessionSparse,
   CustomKeyData,
   KnowledgebaseStatus,
+  MessageType,
 } from '../knowledgebase.schema';
 import { PromptTestDTO, UpdateChatbotSessionDTO } from './chatbot.dto';
 import { OpenaiChatbotService } from './openaiChatbotService';
@@ -109,6 +110,17 @@ export class ChatbotService {
         session.knowledgebaseId,
         totalTokens,
       ),
+    ]);
+  }
+
+  private async updateSessionDataWithNewManualMsg(
+    session: ChatSession,
+    msg: ChatQueryAnswer,
+  ) {
+    session.messages.push(msg);
+    return Promise.all([
+      this.setChatSessionData(session),
+      this.kbDbService.addMsgToChatSession(session._id, msg),
     ]);
   }
 
@@ -241,12 +253,16 @@ export class ChatbotService {
     if (!allowUsage) {
       const answer = 'Sorry I cannot respond right now';
       const msg = {
+        type: MessageType.BOT,
         q: query,
         a: answer,
         qTokens: 0,
         aTokens: 0,
         ts: new Date(),
         read: true,
+        msg: null,
+        sender: null,
+        sessionId: sessionId,
       };
       await this.updateSessionDataWithNewMsg(sessionData, msg);
       return answer;
@@ -285,12 +301,16 @@ export class ChatbotService {
     );
 
     const msg = {
+      type: MessageType.BOT,
       q: query,
       a: answer.response,
       qTokens: answer.tokenUsage.prompt,
       aTokens: answer.tokenUsage.completion,
       ts: new Date(),
       read: true,
+      msg: null,
+      sender: null,
+      sessionId: sessionId,
     };
     await this.updateSessionDataWithNewMsg(sessionData, msg);
 
@@ -303,6 +323,30 @@ export class ChatbotService {
       sources,
       messages: answer.messages,
     };
+  }
+
+  async saveManualChat(sessionId: string, chatData: ChatQueryAnswer) {
+    //
+    // Checks and Validations
+    //
+
+    const sessionData = await this.getChatSessionDataFromCache(sessionId);
+    if (!sessionData) {
+      throw new HttpException('Invalid Session Id', HttpStatus.NOT_FOUND);
+    }
+
+    const msg = {
+      type: MessageType.BOT,
+      q: null,
+      a: null,
+      qTokens: null,
+      aTokens: null,
+      ts: new Date(),
+      msg: chatData.msg,
+      sender: chatData.sender,
+      sessionId: sessionId,
+    };
+    await this.updateSessionDataWithNewMsg(sessionData, msg);
   }
 
   /**
@@ -330,12 +374,16 @@ export class ChatbotService {
     if (!allowUsage) {
       const answer = 'Sorry I cannot respond right now';
       const msg = {
+        type: MessageType.BOT,
         q: query,
         a: answer,
         qTokens: 0,
         aTokens: 0,
         ts: new Date(),
         read: true,
+        msg: null,
+        sender: null,
+        sessionId: sessionId,
       };
       await this.updateSessionDataWithNewMsg(sessionData, msg);
       return of(answer);
@@ -369,12 +417,16 @@ export class ChatbotService {
       prevMessages,
       async (answer, usage) => {
         const msg = {
+          type: MessageType.BOT,
           q: query,
           a: answer,
           qTokens: usage.prompt,
           aTokens: usage.completion,
           ts: new Date(),
           read: true,
+          msg: null,
+          sender: null,
+          sessionId: sessionId,
         };
         await this.updateSessionDataWithNewMsg(sessionData, msg);
 
@@ -482,6 +534,7 @@ export class ChatbotService {
       defaultAnswer: kb.defaultAnswer,
       prompt,
       isDemo: kb.isDemo,
+      isManual: false,
       subscriptionData: subscriptionPlan,
       customKeys: user.customKeys,
       userId: kb.owner,
@@ -499,6 +552,23 @@ export class ChatbotService {
     ]);
 
     return sessionId.toString();
+  }
+
+  async initiateManualChatSession(user, sessionId: string) {
+    const sessionData = await this.getChatSessionDataFromCache(sessionId);
+
+    if (!sessionData) return;
+
+    const updatedSessionData: ChatSession = {
+      ...sessionData,
+      isManual: true,
+    };
+
+    await Promise.all([
+      this.setChatSessionData(updatedSessionData),
+      this.kbDbService.updateChatSession(sessionData._id, updatedSessionData),
+    ]);
+    return user._id;
   }
 
   async updateChatbotSession(sessionId: string, data: UpdateChatbotSessionDTO) {

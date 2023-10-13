@@ -41,7 +41,7 @@ export class OfflineMessageController {
       user,
       kbId,
       pageSize || 10,
-      page
+      page,
     );
   }
 }
