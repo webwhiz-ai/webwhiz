@@ -2,7 +2,6 @@ import { ObjectId } from 'mongodb';
 import { SubscriptionPlanInfo } from '../subscription/subscription.const';
 import { UserMonthlyUsage } from '../user/user.schema';
 import { CrawlerStats } from '../importers/crawler/crawlee/crawler.types';
-import { type } from 'os';
 
 /** **************************************************
  * KNOWLEDGEBASE

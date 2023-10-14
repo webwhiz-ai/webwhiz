@@ -336,7 +336,7 @@ export class ChatbotService {
     }
 
     const msg = {
-      type: MessageType.BOT,
+      type: MessageType.MANUAL,
       q: null,
       a: null,
       qTokens: null,
