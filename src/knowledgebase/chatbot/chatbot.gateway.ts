@@ -13,6 +13,8 @@ import { REDIS } from '../../common/redis/redis.module';
 import { ChatQueryAnswer } from '../knowledgebase.schema';
 import { ChatbotService } from './chatbot.service';
 
+const ONLINE_SESSIONS_REDIS_KEY = 'onlineSessions';
+
 @WebSocketGateway({
   cors: {
     origin: '*',
@@ -39,7 +41,9 @@ export class ChatGateway
     if (query.isAdmin) {
       this.logger.log('Admin joined joined ', query.id);
       // iterate all users from redis
-      const onlineSessions = await this.redis.hgetall('onlineSessions');
+      const onlineSessions = await this.redis.hgetall(
+        ONLINE_SESSIONS_REDIS_KEY,
+      );
       for (const sessionId in onlineSessions) {
         this.logger.log('joining user room', sessionId);
         socket.join(sessionId);
@@ -50,7 +54,7 @@ export class ChatGateway
       const sessionId: any = query.id;
       this.logger.log('New client joined ', sessionId);
       // set user in redis
-      this.redis.hset('onlineSessions', sessionId, 1);
+      this.redis.hset(ONLINE_SESSIONS_REDIS_KEY, sessionId, 1);
       // join chat room
       socket.join(sessionId);
     }
@@ -65,7 +69,7 @@ export class ChatGateway
     } else {
       this.logger.log('Client disconnected ', query);
       // remove user from redis
-      this.redis.hdel('onlineSessions', sessionId);
+      this.redis.hdel(ONLINE_SESSIONS_REDIS_KEY, sessionId);
     }
   }
 
