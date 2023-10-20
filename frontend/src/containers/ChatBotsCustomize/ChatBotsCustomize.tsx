@@ -632,6 +632,29 @@ export const ChatBotsCustomize = ({
 															)}
 														</Field>
 
+														<Field type="text" name="adminEmail">
+															{({ field, form }: any) => (
+																<FormControl
+																	mb="6"
+																	isInvalid={
+																		form.errors.adminEmail && form.touched.adminEmail
+																	}
+																>
+																	<FormLabel fontSize="sm" htmlFor="adminEmail" color="gray.700" fontWeight="400" >
+																		Send email to
+																		</FormLabel>
+																	<Input
+																		{...field}
+																		placeholder={(defaultCustomizationValues || chatWidgetDefaultValues).adminEmail}
+																		isDisabled={!values.offlineMessage}
+																	/>
+																	<FormHelperText fontSize="sm">By default, offline messages are forwarded to account owner's email address.</FormHelperText>
+																	<FormErrorMessage>
+																		{form.errors.adminEmail}
+																	</FormErrorMessage>
+																</FormControl>
+															)}
+														</Field>
 														<Field type="text" name="assistantTabHeader">
 															{({ field, form }: any) => (
 																<FormControl

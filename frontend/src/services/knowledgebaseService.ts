@@ -118,6 +118,16 @@ export async function updateDefaultAnswer(id:string, defaultAnswer: string): Pro
 		url: `knowledgebase/${id}/default_answer`,
 	});
 }
+export async function updateAdminEmail(id:string, adminEmail: string): Promise<AxiosResponse<Knowledgebase[]>> {
+	return await axios({
+		baseURL: baseURL,
+		method: 'put',
+		data: {
+			email: adminEmail
+		},
+		url: `knowledgebase/${id}/admin_email`,
+	});
+}
 
 export async function updateWebsiteData(id:string, data: WebsiteData): Promise<AxiosResponse<Knowledgebase[]>> {
 	return await axios({

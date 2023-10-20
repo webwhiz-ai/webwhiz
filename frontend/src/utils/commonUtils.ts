@@ -72,6 +72,7 @@ export const chatWidgetDefaultValues = {
   showAsPopup: false,
   popupDelay: 3000,
   collectEmail: false,
+  adminEmail: '',
   collectEmailText: 'What is your email address?',
   questionExamples: [
     {question: 'How can I contact you?', label: 'Contact'},

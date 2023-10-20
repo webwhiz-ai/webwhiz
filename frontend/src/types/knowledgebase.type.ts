@@ -75,6 +75,7 @@ export interface ChatBotCustomizeData {
     showAsPopup: boolean;
     popupDelay: number;
     offlineMessage: boolean;
+    adminEmail: string,
     collectEmail: boolean,
     collectEmailText: string,
     welcomeMessage?: string;
