@@ -205,7 +205,7 @@ export const CustomDomain = ({
 				</FormControl>
 			</HStack>
 			<Box>
-				<OrderedList fontSize="md" mt="4" pl="1" mb="2">
+				<OrderedList fontSize="sm" mt="4" pl="1" mb="2">
 					<ListItem>Navigate to the dashboard of your DNS hosting service. </ListItem>
 					<ListItem>In the 'Name' or 'Host' field, input your chosen subdomain. Copy from the 'Name' field above.</ListItem>
 					<ListItem>In the 'Value' or 'Target', use widget.webwhiz.ai. Make sure it's typed correctly for the right domain link.</ListItem>
