@@ -11,7 +11,7 @@ import { Link, useHistory } from "react-router-dom";
 import {
 	ChatBotProductSetup,
 } from "../ChatBotProductSetup/ChatBotProductSetup";
-import { createKnowledgebase, fetchKnowledgebaseCrawlData, fetchKnowledgebaseDetails, generateEmbeddings, fetchKnowledgebaseCrawlDataForDocs, addTrainingDoc, updateWebsiteData } from "../../services/knowledgebaseService";
+import { createKnowledgebase, fetchKnowledgebaseCrawlData, fetchKnowledgebaseDetails, generateEmbeddings, fetchKnowledgebaseCrawlDataForDocs, addTrainingDoc, updateWebsiteData, deleteKnowledgebase } from "../../services/knowledgebaseService";
 import { ProductSetupData, DocsKnowledgeData } from "../../types/knowledgebase.type";
 
 
@@ -76,6 +76,9 @@ export const CreateChatBots = () => {
 		setProductSetupLoadingText('Creating Knowledgebase...');
 
 		try {
+			if (knowledgeBaseId !== '') {
+				await deleteKnowledgebase(knowledgeBaseId);
+			}
 			const response = await createKnowledgebase(payLoad.websiteData);
 			setKnowledgeBaseId(response.data._id);
 
@@ -86,6 +89,11 @@ export const CreateChatBots = () => {
 						await addTrainingDoc(response.data._id, file);
 					} catch (error) {
 						console.log('error', error)
+						toast({
+							title: `${file.name} failed to upload. ${(error?.response?.data?.message) || ''}`,
+							status: "error",
+							isClosable: true,
+						});
 					}
 				}
 				setIsUploadingDocs(false);
@@ -108,10 +116,10 @@ export const CreateChatBots = () => {
 					setProductSetupLoadingText('Crawling your website data.. This may take some time based on the amount of the data...');
 				}
 				const chatBotId = details.data._id
-				if (details.data.status === 'CRAWLED' || (details.data.websiteData === null && details.data.status === 'CREATED')) {
+				if (details.data.status === 'CRAWLED' || (details.data.status === 'CREATED' && docsData && docsData.docs.length > 0)) {
 					setProductSetupLoadingText('Training ChatGPT with your data... This may take some time based on the amount of the data...');
 					await generateEmbeddings(chatBotId);
-				} else if (details.data.status === 'CRAWL_ERROR' || details.data.status === 'EMBEDDING_ERROR') {
+				} else if (details.data.status === 'CRAWL_ERROR' || details.data.status === 'EMBEDDING_ERROR' || (details.data.websiteData === null && (docsData === undefined || docsData.docs.length === 0))) {
 					clearInterval(interval);
 					setIsSubmitting(false);
 					toast({
@@ -153,7 +161,7 @@ export const CreateChatBots = () => {
 				isClosable: true,
 			});
 		}
-	}, [toast, history]);
+	}, [knowledgeBaseId, docsData, toast, history]);
 
 	// TODO: remove if unused
 	/*
