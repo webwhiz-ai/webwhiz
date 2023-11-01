@@ -80,6 +80,7 @@ const widgetStyle = `
 }
 
 .webwhiz__msg-popup-item {
+  cursor: pointer;
   padding: 20px;
   background-color: #FFF;
   display: inline-flex;
@@ -154,7 +155,7 @@ function __WEBWHIZ__addIframe() {
 
 function addPopup(config) {
   const welcomeMessagesHTML = config.welcomeMessages.map(msg => {
-      return `<div class="webwhiz__msg-popup-item">${msg}</div>`
+    return `<div class="webwhiz__msg-popup-item">${msg}</div>`
   }).join(''); 
   const closeBtn = `<button class="webwhiz__msg-popup-close-btn" id="webwhiz__msg-popup-close-btn">
       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-x">
@@ -172,6 +173,12 @@ function addPopup(config) {
   document.getElementById('webwhiz__msg-popup-close-btn').onclick = () => {
     removePopup();
   }
+  const popupItems = document.getElementsByClassName('webwhiz__msg-popup-item');
+  for (const popupItem of popupItems) {
+    popupItem.onclick = () => {
+      openWidget();
+    };
+  }
   setTimeout(() => {
     const popup = document.getElementById('webwhiz__msg-popup');
     if(popup) {
@@ -180,11 +187,18 @@ function addPopup(config) {
   }, config.popupDelay || 3000);
 }
 
+function openWidget() {
+  const iframe = document.getElementById("webwhiz-widget");
+
+  // Call the function inside the iframe
+  iframe.contentWindow.expandWidget();
+}
+
 function removePopup() {
   const popup = document.getElementById('webwhiz__msg-popup');
   if(popup) {
     popup.classList.remove('webwhiz__msg-popup--show');
-    localStorage.setItem("webwhiz__popupRemoved", 'true');
+    localStorage.setItem("webwhiz__popupRemoved", true);
     setTimeout(() => {
       popup.remove();
     }, 350);
@@ -212,7 +226,7 @@ function __WEBWHIZ__getEventHandler(ifrm) {
       if (config.position === 'left'){
         iframe.classList.add("wb-align-left");
       }
-      const popupRemoved = localStorage.getItem("webwhiz__popupRemoved");
+      const popupRemoved = JSON.parse(localStorage.getItem("webwhiz__popupRemoved"));
       if(!popupRemoved && config.showAsPopup && config.welcomeMessages && config.welcomeMessages.length > 0 && !container) {
         addPopup(config);
       }
