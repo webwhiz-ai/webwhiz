@@ -297,14 +297,7 @@
         const chatMinimizeBtn = document.querySelector('#chat-minimize-btn');
         const chatClearHistoryBtn = document.querySelector('#chat-clear-session-btn');
         chatLauncherBtn.addEventListener('click', () => {
-            chatWidget.classList.add('widget-open');
-
-            notifyParentWidgetExpand();
-            setTimeout(() => {
-                const chatMessages = document.getElementById('chat-messages');
-                chatMessages.scrollTop = chatMessages.scrollHeight;
-                document.getElementById('chat-input').focus();
-            }, 320);
+            expandWidget();
         });
         chatCloseBtn.addEventListener('click', () => {
             chatWidget.classList.remove('widget-open');
@@ -326,6 +319,17 @@
             messages = [];
             notifyClearHistory();
         });
+
+        function expandWidget() {
+            chatWidget.classList.add('widget-open');
+
+            notifyParentWidgetExpand();
+            setTimeout(() => {
+                const chatMessages = document.getElementById('chat-messages');
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+                document.getElementById('chat-input').focus();
+            }, 320);
+        }
 
         async function getWidgetData() {
             //const domain = 'chat.timemaster.ai';
