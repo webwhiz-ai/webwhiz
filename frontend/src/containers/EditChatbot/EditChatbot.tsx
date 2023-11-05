@@ -59,6 +59,7 @@ import { OfflineMessagesNew } from "../OfflineMessages/OfflineMessagesNew";
 import { ChatSessionsNew } from "../ChatSessions/ChatSessionsNew";
 import { Paginator } from "../../widgets/Paginator/Paginator";
 import { CustomDomain } from "../CustomDomain/CustomDomain";
+import { useConfirmation } from "../../providers/providers";
 export function validateEmailAddress(email: string) {
 	return email && !/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(email);
 }
@@ -84,6 +85,8 @@ const EditChatbot = (props: EditChatbotProps) => {
 	const toast = useToast();
 	let history = useHistory();
 	let { search } = useLocation();
+
+	const { showConfirmation } = useConfirmation()
 
 	const [user, setUser] = React.useState<User>(CurrentUser.get());
 	React.useEffect(() => {
@@ -1019,8 +1022,19 @@ const EditChatbot = (props: EditChatbotProps) => {
 								setSelectedChat={handleSelectChat}
 								isChatLoading={isChatLoading}
 								updateChatSessionReadStatus={updateChatSessionReadStatus}
-								onDeleteChat={onDeleteChat}
-								
+								onDeleteChat={(chatId) => {
+									showConfirmation(true, {
+										title: 'Delete Chat',
+										content: 'Are you sure you want to delete this chat?',
+										confirmButtonText: 'Delete',
+										onClose: () => showConfirmation(false),
+										onConfirm: () => {
+											onDeleteChat(chatId);
+											showConfirmation(false)
+										},
+									})
+								}}
+
 							/>
 						}
 					</Flex>
