@@ -11,9 +11,10 @@ type ChatListProps = {
     onPageChange: (page: number) => void;
     onSelectChat: (chatSession: ChatSession) => void;
     updateChatSessionReadStatus: (chatId: string, isUnread: boolean) =>void
+    onDeleteChat: (chatId: string) => void
 }
 
-export const ChatList = ({ isChatListLoading, chatSessionsPage, selectedChat, onPageChange, onSelectChat, updateChatSessionReadStatus }: ChatListProps) => {
+export const ChatList = ({ isChatListLoading, chatSessionsPage, selectedChat, onPageChange, onSelectChat, updateChatSessionReadStatus, onDeleteChat }: ChatListProps) => {
 
     return (
         <Box w="450px"
@@ -52,6 +53,7 @@ export const ChatList = ({ isChatListLoading, chatSessionsPage, selectedChat, on
                                     chatSessionData={chatSession}
                                     onSelectChat={() => onSelectChat(chatSession)}
                                     updateChatSessionReadStatus={updateChatSessionReadStatus}
+                                    onDeleteChat={onDeleteChat}
                                 />
                             ))
                     }

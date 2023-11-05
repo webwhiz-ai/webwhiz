@@ -10,11 +10,12 @@ type ChatListItemProps = {
     isSelected?: boolean;
     chatSessionData: ChatSession;
     onSelectChat: (chatSession: ChatSession) => void;
-    updateChatSessionReadStatus: (chatId: string, isUnread: boolean) =>void
+    updateChatSessionReadStatus: (chatId: string, isUnread: boolean) => void
+    onDeleteChat: (chatId: string) => void
 
 }
 
-export const ChatListItem = ({ chatSessionData, isSelected, onSelectChat, updateChatSessionReadStatus }: ChatListItemProps) => {
+export const ChatListItem = ({ chatSessionData, isSelected, onSelectChat, updateChatSessionReadStatus, onDeleteChat }: ChatListItemProps) => {
 
     const getFormattedTime = React.useCallback((date: string) => {
         return formatDistance(new Date(date), new Date(), { addSuffix: true });
@@ -31,7 +32,7 @@ export const ChatListItem = ({ chatSessionData, isSelected, onSelectChat, update
             bg={isSelected ? 'gray.100' : 'white'}
             borderRight={isSelected ? "2px" : "0"}
             borderRightColor="blue.500"
-            onClick={() =>  !isSelected &&  onSelectChat(chatSessionData)}
+            onClick={() => !isSelected && onSelectChat(chatSessionData)}
         >
             <Menu>
                 <MenuButton
@@ -52,7 +53,7 @@ export const ChatListItem = ({ chatSessionData, isSelected, onSelectChat, update
                     {
                         chatSessionData.isUnread ?
                             <MenuItem
-                            fontSize={14}
+                                fontSize={14}
                                 borderRadius={6}
                                 onClick={(e) => {
                                     e.stopPropagation();
@@ -62,7 +63,7 @@ export const ChatListItem = ({ chatSessionData, isSelected, onSelectChat, update
                         </MenuItem>
                             :
                             <MenuItem
-                            fontSize={14}
+                                fontSize={14}
                                 borderRadius={6}
                                 onClick={(e) => {
                                     e.stopPropagation();
@@ -71,6 +72,15 @@ export const ChatListItem = ({ chatSessionData, isSelected, onSelectChat, update
                                 Mark as unread
                     </MenuItem>
                     }
+                    <MenuItem
+                        fontSize={14}
+                        borderRadius={6}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            onDeleteChat(chatSessionData._id)
+                        }}>
+                        Delete chat
+                    </MenuItem>
                 </MenuList>
             </Menu>
             <Text fontSize="xs" color="gray.500" mb={2}>

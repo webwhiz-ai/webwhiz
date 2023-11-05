@@ -47,7 +47,7 @@ import { ChatBotsCustomize } from "../ChatBotsCustomize/ChatBotsCustomize";
 import { useLocation } from "react-router-dom";
 
 import styles from "./EditChatbot.module.scss";
-import { fetchKnowledgebaseCrawlData, customizeWidget, deleteTrainingData, fetcKnowledgebase, fetchKnowledgebaseDetails, generateEmbeddings, getTrainingData, getTrainingDataDetails, updateWebsiteData, getChatSessions, getOfflineMessages, updatePrompt, updateDefaultAnswer, fetchKnowledgebaseCrawlDataForDocs, addTrainingDoc, updateAdminEmail, getChatSessionDetails, unReadChatSession, readChatSession } from "../../services/knowledgebaseService";
+import { fetchKnowledgebaseCrawlData, customizeWidget, deleteTrainingData, fetcKnowledgebase, fetchKnowledgebaseDetails, generateEmbeddings, getTrainingData, getTrainingDataDetails, updateWebsiteData, getChatSessions, getOfflineMessages, updatePrompt, updateDefaultAnswer, fetchKnowledgebaseCrawlDataForDocs, addTrainingDoc, updateAdminEmail, getChatSessionDetails, unReadChatSession, readChatSession, deleteChatSession } from "../../services/knowledgebaseService";
 import { ChatBot } from "../../components/ChatBot/ChatBot";
 import { chatWidgetDefaultValues } from "../../utils/commonUtils";
 import { AddTrainingData } from "../AddTrainingData/AddTrainingData";
@@ -404,6 +404,22 @@ const EditChatbot = (props: EditChatbotProps) => {
           console.log("Unable to update chatSessions", error);
         }
       }
+
+	const onDeleteChat = async (chatId: string) => {
+		try {
+			await deleteChatSession(chatId);
+			if (chatSessions) {
+				const updatedResults = chatSessions.results.filter(item => item._id !== chatId);
+				if(updatedResults.length === 0) {
+					handlePageClick(0)
+				} else {
+					setChatSessions({ ...chatSessions, results: updatedResults });
+				}
+			}
+		} catch (error) {
+			console.log("Unable to delete chatSessions", error);
+		}
+	}
       
 
     const handleSelectChat = React.useCallback((chatSession: ChatSession) => {
@@ -1003,6 +1019,7 @@ const EditChatbot = (props: EditChatbotProps) => {
 								setSelectedChat={handleSelectChat}
 								isChatLoading={isChatLoading}
 								updateChatSessionReadStatus={updateChatSessionReadStatus}
+								onDeleteChat={onDeleteChat}
 								
 							/>
 						}

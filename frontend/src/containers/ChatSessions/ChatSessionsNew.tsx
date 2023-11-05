@@ -14,6 +14,7 @@ type ChatSessionsProps = {
     chatDetail: ChatSessionDetail;
     updateChatSessionReadStatus: (chatId: string, isUnread: boolean) =>void
     isChatLoading?: boolean
+    onDeleteChat: (chatId: string) => void
 
 
 }
@@ -22,7 +23,7 @@ export const ChatSessionsNew = ({
     isChatListLoading,
     chatSessionsPage,
     onPageChange,
-
+    onDeleteChat,
     selectedChat,
     setSelectedChat,
     chatDetail,
@@ -69,6 +70,7 @@ export const ChatSessionsNew = ({
                 onSelectChat={setSelectedChat}
                 onPageChange={onPageChange}
                 updateChatSessionReadStatus={updateChatSessionReadStatus}
+                onDeleteChat={onDeleteChat}
             />
             <ChatWindow chatData={chatDetail} userData={chatDetail?.userData} messages={chatDetail?.messages} isMessagesLoading={isChatLoading} />
         </Flex>

@@ -254,6 +254,14 @@ export async function readChatSession(sessionId: string) {
 	});
 }
 
+export async function deleteChatSession(sessionId: string) {
+	return await axios({
+		baseURL: baseURL,
+		method: 'delete',
+		url: `/chatbot/session/${sessionId}`,
+	});
+}
+
 export async function unReadChatSession(sessionId: string) {
 	return await axios({
 		baseURL: baseURL,
