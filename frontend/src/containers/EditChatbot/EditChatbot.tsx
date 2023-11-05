@@ -47,14 +47,14 @@ import { ChatBotsCustomize } from "../ChatBotsCustomize/ChatBotsCustomize";
 import { useLocation } from "react-router-dom";
 
 import styles from "./EditChatbot.module.scss";
-import { fetchKnowledgebaseCrawlData, customizeWidget, deleteTrainingData, fetcKnowledgebase, fetchKnowledgebaseDetails, generateEmbeddings, getTrainingData, getTrainingDataDetails, updateWebsiteData, getChatSessions, getOfflineMessages, updatePrompt, updateDefaultAnswer, fetchKnowledgebaseCrawlDataForDocs, addTrainingDoc, updateAdminEmail } from "../../services/knowledgebaseService";
+import { fetchKnowledgebaseCrawlData, customizeWidget, deleteTrainingData, fetcKnowledgebase, fetchKnowledgebaseDetails, generateEmbeddings, getTrainingData, getTrainingDataDetails, updateWebsiteData, getChatSessions, getOfflineMessages, updatePrompt, updateDefaultAnswer, fetchKnowledgebaseCrawlDataForDocs, addTrainingDoc, updateAdminEmail, getChatSessionDetails, unReadChatSession, readChatSession } from "../../services/knowledgebaseService";
 import { ChatBot } from "../../components/ChatBot/ChatBot";
 import { chatWidgetDefaultValues } from "../../utils/commonUtils";
 import { AddTrainingData } from "../AddTrainingData/AddTrainingData";
 import { AddTrainingDataForm } from "../AddTrainingDataForm/AddTrainingDataForm";
 import { SectionTitle } from "../../components/SectionTitle/SectionTitle";
 import { CurrentUser, User } from "../../services/appConfig";
-import { ChatBotCustomizeData, TrainingData, OfflineMessagePagination, ChatSessionPagination, CustomDataPagination, ProductSetupData, DocsKnowledgeData } from "../../types/knowledgebase.type";
+import { ChatBotCustomizeData, TrainingData, OfflineMessagePagination, ChatSessionPagination, CustomDataPagination, ProductSetupData, DocsKnowledgeData, ChatSession, ChatSessionDetail } from "../../types/knowledgebase.type";
 import { OfflineMessagesNew } from "../OfflineMessages/OfflineMessagesNew";
 import { ChatSessionsNew } from "../ChatSessions/ChatSessionsNew";
 import { Paginator } from "../../widgets/Paginator/Paginator";
@@ -330,11 +330,15 @@ const EditChatbot = (props: EditChatbotProps) => {
 	const [chatSessions, setChatSessions] = React.useState<ChatSessionPagination>();
 	const [offlineMessages, setOfflineMessages] = React.useState<OfflineMessagePagination>();
 
+	const [selectedChat, setSelectedChat] = React.useState<ChatSession>();
+    const [chatData, setChatData] = React.useState<ChatSessionDetail>();
+
 	useEffect(() => {
 		async function fetchData() {
 			try {
 				const response = await getChatSessions(props.match.params.chatbotId, '1');
 				setChatSessions(response.data);
+				setSelectedChat(response.data.results.find((chatSession) => chatSession.firstMessage) || response.data.results[0])
 			} catch (error) {
 				console.log("Unable to fetch chatSessions", error);
 			} finally {
@@ -356,12 +360,55 @@ const EditChatbot = (props: EditChatbotProps) => {
 			setIsChatLoading(true);
 			const response = await getChatSessions(props.match.params.chatbotId, (selectedPage + 1).toString());
 			setChatSessions(response.data);
+			setSelectedChat(response.data.results.find((chatSession) => chatSession.firstMessage) || response.data.results[0])
 		} catch (error) {
 			console.log("Unable to fetch chatSessions", error);
 		} finally {
 			setIsChatLoading(false);
 		}
 	}, [props.match.params.chatbotId]);
+
+
+	React.useEffect(() => {
+        let ignore = false;
+        async function fetchData() {
+            if (!selectedChat) return;
+            setIsChatLoading(true);
+            try {
+                const response = await getChatSessionDetails(selectedChat._id);
+                if (selectedChat.isUnread) {
+                    updateChatSessionReadStatus(selectedChat._id, false)
+                }
+                if (!ignore) setChatData(response.data);
+            } catch (error) {
+                console.log("Unable to fetch deals", error);
+            } finally {
+                setIsChatLoading(false);
+            }
+        }
+        fetchData();
+        return () => { ignore = true };
+    }, [selectedChat]);
+
+    const updateChatSessionReadStatus = async (chatId: string, isUnread: boolean) => {
+        try {
+          // Toggle read/unread based on isUnread flag
+          await (isUnread ? unReadChatSession : readChatSession)(chatId);
+          if (chatSessions) {
+            const updatedResults = chatSessions.results.map(item => 
+              item._id === chatId ? { ...item, isUnread } : item
+            );
+            setChatSessions({ ...chatSessions, results: updatedResults });
+          }
+        } catch (error) {
+          console.log("Unable to update chatSessions", error);
+        }
+      }
+      
+
+    const handleSelectChat = React.useCallback((chatSession: ChatSession) => {
+        setSelectedChat(chatSession);
+    }, []);
 
 
 	const handleOfflinePageClick = React.useCallback(async (selectedPage: number) => {
@@ -946,7 +993,19 @@ const EditChatbot = (props: EditChatbotProps) => {
 				>
 					<SectionTitle title="Chat sessions" description="All the chat sessions with your customers." />
 					<Flex w="100%" className={styles.trainingDataCont}>
-						{chatSessions && <ChatSessionsNew isChatListLoading={isChatLoading} onPageChange={handlePageClick} chatSessionsPage={chatSessions} />}
+						{!!chatSessions && !!chatData && !!selectedChat &&
+							<ChatSessionsNew
+								isChatListLoading={isChatLoading}
+								onPageChange={handlePageClick}
+								chatSessionsPage={chatSessions}
+								chatDetail={chatData}
+								selectedChat={selectedChat}
+								setSelectedChat={handleSelectChat}
+								isChatLoading={isChatLoading}
+								updateChatSessionReadStatus={updateChatSessionReadStatus}
+								
+							/>
+						}
 					</Flex>
 				</Flex>
 				<Flex

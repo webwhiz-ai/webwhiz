@@ -166,6 +166,7 @@ export interface UserData {
 }
 
 export interface ChatSession {
+    isUnread: boolean;
     firstMessage: MessageList;
     startedAt: string;
     updatedAt: string;
@@ -195,7 +196,7 @@ export interface ChatSessionDetail {
     updatedAt: string;
     messages: MessageList[];
     userData: UserData;
-    src: null
+    src: null;
 }
 
 export interface OfflineMessage {

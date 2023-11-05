@@ -245,6 +245,23 @@ export async function getChatSessions(id: string, page: string): Promise<AxiosRe
 		url: `/chatbot/${id}/session?page_size=10&page=${page}`,
 	});
 }
+
+export async function readChatSession(sessionId: string) {
+	return await axios({
+		baseURL: baseURL,
+		method: 'post',
+		url: `/chatbot/session/${sessionId}/read`,
+	});
+}
+
+export async function unReadChatSession(sessionId: string) {
+	return await axios({
+		baseURL: baseURL,
+		method: 'post',
+		url: `/chatbot/session/${sessionId}/unread`,
+	});
+}
+
 export async function getOfflineMessages(id: string, page: string): Promise<AxiosResponse<OfflineMessagePagination>> {
 	return await axios({
 		baseURL: baseURL,

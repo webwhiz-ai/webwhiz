@@ -1,49 +1,34 @@
+import { Box, Flex, Heading, VStack } from '@chakra-ui/react'
 import React from 'react'
-import { Flex, Box, VStack, Heading } from '@chakra-ui/react'
 import { ChatList } from '../../components/ChatSessions/ChatList'
 import { ChatWindow } from '../../components/ChatSessions/ChatWindow'
-import { ChatSessionPagination, ChatSession, ChatSessionDetail } from '../../types/knowledgebase.type'
-import { getChatSessionDetails } from '../../services/knowledgebaseService'
 import { NoDataChatSessions } from '../../components/Icons/noData/NoDataChatSessions'
+import { ChatSession, ChatSessionDetail, ChatSessionPagination } from '../../types/knowledgebase.type'
 
 type ChatSessionsProps = {
     isChatListLoading: boolean;
     chatSessionsPage: ChatSessionPagination;
     onPageChange: (page: number) => void;
+    selectedChat: ChatSession;
+    setSelectedChat: (selectedChat: ChatSession) => void
+    chatDetail: ChatSessionDetail;
+    updateChatSessionReadStatus: (chatId: string, isUnread: boolean) =>void
+    isChatLoading?: boolean
+
+
 }
 
-export const ChatSessionsNew = ({ isChatListLoading, chatSessionsPage, onPageChange }: ChatSessionsProps) => {
-    const [selectedChat, setSelectedChat] = React.useState<ChatSession>(chatSessionsPage.results.find((chatSession) => chatSession.firstMessage) || chatSessionsPage.results[0]);
-    const [chatData, setChatData] = React.useState<ChatSessionDetail>();
-    const [isChatLoading, setIsChatLoading] = React.useState<boolean>(false);
+export const ChatSessionsNew = ({
+    isChatListLoading,
+    chatSessionsPage,
+    onPageChange,
 
-    React.useEffect(() => {
-        const firstMessageChat = chatSessionsPage.results.find((chatSession) => chatSession.firstMessage);
-        setSelectedChat(firstMessageChat || chatSessionsPage.results[0]);
-    }, [chatSessionsPage])
-
-    React.useEffect(() => {
-        let ignore = false;
-        async function fetchData() {
-            if (!selectedChat) return;
-            setIsChatLoading(true);
-            try {
-                const response = await getChatSessionDetails(selectedChat._id);
-                if (!ignore) setChatData(response.data);
-            } catch (error) {
-                console.log("Unable to fetch deals", error);
-            } finally {
-                setIsChatLoading(false);
-            }
-        }
-        fetchData();
-        return () => { ignore = true };
-    }, [chatSessionsPage.results.length, selectedChat]);
-
-    const handleSelectChat = React.useCallback((chatSession: ChatSession) => {
-        setSelectedChat(chatSession);
-    }, []);
-
+    selectedChat,
+    setSelectedChat,
+    chatDetail,
+    updateChatSessionReadStatus,
+    isChatLoading
+}: ChatSessionsProps) => {
     if (!chatSessionsPage.results.length) {
         return (
             <VStack
@@ -81,10 +66,11 @@ export const ChatSessionsNew = ({ isChatListLoading, chatSessionsPage, onPageCha
                 isChatListLoading={isChatListLoading}
                 chatSessionsPage={chatSessionsPage}
                 selectedChat={selectedChat}
-                onSelectChat={handleSelectChat}
+                onSelectChat={setSelectedChat}
                 onPageChange={onPageChange}
+                updateChatSessionReadStatus={updateChatSessionReadStatus}
             />
-            <ChatWindow chatData={chatData} userData={chatData?.userData} messages={chatData?.messages} isMessagesLoading={isChatLoading} />
+            <ChatWindow chatData={chatDetail} userData={chatDetail?.userData} messages={chatDetail?.messages} isMessagesLoading={isChatLoading} />
         </Flex>
     )
 }

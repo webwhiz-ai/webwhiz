@@ -23,7 +23,7 @@ export const ChatWindow = ({
         if (!userData || !chatData) return null;
         return (
             <Box>
-                <VStack className={styles.meta} alignItems={"start"} spacing="3" pb="4" mb="4" borderBottom="1px solid" borderColor="gray.100">
+                <VStack alignItems={"start"} className={styles.meta}  spacing="3" pb="4" mb="4" borderBottom="1px solid" borderColor="gray.100">
                     <HStack className={styles.metaItemGroup} fontSize="sm" color="gray.500">
                         <Flex className={styles.metaItem}>
                             <svg
