@@ -1,7 +1,16 @@
-import { Body, Controller, Put, Req } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  HttpCode,
+  Param,
+  Post,
+  Put,
+  Req,
+} from '@nestjs/common';
 import { WebhookService } from './webhook.service';
 import { RequestWithUser } from '../common/@types/nest.types';
-import { RegisterWebhookDTO } from './webhook.dto';
+import { RegisterWebhookDTO, WebhookDTO } from './webhook.dto';
 
 @Controller('webhook')
 export class WebhookController {
@@ -18,5 +27,22 @@ export class WebhookController {
       data.url,
       data.signingSecret,
     );
+  }
+
+  @Post('/')
+  @HttpCode(201)
+  async registerNewWebhook(
+    @Req() req: RequestWithUser,
+    @Body() data: WebhookDTO,
+  ) {
+    const { user } = req;
+    return this.webhookService.registerNewWebhook(user._id, data);
+  }
+
+  @Delete('/:id')
+  @HttpCode(204)
+  async deleteWebhook(@Req() req: RequestWithUser, @Param('id') id: string) {
+    const { user } = req;
+    return this.webhookService.deleteWebhookForUser(user._id, id);
   }
 }
