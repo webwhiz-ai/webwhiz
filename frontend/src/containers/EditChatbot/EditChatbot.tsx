@@ -86,8 +86,6 @@ const EditChatbot = (props: EditChatbotProps) => {
 	let history = useHistory();
 	let { search } = useLocation();
 
-	const { showConfirmation } = useConfirmation()
-
 	const [user, setUser] = React.useState<User>(CurrentUser.get());
 	React.useEffect(() => {
 		async function fetchData() {
@@ -330,22 +328,11 @@ const EditChatbot = (props: EditChatbotProps) => {
 		fetchData();
 	}, [props.match.params.chatbotId, startEmbeding]);
 
-	const [chatSessions, setChatSessions] = React.useState<ChatSessionPagination>();
 	const [offlineMessages, setOfflineMessages] = React.useState<OfflineMessagePagination>();
 
-	const [selectedChat, setSelectedChat] = React.useState<ChatSession>();
-    const [chatData, setChatData] = React.useState<ChatSessionDetail>();
 
 	useEffect(() => {
 		async function fetchData() {
-			try {
-				const response = await getChatSessions(props.match.params.chatbotId, '1');
-				setChatSessions(response.data);
-				setSelectedChat(response.data.results.find((chatSession) => chatSession.firstMessage) || response.data.results[0])
-			} catch (error) {
-				console.log("Unable to fetch chatSessions", error);
-			} finally {
-			}
 			try {
 				const response = await getOfflineMessages(props.match.params.chatbotId, '1');
 				setOfflineMessages(response.data);
@@ -356,79 +343,6 @@ const EditChatbot = (props: EditChatbotProps) => {
 		}
 		fetchData();
 	}, [props.match.params.chatbotId]);
-
-
-	const handlePageClick = React.useCallback(async (selectedPage: number) => {
-		try {
-			setIsChatLoading(true);
-			const response = await getChatSessions(props.match.params.chatbotId, (selectedPage + 1).toString());
-			setChatSessions(response.data);
-			setSelectedChat(response.data.results.find((chatSession) => chatSession.firstMessage) || response.data.results[0])
-		} catch (error) {
-			console.log("Unable to fetch chatSessions", error);
-		} finally {
-			setIsChatLoading(false);
-		}
-	}, [props.match.params.chatbotId]);
-
-
-	React.useEffect(() => {
-        let ignore = false;
-        async function fetchData() {
-            if (!selectedChat) return;
-            setIsChatLoading(true);
-            try {
-                const response = await getChatSessionDetails(selectedChat._id);
-                if (selectedChat.isUnread) {
-                    updateChatSessionReadStatus(selectedChat._id, false)
-                }
-                if (!ignore) setChatData(response.data);
-            } catch (error) {
-                console.log("Unable to fetch deals", error);
-            } finally {
-                setIsChatLoading(false);
-            }
-        }
-        fetchData();
-        return () => { ignore = true };
-    }, [selectedChat]);
-
-    const updateChatSessionReadStatus = async (chatId: string, isUnread: boolean) => {
-        try {
-          // Toggle read/unread based on isUnread flag
-          await (isUnread ? unReadChatSession : readChatSession)(chatId);
-          if (chatSessions) {
-            const updatedResults = chatSessions.results.map(item => 
-              item._id === chatId ? { ...item, isUnread } : item
-            );
-            setChatSessions({ ...chatSessions, results: updatedResults });
-          }
-        } catch (error) {
-          console.log("Unable to update chatSessions", error);
-        }
-      }
-
-	const onDeleteChat = async (chatId: string) => {
-		try {
-			await deleteChatSession(chatId);
-			if (chatSessions) {
-				const updatedResults = chatSessions.results.filter(item => item._id !== chatId);
-				if(updatedResults.length === 0) {
-					handlePageClick(0)
-				} else {
-					setChatSessions({ ...chatSessions, results: updatedResults });
-				}
-			}
-		} catch (error) {
-			console.log("Unable to delete chatSessions", error);
-		}
-	}
-      
-
-    const handleSelectChat = React.useCallback((chatSession: ChatSession) => {
-        setSelectedChat(chatSession);
-    }, []);
-
 
 	const handleOfflinePageClick = React.useCallback(async (selectedPage: number) => {
 		try {
@@ -1012,31 +926,7 @@ const EditChatbot = (props: EditChatbotProps) => {
 				>
 					<SectionTitle title="Chat sessions" description="All the chat sessions with your customers." />
 					<Flex w="100%" className={styles.trainingDataCont}>
-						{!!chatSessions && !!chatData && !!selectedChat &&
-							<ChatSessionsNew
-								isChatListLoading={isChatLoading}
-								onPageChange={handlePageClick}
-								chatSessionsPage={chatSessions}
-								chatDetail={chatData}
-								selectedChat={selectedChat}
-								setSelectedChat={handleSelectChat}
-								isChatLoading={isChatLoading}
-								updateChatSessionReadStatus={updateChatSessionReadStatus}
-								onDeleteChat={(chatId) => {
-									showConfirmation(true, {
-										title: 'Delete Chat',
-										content: 'Are you sure you want to delete this chat?',
-										confirmButtonText: 'Delete',
-										onClose: () => showConfirmation(false),
-										onConfirm: () => {
-											onDeleteChat(chatId);
-											showConfirmation(false)
-										},
-									})
-								}}
-
-							/>
-						}
+						<ChatSessionsNew chatbotId={props.match.params.chatbotId} />
 					</Flex>
 				</Flex>
 				<Flex
@@ -1077,7 +967,8 @@ const EditChatbot = (props: EditChatbotProps) => {
 					<SectionTitle title="Try out chatbot" description="Chat with your chatbot and see how it responds. If you don't get the desired response, follow the instructions below." />
 					<HStack w="100%">
 						<Box w="50%">
-							<ChatBot knowledgeBaseId={chatBot._id} customStyle={chatBot.chatWidgeData} defaultMessageNumber={((chatSessions?.results) || []).length} />
+						
+							<ChatBot knowledgeBaseId={chatBot._id} customStyle={chatBot.chatWidgeData} defaultMessageNumber={0} />
 
 						</Box>
 						<Box w="50%" pos="relative" h="100%">
@@ -1125,7 +1016,7 @@ const EditChatbot = (props: EditChatbotProps) => {
 				</Flex>
 			</>
 		);
-	}, [chatBot._id, chatBot.websiteData?.websiteUrl, chatBot.customDomain, chatBot.chatWidgeData, currentStep, getCrawlDataPagination, getDocsDataPagination, getExcludedPaths, getIncludedPaths, handleTabChange, defaultCrauledData, isSubmitting, isUploadingDocs, docsDataLoading, docsData, crawlDataLoading, productSetupLoadingText, primaryButtonLabel, getDefaultCustomizationValues, getAddToWebsiteContent, props.match.params.chatbotId, handleTrainingDataSave, getCustomDataComponent, chatSessions, isChatLoading, handlePageClick, offlineMessages, handleOfflinePageClick, history, handleChatbotUpdate, toast, goToStep]);
+	}, [chatBot._id, chatBot.websiteData?.websiteUrl, chatBot.customDomain, chatBot.chatWidgeData, currentStep, getCrawlDataPagination, getDocsDataPagination, getExcludedPaths, getIncludedPaths, handleTabChange, defaultCrauledData, isSubmitting, isUploadingDocs, docsDataLoading, docsData, crawlDataLoading, productSetupLoadingText, primaryButtonLabel, getDefaultCustomizationValues, getAddToWebsiteContent, props.match.params.chatbotId, handleTrainingDataSave, getCustomDataComponent, isChatLoading, offlineMessages, handleOfflinePageClick, history, handleChatbotUpdate, toast, goToStep]);
 
 	const getEmbedErrorComponent = React.useCallback(() => {
 		if(!isEmbedError) return null;

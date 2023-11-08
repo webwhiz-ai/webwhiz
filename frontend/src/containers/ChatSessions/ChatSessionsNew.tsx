@@ -1,36 +1,113 @@
 import { Box, Flex, Heading, VStack } from '@chakra-ui/react'
-import React from 'react'
+import React, { useEffect } from 'react'
 import { ChatList } from '../../components/ChatSessions/ChatList'
 import { ChatWindow } from '../../components/ChatSessions/ChatWindow'
 import { NoDataChatSessions } from '../../components/Icons/noData/NoDataChatSessions'
+import { useConfirmation } from '../../providers/providers'
+import { deleteChatSession, getChatSessionDetails, getChatSessions, readChatSession, unReadChatSession } from '../../services/knowledgebaseService'
 import { ChatSession, ChatSessionDetail, ChatSessionPagination } from '../../types/knowledgebase.type'
 
-type ChatSessionsProps = {
-    isChatListLoading: boolean;
-    chatSessionsPage: ChatSessionPagination;
-    onPageChange: (page: number) => void;
-    selectedChat: ChatSession;
-    setSelectedChat: (selectedChat: ChatSession) => void
-    chatDetail: ChatSessionDetail;
-    updateChatSessionReadStatus: (chatId: string, isUnread: boolean) =>void
-    isChatLoading?: boolean
-    onDeleteChat: (chatId: string) => void
 
-
+export type ChatSessionsProps = {
+    chatbotId: string
 }
 
-export const ChatSessionsNew = ({
-    isChatListLoading,
-    chatSessionsPage,
-    onPageChange,
-    onDeleteChat,
-    selectedChat,
-    setSelectedChat,
-    chatDetail,
-    updateChatSessionReadStatus,
-    isChatLoading
-}: ChatSessionsProps) => {
-    if (!chatSessionsPage.results.length) {
+export const ChatSessionsNew = ({chatbotId}: ChatSessionsProps) => {
+    const [chatSessions, setChatSessions] = React.useState<ChatSessionPagination>();
+    const [isChatLoading, setIsChatLoading] = React.useState<boolean>(false);
+    const { showConfirmation } = useConfirmation()
+    const [selectedChat, setSelectedChat] = React.useState<ChatSession>();
+    const [chatData, setChatData] = React.useState<ChatSessionDetail>();
+
+    useEffect(() => {
+        async function fetchData() {
+            try {
+                const response = await getChatSessions(chatbotId, '1');
+                setChatSessions(response.data);
+                setSelectedChat(response.data.results.find((chatSession) => chatSession.firstMessage) || response.data.results[0])
+            } catch (error) {
+                console.log("Unable to fetch chatSessions", error);
+            } finally {
+            }
+
+        }
+        fetchData();
+    }, [chatbotId]);
+
+
+    const handlePageClick = React.useCallback(async (selectedPage: number) => {
+        try {
+            setIsChatLoading(true);
+            const response = await getChatSessions(chatbotId, (selectedPage + 1).toString());
+            setChatSessions(response.data);
+            setSelectedChat(response.data.results.find((chatSession) => chatSession.firstMessage) || response.data.results[0])
+        } catch (error) {
+            console.log("Unable to fetch chatSessions", error);
+        } finally {
+            setIsChatLoading(false);
+        }
+    }, [chatbotId]);
+
+
+    React.useEffect(() => {
+        let ignore = false;
+        async function fetchData() {
+            if (!selectedChat) return;
+            setIsChatLoading(true);
+            try {
+                const response = await getChatSessionDetails(selectedChat._id);
+                if (selectedChat.isUnread) {
+                    updateChatSessionReadStatus(selectedChat._id, false)
+                }
+                if (!ignore) setChatData(response.data);
+            } catch (error) {
+                console.log("Unable to fetch deals", error);
+            } finally {
+                setIsChatLoading(false);
+            }
+        }
+        fetchData();
+        return () => { ignore = true };
+    }, [selectedChat]);
+
+    const updateChatSessionReadStatus = async (chatId: string, isUnread: boolean) => {
+        try {
+            // Toggle read/unread based on isUnread flag
+            await (isUnread ? unReadChatSession : readChatSession)(chatId);
+            if (chatSessions) {
+                const updatedResults = chatSessions.results.map(item =>
+                    item._id === chatId ? { ...item, isUnread } : item
+                );
+                setChatSessions({ ...chatSessions, results: updatedResults });
+            }
+        } catch (error) {
+            console.log("Unable to update chatSessions", error);
+        }
+    }
+
+    const onDeleteChat = async (chatId: string) => {
+        try {
+            await deleteChatSession(chatId);
+            if (chatSessions) {
+                const updatedResults = chatSessions.results.filter(item => item._id !== chatId);
+                if (updatedResults.length === 0) {
+                    handlePageClick(0)
+                } else {
+                    setChatSessions({ ...chatSessions, results: updatedResults });
+                }
+            }
+        } catch (error) {
+            console.log("Unable to delete chatSessions", error);
+        }
+    }
+
+
+    const handleSelectChat = React.useCallback((chatSession: ChatSession) => {
+        setSelectedChat(chatSession);
+    }, []);
+
+
+    if (!chatSessions?.results.length) {
         return (
             <VStack
                 alignItems="center"
@@ -61,18 +138,33 @@ export const ChatSessionsNew = ({
         )
     }
 
+    if (!chatSessions || !selectedChat) {
+        return null
+    }
     return (
         <Flex w="100%">
             <ChatList
-                isChatListLoading={isChatListLoading}
-                chatSessionsPage={chatSessionsPage}
+                isChatListLoading={isChatLoading}
+                chatSessionsPage={chatSessions}
                 selectedChat={selectedChat}
-                onSelectChat={setSelectedChat}
-                onPageChange={onPageChange}
+                onSelectChat={handleSelectChat}
+                onPageChange={handlePageClick}
                 updateChatSessionReadStatus={updateChatSessionReadStatus}
-                onDeleteChat={onDeleteChat}
+                onDeleteChat={(chatId) => {
+                    showConfirmation(true, {
+                        title: 'Delete Chat',
+                        content: 'Are you sure you want to delete this chat?',
+                        confirmButtonText: 'Delete',
+                        onClose: () => showConfirmation(false),
+                        onConfirm: () => {
+                            onDeleteChat(chatId);
+                            showConfirmation(false)
+                        },
+                    })
+                }}
+
             />
-            <ChatWindow chatData={chatDetail} userData={chatDetail?.userData} messages={chatDetail?.messages} isMessagesLoading={isChatLoading} />
+            <ChatWindow chatData={chatData} userData={chatData?.userData} messages={chatData?.messages} isMessagesLoading={isChatLoading} />
         </Flex>
     )
 }
