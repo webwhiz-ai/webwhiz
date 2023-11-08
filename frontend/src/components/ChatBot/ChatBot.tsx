@@ -119,7 +119,8 @@ export const ChatBot = ({
 	}, [knowledgeBaseId, messages, numberOfMessagesLeft, question, sessionId])
 
 	const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-		if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
+		if (e.key === "Enter" || e.keyCode  === 13) {
+			e.preventDefault();
 			handleSubmit(e);
 		}
 	}
