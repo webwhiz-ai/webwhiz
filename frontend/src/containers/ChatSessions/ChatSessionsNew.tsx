@@ -1,5 +1,5 @@
 import { Box, Flex, Heading, VStack } from '@chakra-ui/react'
-import React, { useEffect } from 'react'
+import React, { useCallback, useEffect } from 'react'
 import { ChatList } from '../../components/ChatSessions/ChatList'
 import { ChatWindow } from '../../components/ChatSessions/ChatWindow'
 import { NoDataChatSessions } from '../../components/Icons/noData/NoDataChatSessions'
@@ -48,29 +48,7 @@ export const ChatSessionsNew = ({chatbotId}: ChatSessionsProps) => {
         }
     }, [chatbotId]);
 
-
-    React.useEffect(() => {
-        let ignore = false;
-        async function fetchData() {
-            if (!selectedChat) return;
-            setIsChatLoading(true);
-            try {
-                const response = await getChatSessionDetails(selectedChat._id);
-                if (selectedChat.isUnread) {
-                    updateChatSessionReadStatus(selectedChat._id, false)
-                }
-                if (!ignore) setChatData(response.data);
-            } catch (error) {
-                console.log("Unable to fetch deals", error);
-            } finally {
-                setIsChatLoading(false);
-            }
-        }
-        fetchData();
-        return () => { ignore = true };
-    }, [selectedChat]);
-
-    const updateChatSessionReadStatus = async (chatId: string, isUnread: boolean) => {
+    const updateChatSessionReadStatus = useCallback(async (chatId: string, isUnread: boolean, chatSessions) => {
         try {
             // Toggle read/unread based on isUnread flag
             await (isUnread ? unReadChatSession : readChatSession)(chatId);
@@ -83,7 +61,29 @@ export const ChatSessionsNew = ({chatbotId}: ChatSessionsProps) => {
         } catch (error) {
             console.log("Unable to update chatSessions", error);
         }
-    }
+    }, []) 
+
+
+    React.useEffect(() => {
+        let ignore = false;
+        async function fetchData() {
+            if (!selectedChat) return;
+            setIsChatLoading(true);
+            try {
+                const response = await getChatSessionDetails(selectedChat._id);
+                if (selectedChat.isUnread) {
+                    //updateChatSessionReadStatus(selectedChat._id, false, chatSessions)
+                }
+                if (!ignore) setChatData(response.data);
+            } catch (error) {
+                console.log("Unable to fetch deals", error);
+            } finally {
+                setIsChatLoading(false);
+            }
+        }
+        fetchData();
+        return () => { ignore = true };
+    }, [chatSessions, selectedChat, updateChatSessionReadStatus]);
 
     const onDeleteChat = async (chatId: string) => {
         try {

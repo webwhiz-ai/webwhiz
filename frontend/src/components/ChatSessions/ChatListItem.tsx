@@ -34,7 +34,7 @@ export const ChatListItem = ({ chatSessionData, isSelected, onSelectChat, update
             borderRightColor="blue.500"
             onClick={() => !isSelected && onSelectChat(chatSessionData)}
         >
-            <Menu>
+            {/* <Menu>
                 <MenuButton
                     as={IconButton}
                     aria-label='Options'
@@ -82,7 +82,7 @@ export const ChatListItem = ({ chatSessionData, isSelected, onSelectChat, update
                         Delete chat
                     </MenuItem>
                 </MenuList>
-            </Menu>
+            </Menu> */}
             <Text fontSize="xs" color="gray.500" mb={2}>
                 {getFormattedTime(chatSessionData.updatedAt)}
             </Text>
@@ -90,9 +90,9 @@ export const ChatListItem = ({ chatSessionData, isSelected, onSelectChat, update
                 {chatSessionData.firstMessage.q}
             </Text>
 
-            {chatSessionData.isUnread && <CircleIcon boxSize={3} color='blue.500' position="absolute"
+            {/* {chatSessionData.isUnread && <CircleIcon boxSize={3} color='blue.500' position="absolute"
                 right="4px"
-                bottom="2px" />}
+                bottom="2px" />} */}
         </Flex >
     )
 }
