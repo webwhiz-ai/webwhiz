@@ -119,11 +119,14 @@ export const ChatBot = ({
 	}, [knowledgeBaseId, messages, numberOfMessagesLeft, question, sessionId])
 
 	const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-		if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
-			handleSubmit(e);
+		if (e.key === "Enter" || e.keyCode  === 13) {
+			e.preventDefault();
+			const target = e.target as HTMLTextAreaElement;
+			if(target.value) {
+				handleSubmit(e);
+			}
 		}
 	}
-
 	return (
 		<div className="chat-wrap widget-open" id="chat-wrap">
 
