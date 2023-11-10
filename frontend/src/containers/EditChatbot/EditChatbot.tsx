@@ -47,18 +47,19 @@ import { ChatBotsCustomize } from "../ChatBotsCustomize/ChatBotsCustomize";
 import { useLocation } from "react-router-dom";
 
 import styles from "./EditChatbot.module.scss";
-import { fetchKnowledgebaseCrawlData, customizeWidget, deleteTrainingData, fetcKnowledgebase, fetchKnowledgebaseDetails, generateEmbeddings, getTrainingData, getTrainingDataDetails, updateWebsiteData, getChatSessions, getOfflineMessages, updatePrompt, updateDefaultAnswer, fetchKnowledgebaseCrawlDataForDocs, addTrainingDoc, updateAdminEmail } from "../../services/knowledgebaseService";
+import { fetchKnowledgebaseCrawlData, customizeWidget, deleteTrainingData, fetcKnowledgebase, fetchKnowledgebaseDetails, generateEmbeddings, getTrainingData, getTrainingDataDetails, updateWebsiteData, getChatSessions, getOfflineMessages, updatePrompt, updateDefaultAnswer, fetchKnowledgebaseCrawlDataForDocs, addTrainingDoc, updateAdminEmail, getChatSessionDetails, unReadChatSession, readChatSession, deleteChatSession } from "../../services/knowledgebaseService";
 import { ChatBot } from "../../components/ChatBot/ChatBot";
 import { chatWidgetDefaultValues } from "../../utils/commonUtils";
 import { AddTrainingData } from "../AddTrainingData/AddTrainingData";
 import { AddTrainingDataForm } from "../AddTrainingDataForm/AddTrainingDataForm";
 import { SectionTitle } from "../../components/SectionTitle/SectionTitle";
 import { CurrentUser, User } from "../../services/appConfig";
-import { ChatBotCustomizeData, TrainingData, OfflineMessagePagination, ChatSessionPagination, CustomDataPagination, ProductSetupData, DocsKnowledgeData } from "../../types/knowledgebase.type";
+import { ChatBotCustomizeData, TrainingData, OfflineMessagePagination, ChatSessionPagination, CustomDataPagination, ProductSetupData, DocsKnowledgeData, ChatSession, ChatSessionDetail } from "../../types/knowledgebase.type";
 import { OfflineMessagesNew } from "../OfflineMessages/OfflineMessagesNew";
 import { ChatSessionsNew } from "../ChatSessions/ChatSessionsNew";
 import { Paginator } from "../../widgets/Paginator/Paginator";
 import { CustomDomain } from "../CustomDomain/CustomDomain";
+import { useConfirmation } from "../../providers/providers";
 export function validateEmailAddress(email: string) {
 	return email && !/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(email);
 }
@@ -327,18 +328,11 @@ const EditChatbot = (props: EditChatbotProps) => {
 		fetchData();
 	}, [props.match.params.chatbotId, startEmbeding]);
 
-	const [chatSessions, setChatSessions] = React.useState<ChatSessionPagination>();
 	const [offlineMessages, setOfflineMessages] = React.useState<OfflineMessagePagination>();
+
 
 	useEffect(() => {
 		async function fetchData() {
-			try {
-				const response = await getChatSessions(props.match.params.chatbotId, '1');
-				setChatSessions(response.data);
-			} catch (error) {
-				console.log("Unable to fetch chatSessions", error);
-			} finally {
-			}
 			try {
 				const response = await getOfflineMessages(props.match.params.chatbotId, '1');
 				setOfflineMessages(response.data);
@@ -349,20 +343,6 @@ const EditChatbot = (props: EditChatbotProps) => {
 		}
 		fetchData();
 	}, [props.match.params.chatbotId]);
-
-
-	const handlePageClick = React.useCallback(async (selectedPage: number) => {
-		try {
-			setIsChatLoading(true);
-			const response = await getChatSessions(props.match.params.chatbotId, (selectedPage + 1).toString());
-			setChatSessions(response.data);
-		} catch (error) {
-			console.log("Unable to fetch chatSessions", error);
-		} finally {
-			setIsChatLoading(false);
-		}
-	}, [props.match.params.chatbotId]);
-
 
 	const handleOfflinePageClick = React.useCallback(async (selectedPage: number) => {
 		try {
@@ -946,7 +926,7 @@ const EditChatbot = (props: EditChatbotProps) => {
 				>
 					<SectionTitle title="Chat sessions" description="All the chat sessions with your customers." />
 					<Flex w="100%" className={styles.trainingDataCont}>
-						{chatSessions && <ChatSessionsNew isChatListLoading={isChatLoading} onPageChange={handlePageClick} chatSessionsPage={chatSessions} />}
+						<ChatSessionsNew chatbotId={props.match.params.chatbotId} />
 					</Flex>
 				</Flex>
 				<Flex
@@ -987,7 +967,8 @@ const EditChatbot = (props: EditChatbotProps) => {
 					<SectionTitle title="Try out chatbot" description="Chat with your chatbot and see how it responds. If you don't get the desired response, follow the instructions below." />
 					<HStack w="100%">
 						<Box w="50%">
-							<ChatBot knowledgeBaseId={chatBot._id} customStyle={chatBot.chatWidgeData} defaultMessageNumber={((chatSessions?.results) || []).length} />
+						
+							<ChatBot knowledgeBaseId={chatBot._id} customStyle={chatBot.chatWidgeData} defaultMessageNumber={0} />
 
 						</Box>
 						<Box w="50%" pos="relative" h="100%">
@@ -1035,7 +1016,7 @@ const EditChatbot = (props: EditChatbotProps) => {
 				</Flex>
 			</>
 		);
-	}, [chatBot._id, chatBot.websiteData?.websiteUrl, chatBot.customDomain, chatBot.chatWidgeData, currentStep, getCrawlDataPagination, getDocsDataPagination, getExcludedPaths, getIncludedPaths, handleTabChange, defaultCrauledData, isSubmitting, isUploadingDocs, docsDataLoading, docsData, crawlDataLoading, productSetupLoadingText, primaryButtonLabel, getDefaultCustomizationValues, getAddToWebsiteContent, props.match.params.chatbotId, handleTrainingDataSave, getCustomDataComponent, chatSessions, isChatLoading, handlePageClick, offlineMessages, handleOfflinePageClick, history, handleChatbotUpdate, toast, goToStep]);
+	}, [chatBot._id, chatBot.websiteData?.websiteUrl, chatBot.customDomain, chatBot.chatWidgeData, currentStep, getCrawlDataPagination, getDocsDataPagination, getExcludedPaths, getIncludedPaths, handleTabChange, defaultCrauledData, isSubmitting, isUploadingDocs, docsDataLoading, docsData, crawlDataLoading, productSetupLoadingText, primaryButtonLabel, getDefaultCustomizationValues, getAddToWebsiteContent, props.match.params.chatbotId, handleTrainingDataSave, getCustomDataComponent, isChatLoading, offlineMessages, handleOfflinePageClick, history, handleChatbotUpdate, toast, goToStep]);
 
 	const getEmbedErrorComponent = React.useCallback(() => {
 		if(!isEmbedError) return null;
