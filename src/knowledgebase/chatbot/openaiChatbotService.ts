@@ -322,6 +322,7 @@ export class OpenaiChatbotService {
     defaultAnswer: string | undefined,
     prompt: string | undefined,
     customKeys: CustomKeyData,
+    model: string | undefined,
     debug = false,
   ) {
     const messages = this.getChatGptPrompt(
@@ -344,7 +345,7 @@ export class OpenaiChatbotService {
         frequency_penalty: 0,
         presence_penalty: 0,
         top_p: 1,
-        model: 'gpt-3.5-turbo',
+        model: model || 'gpt-3.5-turbo-1106',
       },
       this.getCustomKeys(customKeys),
     );
@@ -363,6 +364,7 @@ export class OpenaiChatbotService {
     ) => Promise<void>,
     defaultAnswer: string | undefined,
     prompt: string | undefined,
+    model: string | undefined,
     customKeys?: CustomKeyData,
   ) {
     const messages = this.getChatGptPrompt(
@@ -382,7 +384,7 @@ export class OpenaiChatbotService {
         presence_penalty: 0,
         stream: true,
         top_p: 1,
-        model: 'gpt-3.5-turbo',
+        model: model || 'gpt-3.5-turbo-1106',
       },
       answerCompleteCb,
       this.getCustomKeys(customKeys),

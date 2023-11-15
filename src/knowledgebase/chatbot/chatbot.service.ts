@@ -281,6 +281,7 @@ export class ChatbotService {
       sessionData.defaultAnswer,
       sessionData.prompt,
       sessionData.customKeys,
+      sessionData.model,
       debug,
     );
 
@@ -399,6 +400,7 @@ export class ChatbotService {
       },
       sessionData.defaultAnswer,
       sessionData.prompt,
+      sessionData.model,
       sessionData.customKeys,
     );
 
@@ -480,6 +482,7 @@ export class ChatbotService {
       knowledgebaseId: kbId,
       kbName: `${kb.name} assistant`,
       defaultAnswer: kb.defaultAnswer,
+      model: kb.model,
       prompt,
       isDemo: kb.isDemo,
       subscriptionData: subscriptionPlan,
