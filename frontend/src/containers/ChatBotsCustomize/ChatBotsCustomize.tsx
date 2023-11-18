@@ -24,6 +24,7 @@ import {
 	AccordionIcon,
 	AccordionPanel,
 	AccordionButton,
+	Select,
 } from "@chakra-ui/react";
 
 import { ErrorMessage, Field, FieldArray, Form, Formik } from "formik";
@@ -609,6 +610,26 @@ export const ChatBotsCustomize = ({
 																)}
 															</Field>
 														)}
+
+														<Field type="text" name="model">
+															{({ field, form }: any) => (
+																<FormControl
+																	mb="6"
+																	isInvalid={
+																		form.errors.model && form.touched.model
+																	}
+																>
+																	<FormLabel fontSize="sm" htmlFor="model" color="gray.700" fontWeight="400" >
+																		Model
+																	</FormLabel>
+																	<Select {...field}>
+																		<option value="gpt-3.5-turbo-1106">GPT-3.5-turbo</option>
+																		<option value="gpt-4-0613">GPT-4</option>
+																	</Select>
+																	<FormHelperText fontSize="sm">Token consumption will be 30 times higher for GPT-4 compared to GPT-3.5.</FormHelperText>
+																</FormControl>
+															)}
+														</Field>
 													</TabPanel>
 													<TabPanel  pt="8">
 														<Field type="text" name="offlineMessage">

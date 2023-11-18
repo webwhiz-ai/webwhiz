@@ -106,6 +106,7 @@ export interface ChatBotCustomizeData {
     formSubmitErrorMsg: string;
     formSendAgainBtnLabel: string;
     formTryAgainBtnLabel: string;
+    model: string;
 }
 export interface CrawlDataListPagination {
     pages: number;
