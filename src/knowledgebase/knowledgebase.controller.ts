@@ -22,6 +22,7 @@ import {
   SetAdminEmailDTO,
   SetCustomDomainDTO,
   SetKnowledgebaseDefaultAnswerDTO,
+  SetModelNameDTO,
   SetPromptDTO,
   UpdateKnowledgebaseWebsiteDataDTO,
 } from './knowledgebase.dto';
@@ -115,6 +116,19 @@ export class KnowledgebaseController {
   ) {
     const { user } = req;
     return this.kbService.setKnowledgebaseAdminEmail(user, id, data.email);
+  }
+
+  /**
+   * Set OpenAI model to use
+   */
+  @Put('/:id/model')
+  async setModelName(
+    @Req() req: RequestWithUser,
+    @Param('id') id: string,
+    @Body() data: SetModelNameDTO,
+  ) {
+    const { user } = req;
+    return this.kbService.setModelName(user, id, data.model);
   }
 
   /**

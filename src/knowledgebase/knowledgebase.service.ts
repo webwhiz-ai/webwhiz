@@ -520,4 +520,23 @@ export class KnowledgebaseService {
 
     return 'Done';
   }
+
+  /**
+   * Set Model for KB
+   * @param user
+   * @param id
+   * @param model
+   * @returns
+   */
+  async setModelName(user: UserSparse, id: string, model: string) {
+    const kbId = new ObjectId(id);
+    const kb = await this.kbDbService.getKnowledgebaseSparseById(kbId);
+    checkUserIsOwnerOfKb(user, kb);
+
+    await this.kbDbService.updateKnowledgebase(kbId, {
+      model,
+    });
+
+    return 'Done';
+  }
 }
