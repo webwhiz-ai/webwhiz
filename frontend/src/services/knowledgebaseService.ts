@@ -129,6 +129,17 @@ export async function updateAdminEmail(id:string, adminEmail: string): Promise<A
 	});
 }
 
+export async function updateModelName(id: string, modelName: string): Promise<AxiosResponse<Knowledgebase[]>> {
+	return await axios({
+		baseURL: baseURL,
+		method: 'put',
+		data: {
+			modelName: modelName
+		},
+		url: `knowledgebase/${id}/model`,
+	});
+}
+
 export async function updateWebsiteData(id:string, data: WebsiteData): Promise<AxiosResponse<Knowledgebase[]>> {
 	return await axios({
 		baseURL: baseURL,

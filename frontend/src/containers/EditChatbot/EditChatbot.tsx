@@ -47,7 +47,7 @@ import { ChatBotsCustomize } from "../ChatBotsCustomize/ChatBotsCustomize";
 import { useLocation } from "react-router-dom";
 
 import styles from "./EditChatbot.module.scss";
-import { fetchKnowledgebaseCrawlData, customizeWidget, deleteTrainingData, fetcKnowledgebase, fetchKnowledgebaseDetails, generateEmbeddings, getTrainingData, getTrainingDataDetails, updateWebsiteData, getChatSessions, getOfflineMessages, updatePrompt, updateDefaultAnswer, fetchKnowledgebaseCrawlDataForDocs, addTrainingDoc, updateAdminEmail, getChatSessionDetails, unReadChatSession, readChatSession, deleteChatSession } from "../../services/knowledgebaseService";
+import { fetchKnowledgebaseCrawlData, customizeWidget, deleteTrainingData, fetcKnowledgebase, fetchKnowledgebaseDetails, generateEmbeddings, getTrainingData, getTrainingDataDetails, updateWebsiteData, getChatSessions, getOfflineMessages, updatePrompt, updateDefaultAnswer, fetchKnowledgebaseCrawlDataForDocs, addTrainingDoc, updateAdminEmail, getChatSessionDetails, unReadChatSession, readChatSession, deleteChatSession, updateModelName } from "../../services/knowledgebaseService";
 import { ChatBot } from "../../components/ChatBot/ChatBot";
 import { chatWidgetDefaultValues } from "../../utils/commonUtils";
 import { AddTrainingData } from "../AddTrainingData/AddTrainingData";
@@ -791,6 +791,7 @@ const EditChatbot = (props: EditChatbotProps) => {
 			formSubmitErrorMsg: chatBot.chatWidgeData?.formSubmitErrorMsg || chatWidgetDefaultValues.formSubmitErrorMsg,
 			formSendAgainBtnLabel: chatBot.chatWidgeData?.formSendAgainBtnLabel || chatWidgetDefaultValues.formSendAgainBtnLabel,
 			formTryAgainBtnLabel: chatBot.chatWidgeData?.formTryAgainBtnLabel || chatWidgetDefaultValues.formTryAgainBtnLabel,
+			model: chatBot.chatWidgeData?.model || chatWidgetDefaultValues.model,
 		};
 	}, [chatBot]);
 
@@ -865,7 +866,8 @@ const EditChatbot = (props: EditChatbotProps) => {
                                     customizeWidget(chatBot._id, formData);
                                     updatePrompt(chatBot._id, formData.prompt || '');
                                     updateDefaultAnswer(chatBot._id, formData.defaultAnswer || '');
-                                    updateAdminEmail(chatBot._id, formData.adminEmail || '');
+																	updateAdminEmail(chatBot._id, formData.adminEmail || '');
+																	updateModelName(chatBot._id, formData.model || '');
 									toast({
 										title: `Chatbot customizations have been updated successfully`,
 										status: "success",
