@@ -29,6 +29,7 @@ import { CreateChatBots } from './containers/CreateChatBots/CreateChatBots';
 import EditChatbot from './containers/EditChatbot/EditChatbot';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { GOOGLE_AUTH_ID } from './config';
+import { ConfirmationProvider } from './providers/providers';
 
 interface AppState {
 	isAuthenticated: boolean;
@@ -84,41 +85,43 @@ export class Base extends React.Component<AppProps, AppState> {
 
 	getAppRoutes = () => {
 		return <Box>
-						<Grid minH='100vh'>
-							<Router>
-								<Switch>
-									<Route path='/sign-up'>
-										<SignUp onSignUp={this.onLoginIn} />
-									</Route>
-									<Route path='/login'>
-										<Login onLoginIn={this.onLoginIn} />
-									</Route>
-									<PrivateRoute
-										isAuthenticated={this.state.isAuthenticated}
-										path='/app/create-chatbot'
-										component={CreateChatBots}
-									></PrivateRoute>
-									<PrivateRoute
-										isAuthenticated={this.state.isAuthenticated}
-										path='/app/edit-chatbot/:chatbotId'
-										component={EditChatbot}
-									></PrivateRoute>
-									<PrivateRoute
-										isAuthenticated={this.state.isAuthenticated}
-										path='/app'
-										onLoginOut={this.onLoginOut}
-										component={App}
-									></PrivateRoute>
-									<PrivateRoute
-										path='/'
-										isAuthenticated={this.state.isAuthenticated}
-										onLoginOut={this.onLoginOut}
-										component={App}
-									></PrivateRoute>
-								</Switch>
-							</Router>
-						</Grid>
-					</Box>
+			<Grid minH='100vh'>
+				<ConfirmationProvider>
+					<Router>
+						<Switch>
+							<Route path='/sign-up'>
+								<SignUp onSignUp={this.onLoginIn} />
+							</Route>
+							<Route path='/login'>
+								<Login onLoginIn={this.onLoginIn} />
+							</Route>
+							<PrivateRoute
+								isAuthenticated={this.state.isAuthenticated}
+								path='/app/create-chatbot'
+								component={CreateChatBots}
+							></PrivateRoute>
+							<PrivateRoute
+								isAuthenticated={this.state.isAuthenticated}
+								path='/app/edit-chatbot/:chatbotId'
+								component={EditChatbot}
+							></PrivateRoute>
+							<PrivateRoute
+								isAuthenticated={this.state.isAuthenticated}
+								path='/app'
+								onLoginOut={this.onLoginOut}
+								component={App}
+							></PrivateRoute>
+							<PrivateRoute
+								path='/'
+								isAuthenticated={this.state.isAuthenticated}
+								onLoginOut={this.onLoginOut}
+								component={App}
+							></PrivateRoute>
+						</Switch>
+					</Router>
+				</ConfirmationProvider>
+			</Grid>
+		</Box>
 	}
 
 	render() {

@@ -1,26 +1,68 @@
-import React from 'react'
-import { Flex, Box, VStack, Heading } from '@chakra-ui/react'
+import { Box, Flex, Heading, VStack } from '@chakra-ui/react'
+import React, { useCallback, useEffect } from 'react'
 import { ChatList } from '../../components/ChatSessions/ChatList'
 import { ChatWindow } from '../../components/ChatSessions/ChatWindow'
-import { ChatSessionPagination, ChatSession, ChatSessionDetail } from '../../types/knowledgebase.type'
-import { getChatSessionDetails } from '../../services/knowledgebaseService'
 import { NoDataChatSessions } from '../../components/Icons/noData/NoDataChatSessions'
+import { useConfirmation } from '../../providers/providers'
+import { deleteChatSession, getChatSessionDetails, getChatSessions, readChatSession, unReadChatSession } from '../../services/knowledgebaseService'
+import { ChatSession, ChatSessionDetail, ChatSessionPagination } from '../../types/knowledgebase.type'
 
-type ChatSessionsProps = {
-    isChatListLoading: boolean;
-    chatSessionsPage: ChatSessionPagination;
-    onPageChange: (page: number) => void;
+
+export type ChatSessionsProps = {
+    chatbotId: string
 }
 
-export const ChatSessionsNew = ({ isChatListLoading, chatSessionsPage, onPageChange }: ChatSessionsProps) => {
-    const [selectedChat, setSelectedChat] = React.useState<ChatSession>(chatSessionsPage.results.find((chatSession) => chatSession.firstMessage) || chatSessionsPage.results[0]);
-    const [chatData, setChatData] = React.useState<ChatSessionDetail>();
+export const ChatSessionsNew = ({chatbotId}: ChatSessionsProps) => {
+    const [chatSessions, setChatSessions] = React.useState<ChatSessionPagination>();
     const [isChatLoading, setIsChatLoading] = React.useState<boolean>(false);
+    const { showConfirmation } = useConfirmation()
+    const [selectedChat, setSelectedChat] = React.useState<ChatSession>();
+    const [chatData, setChatData] = React.useState<ChatSessionDetail>();
 
-    React.useEffect(() => {
-        const firstMessageChat = chatSessionsPage.results.find((chatSession) => chatSession.firstMessage);
-        setSelectedChat(firstMessageChat || chatSessionsPage.results[0]);
-    }, [chatSessionsPage])
+    useEffect(() => {
+        async function fetchData() {
+            try {
+                const response = await getChatSessions(chatbotId, '1');
+                setChatSessions(response.data);
+                setSelectedChat(response.data.results.find((chatSession) => chatSession.firstMessage) || response.data.results[0])
+            } catch (error) {
+                console.log("Unable to fetch chatSessions", error);
+            } finally {
+            }
+
+        }
+        fetchData();
+    }, [chatbotId]);
+
+
+    const handlePageClick = React.useCallback(async (selectedPage: number) => {
+        try {
+            setIsChatLoading(true);
+            const response = await getChatSessions(chatbotId, (selectedPage + 1).toString());
+            setChatSessions(response.data);
+            setSelectedChat(response.data.results.find((chatSession) => chatSession.firstMessage) || response.data.results[0])
+        } catch (error) {
+            console.log("Unable to fetch chatSessions", error);
+        } finally {
+            setIsChatLoading(false);
+        }
+    }, [chatbotId]);
+
+    const updateChatSessionReadStatus = useCallback(async (chatId: string, isUnread: boolean, chatSessions) => {
+        try {
+            // Toggle read/unread based on isUnread flag
+            await (isUnread ? unReadChatSession : readChatSession)(chatId);
+            if (chatSessions) {
+                const updatedResults = chatSessions.results.map(item =>
+                    item._id === chatId ? { ...item, isUnread } : item
+                );
+                setChatSessions({ ...chatSessions, results: updatedResults });
+            }
+        } catch (error) {
+            console.log("Unable to update chatSessions", error);
+        }
+    }, []) 
+
 
     React.useEffect(() => {
         let ignore = false;
@@ -29,6 +71,9 @@ export const ChatSessionsNew = ({ isChatListLoading, chatSessionsPage, onPageCha
             setIsChatLoading(true);
             try {
                 const response = await getChatSessionDetails(selectedChat._id);
+                if (selectedChat.isUnread) {
+                    //updateChatSessionReadStatus(selectedChat._id, false, chatSessions)
+                }
                 if (!ignore) setChatData(response.data);
             } catch (error) {
                 console.log("Unable to fetch deals", error);
@@ -38,13 +83,31 @@ export const ChatSessionsNew = ({ isChatListLoading, chatSessionsPage, onPageCha
         }
         fetchData();
         return () => { ignore = true };
-    }, [chatSessionsPage.results.length, selectedChat]);
+    }, [chatSessions, selectedChat, updateChatSessionReadStatus]);
+
+    const onDeleteChat = async (chatId: string) => {
+        try {
+            await deleteChatSession(chatId);
+            if (chatSessions) {
+                const updatedResults = chatSessions.results.filter(item => item._id !== chatId);
+                if (updatedResults.length === 0) {
+                    handlePageClick(0)
+                } else {
+                    setChatSessions({ ...chatSessions, results: updatedResults });
+                }
+            }
+        } catch (error) {
+            console.log("Unable to delete chatSessions", error);
+        }
+    }
+
 
     const handleSelectChat = React.useCallback((chatSession: ChatSession) => {
         setSelectedChat(chatSession);
     }, []);
 
-    if (!chatSessionsPage.results.length) {
+
+    if (!chatSessions?.results.length) {
         return (
             <VStack
                 alignItems="center"
@@ -75,14 +138,31 @@ export const ChatSessionsNew = ({ isChatListLoading, chatSessionsPage, onPageCha
         )
     }
 
+    if (!chatSessions || !selectedChat) {
+        return null
+    }
     return (
         <Flex w="100%">
             <ChatList
-                isChatListLoading={isChatListLoading}
-                chatSessionsPage={chatSessionsPage}
+                isChatListLoading={isChatLoading}
+                chatSessionsPage={chatSessions}
                 selectedChat={selectedChat}
                 onSelectChat={handleSelectChat}
-                onPageChange={onPageChange}
+                onPageChange={handlePageClick}
+                updateChatSessionReadStatus={updateChatSessionReadStatus}
+                onDeleteChat={(chatId) => {
+                    showConfirmation(true, {
+                        title: 'Delete Chat',
+                        content: 'Are you sure you want to delete this chat?',
+                        confirmButtonText: 'Delete',
+                        onClose: () => showConfirmation(false),
+                        onConfirm: () => {
+                            onDeleteChat(chatId);
+                            showConfirmation(false)
+                        },
+                    })
+                }}
+
             />
             <ChatWindow chatData={chatData} userData={chatData?.userData} messages={chatData?.messages} isMessagesLoading={isChatLoading} />
         </Flex>

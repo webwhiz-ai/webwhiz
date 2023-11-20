@@ -72,6 +72,7 @@ export const chatWidgetDefaultValues = {
   showAsPopup: false,
   popupDelay: 3000,
   collectEmail: false,
+  adminEmail: '',
   collectEmailText: 'What is your email address?',
   questionExamples: [
     {question: 'How can I contact you?', label: 'Contact'},
@@ -103,6 +104,7 @@ export const chatWidgetDefaultValues = {
   formSubmitErrorMsg: "Oops! Something went wrong",
   formSendAgainBtnLabel: "Send again",
   formTryAgainBtnLabel: "Try again",
+  model: 'gpt-3.5-turbo-1106'
 };
 
 

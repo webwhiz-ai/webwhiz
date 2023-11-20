@@ -75,6 +75,7 @@ export interface ChatBotCustomizeData {
     showAsPopup: boolean;
     popupDelay: number;
     offlineMessage: boolean;
+    adminEmail: string,
     collectEmail: boolean,
     collectEmailText: string,
     welcomeMessage?: string;
@@ -105,6 +106,7 @@ export interface ChatBotCustomizeData {
     formSubmitErrorMsg: string;
     formSendAgainBtnLabel: string;
     formTryAgainBtnLabel: string;
+    model: string;
 }
 export interface CrawlDataListPagination {
     pages: number;
@@ -165,6 +167,7 @@ export interface UserData {
 }
 
 export interface ChatSession {
+    isUnread: boolean;
     firstMessage: MessageList;
     startedAt: string;
     updatedAt: string;
@@ -194,7 +197,7 @@ export interface ChatSessionDetail {
     updatedAt: string;
     messages: MessageList[];
     userData: UserData;
-    src: null
+    src: null;
 }
 
 export interface OfflineMessage {

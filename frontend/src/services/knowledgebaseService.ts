@@ -118,6 +118,27 @@ export async function updateDefaultAnswer(id:string, defaultAnswer: string): Pro
 		url: `knowledgebase/${id}/default_answer`,
 	});
 }
+export async function updateAdminEmail(id:string, adminEmail: string): Promise<AxiosResponse<Knowledgebase[]>> {
+	return await axios({
+		baseURL: baseURL,
+		method: 'put',
+		data: {
+			email: adminEmail
+		},
+		url: `knowledgebase/${id}/admin_email`,
+	});
+}
+
+export async function updateModelName(id: string, modelName: string): Promise<AxiosResponse<Knowledgebase[]>> {
+	return await axios({
+		baseURL: baseURL,
+		method: 'put',
+		data: {
+			modelName: modelName
+		},
+		url: `knowledgebase/${id}/model`,
+	});
+}
 
 export async function updateWebsiteData(id:string, data: WebsiteData): Promise<AxiosResponse<Knowledgebase[]>> {
 	return await axios({
@@ -235,6 +256,31 @@ export async function getChatSessions(id: string, page: string): Promise<AxiosRe
 		url: `/chatbot/${id}/session?page_size=10&page=${page}`,
 	});
 }
+
+export async function readChatSession(sessionId: string) {
+	return await axios({
+		baseURL: baseURL,
+		method: 'post',
+		url: `/chatbot/session/${sessionId}/read`,
+	});
+}
+
+export async function deleteChatSession(sessionId: string) {
+	return await axios({
+		baseURL: baseURL,
+		method: 'delete',
+		url: `/chatbot/session/${sessionId}`,
+	});
+}
+
+export async function unReadChatSession(sessionId: string) {
+	return await axios({
+		baseURL: baseURL,
+		method: 'post',
+		url: `/chatbot/session/${sessionId}/unread`,
+	});
+}
+
 export async function getOfflineMessages(id: string, page: string): Promise<AxiosResponse<OfflineMessagePagination>> {
 	return await axios({
 		baseURL: baseURL,

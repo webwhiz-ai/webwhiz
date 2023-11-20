@@ -190,12 +190,13 @@ export class OpenaiService {
       const stream = res.data;
 
       let answer = '';
+      let buffer = '';
 
       stream.on('data', (data) => {
-        const responses = data
-          .toString()
-          .split('\n\n')
-          .filter((c) => c.length > 0);
+        const dataStr = buffer.length
+          ? buffer + data.toString()
+          : data.toString();
+        const responses = dataStr.split('\n\n').filter((c) => c.length > 0);
 
         for (const res of responses) {
           try {
@@ -206,8 +207,10 @@ export class OpenaiService {
               observable.next(JSON.stringify({ content }));
               answer += content;
             }
+            buffer = '';
           } catch {
             console.log('Error', res);
+            buffer += res;
           }
         }
       });

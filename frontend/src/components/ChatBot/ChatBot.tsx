@@ -6,6 +6,7 @@ import { uuidv4 } from '../../utils/commonUtils';
 import { CurrentUser } from '../../services/appConfig';
 import { ChatBotCustomizeData } from '../../types/knowledgebase.type';
 import ChatBotLauncher from '../../containers/ChatBotLauncher/ChatBotLauncher';
+import { Heading,Text, Box } from '@chakra-ui/react';
 export interface ChatBotProps {
 	customStyle: ChatBotCustomizeData,
 	knowledgeBaseId: string,
@@ -119,30 +120,33 @@ export const ChatBot = ({
 	}, [knowledgeBaseId, messages, numberOfMessagesLeft, question, sessionId])
 
 	const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-		if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
-			handleSubmit(e);
+		if (e.key === "Enter" || e.keyCode  === 13) {
+			e.preventDefault();
+			const target = e.target as HTMLTextAreaElement;
+			if(target.value) {
+				handleSubmit(e);
+			}
 		}
 	}
-
 	return (
 		<div className="chat-wrap widget-open" id="chat-wrap">
 
 
 			<div className="chat-widget" style={{ borderRadius: customStyle.borderRadius, height: height, minHeight:"410px" }}>
-				<div className="chat-header" style={{ backgroundColor: customStyle.backgroundColor, color: customStyle.fontColor }}>
-					{showCloseButton && <div className="chat-close">
-						<button className="chat-close-btn" id="chat-close-btn">
+				<Box className="chat-header"  bgColor={customStyle.backgroundColor} color={customStyle.fontColor} >
+					{showCloseButton &&<Box className="chat-close">
+						<Box className="chat-close-btn" id="chat-close-btn">
 							<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="feather feather-x">
 								<line x1="18" y1="6" x2="6" y2="18"></line>
 								<line x1="6" y1="6" x2="18" y2="18"></line>
 							</svg>
-						</button>
-					</div>}
-					<h2>
+						</Box>
+					</Box>}
+					<Heading>
 						{customStyle.heading}
-					</h2>
-					<p dangerouslySetInnerHTML={{ __html: customStyle.description }}></p>
-				</div>
+					</Heading>
+					<Text dangerouslySetInnerHTML={{ __html: customStyle.description }}></Text>
+				</Box>
 				<div id="chat-messages" className="chat-messages">
 					{messages.map((message, index) => {
 						
@@ -168,13 +172,13 @@ export const ChatBot = ({
 						</div>
 					})}
 				</div>
-				<div className="chat-input-wrap">
+				<Box className="chat-input-wrap">
 					{/* {user && user?.subscriptionData?.name === 'FREE' && <div className='chat-message-warning'>{numberOfMessagesLeft} messages left</div>} */}
 					<TextareaAutosize value={question} onChange={handleChatChange} onKeyDown={handleKeyDown} rows="1" className="chat-input textarea js-auto-size" id="chat-input" placeholder="Type your message" />
 					<button onClick={handleSubmit}  className="chat-submit-btn" type="submit"><svg width="16" height="16" fill="none" xmlns="http://www.w3.org/2000/svg">
 						<path fillRule="evenodd" clipRule="evenodd" d="M4.394 14.7L13.75 9.3c1-.577 1-2.02 0-2.598L4.394 1.299a1.5 1.5 0 00-2.25 1.3v3.438l4.059 1.088c.494.132.494.833 0 .966l-4.06 1.087v4.224a1.5 1.5 0 002.25 1.299z" style={{ fill: customStyle.backgroundColor }}></path>
 					</svg></button>
-				</div>
+				</Box>				
 			</div>
 			{showLauncher && <ChatBotLauncher backgroundColor= {customStyle.backgroundColor} fontColor= {customStyle.fontColor} />}
 			

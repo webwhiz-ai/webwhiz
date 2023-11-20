@@ -46,6 +46,7 @@ export interface Knowledgebase {
   createdAt: Date;
   updatedAt: Date;
   // Custom prompt fields
+  model?: string;
   defaultAnswer?: string;
   prompt?: string;
   // Custom domain
@@ -155,6 +156,7 @@ export interface ChatSession {
   kbName: string;
   defaultAnswer?: string;
   prompt?: string;
+  model?: string;
   isDemo?: boolean;
   src?: string;
   subscriptionData: SubscriptionPlanInfo;

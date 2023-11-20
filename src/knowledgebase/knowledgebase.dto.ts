@@ -100,6 +100,12 @@ export class SetAdminEmailDTO {
   email: string;
 }
 
+export class SetModelNameDTO {
+  @IsNotEmpty()
+  @IsString()
+  model: string;
+}
+
 export class SetCustomDomainDTO {
   @IsString()
   @IsNotEmpty()

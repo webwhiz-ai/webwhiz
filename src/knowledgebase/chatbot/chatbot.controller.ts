@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   Param,
@@ -43,7 +44,7 @@ export class ChatbotController {
     );
   }
 
-  @Post('/session/:sessionId/delete')
+  @Delete('/session/:sessionId')
   @HttpCode(200)
   async removeSession(
     @Req() req: RequestWithUser,
