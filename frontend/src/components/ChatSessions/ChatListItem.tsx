@@ -94,10 +94,6 @@ export const ChatListItem = ({ chatSessionData, isSelected, onSelectChat, update
             <Text fontSize="sm" noOfLines={2} fontWeight={chatSessionData.isUnread ? '500' : '400'}>
                 {chatSessionData.firstMessage.q}
             </Text>
-
-            {chatSessionData.isUnread && <CircleIcon boxSize={3} color='blue.500' position="absolute"
-                right="4px"
-                bottom="2px" />}
         </Flex >
     )
 }
