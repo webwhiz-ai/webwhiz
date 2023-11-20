@@ -74,6 +74,16 @@ export class ChatbotController {
     return this.chatbotService.markSessionAsUnread(user, sessionId);
   }
 
+  @Post('/session/:sessionId/initiate-manual')
+  @HttpCode(200)
+  async initiateManualSession(
+    @Req() req: RequestWithUser,
+    @Param('sessionId') sessionId: string,
+  ) {
+    const { user } = req;
+    return this.chatbotService.initiateManualChatSession(user, sessionId);
+  }
+
   @Get('/session/:id')
   async getSessionData(
     @Req() req: RequestWithUser,

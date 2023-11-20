@@ -140,13 +140,22 @@ export enum ChatAnswerFeedbackType {
   GOOD,
 }
 
+export enum MessageType {
+  BOT = 'BOT',
+  MANUAL = 'MANUAL',
+}
+
 export interface ChatQueryAnswer {
+  type?: MessageType;
   q: string;
   a: string;
   qTokens: number;
   aTokens: number;
   ts: Date;
   feedback?: ChatAnswerFeedbackType;
+  msg: string;
+  sender: string;
+  sessionId: string;
 }
 
 export const CHAT_SESSION_COLLECTION = 'chatSessions';
@@ -159,6 +168,7 @@ export interface ChatSession {
   model?: string;
   isDemo?: boolean;
   src?: string;
+  isManual?: boolean;
   subscriptionData: SubscriptionPlanInfo;
   customKeys?: CustomKeyData;
   userId: ObjectId;
