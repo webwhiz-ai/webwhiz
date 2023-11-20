@@ -3,7 +3,9 @@ import { formatDistance } from 'date-fns'
 import React from 'react'
 import { ChatSession } from '../../types/knowledgebase.type'
 import { ThreeDotIcon } from '../Icons/ThreeDotIcon'
-import { CircleIcon } from '../Icons/Icon'
+import { DeleteIcon } from '../Icons/DeleteIcon'
+import { ReadIcon } from '../Icons/ReadIcon'
+import { UnreadIcon } from '../Icons/UnreadIcon'
 
 
 type ChatListItemProps = {
@@ -29,12 +31,12 @@ export const ChatListItem = ({ chatSessionData, isSelected, onSelectChat, update
             px={3} py={2}
             borderBottom="1px"
             borderBottomColor="gray.100"
-            bg={isSelected ? 'gray.100' : 'white'}
-            borderRight={isSelected ? "2px" : "0"}
-            borderRightColor="blue.500"
+            bg={isSelected?  '#eee8ff' : chatSessionData.isUnread ? '#faf9ff' : 'white'}
+            borderRight={"2px"}
+            borderRightColor={isSelected ? "blue.500" : "transparent"}
             onClick={() => !isSelected && onSelectChat(chatSessionData)}
         >
-            {/* <Menu>
+            <Menu>
                 <MenuButton
                     as={IconButton}
                     aria-label='Options'
@@ -49,12 +51,13 @@ export const ChatListItem = ({ chatSessionData, isSelected, onSelectChat, update
                         e.stopPropagation();
                     }}
                 />
-                <MenuList p={1}>
+                <MenuList p={1} minW="140px" color="gray.600">
                     {
                         chatSessionData.isUnread ?
                             <MenuItem
                                 fontSize={14}
                                 borderRadius={6}
+                                icon={<UnreadIcon />}
                                 onClick={(e) => {
                                     e.stopPropagation();
                                     updateChatSessionReadStatus(chatSessionData._id, false)
@@ -65,6 +68,7 @@ export const ChatListItem = ({ chatSessionData, isSelected, onSelectChat, update
                             <MenuItem
                                 fontSize={14}
                                 borderRadius={6}
+                                icon={<ReadIcon />}
                                 onClick={(e) => {
                                     e.stopPropagation();
                                     updateChatSessionReadStatus(chatSessionData._id, true)
@@ -75,6 +79,7 @@ export const ChatListItem = ({ chatSessionData, isSelected, onSelectChat, update
                     <MenuItem
                         fontSize={14}
                         borderRadius={6}
+                        icon={<DeleteIcon />}
                         onClick={(e) => {
                             e.stopPropagation();
                             onDeleteChat(chatSessionData._id)
@@ -82,17 +87,13 @@ export const ChatListItem = ({ chatSessionData, isSelected, onSelectChat, update
                         Delete chat
                     </MenuItem>
                 </MenuList>
-            </Menu> */}
+            </Menu>
             <Text fontSize="xs" color="gray.500" mb={2}>
                 {getFormattedTime(chatSessionData.updatedAt)}
             </Text>
-            <Text fontSize="sm" noOfLines={2}>
+            <Text fontSize="sm" noOfLines={2} fontWeight={chatSessionData.isUnread ? '500' : '400'}>
                 {chatSessionData.firstMessage.q}
             </Text>
-
-            {/* {chatSessionData.isUnread && <CircleIcon boxSize={3} color='blue.500' position="absolute"
-                right="4px"
-                bottom="2px" />} */}
         </Flex >
     )
 }

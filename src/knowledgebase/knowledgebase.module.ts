@@ -20,6 +20,7 @@ import { EmailModule } from '../common/email/email.module';
 import { TaskModule } from '../task/task.module';
 import { CustomKeyService } from './custom-key.service';
 import { WebhookModule } from '../webhook/webhook.module';
+import { ChatGateway } from './chatbot/chatbot.gateway';
 
 @Module({
   imports: [
@@ -48,6 +49,7 @@ import { WebhookModule } from '../webhook/webhook.module';
     OfflineMsgService,
     PromptService,
     CustomKeyService,
+    ChatGateway,
   ],
   exports: [KnowledgebaseDbService, DataStoreService],
 })
