@@ -1,5 +1,5 @@
 import { Box, Flex, Heading, VStack } from '@chakra-ui/react'
-import React, { useCallback, useEffect } from 'react'
+import React, { useEffect } from 'react'
 import { ChatList } from '../../components/ChatSessions/ChatList'
 import { ChatWindow } from '../../components/ChatSessions/ChatWindow'
 import { NoDataChatSessions } from '../../components/Icons/noData/NoDataChatSessions'
@@ -48,7 +48,7 @@ export const ChatSessionsNew = ({chatbotId}: ChatSessionsProps) => {
         }
     }, [chatbotId]);
 
-    const updateChatSessionReadStatus = useCallback(async (chatId: string, isUnread: boolean, chatSessions) => {
+    const updateChatSessionReadStatus = async (chatId: string,  isUnread: boolean) => {
         try {
             // Toggle read/unread based on isUnread flag
             await (isUnread ? unReadChatSession : readChatSession)(chatId);
@@ -56,12 +56,15 @@ export const ChatSessionsNew = ({chatbotId}: ChatSessionsProps) => {
                 const updatedResults = chatSessions.results.map(item =>
                     item._id === chatId ? { ...item, isUnread } : item
                 );
-                setChatSessions({ ...chatSessions, results: updatedResults });
+                setChatSessions((prev) => { 
+                    if(!prev) return undefined
+                    return  { ...prev, results: updatedResults } 
+                });
             }
         } catch (error) {
             console.log("Unable to update chatSessions", error);
         }
-    }, []) 
+    } 
 
 
     React.useEffect(() => {
@@ -72,7 +75,7 @@ export const ChatSessionsNew = ({chatbotId}: ChatSessionsProps) => {
             try {
                 const response = await getChatSessionDetails(selectedChat._id);
                 if (selectedChat.isUnread) {
-                    //updateChatSessionReadStatus(selectedChat._id, false, chatSessions)
+                    updateChatSessionReadStatus(selectedChat._id, false)
                 }
                 if (!ignore) setChatData(response.data);
             } catch (error) {
@@ -83,7 +86,7 @@ export const ChatSessionsNew = ({chatbotId}: ChatSessionsProps) => {
         }
         fetchData();
         return () => { ignore = true };
-    }, [chatSessions, selectedChat, updateChatSessionReadStatus]);
+    }, [selectedChat]);
 
     const onDeleteChat = async (chatId: string) => {
         try {
