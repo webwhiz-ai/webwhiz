@@ -8,6 +8,6 @@ import { SlackBotService } from './slackbot.service';
 @Module({
   imports: [KnowledgebaseModule, MongoModule],
   providers: [SlackService, SlackBotService, SlackTokenService],
-  exports: [SlackTokenService],
+  exports: [SlackTokenService, SlackService, SlackBotService],
 })
 export class SlackModule { }

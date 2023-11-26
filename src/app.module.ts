@@ -18,6 +18,7 @@ import { ImportersModule } from './importers/importers.module';
 import { TaskModule } from './task/task.module';
 import { WebhookModule } from './webhook/webhook.module';
 import { SlackModule } from './slack/slack.module';
+import { SlackBoltMiddleware } from './slack.middleware';
 
 @Module({
   imports: [
@@ -49,5 +50,6 @@ export class AppModule {
       path: '*',
       method: RequestMethod.ALL,
     });
+    consumer.apply(SlackBoltMiddleware).forRoutes('');
   }
 }

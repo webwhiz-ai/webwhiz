@@ -456,6 +456,13 @@ export class KnowledgebaseDbService {
     return session;
   }
 
+  async getSesstionIdbySlackThreadId(slackThreadId: string): Promise<string> {
+    const result = await this.chatSessionCollection.findOne({
+      slackThreadId,
+    });
+    return result && result._id ? result._id.toHexString() : null;
+  }
+
   async getChatSessionSparseById(id: ObjectId): Promise<ChatSessionSparse> {
     const session = await this.chatSessionCollection.findOne(
       { _id: id },

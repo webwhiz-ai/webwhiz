@@ -139,7 +139,7 @@ export class SlackService {
   public async onAppMention({ event, say, logger, client }) {
     try {
       console.log(event);
-      this.slackbotService.botProcess(event, say, client);
+      // this.slackbotService.botProcess(event, say, client);
     } catch (error) {
       logger.error(error);
     }

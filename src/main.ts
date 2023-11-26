@@ -37,8 +37,8 @@ async function bootstrap() {
   // const document = SwaggerModule.createDocument(app, config);
   // SwaggerModule.setup('docs', app, document);
 
-  const slack = app.get(SlackService);
-  app.use('/slack/events', slack.use());
+  // const slack = app.get(SlackService);
+  // app.use('/slack/events', slack.use());
 
   const host = process.env.HOST || '127.0.0.1';
   const appPort = Number.parseInt(process.env.PORT || '3000', 10);

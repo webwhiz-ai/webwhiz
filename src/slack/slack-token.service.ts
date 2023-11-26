@@ -20,11 +20,16 @@ export class SlackTokenService {
    */
   async saveInstallationToDatabase(installation: any) {
     console.log('installation: ', installation);
-    const { teamId, enterpriseId, bot } = installation;
+    // const { teamId, enterpriseId } = installation;
+    const teamId = installation.team.id;
+    const enterpriseId = installation.enterprise?.id;
+    console.log('teamId: ', teamId);
+    console.log('enterpriseId: ', enterpriseId);
     await this.slackTokenCollection.insertOne({
       teamId,
       enterpriseId,
-      bot,
+      webwhizBotId: installation.metadata,
+      installation,
     });
   }
 
@@ -39,7 +44,13 @@ export class SlackTokenService {
       return result.installation;
     }
     const result = await this.slackTokenCollection.findOne({ teamId });
+    console.log('result from db: ', result);
     return result.installation;
+  }
+
+  async fetchWebWhizBotIdFromDatabase(teamId: string) {
+    const result = await this.slackTokenCollection.findOne({ teamId });
+    return result ? result.webwhizBotId : null;
   }
 
   /**

@@ -152,6 +152,7 @@ export const CHAT_SESSION_COLLECTION = 'chatSessions';
 export interface ChatSession {
   _id?: ObjectId;
   knowledgebaseId: ObjectId;
+  slackThreadId?: string;
   kbName: string;
   defaultAnswer?: string;
   prompt?: string;
