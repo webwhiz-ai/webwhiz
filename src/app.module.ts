@@ -18,6 +18,7 @@ import { ImportersModule } from './importers/importers.module';
 import { TaskModule } from './task/task.module';
 import { WebhookModule } from './webhook/webhook.module';
 import { SlackBoltMiddleware } from './slack/slack-bolt.middleware';
+import { SlackModule } from './slack/slack.module';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { SlackBoltMiddleware } from './slack/slack-bolt.middleware';
     SubscriptionModule,
     EmailModule,
     WebhookModule,
+    SlackModule,
   ],
   controllers: [AppController],
   providers: [AppService],
