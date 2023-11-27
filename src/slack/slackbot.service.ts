@@ -12,6 +12,7 @@ export class SlackBotService {
   ) { }
 
   async botProcessAppMention(event: AppMentionEvent, say: any, client: any) {
+    // TODO: Fix: Bot is not responding to direct messages
     const loadingMsg = await client.chat.postMessage({
       channel: event.channel,
       text: 'Webwhiz is thinking... ✨',
