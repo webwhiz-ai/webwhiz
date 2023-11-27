@@ -50,6 +50,10 @@ export const MONGODB = 'MONGODB';
 
           await db.collection('task').createIndex({ name: 1 });
 
+          await db
+            .collection('slackTokens')
+            .createIndex({ teamId: 1 }, { unique: true });
+
           return db;
         } catch (e) {
           throw e;
