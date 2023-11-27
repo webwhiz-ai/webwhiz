@@ -1,6 +1,5 @@
-/* eslint-disable prettier/prettier */
-import { Inject, Injectable } from "@nestjs/common";
-import { Collection, Db } from "mongodb";
+import { Inject, Injectable } from '@nestjs/common';
+import { Collection, Db } from 'mongodb';
 
 @Injectable()
 export class SlackTokenService {
@@ -19,7 +18,7 @@ export class SlackTokenService {
     await this.slackTokenCollection.updateOne(
       { teamId },
       { $set: { installation } },
-      { upsert: true }
+      { upsert: true },
     );
   }
 
@@ -43,5 +42,17 @@ export class SlackTokenService {
     if (result.deletedCount === 0) {
       throw new Error(`No document found with teamId: ${teamId}`);
     }
+  }
+
+  /**
+   * Fetches the WebWhiz bot ID from the database for a given team ID.
+   * @param teamId The ID of the team.
+   * @returns The WebWhiz bot ID if found, otherwise null.
+   */
+  async fetchWebWhizBotIdFromDatabase(teamId: string) {
+    const result = await this.slackTokenCollection.findOne({ teamId });
+    return result && result.installation && result.installation.metadata
+      ? result.installation.metadata
+      : null;
   }
 }

@@ -3,12 +3,14 @@ import { Injectable } from '@nestjs/common';
 import { AppMentionEvent } from '@slack/bolt';
 import { ChatbotService } from '../knowledgebase/chatbot/chatbot.service';
 import { KnowledgebaseDbService } from '../knowledgebase/knowledgebase-db.service';
+import { SlackTokenService } from './slack-token.service';
 
 @Injectable()
 export class SlackBotService {
   constructor(
     private readonly chatbotService: ChatbotService,
     private readonly kbDbService: KnowledgebaseDbService,
+    private readonly slackTokenService: SlackTokenService,
   ) { }
 
   async botProcessAppMention(event: AppMentionEvent, say: any, client: any) {
@@ -35,8 +37,8 @@ export class SlackBotService {
     const teamId = event.team;
     const message = event.text.replace(/<[^>]+>/g, '').trim();
     console.log('message: ', message);
-    // TODO: Fetch webwhiz botId
-    const webwhizKbId = '65188ee72d83026138772455';
+    // Fetch webwhiz botId
+    const webwhizKbId = await this.slackTokenService.fetchWebWhizBotIdFromDatabase(teamId);
 
     /* if thread_ts is present, then it is a message in a thread
     if ts value equals thread_ts, then it is a parent message
@@ -81,10 +83,9 @@ export class SlackBotService {
       });
     } catch (error) {
       console.log('error: ', error);
-      await client.chat.postMessage({
+      await client.chat.update({
         channel: event.channel,
         text: 'Sorry, I am unable to answer your question. Please try again later.',
-        thread_ts: parentMessageTs,
         ts: loadingMsgTs,
       });
     }
