@@ -46,6 +46,7 @@ export const MONGODB = 'MONGODB';
           await db
             .collection('chatSessions')
             .createIndex({ knowledgebaseId: 1 });
+          await db.collection('chatSessions').createIndex({ slackThreadId: 1 });
 
           await db.collection('task').createIndex({ name: 1 });
 
