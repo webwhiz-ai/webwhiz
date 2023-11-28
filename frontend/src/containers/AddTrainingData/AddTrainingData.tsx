@@ -17,6 +17,7 @@ import {
 	ModalOverlay,
 
 	useDisclosure,
+	FormHelperText,
 } from "@chakra-ui/react";
 import { FiPlus } from 'react-icons/fi';
 import { addTrainingData } from "../../services/knowledgebaseService";
@@ -90,7 +91,7 @@ export const AddTrainingData = ({
 					<ModalCloseButton />
 					<ModalBody pb={6}>
 						<FormControl>
-							<FormLabel fontSize="sm">Question</FormLabel>
+							<FormLabel fontSize="sm">Title</FormLabel>
 							<Input ref={initialRef} value={question}
 								onChange={handleQuestionChange} placeholder='Question' />
 						</FormControl>
@@ -100,6 +101,18 @@ export const AddTrainingData = ({
 							<Box data-color-mode="light">
 								<MDEditor height={300} value={answer} preview="edit" onChange={handleAnswerChange} />
 							</Box>
+							<FormHelperText fontSize="smaller" color="gray.400">
+								One of the best option to add training data is using the question and answer format. For example:
+								<br />
+								<br />
+								## What is WebWhiz?
+								<br />
+								#### WebWhiz allows you to train ChatGPT on your website data and build a chatbot that you can add to your website. 				
+								<br />
+								## How can I contact support?
+								<br />
+								#### You can contact support by using the offline message feature on our website. 
+							</FormHelperText>
 						</FormControl>
 						<Flex mt="8" justifyContent="end">
 							<Button onClick={onClose} mr={3}>Cancel</Button>
