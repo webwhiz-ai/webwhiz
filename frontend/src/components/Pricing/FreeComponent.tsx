@@ -5,6 +5,7 @@ import {
     Flex,
     Heading,
     HStack,
+    Button,
     Tab,
     TabIndicator,
     TabList,
@@ -107,8 +108,38 @@ export const FreeComponent = ({ currentSubscription, discountData, userEmail,  a
         
     }, [activeSubscriptionId, currentSubscription?.type, getLTDPricingCrrd]);
 
+    const manageSubscription = React.useCallback(() => {
+        if(currentSubscription?.type !== 'LIFETIME' && currentSubscription?.name !== 'FREE' && currentSubscription?.name !== 'Self Hosted') {
+            return <Flex justifyContent="center" w="100%" p={8} pt={12} backgroundColor="white" boxShadow="sm" borderRadius="md" mb="6" pb={12}>
+                <Flex direction="column" alignItems="center" maxW="xl">
+                        <Heading mb={5}>
+                            Manage Subscription
+                        </Heading>
+                        <Text textAlign="center" color="gray.600" fontSize="xl" mb={6}>
+                            You can manage your subscriptions and payment methods, view payment history and download invoices by visiting the billing portal.
+                        </Text>
+                        <a href="https://webwhiz.lemonsqueezy.com/billing" target="_blank" rel="noreferrer">
+                            <Button
+                                variant="solid"
+                                colorScheme={"blue"}
+                                background={"blue.500"}
+                                color={"white"}
+                                w="100%"
+                            >
+                                Visit Billing Portal
+                            </Button>
+                        </a>
+                </Flex>
+            </Flex>
+        }
+        return null
+    }, [currentSubscription?.name, currentSubscription?.type]);
+
     return (
         <>
+            {
+                manageSubscription()
+            }
             {
                 getPricingBlockLTD()
             }
