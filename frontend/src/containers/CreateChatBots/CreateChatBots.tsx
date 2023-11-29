@@ -82,6 +82,8 @@ export const CreateChatBots = () => {
 			const response = await createKnowledgebase(payLoad.websiteData);
 			setKnowledgeBaseId(response.data._id);
 
+			let _docsData:DocsKnowledgeData;
+
 			if (payLoad.files?.length && payLoad.files.length > 0) {
 				setIsUploadingDocs(true);
 				for (const file of payLoad.files) {
@@ -100,7 +102,7 @@ export const CreateChatBots = () => {
 
 				setDocsDataLoading(true);
 				const _docsDataResponse = await fetchKnowledgebaseCrawlDataForDocs(response.data._id, 1);
-				const _docsData: DocsKnowledgeData = {
+				 _docsData = {
 					docs: _docsDataResponse.data.results,
 					pages: _docsDataResponse.data.pages,
 					knowledgebaseId: response.data._id
@@ -116,10 +118,10 @@ export const CreateChatBots = () => {
 					setProductSetupLoadingText('Crawling your website data.. This may take some time based on the amount of the data...');
 				}
 				const chatBotId = details.data._id
-				if (details.data.status === 'CRAWLED' || (details.data.status === 'CREATED' && docsData && docsData.docs.length > 0)) {
+				if (details.data.status === 'CRAWLED' || (details.data.status === 'CREATED' && _docsData && _docsData.docs.length > 0)) {
 					setProductSetupLoadingText('Training ChatGPT with your data... This may take some time based on the amount of the data...');
 					await generateEmbeddings(chatBotId);
-				} else if (details.data.status === 'CRAWL_ERROR' || details.data.status === 'EMBEDDING_ERROR' || (details.data.websiteData === null && (docsData === undefined || docsData.docs.length === 0))) {
+				} else if (details.data.status === 'CRAWL_ERROR' || details.data.status === 'EMBEDDING_ERROR' || (details.data.websiteData === null && (_docsData === undefined || _docsData.docs.length === 0))) {
 					clearInterval(interval);
 					setIsSubmitting(false);
 					toast({
@@ -161,7 +163,7 @@ export const CreateChatBots = () => {
 				isClosable: true,
 			});
 		}
-	}, [knowledgeBaseId, docsData, toast, history]);
+	}, [knowledgeBaseId, toast, history]);
 
 	// TODO: remove if unused
 	/*
