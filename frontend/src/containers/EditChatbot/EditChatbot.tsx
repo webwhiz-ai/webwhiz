@@ -908,7 +908,7 @@ const EditChatbot = (props: EditChatbotProps) => {
 					h="100%" overflow="auto"
 				>
 					<VStack alignItems="start" w="100%" position="relative">
-						<SectionTitle title="Fine tune data" description="Improve your chatbot by adding more Q&A training data. The more you add, the better its responses. Group logically & avoid lengthy inputs." />
+						<SectionTitle title="Fine tune data" description="Improve your chatbot by adding more training data. The more you add, the better its responses. Group logically & avoid lengthy inputs." />
 						<Box position="absolute" right="0" bottom="8">
 							<AddTrainingData knowledgeBaseId={props.match.params.chatbotId} onSubmit={handleTrainingDataSave} answer="" question="" />
 
