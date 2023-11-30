@@ -133,6 +133,25 @@ export class SlackBoltMiddleware implements NestMiddleware {
 
     app.event('app_mention', this.onAppMention.bind(this));
 
+    app.event('app_uninstalled', async ({ event, logger, context }) => {
+      try {
+        if (context.isEnterpriseInstall && context.enterpriseId !== undefined) {
+          // org wide app installation deletion
+          return await slackTokenService.deleteInstallationByTeamId(
+            context.enterpriseId,
+          );
+        }
+        if (context.teamId !== undefined) {
+          // single team app installation deletion
+          return await slackTokenService.deleteInstallationByTeamId(
+            context.teamId,
+          );
+        }
+      } catch (error) {
+        logger.error(error);
+      }
+    });
+
     runner.setup(app);
     this.appRunner = runner;
   }
