@@ -3,6 +3,8 @@ import { AppRunner } from '@seratch_/bolt-http-runner';
 import { App, LogLevel } from '@slack/bolt';
 import { NextFunction } from 'express';
 import { IncomingMessage, ServerResponse } from 'http';
+import { ObjectId } from 'mongodb';
+import { KnowledgebaseDbService } from '../knowledgebase/knowledgebase-db.service';
 import { SlackTokenService } from './slack-token.service';
 import { SlackBotService } from './slackbot.service';
 
@@ -22,6 +24,7 @@ export class SlackBoltMiddleware implements NestMiddleware {
   public constructor(
     private readonly slackBotService: SlackBotService,
     private readonly slackTokenService: SlackTokenService,
+    private readonly kbDbService: KnowledgebaseDbService,
   ) {
     const runner = new AppRunner({
       logLevel: LogLevel.DEBUG,
@@ -98,7 +101,10 @@ export class SlackBoltMiddleware implements NestMiddleware {
           beforeRedirection: async (req, res) => {
             const webwhizbotId = req.url.split('webwhizKbId=')[1];
             console.log('beforeRedirection: webwhizKbId: ', webwhizbotId);
-            if (webwhizbotId) {
+            if (
+              webwhizbotId &&
+              (await this.isValidKnowledgebase(webwhizbotId))
+            ) {
               this.webwhizbotIdStore.set('webwhizKbId', webwhizbotId);
               return true;
             } else {
@@ -131,6 +137,17 @@ export class SlackBoltMiddleware implements NestMiddleware {
 
     runner.setup(app);
     this.appRunner = runner;
+  }
+  async isValidKnowledgebase(webwhizbotId: string) {
+    let kbId;
+    try {
+      kbId = new ObjectId(webwhizbotId);
+    } catch (e) {
+      console.log('Error: ', e);
+      return false;
+    }
+    const kbData = await this.kbDbService.getKnowledgebaseById(kbId);
+    return !!kbData;
   }
 
   private async onAppMention({ event, say, client }) {
