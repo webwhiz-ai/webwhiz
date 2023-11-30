@@ -1,4 +1,4 @@
-import { Injectable, NestMiddleware } from '@nestjs/common';
+import { Injectable, Logger, NestMiddleware } from '@nestjs/common';
 import { AppRunner } from '@seratch_/bolt-http-runner';
 import { App, LogLevel } from '@slack/bolt';
 import { NextFunction } from 'express';
@@ -10,6 +10,7 @@ import { SlackBotService } from './slackbot.service';
 
 @Injectable()
 export class SlackBoltMiddleware implements NestMiddleware {
+  private readonly logger: Logger;
   private appRunner: AppRunner;
   private webwhizbotIdStore: any = {
     data: {},
@@ -26,15 +27,15 @@ export class SlackBoltMiddleware implements NestMiddleware {
     private readonly slackTokenService: SlackTokenService,
     private readonly kbDbService: KnowledgebaseDbService,
   ) {
+    this.logger = new Logger(SlackBoltMiddleware.name);
     const runner = new AppRunner({
-      logLevel: LogLevel.DEBUG,
+      // logLevel: LogLevel.DEBUG,
       signingSecret: process.env.SLACK_SIGNING_SECRET,
       clientId: process.env.SLACK_CLIENT_ID,
       clientSecret: process.env.SLACK_CLIENT_SECRET,
       scopes: ['chat:write', 'app_mentions:read', 'im:history', 'im:read'],
       installationStore: {
         storeInstallation: async (installation) => {
-          console.log('installation: ', installation);
           if (
             installation.isEnterpriseInstall &&
             installation.enterprise !== undefined
@@ -52,12 +53,12 @@ export class SlackBoltMiddleware implements NestMiddleware {
               installation,
             );
           }
+          this.logger.error('Failed to save installation in db');
           throw new Error(
             'Failed saving installation data to installationStore',
           );
         },
         fetchInstallation: async (installQuery) => {
-          console.log('installQuery: ', installQuery);
           if (
             installQuery.isEnterpriseInstall &&
             installQuery.enterpriseId !== undefined
@@ -73,10 +74,10 @@ export class SlackBoltMiddleware implements NestMiddleware {
               installQuery.teamId,
             );
           }
+          this.logger.error('Failed to fetch installation from db');
           throw new Error('Failed fetching installation');
         },
         deleteInstallation: async (installQuery) => {
-          console.log('installQuery: ', installQuery);
           if (
             installQuery.isEnterpriseInstall &&
             installQuery.enterpriseId !== undefined
@@ -92,6 +93,7 @@ export class SlackBoltMiddleware implements NestMiddleware {
               installQuery.teamId,
             );
           }
+          this.logger.error('Failed to delete installation from db');
           throw new Error('Failed to delete installation');
         },
       },
@@ -100,7 +102,7 @@ export class SlackBoltMiddleware implements NestMiddleware {
         installPathOptions: {
           beforeRedirection: async (req, res) => {
             const webwhizbotId = req.url.split('webwhizKbId=')[1];
-            console.log('beforeRedirection: webwhizKbId: ', webwhizbotId);
+            this.logger.log('webwhizKbId: ', webwhizbotId);
             if (
               webwhizbotId &&
               (await this.isValidKnowledgebase(webwhizbotId))
@@ -115,7 +117,6 @@ export class SlackBoltMiddleware implements NestMiddleware {
         callbackOptions: {
           afterInstallation: async (installation, req, res) => {
             const webwhizbotId = this.webwhizbotIdStore.get('webwhizKbId');
-            console.log('afterInstallation: webwhizKbId: ', webwhizbotId);
             if (webwhizbotId) {
               installation.metadata = webwhizbotId;
               return true;
@@ -148,7 +149,9 @@ export class SlackBoltMiddleware implements NestMiddleware {
           );
         }
       } catch (error) {
-        logger.error(error);
+        logger.error(
+          'Error while deleting slack installation data' + error.message,
+        );
       }
     });
 
@@ -160,7 +163,7 @@ export class SlackBoltMiddleware implements NestMiddleware {
     try {
       kbId = new ObjectId(webwhizbotId);
     } catch (e) {
-      console.log('Error: ', e);
+      this.logger.error('Invalid knowledgebase id: ' + webwhizbotId);
       return false;
     }
     const kbData = await this.kbDbService.getKnowledgebaseById(kbId);

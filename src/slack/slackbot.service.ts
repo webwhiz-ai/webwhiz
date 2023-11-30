@@ -1,5 +1,4 @@
-/* eslint-disable prettier/prettier */
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { AppMentionEvent } from '@slack/bolt';
 import { ChatbotService } from '../knowledgebase/chatbot/chatbot.service';
 import { KnowledgebaseDbService } from '../knowledgebase/knowledgebase-db.service';
@@ -7,11 +6,14 @@ import { SlackTokenService } from './slack-token.service';
 
 @Injectable()
 export class SlackBotService {
+  private readonly logger: Logger;
   constructor(
     private readonly chatbotService: ChatbotService,
     private readonly kbDbService: KnowledgebaseDbService,
     private readonly slackTokenService: SlackTokenService,
-  ) { }
+  ) {
+    this.logger = new Logger(SlackBotService.name);
+  }
 
   async botProcessAppMention(event: AppMentionEvent, say: any, client: any) {
     // TODO: Fix: Bot is not responding to direct messages
@@ -22,23 +24,8 @@ export class SlackBotService {
       thread_ts: event.thread_ts || event.ts,
     });
     const loadingMsgTs = loadingMsg.ts;
-    console.log('event: ', event);
-    /* event:  {
-      client_msg_id: '6b58de35-845f-462a-b4fa-02c467e718c5',
-      type: 'app_mention',
-      text: '<@U067PRPASHX> Hello',
-      user: 'U067DK84336',
-      ts: '1701031166.923619',
-      blocks: [ { type: 'rich_text', block_id: 'jPZfh', elements: [Array] } ],
-      team: 'T06805KARRN',
-      channel: 'C066WKZJRU7',
-      event_ts: '1701031166.923619'
-    } */
     const teamId = event.team;
     const message = event.text.replace(/<[^>]+>/g, '').trim();
-    console.log('message: ', message);
-    // Fetch webwhiz botId
-    const webwhizKbId = await this.slackTokenService.fetchWebWhizBotIdFromDatabase(teamId);
 
     /* if thread_ts is present, then it is a message in a thread
     if ts value equals thread_ts, then it is a parent message
@@ -49,16 +36,16 @@ export class SlackBotService {
     /* if not parent message then check for existing session else, create a new session. */
     let sessionId = null;
     try {
+      // Fetch webwhiz botId
+      const webwhizKbId =
+        await this.slackTokenService.fetchWebWhizBotIdFromDatabase(teamId);
       if (!isParentMessage) {
-        console.log('not parentMessage- checking for existing session');
         sessionId = await this.kbDbService.getSessionIdBySlackThreadId(
           parentMessageTs,
         );
-        console.log('found existing session from db: ', sessionId);
       }
 
       if (sessionId === null) {
-        console.log('parentMessage- creating new session');
         sessionId = await this.chatbotService.createChatSession(
           webwhizKbId,
           null,
@@ -67,13 +54,12 @@ export class SlackBotService {
           parentMessageTs,
         );
       }
-      console.log('sessionId: ', sessionId);
+      this.logger.debug('sessionId: ' + sessionId);
 
       const responseAnswer = await this.chatbotService.getAnswer(
         sessionId,
         message,
       );
-      console.log('responseAnswer: ', responseAnswer['response']);
 
       await client.chat.update({
         channel: event.channel,
@@ -82,7 +68,9 @@ export class SlackBotService {
         ts: loadingMsgTs,
       });
     } catch (error) {
-      console.log('error: ', error);
+      this.logger.error(
+        'Error occurred while processing slack message: ' + error.message,
+      );
       await client.chat.update({
         channel: event.channel,
         text: 'Sorry, I am unable to answer your question. Please try again later.',
