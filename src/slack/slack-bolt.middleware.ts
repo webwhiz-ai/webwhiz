@@ -129,9 +129,7 @@ export class SlackBoltMiddleware implements NestMiddleware {
 
     const app = new App(runner.appOptions());
 
-    app.message('hello', async ({ say }) => {
-      await say(`Hey there`);
-    });
+    app.event('message', this.onAppMention.bind(this));
 
     app.event('app_mention', this.onAppMention.bind(this));
 
@@ -151,6 +149,10 @@ export class SlackBoltMiddleware implements NestMiddleware {
   }
 
   private async onAppMention({ event, say, client }) {
+    // Ignore message_changed events
+    if (event.channel_type === 'im' && event.subtype === 'message_changed') {
+      return;
+    }
     this.slackBotService.botProcessAppMention(event, say, client);
   }
 
