@@ -191,12 +191,16 @@ export class OpenaiChatbotService {
    * CHAT GPT ANSWER RELATED
    ******************************************** */
 
-  getTokenCountForChatGptMessages(messages: ChatGptPromptMessages): number {
+  getTokenCountForChatGptMessages(
+    messages: ChatGptPromptMessages,
+    modelName?: string,
+  ): number {
     return this.openaiService.getTokenCount(
       messages.reduce<string>((str, p) => {
         str += p.content;
         return str;
       }, ''),
+      modelName,
     );
   }
 
@@ -208,6 +212,7 @@ export class OpenaiChatbotService {
     defaultAnswer: string | undefined,
     prompt?: string,
     maxTokenLimit = 4000,
+    modelName?: string,
   ): ChatGptPromptMessages {
     // Defaults
     defaultAnswer = defaultAnswer || "I don't know how to answer that";
@@ -222,7 +227,10 @@ export class OpenaiChatbotService {
       pastMessages: [],
       query,
     });
-    const emptyPromptTokens = this.getTokenCountForChatGptMessages(emptyPrompt);
+    const emptyPromptTokens = this.getTokenCountForChatGptMessages(
+      emptyPrompt,
+      modelName,
+    );
 
     /** ********************************************************************
      * NOTE: Size of chunk matters heavily in the following calculation
@@ -244,7 +252,7 @@ export class OpenaiChatbotService {
 
     const remainingTokens = maxTokenLimit - emptyPromptTokens - 300; // 500 for response
     const pastMessagesTokenCount = prevMessages.reduce((count, m) => {
-      count += m.aTokens + this.openaiService.getTokenCount(m.q);
+      count += m.aTokens + this.openaiService.getTokenCount(m.q, modelName);
       return count;
     }, 0);
 
@@ -258,7 +266,7 @@ export class OpenaiChatbotService {
     for (let i = 0; i < Math.max(2, topChunks.length); i++) {
       const chunk = topChunks[i];
       const ctxSection = getCtxBlock(chunk);
-      const tokens = this.openaiService.getTokenCount(ctxSection);
+      const tokens = this.openaiService.getTokenCount(ctxSection, modelName);
       if (tokenCount + tokens <= remainingTokens) {
         ctx += `${ctxSection}\n\n`;
         tokenCount += tokens;
@@ -272,7 +280,8 @@ export class OpenaiChatbotService {
     if (tokenCount + pastMessagesTokenCount > remainingTokens) {
       const lastMsg = prevMessages[prevMessages.length - 1];
       const lastMsgTokenCount =
-        lastMsg.aTokens + this.openaiService.getTokenCount(lastMsg.q);
+        lastMsg.aTokens +
+        this.openaiService.getTokenCount(lastMsg.q, modelName);
 
       // See if its possibl to add only the last msg
       if (tokenCount + lastMsgTokenCount < remainingTokens) {
@@ -294,7 +303,7 @@ export class OpenaiChatbotService {
     for (let i = 2; i < topChunks.length; i++) {
       const chunk = topChunks[i];
       const ctxSection = getCtxBlock(chunk);
-      const tokens = this.openaiService.getTokenCount(ctxSection);
+      const tokens = this.openaiService.getTokenCount(ctxSection, modelName);
       if (tokenCount + tokens <= remainingTokens) {
         ctx += `${ctxSection}\n\n`;
         tokenCount += tokens;
@@ -324,6 +333,7 @@ export class OpenaiChatbotService {
     customKeys: CustomKeyData,
     model: string | undefined,
     debug = false,
+    modelName?: string,
   ) {
     const messages = this.getChatGptPrompt(
       chatbotName,
@@ -332,6 +342,8 @@ export class OpenaiChatbotService {
       prevMessages,
       defaultAnswer,
       prompt,
+      undefined,
+      modelName,
     );
 
     // if (debug) {
@@ -366,6 +378,7 @@ export class OpenaiChatbotService {
     prompt: string | undefined,
     model: string | undefined,
     customKeys?: CustomKeyData,
+    modelName?: string,
   ) {
     const messages = this.getChatGptPrompt(
       chatbotName,
@@ -374,6 +387,8 @@ export class OpenaiChatbotService {
       prevMessages,
       defaultAnswer,
       prompt,
+      undefined,
+      modelName,
     );
 
     const answerStream = await this.openaiService.getChatGptCompletionStream(
