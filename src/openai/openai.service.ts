@@ -9,6 +9,7 @@ import { createHash } from 'node:crypto';
 
 const TOKENIZERS = {
   chatgtp: tiktoken.encoding_for_model('gpt-3.5-turbo'),
+  gpt4: tiktoken.encoding_for_model('gpt-4'),
 };
 
 export interface ChatGTPResponse {
@@ -62,10 +63,28 @@ export class OpenaiService {
     });
   }
 
-  getTokenCount(input: string): number {
-    const encoder = TOKENIZERS['chatgtp'];
+  getTokenCount(input: string, modelName = 'gpt-3.5-turbo-1106'): number {
+    switch (modelName) {
+      case 'gpt-3.5-turbo-1106':
+        modelName = 'chatgtp';
+        break;
+      case 'gpt-4-0613':
+        modelName = 'gpt4';
+        break;
+      default:
+        modelName = 'chatgtp';
+        break;
+    }
+    const encoder = TOKENIZERS[modelName];
     const tokens = encoder.encode(input);
-    return tokens.length;
+    switch (modelName) {
+      case 'chatgtp':
+        return tokens.length;
+      case 'gpt4':
+        return tokens.length * 30;
+      default:
+        return tokens.length;
+    }
   }
 
   /**

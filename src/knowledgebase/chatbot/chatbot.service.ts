@@ -273,6 +273,7 @@ export class ChatbotService {
     //
 
     const kbId = sessionData.knowledgebaseId;
+    const modelName = sessionData.model || 'gpt-3.5-turbo-1106';
 
     // Get top n chunks from knowledge base
     const topChunks = await this.openaiChatbotService.getTopNChunks(
@@ -299,6 +300,7 @@ export class ChatbotService {
       sessionData.customKeys,
       sessionData.model,
       debug,
+      modelName,
     );
 
     const msg = {
@@ -395,6 +397,7 @@ export class ChatbotService {
     //
 
     const kbId = sessionData.knowledgebaseId;
+    const modelName = sessionData.model || 'gpt-3.5-turbo-1106';
 
     // Get top n chunks from knowledge base
     const topChunks = await this.openaiChatbotService.getTopNChunks(
@@ -454,6 +457,7 @@ export class ChatbotService {
       sessionData.prompt,
       sessionData.model,
       sessionData.customKeys,
+      modelName,
     );
 
     const sources = topChunks
