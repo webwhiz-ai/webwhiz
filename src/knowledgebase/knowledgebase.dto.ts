@@ -111,3 +111,9 @@ export class SetCustomDomainDTO {
   @IsNotEmpty()
   domain: string;
 }
+
+export class SetChatBotNameDTO {
+  @IsString()
+  @IsNotEmpty()
+  name: string;
+}
