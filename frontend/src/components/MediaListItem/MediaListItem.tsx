@@ -148,6 +148,11 @@ export const MediaListItem = ({ onMenuItemClick, showWarning, showPrimaryActionB
 								Get code
 							</MenuItem> : null}
 							<MenuItem fontSize="14" textAlign="right" fontWeight="medium" color="gray.600" onClick={() => {
+									onSelect('rename')
+								}}>
+									Rename
+								</MenuItem>
+								<MenuItem fontSize="14" textAlign="right" fontWeight="medium" color="gray.600" onClick={() => {
 								onSelect('delete')
 							}}>
 								Delete
