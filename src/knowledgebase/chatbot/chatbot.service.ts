@@ -557,7 +557,7 @@ export class ChatbotService {
     return sessionId.toString();
   }
 
-  async initiateManualChatSession(user, sessionId: string) {
+  async initiateManualChatSession(sessionId: string) {
     const sessionData = await this.getChatSessionDataFromCache(sessionId);
 
     if (!sessionData) return;
@@ -571,7 +571,7 @@ export class ChatbotService {
       this.setChatSessionData(updatedSessionData),
       this.kbDbService.updateChatSession(sessionData._id, updatedSessionData),
     ]);
-    return user._id;
+    return sessionId;
   }
 
   async updateChatbotSession(sessionId: string, data: UpdateChatbotSessionDTO) {
