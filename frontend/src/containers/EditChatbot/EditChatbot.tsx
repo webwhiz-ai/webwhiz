@@ -1,4 +1,6 @@
 import * as React from "react";
+import { io } from 'socket.io-client';
+
 import {
 	Box,
 	Flex,
@@ -794,6 +796,21 @@ const EditChatbot = (props: EditChatbotProps) => {
 			model: chatBot.chatWidgeData?.model || chatWidgetDefaultValues.model,
 		};
 	}, [chatBot]);
+
+	useEffect(() => {
+		const socket = io('https://api.webwhiz.ai', {transports: ["websocket"], query:{id: 'Admin', isAdmin: true} });
+		socket.on('connect', function () {
+            console.log('connected');
+        });
+		socket.on('chat', function(msgData){
+			// append to UI 
+			console.log('msgData', msgData)
+		});
+
+		// 
+		socket.emit('chat', { sender: 'Admin', sessionId: '65714adbbbf9ca6fed509634', msg: 'Admin msg' });
+	
+	}, []);
 
 	const getMainComponent = React.useCallback(() => {
 		if (!chatBot._id) {

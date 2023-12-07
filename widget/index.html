@@ -144,6 +144,7 @@
                 </div>
             </div>
             <div class="chat-sample-messages hide-sample-messages" id="chat-sample-messages">
+                <button type="button" id="chat-with-human">Chat with human</button>
             </div>
             <form id="chat-form" class="chat-input-wrap">
                 <textarea rows='1' class="chat-input textarea js-auto-size" id="chat-input"
@@ -163,11 +164,15 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.2.12/marked.min.js"></script>
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/default.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js" integrity="sha384-mZLF4UVrpi/QTWPA7BjNPEnkIfRFn4ZEO3Qt/HFklTJBj/gBOV8G3HcKn4NfQblz" crossorigin="anonymous"></script>
 
 
 
     <script>
         const STREAM_RESPONSE = true;
+
+        
+        // message format
 
         let origin = '';
         let container = '';
@@ -367,6 +372,18 @@
                 console.log('error');
             }
             //return response;
+        }
+
+        const initSocketConnection = () => {
+            var socket = io('https://api.webwhiz.ai', {transports: ["websocket"], query:{id: sessionId} });
+            socket.on('connect', function () {
+                console.log('connected');
+            });
+            socket.on('chat', function(msgData){
+                // append to UI 
+                console.log(msgData);
+            });
+            return socket;
         }
 
         (async () => {
@@ -579,6 +596,11 @@
                 }
             });
 
+            document.getElementById('chat-with-human').addEventListener('click', async (e) => {
+                socketData = await initManualChat(sessionId);
+                console.log(socketData);
+            });
+
 
             const widgetConfig = {}
 
@@ -627,6 +649,33 @@
                 console.log('error');
             }
             //return response;
+        }
+        let isManualChat = false;
+        async function initManualChat(sessionId) {
+            const response = await fetch(
+                `https://api.webwhiz.ai/chatbot/session/${sessionId}/initiate-manual`,
+                {
+                    method: 'POST', // *GET, POST, PUT, DELETE, etc.
+                    headers: {
+                        Accept: 'application/json',
+                        'Content-Type': 'application/json',
+                    },
+                    //mode: 'no-cors',
+                    referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+                    body: JSON.stringify({}), // body data type must match "Content-Type" header
+                }
+            );
+
+            if (response.status === 200) {
+                const result = await response.text()
+
+                const socketData = initSocketConnection();
+
+                isManualChat = true;
+                return socketData;
+            } else {
+                console.log('error');
+            }
         }
 
         async function updateSession(sessionId, userData) {
@@ -701,12 +750,24 @@
             };
         }
 
+        let socketData;
+
 
         async function addMessageToChat(message) {
 
             const input = document.getElementById('chat-input');
             message = message || input.value.trim();
             if (!message) return;
+
+            if(isManualChat) {
+                const msgData = {'sender': 'Sachin', 'msg': message, 'sessionId': sessionId}
+            
+                console.log('socketDatasent', socketData);
+                // send message to admin
+                socketData.emit('chat', msgData);
+                console.log('message sent', msgData);
+                return
+            }
 
             const newMessageUser = {
                 role: "user",
@@ -723,6 +784,7 @@
             autosize.update(input);
 
             const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+            
 
             if (STREAM_RESPONSE) {
                 chatMessages.insertAdjacentHTML("beforeend",
@@ -739,7 +801,6 @@
                         userAgent: userAgent,
                         origin: origin
                     });
-                    notifyNewSession(sessionId);
                 }
                 const response = getAnswerStream(sessionId, message, (data) => {
 
@@ -1130,6 +1191,7 @@
                 chatWrap.classList.remove('chat-wrap-offline');
             });
         }
+        
     </script>
     <script defer type="text/javascript" src="https://api.pirsch.io/pirsch.js"
     id="pirschjs"
