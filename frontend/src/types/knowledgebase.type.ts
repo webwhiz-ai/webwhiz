@@ -155,11 +155,14 @@ export interface TrainingDataDetail {
 }
 
 export interface MessageList {
+    sender: string;
     a: string;
     aTokens: number;
     q: string;
     qTokens: number;
     ts: string;
+    msg: string
+    type: 'MANUAL' | 'BOT'
 }
 
 export interface UserData {

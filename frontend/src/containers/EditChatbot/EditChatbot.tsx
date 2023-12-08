@@ -1,5 +1,4 @@
 import * as React from "react";
-import { io } from 'socket.io-client';
 
 import {
 	Box,
@@ -62,6 +61,7 @@ import { ChatSessionsNew } from "../ChatSessions/ChatSessionsNew";
 import { Paginator } from "../../widgets/Paginator/Paginator";
 import { CustomDomain } from "../CustomDomain/CustomDomain";
 import { useConfirmation } from "../../providers/providers";
+import { socket } from "../../socket";
 export function validateEmailAddress(email: string) {
 	return email && !/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(email);
 }
@@ -86,7 +86,6 @@ export type EditChatbotProps = RouteComponentProps<MatchParams>;
 const EditChatbot = (props: EditChatbotProps) => {
 	const toast = useToast();
 	let history = useHistory();
-	let { search } = useLocation();
 
 	const [user, setUser] = React.useState<User>(CurrentUser.get());
 	React.useEffect(() => {
@@ -102,7 +101,7 @@ const EditChatbot = (props: EditChatbotProps) => {
 		fetchData();
 	}, [])
 
-	const defaultStep = new URLSearchParams(search).get("step") as Steps;
+	const defaultStep = history.location.pathname.split('/').pop() as Steps
 
 	const [isSubmitting, setIsSubmitting] = React.useState<boolean>(false);
 	const [isUploadingDocs, setIsUploadingDocs] = React.useState<boolean>(false);
@@ -112,7 +111,7 @@ const EditChatbot = (props: EditChatbotProps) => {
 
 
 	const [currentStep, setCurrentStep] = React.useState<Steps>(
-		defaultStep || "product-setup"
+		 defaultStep || "product-setup"
 	);
 	
 	const [primaryButtonLabel, setPrimaryButtonLabel] = React.useState<string>("Update Website Data");
@@ -449,6 +448,7 @@ const EditChatbot = (props: EditChatbotProps) => {
 
 	const goToStep = React.useCallback((step: Steps) => {
 		setCurrentStep(step);
+		history.push(`/app/edit-chatbot/${props.match.params.chatbotId}/${step}`)
 	}, []);
 
 	const handleTrainingDataSave = React.useCallback((values) => {
@@ -797,20 +797,28 @@ const EditChatbot = (props: EditChatbotProps) => {
 		};
 	}, [chatBot]);
 
-	useEffect(() => {
-		const socket = io('https://api.webwhiz.ai', {transports: ["websocket"], query:{id: 'Admin', isAdmin: true} });
-		socket.on('connect', function () {
-            console.log('connected');
-        });
-		socket.on('chat', function(msgData){
-			// append to UI 
-			console.log('msgData', msgData)
-		});
 
-		// 
-		socket.emit('chat', { sender: 'Admin', sessionId: '65714adbbbf9ca6fed509634', msg: 'Admin msg' });
-	
+	const onChatEvent = React.useCallback((data: { msg: string; sessionId: string; sender: 'admin' }) => {
+        console.log(data.msg, 'received');
+    }, []);
+
+	useEffect(() => {
+		const onConnect = () => {
+			console.log('connected');
+		}
+		const onDisconnect = () => {
+			console.log('disconnected');
+		}
+		socket.on('connect', onConnect);
+		socket.on('disconnect', onDisconnect);
+		socket.on('chat', onChatEvent);
+		return () => {
+			socket.off('connect', onConnect);
+			socket.off('disconnect', onDisconnect);
+			socket.off('chat', onChatEvent);
+		};
 	}, []);
+
 
 	const getMainComponent = React.useCallback(() => {
 		if (!chatBot._id) {
@@ -935,7 +943,7 @@ const EditChatbot = (props: EditChatbotProps) => {
 						{getCustomDataComponent()}
 					</Flex>
 				</Flex>
-				<Flex
+				{currentStep === "chat-sessions" ? <Flex
 					direction="column"
 					style={{
 						display: currentStep === "chat-sessions" ? "flex" : "none",
@@ -945,9 +953,9 @@ const EditChatbot = (props: EditChatbotProps) => {
 				>
 					<SectionTitle title="Chat sessions" description="All the chat sessions with your customers." />
 					<Flex w="100%" className={styles.trainingDataCont}>
-						<ChatSessionsNew chatbotId={props.match.params.chatbotId} />
+						{ <ChatSessionsNew chatbotId={props.match.params.chatbotId}  />}
 					</Flex>
-				</Flex>
+				</Flex> : null}
 				<Flex
 					direction="column"
 					style={{

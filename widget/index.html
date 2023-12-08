@@ -95,26 +95,31 @@
             </div>
             <div id="offline-message" class="offline-message">
                 <div class="form-group">
-                    <label for="offline-message-name"><span id="label-offline-message-name">Name</span> <span class="form-required">*</span></label>
+                    <label for="offline-message-name"><span id="label-offline-message-name">Name</span> <span
+                            class="form-required">*</span></label>
                     <input type="text" class="form-control" id="offline-message-name" placeholder="Enter your name">
                     <!--Error message-->
                     <div class="invalid-feedback required-field" id="invalid-feedback-name">This field is required</div>
 
                 </div>
                 <div class="form-group">
-                    <label for="offline-message-email"><span id="label-offline-message-email">Email</span> <span class="form-required">*</span></label>
+                    <label for="offline-message-email"><span id="label-offline-message-email">Email</span> <span
+                            class="form-required">*</span></label>
                     <input type="text" class="form-control" id="offline-message-email" placeholder="Enter your email">
                     <!--Error message-->
-                    <div class="invalid-feedback required-field" id="invalid-feedback-email">This field is required</div>
+                    <div class="invalid-feedback required-field" id="invalid-feedback-email">This field is required
+                    </div>
                     <div class="invalid-feedback" id="invalid-feedback-email-invalid">Please enter a valid email</div>
 
                 </div>
                 <div class="form-group">
-                    <label for="offline-message-message"><span id="label-offline-message-message">Message</span> <span class="form-required">*</span></label>
+                    <label for="offline-message-message"><span id="label-offline-message-message">Message</span> <span
+                            class="form-required">*</span></label>
                     <textarea class="form-control" rows="4" id="offline-message-message"
                         placeholder="Enter your message"></textarea>
                     <!--Error message-->
-                    <div class="invalid-feedback required-field" id="invalid-feedback-message">This field is required</div>
+                    <div class="invalid-feedback required-field" id="invalid-feedback-message">This field is required
+                    </div>
 
                 </div>
                 <button class="btn btn-primary" loadingText="Submitting..." id="offline-message-submit"
@@ -144,7 +149,7 @@
                 </div>
             </div>
             <div class="chat-sample-messages hide-sample-messages" id="chat-sample-messages">
-                <button type="button" id="chat-with-human">Chat with human</button>
+                <button type="button" class="chat-with-human" id="chat-with-human">Chat with human</button>
             </div>
             <form id="chat-form" class="chat-input-wrap">
                 <textarea rows='1' class="chat-input textarea js-auto-size" id="chat-input"
@@ -164,24 +169,27 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.2.12/marked.min.js"></script>
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/default.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js" integrity="sha384-mZLF4UVrpi/QTWPA7BjNPEnkIfRFn4ZEO3Qt/HFklTJBj/gBOV8G3HcKn4NfQblz" crossorigin="anonymous"></script>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"
+        integrity="sha384-mZLF4UVrpi/QTWPA7BjNPEnkIfRFn4ZEO3Qt/HFklTJBj/gBOV8G3HcKn4NfQblz"
+        crossorigin="anonymous"></script>
 
 
 
     <script>
         const STREAM_RESPONSE = true;
 
-        
+
         // message format
 
         let origin = '';
         let container = '';
+        let socketData;
 
         let showReadMore = true;
         let readMoreText = 'Read More:';
 
         let isFirstMessage = true;
-        
+
         let collectEmail = false;
         let collectEmailText = 'Read More:';
 
@@ -205,10 +213,10 @@
         const baseURL = urlParams.get('baseUrl') || 'https://api.webwhiz.ai';
         const chatWidget = document.querySelector('.chat-wrap');
 
-        if(urlParams.get('embed') === 'true') {
+        if (urlParams.get('embed') === 'true') {
             chatWidget.classList.add('widget-open');
-        } 
-        if(urlParams.get('hide-chat-actions') === 'true') {
+        }
+        if (urlParams.get('hide-chat-actions') === 'true') {
             chatWidget.classList.add('hide-chat-actions');
         }
 
@@ -216,7 +224,7 @@
          * Iframe communications
          */
         // Msg listener
-        window.onmessage = function (event) {
+        window.onmessage = function(event) {
             if (event.data.messageType === 'webwhiz:recieve_meta_data') {
                 origin = event.data.url;
                 container = event.data.container;
@@ -235,7 +243,7 @@
                 }
             } else if (event.data.messageType === 'webwhiz:recieve_chat_data') {
                 messages = event.data.chatHistory;
-                if(messages.length > 0) {
+                if (messages.length > 0) {
                     isFirstMessage = false;
                 }
                 let msgHTML = messages.map(msg => {
@@ -277,7 +285,7 @@
         };
 
         marked.setOptions({
-            highlight: function (code, lang) {
+            highlight: function(code, lang) {
                 const language = hljs.getLanguage(lang) ? lang : 'plaintext';
                 const hl = hljs.highlight(code, { language: 'javascript' }).value;
                 return hl;
@@ -340,7 +348,7 @@
             //const domain = 'chat.timemaster.ai';
             let url;
             const kbId = urlParams.get('kbId');
-            if(kbId) {
+            if (kbId) {
                 knowledgebaseId = kbId;
                 url = `${baseURL}/knowledgebase/${knowledgebaseId}/chat_widget_data`;
             } else {
@@ -375,20 +383,23 @@
         }
 
         const initSocketConnection = () => {
-            var socket = io('https://api.webwhiz.ai', {transports: ["websocket"], query:{id: sessionId} });
-            socket.on('connect', function () {
+            var socket = io('https://api.webwhiz.ai', { transports: ["websocket"], query: { id: sessionId } });
+            socket.on('connect', function() {
                 console.log('connected');
+                insertMessageIntoUI(createChatWithHumanDivider());
             });
-            socket.on('chat', function(msgData){
+            socket.on('chat', function(msgData) {
                 // append to UI 
-                console.log(msgData);
+                const chatMessage = createChatMessage(msgData.msg, true);
+                insertMessageIntoUI(chatMessage);
             });
+
             return socket;
         }
 
         (async () => {
             const data = await getWidgetData();
-            if(!knowledgebaseId) {
+            if (!knowledgebaseId) {
                 knowledgebaseId = data.id;
             }
             const chatWidgetData = data.chatWidgeData;
@@ -442,11 +453,11 @@
                 branding.style.display = 'none';
             }
 
-            if(chatWidgetData.offlineMsgTabHeader) {
+            if (chatWidgetData.offlineMsgTabHeader) {
                 offlineMsgTab.innerText = chatWidgetData.offlineMsgTabHeader;
             }
 
-            if(chatWidgetData.assistantTabHeader) {
+            if (chatWidgetData.assistantTabHeader) {
                 aiAssistantTab.innerText = chatWidgetData.assistantTabHeader;
 
                 requestAnimationFrame(() => {
@@ -485,55 +496,55 @@
                 chatWrap.classList.add('has-offline-message');
             }
 
-            if(chatWidgetData.readMoreText) {
+            if (chatWidgetData.readMoreText) {
                 readMoreText = chatWidgetData.readMoreText;
             }
-            
+
             collectEmailText = chatWidgetData.collectEmailText || collectEmailText;
 
-            if(chatWidgetData.offlineMsgHeading) {
+            if (chatWidgetData.offlineMsgHeading) {
                 offlineMsgHeading.innerText = chatWidgetData.offlineMsgHeading;
             }
 
-            if(chatWidgetData.offlineMsgDescription) {
+            if (chatWidgetData.offlineMsgDescription) {
                 offlineMsgDescription.innerText = chatWidgetData.offlineMsgDescription;
             }
 
-            if(chatWidgetData.nameFieldLabel) {
+            if (chatWidgetData.nameFieldLabel) {
                 offlineMsgNameLabel.innerText = chatWidgetData.nameFieldLabel;
             }
 
-            if(chatWidgetData.emailFieldLabel) {
+            if (chatWidgetData.emailFieldLabel) {
                 offlineMsgEmailLabel.innerText = chatWidgetData.emailFieldLabel;
             }
 
-            if(chatWidgetData.msgFieldLabel) {
+            if (chatWidgetData.msgFieldLabel) {
                 offlineMsgMessageLabel.innerText = chatWidgetData.msgFieldLabel;
             }
 
-            if(chatWidgetData.nameFieldPlaceholder) {
+            if (chatWidgetData.nameFieldPlaceholder) {
                 offlineMsgNameInput.placeholder = chatWidgetData.nameFieldPlaceholder;
             }
 
-            if(chatWidgetData.emailFieldPlaceholder) {
+            if (chatWidgetData.emailFieldPlaceholder) {
                 offlineMsgEmailInput.placeholder = chatWidgetData.emailFieldPlaceholder;
             }
 
-            if(chatWidgetData.msgFieldPlaceholder) {
+            if (chatWidgetData.msgFieldPlaceholder) {
                 offlineMsgMessageInput.placeholder = chatWidgetData.msgFieldPlaceholder;
             }
 
-            if(chatWidgetData.requiredFieldMsg) {
+            if (chatWidgetData.requiredFieldMsg) {
                 requiredFieldErrorMsg.forEach(div => {
-                        div.innerText = chatWidgetData.requiredFieldMsg;
+                    div.innerText = chatWidgetData.requiredFieldMsg;
                 });
             }
 
-            if(chatWidgetData.invalidEmailMsg) {
+            if (chatWidgetData.invalidEmailMsg) {
                 invalidEmailErrorMsg.innerText = chatWidgetData.invalidEmailMsg;
             }
 
-            if(chatWidgetData.formSubmitBtnLabel) {
+            if (chatWidgetData.formSubmitBtnLabel) {
                 offlineMessageBtn.innerText = chatWidgetData.formSubmitBtnLabel;
             }
 
@@ -597,7 +608,16 @@
             });
 
             document.getElementById('chat-with-human').addEventListener('click', async (e) => {
-                socketData = await initManualChat(sessionId);
+                document.getElementById('chat-with-human').style.display = 'none';
+                if (!sessionId) {
+                    sessionId = await createSession({
+                        userAgent: getUserAgent(),
+                        origin: origin
+                    });
+                    notifyNewSession(sessionId);
+                }
+
+                await initManualChat(sessionId);
                 console.log(socketData);
             });
 
@@ -610,7 +630,7 @@
                 chatLauncher.style.right = 'auto';
                 widgetConfig.position = 'left';
             }
-            if(chatWidgetData.showAsPopup) {
+            if (chatWidgetData.showAsPopup) {
                 widgetConfig.showAsPopup = true;
                 widgetConfig.popupDelay = chatWidgetData.popupDelay;
                 widgetConfig.welcomeMessages = chatWidgetData.welcomeMessages;
@@ -652,29 +672,28 @@
         }
         let isManualChat = false;
         async function initManualChat(sessionId) {
-            const response = await fetch(
-                `https://api.webwhiz.ai/chatbot/session/${sessionId}/initiate-manual`,
-                {
-                    method: 'POST', // *GET, POST, PUT, DELETE, etc.
+            const url = `https://api.webwhiz.ai/chatbot/session/${sessionId}/initiate-manual`;
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
                     headers: {
                         Accept: 'application/json',
                         'Content-Type': 'application/json',
                     },
-                    //mode: 'no-cors',
-                    referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
-                    body: JSON.stringify({}), // body data type must match "Content-Type" header
+                    referrerPolicy: 'no-referrer',
+                    body: JSON.stringify({}),
+                });
+
+                if (response.status === 200) {
+                    const result = await response.text();
+                    socketData = initSocketConnection();
+                    isManualChat = true;
+
+                } else {
+                    console.error('Error:', response.status);
                 }
-            );
-
-            if (response.status === 200) {
-                const result = await response.text()
-
-                const socketData = initSocketConnection();
-
-                isManualChat = true;
-                return socketData;
-            } else {
-                console.log('error');
+            } catch (error) {
+                console.error('Network error:', error.message);
             }
         }
 
@@ -728,11 +747,6 @@
             //return response;
         }
 
-
-
-
-
-
         function getAnswerStream(sessionId, query, cb, errorCb) {
             const url = `${baseURL}${'/chatbot/answer_stream'}?session=${sessionId}&query=${encodeURIComponent(query)}`;
             let source = new EventSource(url);
@@ -750,25 +764,40 @@
             };
         }
 
-        let socketData;
+        const getUserAgent = () => {
+            return navigator.userAgent || navigator.vendor || window.opera
+        }
 
+        const createChatWithHumanDivider = (chatWithWhom = 'Chat with human') => {
+            return `
+                <div class="divider">
+                    <span class="divider-line"></span>
+                    <span class="divider-text">${chatWithWhom}</span>
+                    <span class="divider-line"></span>
+                </div>
+                `;
+        };
+
+
+        const createChatMessage = (msg, isChatbot) => {
+            const messageType = isChatbot ? 'chatbot' : 'user';
+            return `<div class="chat-message ${messageType}">
+                <div class="chat-message-text">${msg}</div>
+            </div>
+            `;
+        };
+
+        const insertMessageIntoUI = (message) => {
+            const chatMessages = document.getElementById('chat-messages');
+            chatMessages.insertAdjacentHTML('beforeend', message);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        };
 
         async function addMessageToChat(message) {
 
             const input = document.getElementById('chat-input');
             message = message || input.value.trim();
             if (!message) return;
-
-            if(isManualChat) {
-                const msgData = {'sender': 'Sachin', 'msg': message, 'sessionId': sessionId}
-            
-                console.log('socketDatasent', socketData);
-                // send message to admin
-                socketData.emit('chat', msgData);
-                console.log('message sent', msgData);
-                return
-            }
-
             const newMessageUser = {
                 role: "user",
                 content: message
@@ -783,9 +812,15 @@
             input.value = '';
             autosize.update(input);
 
-            const userAgent = navigator.userAgent || navigator.vendor || window.opera;
-            
 
+            if (isManualChat) {
+                const msgData = { 'sender': 'user', 'msg': message, 'sessionId': sessionId }
+                console.log('socketDatasent', socketData);
+                // send message to admin
+                socketData.emit('chat', msgData);
+                console.log('message sent', msgData);
+                return;
+            }
             if (STREAM_RESPONSE) {
                 chatMessages.insertAdjacentHTML("beforeend",
                     `<div class="chat-message chatbot"><div class="chat-message-text"><div class='chat-loading-dot-cont'>
@@ -798,9 +833,10 @@
                 let msg = '';
                 if (!sessionId) {
                     sessionId = await createSession({
-                        userAgent: userAgent,
+                        userAgent: getUserAgent(),
                         origin: origin
                     });
+                    notifyNewSession(sessionId);
                 }
                 const response = getAnswerStream(sessionId, message, (data) => {
 
@@ -843,7 +879,7 @@
                         msg = replaceAll(msg, '<br/>', '\n')
                         const markdownRes = marked.parse(msg);
                         msgHolder.innerHTML = markdownRes;
-                        if(collectEmail && isFirstMessage) {
+                        if (collectEmail && isFirstMessage) {
                             const collectEmailMarkup = `<div class="chat-message chatbot">
                                     <div
                                         class="chat-message-text chat-message-form"
@@ -890,9 +926,9 @@
                                         </div>
                                     </div>
                                 </div>`;
-                                chatMessages.insertAdjacentHTML("beforeend", collectEmailMarkup);
-                                enableEmailCollection();
-                                isFirstMessage = false;
+                            chatMessages.insertAdjacentHTML("beforeend", collectEmailMarkup);
+                            enableEmailCollection();
+                            isFirstMessage = false;
                         }
                     }
 
@@ -922,11 +958,10 @@
             if (!email) return;
             const $emailFormCont = document.getElementById('chat-message-form-email');
             $emailFormCont.classList.add('chat-message-form-loading');
-            const userAgent = navigator.userAgent || navigator.vendor || window.opera;
             try {
                 await updateSession(sessionId, {
                     email: email,
-                    userAgent: userAgent,
+                    userAgent: getUserAgent(),
                     origin: origin
                 });
             } catch (error) {
@@ -940,7 +975,7 @@
         function enableEmailCollection() {
             const leadInputForm = document.getElementById('lead-email-form');
             const emailInput = document.getElementById('lead-email-input');
-            emailInput.addEventListener('keydown',  (e) => {
+            emailInput.addEventListener('keydown', (e) => {
                 if (e.keyCode === 13 || e.key === "Enter") {
                     e.preventDefault();
                     saveEmail();
@@ -948,7 +983,7 @@
                 const $emailFormCont = document.getElementById('chat-message-form-email');
                 $emailFormCont.classList.remove('chat-message-form-submitted');
             });
-            document.getElementById('lead-email-input-submit').addEventListener('click', (e)=>{
+            document.getElementById('lead-email-input-submit').addEventListener('click', (e) => {
                 e.preventDefault();
                 saveEmail();
             })
@@ -963,7 +998,7 @@
             addMessageToChat();
         });
 
-        document.getElementById('chat-input').onkeydown = function (e) {
+        document.getElementById('chat-input').onkeydown = function(e) {
             if (e.key === "Enter" && !e.shiftKey && !e.ctrlKey && !e.metaKey) {
                 e.preventDefault();
                 addMessageToChat();
@@ -1068,7 +1103,7 @@
                 const email = $email.value;
                 const message = $message.value;
 
-                const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+
 
                 const isValidEmail = validateEmail(email);
 
@@ -1081,7 +1116,7 @@
                     offlineMessageBtn.setAttribute('disabled', true);
                     if (!sessionId) {
                         sessionId = await createSession({
-                            userAgent: userAgent,
+                            userAgent: getUserAgent(),
                             origin: origin
                         });
                         notifyNewSession(sessionId);
@@ -1172,7 +1207,7 @@
         const chatWrap = document.getElementById('chat-wrap');
 
         if (offlineMsgTab) {
-            offlineMsgTab.addEventListener('click', function () {
+            offlineMsgTab.addEventListener('click', function() {
                 const width = offlineMsgTab.offsetWidth;
                 const left = aiAssistantTab.offsetWidth;
                 tabsActive.style.width = `${width - 5}px`;
@@ -1183,7 +1218,7 @@
             });
         }
         if (aiAssistantTab) {
-            aiAssistantTab.addEventListener('click', function () {
+            aiAssistantTab.addEventListener('click', function() {
                 const width = aiAssistantTab.offsetWidth;
                 tabsActive.style.width = `${width - 5}px`;
                 tabsActive.style.left = `4px`;
@@ -1191,11 +1226,10 @@
                 chatWrap.classList.remove('chat-wrap-offline');
             });
         }
-        
+
     </script>
-    <script defer type="text/javascript" src="https://api.pirsch.io/pirsch.js"
-    id="pirschjs"
-    data-code="VEW6587Xat8LXjE7ejokwXUked6s7udc"></script>
+    <script defer type="text/javascript" src="https://api.pirsch.io/pirsch.js" id="pirschjs"
+        data-code="VEW6587Xat8LXjE7ejokwXUked6s7udc"></script>
 </body>
 
 
