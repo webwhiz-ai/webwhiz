@@ -776,7 +776,7 @@
                         };
                         messages.push(newMessageUser);
                         messages.push(newMessageAssistant);
-                        notifyNewMessage(messages)
+                        notifyNewMessage([newMessageUser, newMessageAssistant])
                         msg = replaceAll(msg, '&lt;', '<')
                         msg = replaceAll(msg, '&gt;', '>')
                         msg = replaceAll(msg, '<br/>', '\n')
