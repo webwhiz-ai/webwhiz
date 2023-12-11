@@ -46,6 +46,7 @@
     "handlebars": "^4.7.7",
     "ioredis": "^5.3.1",
     "mongodb": "^5.1.0",
+    "nest-commander": "^3.12.5",
     "nestjs-real-ip": "^2.2.0",
     "openai": "^3.2.1",
     "passport": "^0.6.0",
