@@ -104,7 +104,7 @@ export const chatWidgetDefaultValues = {
   formSubmitErrorMsg: "Oops! Something went wrong",
   formSendAgainBtnLabel: "Send again",
   formTryAgainBtnLabel: "Try again",
-  model: 'gpt-3.5-turbo-1106'
+  model: 'gpt-3.5-turbo'
 };
 
 

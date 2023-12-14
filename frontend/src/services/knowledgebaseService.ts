@@ -134,7 +134,7 @@ export async function updateModelName(id: string, modelName: string): Promise<Ax
 		baseURL: baseURL,
 		method: 'put',
 		data: {
-			modelName: modelName
+			model: modelName
 		},
 		url: `knowledgebase/${id}/model`,
 	});
