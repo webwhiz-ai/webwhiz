@@ -345,7 +345,7 @@ export class OpenaiChatbotService {
         frequency_penalty: 0,
         presence_penalty: 0,
         top_p: 1,
-        model: model || 'gpt-3.5-turbo-1106',
+        model: model || 'gpt-3.5-turbo',
       },
       this.getCustomKeys(customKeys),
     );
@@ -384,7 +384,7 @@ export class OpenaiChatbotService {
         presence_penalty: 0,
         stream: true,
         top_p: 1,
-        model: model || 'gpt-3.5-turbo-1106',
+        model: model || 'gpt-3.5-turbo',
       },
       answerCompleteCb,
       this.getCustomKeys(customKeys),

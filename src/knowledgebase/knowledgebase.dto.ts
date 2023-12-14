@@ -95,8 +95,7 @@ export class KbCustomKeysDTO {
 }
 
 export class SetAdminEmailDTO {
-  @IsNotEmpty()
-  @IsEmail()
+  @IsString()
   email: string;
 }
 

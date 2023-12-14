@@ -623,7 +623,7 @@ export const ChatBotsCustomize = ({
 																		Model
 																	</FormLabel>
 																	<Select {...field}>
-																		<option value="gpt-3.5-turbo-1106">GPT-3.5-turbo</option>
+																		<option value="gpt-3.5-turbo">GPT-3.5-turbo</option>
 																		<option value="gpt-4-0613">GPT-4</option>
 																	</Select>
 																	<FormHelperText fontSize="sm">Token consumption will be 30 times higher for GPT-4 compared to GPT-3.5.</FormHelperText>

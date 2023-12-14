@@ -866,8 +866,8 @@ const EditChatbot = (props: EditChatbotProps) => {
                                     customizeWidget(chatBot._id, formData);
                                     updatePrompt(chatBot._id, formData.prompt || '');
                                     updateDefaultAnswer(chatBot._id, formData.defaultAnswer || '');
-																	updateAdminEmail(chatBot._id, formData.adminEmail || '');
-																	updateModelName(chatBot._id, formData.model || '');
+									updateAdminEmail(chatBot._id, formData.adminEmail || '');
+									updateModelName(chatBot._id, formData.model || '');
 									toast({
 										title: `Chatbot customizations have been updated successfully`,
 										status: "success",
