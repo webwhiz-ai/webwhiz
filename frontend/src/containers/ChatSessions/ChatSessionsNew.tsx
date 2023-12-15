@@ -25,6 +25,11 @@ export const ChatSessionsNew = ({ chatbotId }: ChatSessionsProps) => {
 	let { search } = useLocation();
     const sessionId = new URLSearchParams(search).get("session") 
 
+    const handleSelectChat = React.useCallback((chatSession: ChatSession) => {
+        setSelectedChat(chatSession);
+        history.push(`/app/edit-chatbot/${chatbotId}/chat-sessions?session=${chatSession._id}`)
+    }, [chatbotId, history]);
+
 
     useEffect(() => {
         async function fetchData() {
@@ -40,7 +45,7 @@ export const ChatSessionsNew = ({ chatbotId }: ChatSessionsProps) => {
 
         }
         fetchData();
-    }, [chatbotId]);
+    }, [chatbotId, handleSelectChat, sessionId]);
 
     const addManualMessage = (chatData: ChatSessionDetail, data: IChatEmitData) => {
         const newMessage = { type: 'MANUAL', ...data, ts: new Date() } as any;
@@ -62,9 +67,9 @@ export const ChatSessionsNew = ({ chatbotId }: ChatSessionsProps) => {
 
 
     useEffect(() => {
-        socket.on('chat', onChatEvent);
+        socket.on('admin_chat', onChatEvent);
         return () => {
-            socket.off('chat', onChatEvent);
+            socket.off('admin_chat', onChatEvent);
         };
     }, [onChatEvent]);
 
@@ -75,7 +80,7 @@ export const ChatSessionsNew = ({ chatbotId }: ChatSessionsProps) => {
             setChatData(updatedChatData);
         }
         console.log(msg, 'sent');
-        socket?.emit('chat', { sender: 'admin', sessionId, msg });
+        socket.emit('admin_chat', { sender: 'admin', sessionId, msg });
     };
 
     const handlePageClick = React.useCallback(async (selectedPage: number) => {
@@ -89,7 +94,7 @@ export const ChatSessionsNew = ({ chatbotId }: ChatSessionsProps) => {
         } finally {
             setIsChatLoading(false);
         }
-    }, [chatbotId]);
+    }, [chatbotId, handleSelectChat]);
 
     const updateChatSessionReadStatus = useCallback(async (chatId: string, isUnread: boolean) => {
         try {
@@ -108,7 +113,6 @@ export const ChatSessionsNew = ({ chatbotId }: ChatSessionsProps) => {
             console.log("Unable to update chatSessions", error);
         }
     }, [chatSessions, setChatSessions]);
-
 
     React.useEffect(() => {
         let ignore = false;
@@ -129,7 +133,7 @@ export const ChatSessionsNew = ({ chatbotId }: ChatSessionsProps) => {
         }
         fetchData();
         return () => { ignore = true };
-    }, [selectedChat]);
+    }, [selectedChat, updateChatSessionReadStatus]);
 
     const onDeleteChat = useCallback(async (chatId: string) => {
         try {
@@ -145,13 +149,7 @@ export const ChatSessionsNew = ({ chatbotId }: ChatSessionsProps) => {
         } catch (error) {
             console.log("Unable to delete chatSessions", error);
         }
-    }, [chatSessions, setChatSessions])
-
-
-    const handleSelectChat = React.useCallback((chatSession: ChatSession) => {
-        setSelectedChat(chatSession);
-        history.push(`/app/edit-chatbot/${chatbotId}/chat-sessions?session=${chatSession._id}`)
-    }, []);
+    }, [chatSessions, handlePageClick])
 
 
     if (!chatSessions?.results.length) {

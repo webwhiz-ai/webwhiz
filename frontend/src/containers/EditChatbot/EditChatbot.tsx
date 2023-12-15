@@ -811,13 +811,14 @@ const EditChatbot = (props: EditChatbotProps) => {
 		}
 		socket.on('connect', onConnect);
 		socket.on('disconnect', onDisconnect);
-		socket.on('chat', onChatEvent);
+		socket.on('admin_chat', onChatEvent);
 		return () => {
+			console.log('unmounting');
 			socket.off('connect', onConnect);
 			socket.off('disconnect', onDisconnect);
-			socket.off('chat', onChatEvent);
+			socket.off('admin_chat', onChatEvent);
 		};
-	}, []);
+	}, [onChatEvent]);
 
 
 	const getMainComponent = React.useCallback(() => {

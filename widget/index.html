@@ -383,12 +383,12 @@
         }
 
         const initSocketConnection = () => {
-            var socket = io('https://api.webwhiz.ai', { transports: ["websocket"], query: { id: sessionId } });
+            var socket = io(`${baseURL}`, { transports: ["websocket"], query: { id: sessionId } });
             socket.on('connect', function() {
                 console.log('connected');
                 insertMessageIntoUI(createChatWithHumanDivider());
             });
-            socket.on('chat', function(msgData) {
+            socket.on('user_chat', function(msgData) {
                 // append to UI 
                 const chatMessage = createChatMessage(msgData.msg, true);
                 insertMessageIntoUI(chatMessage);
@@ -672,7 +672,7 @@
         }
         let isManualChat = false;
         async function initManualChat(sessionId) {
-            const url = `https://api.webwhiz.ai/chatbot/session/${sessionId}/initiate-manual`;
+            const url = `${baseURL}/chatbot/session/${sessionId}/initiate-manual`;
             try {
                 const response = await fetch(url, {
                     method: 'POST',
@@ -817,7 +817,7 @@
                 const msgData = { 'sender': 'user', 'msg': message, 'sessionId': sessionId }
                 console.log('socketDatasent', socketData);
                 // send message to admin
-                socketData.emit('chat', msgData);
+                socketData.emit('user_chat', msgData);
                 console.log('message sent', msgData);
                 return;
             }
