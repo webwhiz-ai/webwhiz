@@ -27,6 +27,8 @@ import { TaskModule } from './task/task.module';
 import { ChatbotService } from './knowledgebase/chatbot/chatbot.service';
 import { AppConfigService } from './common/config/appConfig.service';
 import { MaxJobQueue } from './common/max-job-queue';
+import * as AdmZip from 'adm-zip';
+import { EmailService } from './common/email/email.service';
 
 @Module({
   imports: [
@@ -81,6 +83,7 @@ async function bootstrap() {
   const inscriptisService = app.get(InscriptisImporterService);
   const kbDbService = app.get(KnowledgebaseDbService);
   const chatbotService = app.get(ChatbotService);
+  const emailService = app.get(EmailService);
   const logger = new Logger('CrawlerWorker');
 
   // Celery Worker Init
@@ -227,9 +230,48 @@ async function bootstrap() {
     await chatbotService.notifyUserOfTokenLimitExhaustion(id);
   }
 
+  /**
+   * Worker function for Caas Crawl
+   * @param crawlData
+   * @returns
+   */
+  async function caasCrawl(crawlData: CrawlConfig, email: string) {
+    return crawlerJobQueue.addJob(async () => {
+      console.log('Caas Crawldata', crawlData);
+
+      try {
+        const zipsteam = new AdmZip();
+        const crawlStats = await crawlerService.crawl(
+          crawlData,
+          async (pageData) => {
+            zipsteam.addFile(
+              `${pageData.title}.json`,
+              Buffer.from(JSON.stringify(pageData), 'utf8'),
+            );
+          },
+        );
+
+        console.log(crawlStats);
+
+        // Send the zip file as email
+        const res = emailService.sendEmailWithAttachment(
+          email,
+          'website_data.zip',
+          'application/zip',
+          zipsteam.toBuffer(),
+        );
+
+        logger.log(`Email response ${res}`);
+      } catch (err) {
+        logger.error(`Error in crawl`);
+      }
+    });
+  }
+
   worker.register('tasks.crawl', doCrawl);
   worker.register('tasks.gen_embeddings', generateEmbeddingsForKnowledgebase);
   worker.register('tasks.notify_token_limit', notifyTokenLimit);
+  worker.register('tasks.caas_crawl', caasCrawl);
   worker.start();
 }
 

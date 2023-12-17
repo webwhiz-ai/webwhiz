@@ -35,6 +35,31 @@ export class EmailService {
     return res;
   }
 
+  async sendEmailWithAttachment(
+    email: string,
+    attachmentName: string,
+    attachmentType: string,
+    attachment: Buffer,
+  ) {
+    const msg = {
+      to: email,
+      from: { email: 'hi@webwhiz.ai', name: 'WebWhiz.ai' },
+      subject: 'Sending with SendGrid is Fun',
+      text: 'Hi,\n\nPFA the website crawl data',
+      attachments: [
+        {
+          content: attachment.toString('base64'),
+          filename: attachmentName,
+          type: attachmentType,
+          disposition: 'attachment',
+        },
+      ],
+    };
+
+    const res = await sgMail.send(msg);
+    return res;
+  }
+
   async sendOfflineMsgEmail(
     email: string,
     websiteUrl: string,
