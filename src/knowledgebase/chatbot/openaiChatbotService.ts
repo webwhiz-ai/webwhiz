@@ -255,7 +255,7 @@ export class OpenaiChatbotService {
     // Try to Add 2 chunks initially
     let ctx = '';
     let tokenCount = 0;
-    for (let i = 0; i < Math.max(2, topChunks.length); i++) {
+    for (let i = 0; i < Math.min(2, topChunks.length); i++) {
       const chunk = topChunks[i];
       const ctxSection = getCtxBlock(chunk);
       const tokens = this.openaiService.getTokenCount(ctxSection);
