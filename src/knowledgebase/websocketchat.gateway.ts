@@ -6,12 +6,13 @@ import {
   OnGatewayInit,
   SubscribeMessage,
 } from '@nestjs/websockets';
-import { Inject, Logger } from '@nestjs/common';
+import { Logger, Inject, forwardRef } from '@nestjs/common';
 import { Socket } from 'socket.io';
 import { Redis } from 'ioredis';
-import { REDIS } from '../../common/redis/redis.module';
-import { ChatQueryAnswer } from '../knowledgebase.schema';
-import { ChatbotService } from './chatbot.service';
+import { ChatQueryAnswer } from './knowledgebase.schema';
+import { AppConfigService } from '../common/config/appConfig.service';
+import { ChatbotService } from './chatbot/chatbot.service';
+import { OfflineMsgService } from './offline-msg/offline-msg.service';
 
 const ONLINE_SESSIONS_REDIS_KEY = 'onlineSessions';
 const ONLINE_ADMINS_REDIS_KEY = 'onlineAdmins';
@@ -22,15 +23,30 @@ const USER_SESSION_ADMIN_MAPPING_KEY = 'userSessionAdminMapping';
     origin: '*',
   },
 })
-export class ChatGateway
+export class WebSocketChatGateway
   implements OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit
 {
-  constructor(
-    @Inject(REDIS) private redis: Redis,
-    private chatBotService: ChatbotService,
-  ) {}
-  private readonly logger = new Logger(ChatGateway.name);
   @WebSocketServer() server;
+  private readonly logger = new Logger(WebSocketChatGateway.name);
+  private redisClient: Redis;
+
+  constructor(
+    private appConfig: AppConfigService,
+    @Inject(forwardRef(() => ChatbotService))
+    private chatbotService: ChatbotService,
+    private offlineMsgService: OfflineMsgService,
+  ) {
+    const redisUrl = this.appConfig.get('redisUrl');
+
+    if (redisUrl) {
+      this.redisClient = new Redis(redisUrl);
+    } else {
+      this.redisClient = new Redis({
+        host: this.appConfig.get('redisHost'),
+        port: this.appConfig.get('redisPort'),
+      });
+    }
+  }
 
   afterInit() {
     this.logger.log('Websocket gateway initialized.');
@@ -44,11 +60,11 @@ export class ChatGateway
     if (query.isAdmin) {
       this.logger.log('Admin joined joined ', sessionId);
       // set online admins in redis
-      this.redis.hset(ONLINE_ADMINS_REDIS_KEY, sessionId, 1);
+      this.redisClient.hset(ONLINE_ADMINS_REDIS_KEY, sessionId, 1);
       // join admin room
       socket.join(sessionId);
       // iterate all users from redis
-      const onlineSessions = await this.redis.hgetall(
+      const onlineSessions = await this.redisClient.hgetall(
         ONLINE_SESSIONS_REDIS_KEY,
       );
       for (const userSessionId in onlineSessions) {
@@ -57,14 +73,20 @@ export class ChatGateway
     } else {
       this.logger.log('New client joined ', sessionId);
       // set user in redis
-      this.redis.hset(ONLINE_SESSIONS_REDIS_KEY, sessionId, 1);
+      this.redisClient.hset(ONLINE_SESSIONS_REDIS_KEY, sessionId, 1);
       // join chat room
       socket.join(sessionId);
       // assign admin // change this when we have multiple admins
-      const onlineAdmins = await this.redis.hgetall(ONLINE_ADMINS_REDIS_KEY);
+      const onlineAdmins = await this.redisClient.hgetall(
+        ONLINE_ADMINS_REDIS_KEY,
+      );
       for (const adminId in onlineAdmins) {
         this.logger.log(`assign session ${sessionId} to admin ${adminId}`);
-        this.redis.hset(USER_SESSION_ADMIN_MAPPING_KEY, sessionId, adminId);
+        this.redisClient.hset(
+          USER_SESSION_ADMIN_MAPPING_KEY,
+          sessionId,
+          adminId,
+        );
         socket.to(adminId).emit('user_assigned', sessionId);
       }
     }
@@ -76,12 +98,12 @@ export class ChatGateway
     const sessionId: any = query.id;
     if (query.isAdmin) {
       // remove online admin from redis
-      this.redis.hdel(ONLINE_ADMINS_REDIS_KEY, sessionId);
+      this.redisClient.hdel(ONLINE_ADMINS_REDIS_KEY, sessionId);
       this.logger.log('Admin disconnected ', query.id);
     } else {
       this.logger.log('Client disconnected ', query);
       // remove user from redis
-      this.redis.hdel(ONLINE_SESSIONS_REDIS_KEY, sessionId);
+      this.redisClient.hdel(ONLINE_SESSIONS_REDIS_KEY, sessionId);
     }
   }
 
@@ -91,14 +113,14 @@ export class ChatGateway
 
     client.to(msgData.sessionId).emit('user_chat', msgData);
 
-    this.chatBotService.saveManualChat(msgData.sessionId, msgData);
+    this.chatbotService.saveManualChat(msgData.sessionId, msgData);
   }
 
   @SubscribeMessage('user_chat')
   async onUserChat(client: Socket, msgData: ChatQueryAnswer) {
     this.logger.log('New user chat message ', msgData);
 
-    const adminId = await this.redis.hget(
+    const adminId = await this.redisClient.hget(
       USER_SESSION_ADMIN_MAPPING_KEY,
       msgData.sessionId,
     );
@@ -106,6 +128,22 @@ export class ChatGateway
       client.to(adminId).emit('admin_chat', msgData);
     }
 
-    this.chatBotService.saveManualChat(msgData.sessionId, msgData);
+    // save the chat in db
+    const knowledgeBaseId = await this.chatbotService.saveManualChat(
+      msgData.sessionId,
+      msgData,
+    );
+
+    const onlineAdmins = await this.redisClient.hgetall(
+      ONLINE_ADMINS_REDIS_KEY,
+    );
+
+    if (Object.keys(onlineAdmins).length === 0) {
+      // send email if the admin is offline
+      this.offlineMsgService.sendEmailForOfflineManualMessage(
+        knowledgeBaseId,
+        msgData.msg,
+      );
+    }
   }
 }

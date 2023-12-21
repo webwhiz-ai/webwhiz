@@ -77,7 +77,16 @@ export class ChatbotController {
   @Post('/session/:sessionId/initiate-manual')
   @HttpCode(200)
   async initiateManualSession(@Param('sessionId') sessionId: string) {
-    return this.chatbotService.initiateManualChatSession(sessionId);
+    const isManual = true;
+    return this.chatbotService.switchChatSession(sessionId, isManual);
+  }
+
+  @Public()
+  @Post('/session/:sessionId/initiate-bot')
+  @HttpCode(200)
+  async initiateBotSession(@Param('sessionId') sessionId: string) {
+    const isManual = false;
+    return this.chatbotService.switchChatSession(sessionId, isManual);
   }
 
   @Get('/session/:id')

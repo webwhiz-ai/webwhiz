@@ -183,6 +183,7 @@ export type ChatSessionSparse = Pick<
   | '_id'
   | 'knowledgebaseId'
   | 'src'
+  | 'isManual'
   | 'messages'
   | 'userData'
   | 'startedAt'
