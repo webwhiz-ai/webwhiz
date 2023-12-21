@@ -463,6 +463,7 @@ export class KnowledgebaseDbService {
         projection: {
           _id: 1,
           src: 1,
+          isManual: 1,
           messages: 1,
           userData: 1,
           startedAt: 1,

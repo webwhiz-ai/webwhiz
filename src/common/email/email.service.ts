@@ -61,6 +61,22 @@ export class EmailService {
     return res;
   }
 
+  async sendManualMsgEmail(email: string, queryText: string) {
+    if (!this.isSgInitialized) return;
+
+    const msg = {
+      to: email,
+      from: { email: 'hi@webwhiz.ai', name: 'WebWhiz.ai' },
+      templateId: 'd-a4f34375b9504c5d94f6d9e3eafe0214',
+      dynamicTemplateData: {
+        msg_msg: queryText,
+      },
+    };
+
+    const res = await sgMail.send(msg);
+    return res;
+  }
+
   async sendToken80ExhaustedEmail(email: string) {
     if (!this.isSgInitialized) return;
 

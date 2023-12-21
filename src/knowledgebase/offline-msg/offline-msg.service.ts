@@ -1,4 +1,10 @@
-import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Inject,
+  Injectable,
+  Logger,
+} from '@nestjs/common';
 import { Collection, Db, ObjectId } from 'mongodb';
 import { MONGODB } from '../../common/mongo/mongo.module';
 import { UserSparse } from '../../user/user.schema';
@@ -14,6 +20,7 @@ import { WebhookEventType } from '../../webhook/webhook.types';
 @Injectable()
 export class OfflineMsgService {
   private readonly offlineMsgCollection: Collection<OfflineMessage>;
+  private readonly logger = new Logger(OfflineMsgService.name);
 
   constructor(
     @Inject(MONGODB) private db: Db,
@@ -164,5 +171,34 @@ export class OfflineMsgService {
     }
 
     return this.getPaginatedOfflineMsgsForKnowledgebase(kbId, pageSize, page);
+  }
+
+  async sendEmailForOfflineManualMessage(
+    knowledgebaseId: ObjectId,
+    msg: string,
+  ) {
+    const kb = await this.kbDbService.getKnowledgebaseById(knowledgebaseId);
+    if (!kb) {
+      this.logger.error('Invalid Knowledgebase', knowledgebaseId);
+      return;
+    }
+
+    // Choose email address to send this mail
+    // If adminEmail field is set user that, else use owner email
+    let email = '';
+    if (kb.adminEmail) {
+      email = kb.adminEmail;
+    } else {
+      // Get kb owner
+      const kbOwner = await this.userService.findUserByIdSparse(
+        kb.owner.toHexString(),
+      );
+      email = kbOwner.email;
+    }
+
+    // Send email
+    await this.emailService.sendManualMsgEmail(email, msg);
+
+    return;
   }
 }
