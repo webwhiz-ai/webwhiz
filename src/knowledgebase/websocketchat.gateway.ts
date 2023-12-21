@@ -140,6 +140,7 @@ export class WebSocketChatGateway
 
     if (Object.keys(onlineAdmins).length === 0) {
       // send email if the admin is offline
+      this.logger.log('No online admins online!!!!');
       this.offlineMsgService.sendEmailForOfflineManualMessage(
         knowledgeBaseId,
         msgData.msg,

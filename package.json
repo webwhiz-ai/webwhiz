@@ -56,7 +56,8 @@
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.2.0",
     "socket.io": "^4.7.2",
-    "turndown": "^7.1.2"
+    "turndown": "^7.1.2",
+    "uuid": "^9.0.1"
   },
   "devDependencies": {
     "@automock/jest": "^1.0.1",

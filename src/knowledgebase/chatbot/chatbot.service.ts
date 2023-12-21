@@ -9,6 +9,7 @@ import {
 import { Redis } from 'ioredis';
 import { ObjectId } from 'mongodb';
 import { endWith, map, of, skipLast } from 'rxjs';
+import { v4 as uuidv4 } from 'uuid';
 import {
   CELERY_CLIENT,
   CeleryClientQueue,
@@ -258,6 +259,7 @@ export class ChatbotService {
     if (!allowUsage) {
       const answer = 'Sorry I cannot respond right now';
       const msg = {
+        id: uuidv4(),
         type: MessageType.BOT,
         q: query,
         a: answer,
@@ -307,6 +309,7 @@ export class ChatbotService {
     );
 
     const msg = {
+      id: uuidv4(),
       type: MessageType.BOT,
       q: query,
       a: answer.response,
@@ -342,6 +345,7 @@ export class ChatbotService {
     }
 
     const msg = {
+      id: uuidv4(),
       type: MessageType.MANUAL,
       q: null,
       a: null,
@@ -381,6 +385,7 @@ export class ChatbotService {
     if (!allowUsage) {
       const answer = 'Sorry I cannot respond right now';
       const msg = {
+        id: uuidv4(),
         type: MessageType.BOT,
         q: query,
         a: answer,
@@ -425,6 +430,7 @@ export class ChatbotService {
       prevMessages,
       async (answer, usage) => {
         const msg = {
+          id: uuidv4(),
           type: MessageType.BOT,
           q: query,
           a: answer,
@@ -563,6 +569,7 @@ export class ChatbotService {
     ]);
 
     const msgData = {
+      id: uuidv4(),
       type: 'SYSTEM',
       ts: new Date(),
       msg: 'New session',

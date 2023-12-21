@@ -146,6 +146,7 @@ export enum MessageType {
 }
 
 export interface ChatQueryAnswer {
+  id: string;
   type?: MessageType;
   q: string;
   a: string;
