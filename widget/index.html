@@ -382,14 +382,15 @@
             //return response;
         }
 
-        const initSocketConnection = () => {
-            var socket = io(`${baseURL}`, { transports: ["websocket"], query: { id: sessionId } });
+        const initSocketConnection = (sessionId) => {
+            var socket = io(`${baseURL}`, { transports: ["websocket"], query: { id: sessionId, knowledgebaseId: knowledgebaseId } });
             socket.on('connect', function() {
                 console.log('connected');
                 insertMessageIntoUI(createChatWithHumanDivider());
             });
             socket.on('user_chat', function(msgData) {
                 // append to UI 
+                console.log('user_chat', msgData);
                 const chatMessage = createChatMessage(msgData.msg, true);
                 insertMessageIntoUI(chatMessage);
             });
@@ -664,6 +665,7 @@
 
             if (response.status === 200) {
                 const result = await response.text()
+                socketData = initSocketConnection(result);
                 return result;
             } else {
                 console.log('error');
@@ -686,7 +688,6 @@
 
                 if (response.status === 200) {
                     const result = await response.text();
-                    socketData = initSocketConnection();
                     isManualChat = true;
 
                 } else {

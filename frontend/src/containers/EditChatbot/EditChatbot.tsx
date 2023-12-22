@@ -60,8 +60,6 @@ import { OfflineMessagesNew } from "../OfflineMessages/OfflineMessagesNew";
 import { ChatSessionsNew } from "../ChatSessions/ChatSessionsNew";
 import { Paginator } from "../../widgets/Paginator/Paginator";
 import { CustomDomain } from "../CustomDomain/CustomDomain";
-import { useConfirmation } from "../../providers/providers";
-import { socket } from "../../socket";
 export function validateEmailAddress(email: string) {
 	return email && !/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(email);
 }
@@ -796,29 +794,6 @@ const EditChatbot = (props: EditChatbotProps) => {
 			model: chatBot.chatWidgeData?.model || chatWidgetDefaultValues.model,
 		};
 	}, [chatBot]);
-
-
-	const onChatEvent = React.useCallback((data: { msg: string; sessionId: string; sender: 'admin' }) => {
-        console.log(data.msg, 'received');
-    }, []);
-
-	useEffect(() => {
-		const onConnect = () => {
-			console.log('connected');
-		}
-		const onDisconnect = () => {
-			console.log('disconnected');
-		}
-		socket.on('connect', onConnect);
-		socket.on('disconnect', onDisconnect);
-		socket.on('admin_chat', onChatEvent);
-		return () => {
-			console.log('unmounting');
-			socket.off('connect', onConnect);
-			socket.off('disconnect', onDisconnect);
-			socket.off('admin_chat', onChatEvent);
-		};
-	}, [onChatEvent]);
 
 
 	const getMainComponent = React.useCallback(() => {

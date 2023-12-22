@@ -6,8 +6,8 @@ import { ChatWindow } from '../../components/ChatSessions/ChatWindow'
 import { NoDataChatSessions } from '../../components/Icons/noData/NoDataChatSessions'
 import { useConfirmation } from '../../providers/providers'
 import { deleteChatSession, getChatSessionDetails, getChatSessions, readChatSession, unReadChatSession } from '../../services/knowledgebaseService'
-import { socket } from '../../socket'
 import { ChatSession, ChatSessionDetail, ChatSessionPagination } from '../../types/knowledgebase.type'
+import socketService from '../../services/SocketService'
 
 export type ChatSessionsProps = {
     chatbotId: string
@@ -57,21 +57,6 @@ export const ChatSessionsNew = ({ chatbotId }: ChatSessionsProps) => {
     };
 
 
-    const onChatEvent = useCallback((data: IChatEmitData) => {
-        console.log(data.msg, 'received');
-        if (chatData) {
-            const updatedChatData = addManualMessage(chatData, { msg: data.msg, sessionId: data.sessionId, sender: 'user' });
-            setChatData(updatedChatData);
-        }
-    }, [chatData]);
-
-
-    useEffect(() => {
-        socket.on('admin_chat', onChatEvent);
-        return () => {
-            socket.off('admin_chat', onChatEvent);
-        };
-    }, [onChatEvent]);
 
 
     const sendReplyToUser = (sessionId: string, msg: string) => {
@@ -80,6 +65,7 @@ export const ChatSessionsNew = ({ chatbotId }: ChatSessionsProps) => {
             setChatData(updatedChatData);
         }
         console.log(msg, 'sent');
+        const socket = socketService.getSocket(chatbotId);
         socket.emit('admin_chat', { sender: 'admin', sessionId, msg });
     };
 
@@ -150,6 +136,31 @@ export const ChatSessionsNew = ({ chatbotId }: ChatSessionsProps) => {
             console.log("Unable to delete chatSessions", error);
         }
     }, [chatSessions, handlePageClick])
+
+    const onChatEvent = useCallback((data: IChatEmitData) => {
+        console.log(data.msg, 'received');
+        if (chatData) {
+            const updatedChatData = addManualMessage(chatData, { msg: data.msg, sessionId: data.sessionId, sender: 'user' });
+            setChatData(updatedChatData);
+        }
+    }, [chatData]);
+	const onNewSessionEvent = React.useCallback((data: { msg: string; sessionId: string; sender: 'admin' }) => {
+        console.log(data, 'received');
+    }, []);
+	const onNewBotReply = React.useCallback((data: { msg: string; sessionId: string; sender: 'admin' }) => {
+        console.log(data, 'received');
+    }, []);
+
+	useEffect(() => {
+        const socket = socketService.getSocket(chatbotId);
+        console.log('socket', socket)
+		socket.on('admin_chat', onChatEvent);
+		socket.on('new_session', onNewSessionEvent);
+		socket.on('chat_broadcast', onNewBotReply);
+		return () => {
+            socketService.disconnectSocket(chatbotId);
+		};
+	}, [chatbotId, onChatEvent, onNewBotReply, onNewSessionEvent]);
 
 
     if (!chatSessions?.results.length) {
