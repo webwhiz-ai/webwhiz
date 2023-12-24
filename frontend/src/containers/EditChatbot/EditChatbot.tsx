@@ -786,6 +786,7 @@ const EditChatbot = (props: EditChatbotProps) => {
 			requiredFieldMsg: chatBot.chatWidgeData?.requiredFieldMsg || chatWidgetDefaultValues.requiredFieldMsg,
 			invalidEmailMsg: chatBot.chatWidgeData?.invalidEmailMsg || chatWidgetDefaultValues.invalidEmailMsg,
 			formSubmitBtnLabel: chatBot.chatWidgeData?.formSubmitBtnLabel || chatWidgetDefaultValues.formSubmitBtnLabel,
+			enableHumanChat: chatBot.chatWidgeData?.enableHumanChat || chatWidgetDefaultValues.enableHumanChat,
 			formSubmitBtnSubmittingText: chatBot.chatWidgeData?.formSubmitBtnSubmittingText || chatWidgetDefaultValues.formSubmitBtnSubmittingText,
 			formSubmitSuccessMsg: chatBot.chatWidgeData?.formSubmitSuccessMsg || chatWidgetDefaultValues.formSubmitSuccessMsg,
 			formSubmitErrorMsg: chatBot.chatWidgeData?.formSubmitErrorMsg || chatWidgetDefaultValues.formSubmitErrorMsg,
