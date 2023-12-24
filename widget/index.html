@@ -658,6 +658,7 @@
                     notifyNewSession(sessionId);
                 }
                 await initManualChat(sessionId);
+                document.getElementById('chat-input').focus();
 
             });
 
@@ -672,6 +673,7 @@
                     notifyNewSession(sessionId);
                 }
                 await initBotChat(sessionId);
+                document.getElementById('chat-input').focus();
             });
 
             const widgetConfig = {}
