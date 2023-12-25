@@ -303,6 +303,12 @@
                 );
         };
 
+        const uuidv4 = () => {
+            return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, c =>
+                (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
+            );
+        }
+
         marked.setOptions({
             highlight: function(code, lang) {
                 const language = hljs.getLanguage(lang) ? lang : 'plaintext';
@@ -414,7 +420,8 @@
                 insertMessageIntoUI(chatMessage);
                 const newMessageAdmin = {
                     role: "assistant",
-                    content: msgData.msg
+                    content: msgData.msg,
+                    id: uuidv4(),
                 };
                 notifyNewMessage([newMessageAdmin])
             });
@@ -744,7 +751,8 @@
                     insertMessageIntoUI(createChatWithDivider(`Let's Chat, Human!`));
                     const startChatDivider = {
                         role: "divider",
-                        content: `Let's Chat, Human!`
+                        content: `Let's Chat, Human!`,
+                        id: uuidv4(),
                     };
                     notifyNewMessage([startChatDivider])
                     isManualChat = true;
@@ -777,7 +785,8 @@
                     updateIsManualChat(isManualChat)
                     const botReadyDivider = {
                         role: "divider",
-                        content: `Bot Ready to Chat!`
+                        content: `Bot Ready to Chat!`,
+                        id: uuidv4(),
                     };
                     notifyNewMessage([botReadyDivider])
 
@@ -892,7 +901,8 @@
             if (!message) return;
             const newMessageUser = {
                 role: "user",
-                content: message
+                content: message,
+                id: uuidv4(),
             };
 
             const chatMessages = document.getElementById('chat-messages');
@@ -906,7 +916,7 @@
 
 
             if (isManualChat) {
-                const msgData = { 'sender': 'user', 'msg': message, 'sessionId': sessionId }
+                const msgData = { 'sender': 'user', 'msg': message,  id: uuidv4(), 'sessionId': sessionId }
                 // send message to admin
                 socketData.emit('user_chat', msgData);
                 console.log('message sent:', msgData, 'socketData:', socketData);
@@ -962,7 +972,8 @@
                     } else {
                         const newMessageAssistant = {
                             role: "assistant",
-                            content: msg
+                            content: msg,
+                            id: uuidv4(),
                         };
                         messages.push(newMessageUser);
                         messages.push(newMessageAssistant);
