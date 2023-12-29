@@ -148,9 +148,15 @@
                     <button class="btn btn-primary" id="offline-message-error-close" type="button">Try Again</button>
                 </div>
             </div>
-            <div class="chat-sample-messages hide-sample-messages" id="chat-sample-messages">
-                <button type="button" class="chat-with-human" id="chat-with-human">Chat with human</button>
+            <div class="chat-options">
+                <button type="button" class="chat-with-human" style="display: none;" id="chat-with-human">Chat with
+                    human</button>
+                <button type="button" class="chat-with-bot" style="display: none;" id="chat-with-bot">Chat with
+                    bot</button>
+                <div class="chat-sample-messages hide-sample-messages" id="chat-sample-messages">
+                </div>
             </div>
+
             <form id="chat-form" class="chat-input-wrap">
                 <textarea rows='1' class="chat-input textarea js-auto-size" id="chat-input"
                     placeholder="Type your message"></textarea>
@@ -191,10 +197,16 @@
         let isFirstMessage = true;
 
         let collectEmail = false;
+        let enableHumanChat = false;
+        let isManualChat = false;
         let collectEmailText = 'Read More:';
+
+        const chatWithHumanButton = document.getElementById('chat-with-human');
+        const chatWithBotButton = document.getElementById('chat-with-bot');
 
         const defaultWelcomeMessage = 'Hello! How can I assist you today?';
         const submitBtnSubmittingText = 'Submitting...';
+
 
         let sessionId = '';
 
@@ -253,6 +265,9 @@
                     msgContent = replaceAll(msgContent, '&gt;', '>')
                     msgContent = replaceAll(msgContent, '<br/>', '\n')
                     const markdownRes = marked.parse(msgContent);
+                    if (msg.role === 'divider') {
+                        return createChatWithDivider(msgContent)
+                    }
                     return `<div class="chat-message ${type}"><div class="chat-message-text">${markdownRes}</div></div>`
                 })
                 msgHTML = msgHTML.join('');
@@ -263,11 +278,15 @@
                 chatMessages.scrollTop = chatMessages.scrollHeight;
             } else if (event.data.messageType === 'webwhiz:recieve_session_id') {
                 sessionId = event.data.sessionId;
+            } else if (event.data.messageType === 'webwhiz:recieve_is_manual_chat') {
+                console.log(event.data.isManualChat, ' event.data.isManualChat');
+                isManualChat = event.data.isManualChat;
             }
         }
 
         requestChatHistoryData();
         requestSessionId();
+        requestIsManualChat();
 
         const defaultWidgetData = {
             backgroundColor: "#000",
@@ -283,6 +302,12 @@
                     /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
                 );
         };
+
+        const uuidv4 = () => {
+            return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, c =>
+                (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
+            );
+        }
 
         marked.setOptions({
             highlight: function(code, lang) {
@@ -382,23 +407,29 @@
             //return response;
         }
 
-        const initSocketConnection = (sessionId) => {
+        async function initSocketConnection(sessionId) {
             var socket = io(`${baseURL}`, { transports: ["websocket"], query: { id: sessionId, knowledgebaseId: knowledgebaseId } });
             socket.on('connect', function() {
                 console.log('connected');
-                insertMessageIntoUI(createChatWithHumanDivider());
+
             });
             socket.on('user_chat', function(msgData) {
                 // append to UI 
                 console.log('user_chat', msgData);
                 const chatMessage = createChatMessage(msgData.msg, true);
                 insertMessageIntoUI(chatMessage);
+                const newMessageAdmin = {
+                    role: "assistant",
+                    content: msgData.msg,
+                    id: uuidv4(),
+                };
+                notifyNewMessage([newMessageAdmin])
             });
-
             return socket;
         }
 
         (async () => {
+
             const data = await getWidgetData();
             if (!knowledgebaseId) {
                 knowledgebaseId = data.id;
@@ -406,7 +437,19 @@
             const chatWidgetData = data.chatWidgeData;
             showReadMore = chatWidgetData.showReadMore;
             collectEmail = chatWidgetData.collectEmail;
+
+            enableHumanChat = chatWidgetData.enableHumanChat
+            if (enableHumanChat) {
+                chatWithHumanButton.style.display = isManualChat ? 'none' : 'block';
+                chatWithBotButton.style.display = isManualChat ? 'block' : 'none';
+            } else {
+                isManualChat = false;
+                updateIsManualChat(false)
+            }
+
             requestMetaData();
+            socketData = await initSocketConnection(sessionId)
+            console.log(socketData, 'socketData');
 
             const heading = document.getElementById('chat-heading');
             const description = document.getElementById('chat-description');
@@ -608,8 +651,12 @@
                 }
             });
 
-            document.getElementById('chat-with-human').addEventListener('click', async (e) => {
-                document.getElementById('chat-with-human').style.display = 'none';
+
+
+            chatWithHumanButton.addEventListener('click', async (e) => {
+                if (!enableHumanChat) return;
+                chatWithHumanButton.style.display = 'none';
+                chatWithBotButton.style.display = 'block';
                 if (!sessionId) {
                     sessionId = await createSession({
                         userAgent: getUserAgent(),
@@ -617,11 +664,24 @@
                     });
                     notifyNewSession(sessionId);
                 }
-
                 await initManualChat(sessionId);
-                console.log(socketData);
+                document.getElementById('chat-input').focus();
+
             });
 
+            chatWithBotButton.addEventListener('click', async (e) => {
+                chatWithBotButton.style.display = 'none';
+                chatWithHumanButton.style.display = 'block';
+                if (!sessionId) {
+                    sessionId = await createSession({
+                        userAgent: getUserAgent(),
+                        origin: origin
+                    });
+                    notifyNewSession(sessionId);
+                }
+                await initBotChat(sessionId);
+                document.getElementById('chat-input').focus();
+            });
 
             const widgetConfig = {}
 
@@ -665,14 +725,14 @@
 
             if (response.status === 200) {
                 const result = await response.text()
-                socketData = initSocketConnection(result);
+                socketData = await initSocketConnection(result);
                 return result;
             } else {
                 console.log('error');
             }
             //return response;
         }
-        let isManualChat = false;
+
         async function initManualChat(sessionId) {
             const url = `${baseURL}/chatbot/session/${sessionId}/initiate-manual`;
             try {
@@ -688,7 +748,47 @@
 
                 if (response.status === 200) {
                     const result = await response.text();
+                    insertMessageIntoUI(createChatWithDivider(`Let's Chat, Human!`));
+                    const startChatDivider = {
+                        role: "divider",
+                        content: `Let's Chat, Human!`,
+                        id: uuidv4(),
+                    };
+                    notifyNewMessage([startChatDivider])
                     isManualChat = true;
+                    updateIsManualChat(isManualChat)
+
+                } else {
+                    console.error('Error:', response.status);
+                }
+            } catch (error) {
+                console.error('Network error:', error.message);
+            }
+        }
+        async function initBotChat(sessionId) {
+            const url = `${baseURL}/chatbot/session/${sessionId}/initiate-bot`;
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        Accept: 'application/json',
+                        'Content-Type': 'application/json',
+                    },
+                    referrerPolicy: 'no-referrer',
+                    body: JSON.stringify({}),
+                });
+
+                if (response.status === 200) {
+                    const result = await response.text();
+                    insertMessageIntoUI(createChatWithDivider('Bot Ready to Chat!'));
+                    isManualChat = false;
+                    updateIsManualChat(isManualChat)
+                    const botReadyDivider = {
+                        role: "divider",
+                        content: `Bot Ready to Chat!`,
+                        id: uuidv4(),
+                    };
+                    notifyNewMessage([botReadyDivider])
 
                 } else {
                     console.error('Error:', response.status);
@@ -765,11 +865,11 @@
             };
         }
 
-        const getUserAgent = () => {
+        function getUserAgent() {
             return navigator.userAgent || navigator.vendor || window.opera
         }
 
-        const createChatWithHumanDivider = (chatWithWhom = 'Chat with human') => {
+        function createChatWithDivider(chatWithWhom) {
             return `
                 <div class="divider">
                     <span class="divider-line"></span>
@@ -780,7 +880,7 @@
         };
 
 
-        const createChatMessage = (msg, isChatbot) => {
+        function createChatMessage(msg, isChatbot) {
             const messageType = isChatbot ? 'chatbot' : 'user';
             return `<div class="chat-message ${messageType}">
                 <div class="chat-message-text">${msg}</div>
@@ -788,7 +888,7 @@
             `;
         };
 
-        const insertMessageIntoUI = (message) => {
+        function insertMessageIntoUI(message) {
             const chatMessages = document.getElementById('chat-messages');
             chatMessages.insertAdjacentHTML('beforeend', message);
             chatMessages.scrollTop = chatMessages.scrollHeight;
@@ -801,7 +901,8 @@
             if (!message) return;
             const newMessageUser = {
                 role: "user",
-                content: message
+                content: message,
+                id: uuidv4(),
             };
 
             const chatMessages = document.getElementById('chat-messages');
@@ -815,11 +916,12 @@
 
 
             if (isManualChat) {
-                const msgData = { 'sender': 'user', 'msg': message, 'sessionId': sessionId }
-                console.log('socketDatasent', socketData);
+                const msgData = { 'sender': 'user', 'msg': message,  id: uuidv4(), 'sessionId': sessionId }
                 // send message to admin
                 socketData.emit('user_chat', msgData);
-                console.log('message sent', msgData);
+                console.log('message sent:', msgData, 'socketData:', socketData);
+                messages.push(newMessageUser);
+                notifyNewMessage([newMessageUser])
                 return;
             }
             if (STREAM_RESPONSE) {
@@ -870,11 +972,12 @@
                     } else {
                         const newMessageAssistant = {
                             role: "assistant",
-                            content: msg
+                            content: msg,
+                            id: uuidv4(),
                         };
                         messages.push(newMessageUser);
                         messages.push(newMessageAssistant);
-                        notifyNewMessage(messages)
+                        notifyNewMessage([newMessageUser, newMessageAssistant])
                         msg = replaceAll(msg, '&lt;', '<')
                         msg = replaceAll(msg, '&gt;', '>')
                         msg = replaceAll(msg, '<br/>', '\n')
@@ -1054,6 +1157,17 @@
 
         function requestSessionId() {
             window.top.postMessage('webwhiz:request_session_id', '*');
+        }
+
+        function requestIsManualChat() {
+            window.top.postMessage('webwhiz:request_is_manual_chat', '*');
+        }
+
+        function updateIsManualChat(isManualChat) {
+            window.top.postMessage({
+                messageType: 'webwhiz:update_is_manual_chat',
+                isManualChat: isManualChat || false
+            }, '*');
         }
 
 

@@ -524,6 +524,26 @@ export const ChatBotsCustomize = ({
 																</FormControl>
 															)}
 														</Field>
+														<Field type="text" name="enableHumanChat">
+															{({ field, form }: any) => (
+																<FormControl mb="6">
+																	<Flex justifyContent="space-between" w="100%" alignItems="center">
+
+																		<FormLabel fontWeight="400" fontSize="sm" color="gray.700" htmlFor="enableHumanChat">
+																			Enable human chat
+																		</FormLabel>
+																		<Switch
+																			{...field}
+																			defaultChecked={(defaultCustomizationValues || chatWidgetDefaultValues).enableHumanChat}
+																			onChange={(event) => { handleSwitchChange(event, form) }}
+																			colorScheme="teal"
+																			size="md"
+																			mr="2"
+																		/>
+																	</Flex>
+																</FormControl>
+															)}
+														</Field>
 														<Field type="text" name="collectEmail">
 															{({ field, form }: any) => (
 																<FormControl mb="6">
@@ -544,6 +564,7 @@ export const ChatBotsCustomize = ({
 																</FormControl>
 															)}
 														</Field>
+
 														{values.collectEmail && (
 															<Field type="text" name="collectEmailText">
 																{({ field, form }: any) => (

@@ -30,6 +30,7 @@ export const ChatList = ({ isChatListLoading, chatSessionsPage, selectedChat, on
                     right={0}
                     left={0}
                     bg="whiteAlpha.700"
+                    zIndex={10}
                 >
                     <Spinner />
                 </Flex>

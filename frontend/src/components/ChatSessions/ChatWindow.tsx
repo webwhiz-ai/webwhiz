@@ -1,4 +1,4 @@
-import React, {  useRef, useEffect } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { Box, Spinner, Flex, VStack, HStack, Text } from '@chakra-ui/react';
 import { MessageList } from '../../types/knowledgebase.type';
 import { ChatBubble } from './ChatBubble';
@@ -22,6 +22,7 @@ export const ChatWindow = ({
     onChatReply
 }: ChatWindowProps) => {
     const chatListRef = useRef<HTMLDivElement | null>(null);
+    const inputRef = useRef<HTMLTextAreaElement | null>(null)
     const [question, setQuestion] = React.useState<string>('');
 
     const handleChatChange = React.useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -46,8 +47,12 @@ export const ChatWindow = ({
         if (chatListRef.current) {
             chatListRef.current.scrollTop = chatListRef.current.scrollHeight;
         }
-    }, [chatListRef?.current, messages]);
+    }, [messages]);
 
+    useEffect(() => {
+        if (!chatData?._id) return
+        inputRef.current?.focus()
+    }, [chatData?._id])
 
     const getChatHeader = React.useCallback(() => {
         if (!userData || !chatData) return null;
@@ -162,7 +167,7 @@ export const ChatWindow = ({
                     messages.map((message) => {
                         return (
                             <Box key={message.ts.toString()}>
-                                {message.type === 'MANUAL' ? <ChatBubble message={message.msg} type={message.sender === 'admin' ? 'bot': 'user'} /> :
+                                {message.type === 'MANUAL' ? <ChatBubble message={message.msg} type={message.sender === 'admin' ? 'bot' : 'user'} /> :
                                     <>
                                         <ChatBubble message={message.q || message.msg} type={'user'} />
                                         <ChatBubble message={message.a || message.msg} type={'bot'} />
@@ -174,7 +179,7 @@ export const ChatWindow = ({
                     })}
             </Box>
             <Box className="chat-input-wrap" style={{ position: 'absolute' }} w={'100%'} bottom={0} bgColor={'white'}>
-                <TextareaAutosize value={question} onChange={handleChatChange} onKeyDown={handleKeyDown} rows="1" className="chat-input textarea js-auto-size" id="chat-input" placeholder="Type your message" />
+                <TextareaAutosize ref={inputRef} autoFocus value={question} onChange={handleChatChange} onKeyDown={handleKeyDown} rows="1" className="chat-input textarea js-auto-size" id="chat-input" placeholder="Type your message" />
                 <button onClick={handleSubmit} className="chat-submit-btn" type="submit"><svg width="16" height="16" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path fillRule="evenodd" clipRule="evenodd" d="M4.394 14.7L13.75 9.3c1-.577 1-2.02 0-2.598L4.394 1.299a1.5 1.5 0 00-2.25 1.3v3.438l4.059 1.088c.494.132.494.833 0 .966l-4.06 1.087v4.224a1.5 1.5 0 002.25 1.299z" style={{ fill: '#000' }}></path>
                 </svg></button>
