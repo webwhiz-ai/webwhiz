@@ -5,6 +5,7 @@ Train ChatGPT on Your Website Data and Build an AI Chatbot that can instantly an
 ![webwhiz](https://user-images.githubusercontent.com/6586706/236858939-4f3e4ac0-f3f7-4f76-8fee-add747b09ce1.png)
 
 
+![commit](https://badgen.net/github/last-commit/webwhiz-ai/webwhiz/main)
 
 ## 🔥 Core features
 
