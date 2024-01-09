@@ -107,4 +107,18 @@ export class EmailService {
     const res = await sgMail.send(msg);
     return res;
   }
+
+  async sendInviteUserEmail(email: string) {
+    if (!this.isSgInitialized) return;
+
+    const msg = {
+      to: email,
+      from: { email: 'hi@webwhiz.ai', name: 'WebWhiz.ai' },
+      templateId: 'd-4ba3b2bf1f9e4fcea8c5e881c934a2c6',
+      dynamicTemplateData: {},
+    };
+
+    const res = await sgMail.send(msg);
+    return res;
+  }
 }
