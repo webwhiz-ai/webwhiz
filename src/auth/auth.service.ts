@@ -127,4 +127,13 @@ export class AuthService {
     await this.emailService.sendWelcomeEmail(newUser.email);
     return this.getJwtTokenForUser(newUser);
   }
+
+  /**
+   * Validates an API key and returns corresponding UserSparse object.
+   * @param apiKey - The API key to validate.
+   * @returns A Promise that resolves to a UserSparse object.
+   */
+  validateApiKey(apiKey: string): Promise<UserSparse> {
+    return this.userService.findUserByApiKey(apiKey);
+  }
 }
