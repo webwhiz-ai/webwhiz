@@ -17,6 +17,7 @@ import '@sentry/tracing';
 import { ImportersModule } from './importers/importers.module';
 import { TaskModule } from './task/task.module';
 import { WebhookModule } from './webhook/webhook.module';
+import { PublicApisModule } from './public-apis/public-apis.module';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { WebhookModule } from './webhook/webhook.module';
     SubscriptionModule,
     EmailModule,
     WebhookModule,
+    PublicApisModule,
   ],
   controllers: [AppController],
   providers: [AppService],
