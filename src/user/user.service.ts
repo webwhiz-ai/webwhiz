@@ -69,6 +69,19 @@ export class UserService {
     return sanitizeUser(user);
   }
 
+  /**
+   * Finds a user by their API key.
+   * @param key - The API key to search for.
+   * @returns A Promise that resolves to a UserSparse object.
+   */
+  async findUserByApiKey(key: string): Promise<UserSparse> {
+    const user: UserSparse = await this.userCollection.findOne(
+      { apiKeys: { $in: [key] } },
+      { projection: { _id: 1, email: 1, activeSubscription: 1 } },
+    );
+    return sanitizeUser(user);
+  }
+
   async findUserById(id: string): Promise<User> {
     const user = await this.userCollection.findOne({
       _id: new ObjectId(id),
