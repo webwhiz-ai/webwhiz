@@ -19,7 +19,7 @@ export class ApikeyController {
    */
   @Post()
   @HttpCode(201)
-  createApiKey(@Req() req: RequestWithUser) {
+  async createApiKey(@Req() req: RequestWithUser) {
     const { user } = req;
     return this.apikeyService.createApiKey(user);
   }
