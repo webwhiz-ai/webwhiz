@@ -48,6 +48,11 @@ export interface WebhookData {
   secret?: string;
 }
 
+export interface ApikeyData {
+  id: ObjectId;
+  apiKey: string;
+}
+
 export interface User {
   _id?: ObjectId;
   email: string;
@@ -73,6 +78,8 @@ export interface User {
     secret: string;
   };
   webhooks?: WebhookData[];
+  // API keys
+  apikeys?: ApikeyData[];
   createdAt: Date;
   updatedAt: Date;
   lastLogin?: Date;
