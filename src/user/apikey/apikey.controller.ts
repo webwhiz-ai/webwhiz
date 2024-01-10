@@ -4,20 +4,23 @@ import { ApikeyService } from './apikey.service';
 
 @Controller('user/apikey')
 export class ApikeyController {
-  constructor(private apikeyService: ApikeyService) { }
+  constructor(private readonly apikeyService: ApikeyService) { }
 
   @Get()
   getAllApiKeys(@Req() req: RequestWithUser) {
-    return this.apikeyService.getAllApiKeys(req.user);
+    const { user } = req;
+    return this.apikeyService.getAllApiKeys(user);
   }
 
   @Post()
   createApiKey(@Req() req: RequestWithUser) {
-    return this.apikeyService.createApiKey(req.user);
+    const { user } = req;
+    return this.apikeyService.createApiKey(user);
   }
 
   @Delete()
   deleteApiKey(@Req() req: any): any {
-    return this.apikeyService.deleteApiKey(req.user);
+    const { user } = req;
+    return this.apikeyService.deleteApiKey(user);
   }
 }
