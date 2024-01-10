@@ -79,7 +79,7 @@ export interface User {
   };
   webhooks?: WebhookData[];
   // API keys
-  apikeys?: ApikeyData[];
+  apiKeys?: ApikeyData[];
   createdAt: Date;
   updatedAt: Date;
   lastLogin?: Date;
