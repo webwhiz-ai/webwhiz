@@ -7,6 +7,7 @@ import { MONGODB } from '../common/mongo/mongo.module';
 import { SubscriptionPlanInfoService } from '../subscription/subscription-plan.service';
 import { CreateUserDTO } from './user.dto';
 import {
+  ApikeyData,
   Subscription,
   SubscriptionData,
   User,
@@ -69,7 +70,7 @@ export class UserService {
    */
   async findUserByApiKey(key: string): Promise<UserSparse> {
     const user: UserSparse = await this.userCollection.findOne(
-      { apiKeys: { $in: [key] } },
+      { 'apiKeys.apiKey': key },
       { projection: { _id: 1, email: 1, activeSubscription: 1 } },
     );
     return sanitizeUser(user);
@@ -335,6 +336,32 @@ export class UserService {
       { projection: { webhooks: 1 } },
     );
     return res;
+  }
+
+  /** **************************************************
+   * API KEY RELATED
+   *************************************************** */
+
+  /**
+   * Adds a new API key for a user.
+   * @param userId - The ID of the user.
+   * @param apikeyData - The data for the new API key.
+   * @returns The generated API key.
+   */
+  async addNewApikey(
+    userId: ObjectId,
+    apikeyData: ApikeyData,
+  ): Promise<string> {
+    const update: UpdateFilter<User> = {
+      $push: {
+        apiKeys: apikeyData,
+      },
+    };
+
+    const result = await this.userCollection.updateOne({ _id: userId }, update);
+    if (result.modifiedCount == 1) {
+      return apikeyData.apiKey;
+    }
   }
 
   /** **************************************************
