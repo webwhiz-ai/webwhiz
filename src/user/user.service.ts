@@ -364,6 +364,14 @@ export class UserService {
     }
   }
 
+  async getUserApikeys(userId: ObjectId): Promise<Pick<User, 'apiKeys'>> {
+    const res = await this.userCollection.findOne(
+      { _id: userId },
+      { projection: { apiKeys: 1 } },
+    );
+    return res;
+  }
+
   /** **************************************************
    * CHATBOT MONTHLY USAGE RELATED
    *************************************************** */
