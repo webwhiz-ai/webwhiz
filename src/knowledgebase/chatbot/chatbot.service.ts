@@ -489,6 +489,7 @@ export class ChatbotService {
     userData?: any,
     isAuthenticated = false,
     src?: string,
+    slackThreadId?: string,
   ) {
     const sessionId = new ObjectId();
 
@@ -532,6 +533,7 @@ export class ChatbotService {
     const sessionData: ChatSession = {
       _id: sessionId,
       knowledgebaseId: kbId,
+      slackThreadId: slackThreadId,
       kbName: `${kb.name} assistant`,
       defaultAnswer: kb.defaultAnswer,
       model: kb.model,
