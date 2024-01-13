@@ -1,4 +1,12 @@
-import { Controller, Post, Req, Delete, Get, HttpCode } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Req,
+  Delete,
+  Get,
+  HttpCode,
+  Param,
+} from '@nestjs/common';
 import { RequestWithUser } from '../../common/@types/nest.types';
 import { ApikeyData } from '../user.schema';
 import { ApikeyService } from './apikey.service';
@@ -31,9 +39,17 @@ export class ApikeyController {
     return this.apikeyService.createApiKey(user);
   }
 
-  @Delete()
-  deleteApiKey(@Req() req: any): any {
+  /**
+   * Deletes an API key.
+   *
+   * @param req The request object containing the user information.
+   * @param id The ID of the API key to delete.
+   * @returns The result of the API key deletion.
+   */
+  @Delete('/:id')
+  @HttpCode(204)
+  deleteApiKey(@Req() req: RequestWithUser, @Param('id') id: string) {
     const { user } = req;
-    return this.apikeyService.deleteApiKey(user);
+    return this.apikeyService.deleteApiKey(user._id, id);
   }
 }
