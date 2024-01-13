@@ -364,12 +364,30 @@ export class UserService {
     }
   }
 
+  /**
+   * Retrieves the API keys of a user.
+   * @param userId The ID of the user.
+   * @returns A promise that resolves to an object containing the user's API keys.
+   */
   async getUserApikeys(userId: ObjectId): Promise<Pick<User, 'apiKeys'>> {
     const res = await this.userCollection.findOne(
       { _id: userId },
       { projection: { apiKeys: 1 } },
     );
     return res;
+  }
+
+  async deleteApiKey(userId: ObjectId, apiKeyId: ObjectId) {
+    const update: UpdateFilter<User> = {
+      $pull: { apiKeys: { id: apiKeyId } },
+    };
+
+    const result = await this.userCollection.updateOne({ _id: userId }, update);
+    if (result.matchedCount === 0) {
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+    } else if (result.modifiedCount === 0) {
+      throw new HttpException('API-key not found', HttpStatus.NOT_FOUND);
+    }
   }
 
   /** **************************************************
