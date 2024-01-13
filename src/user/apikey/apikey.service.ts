@@ -24,8 +24,21 @@ export class ApikeyService {
     return apiKeysData.apiKeys;
   }
 
-  deleteApiKey(user: UserSparse): any {
-    throw new Error('Method not implemented.');
+  /**
+   * Deletes an API key for a user.
+   * @param userId - The ID of the user.
+   * @param id - The ID of the API key to delete.
+   * @returns A Promise that resolves to the result of the deletion.
+   * @throws HttpException if the API key ID is invalid.
+   */
+  async deleteApiKey(userId: ObjectId, id: string) {
+    let apiKeyId: ObjectId;
+    try {
+      apiKeyId = new ObjectId(id);
+    } catch (e) {
+      throw new HttpException('Invalid API-Key id', HttpStatus.BAD_REQUEST);
+    }
+    return await this.userService.deleteApiKey(userId, apiKeyId);
   }
 
   /**
