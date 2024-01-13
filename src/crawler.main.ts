@@ -52,7 +52,12 @@ async function processPage(
   let pageContent;
   if (!useAlternateParser) {
     const cleanedContent = getCleanedHtmlContent(pageData.content);
-    pageContent = cleanedContent.markdownContent || cleanedContent.textContent;
+    try {
+      pageContent =
+        cleanedContent.markdownContent || cleanedContent.textContent;
+    } catch (error) {
+      pageContent = '';
+    }
   } else {
     // TODO: Fall back to normal parser if this fails
     pageContent = await parser(pageData.content);
