@@ -51,6 +51,6 @@ import { ChatGateway } from './chatbot/chatbot.gateway';
     CustomKeyService,
     ChatGateway,
   ],
-  exports: [KnowledgebaseDbService, DataStoreService],
+  exports: [KnowledgebaseDbService, DataStoreService, ChatbotService],
 })
 export class KnowledgebaseModule {}
