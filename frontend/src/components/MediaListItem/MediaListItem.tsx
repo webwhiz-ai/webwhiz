@@ -45,7 +45,7 @@ interface MediaListItemProps extends BoxProps {
 
 export const MediaListItem = ({ onMenuItemClick, showWarning, showPrimaryActionButton, isPrimaryButtonLoading, onPrimaryActionButtonClick, className, ...restProps }: MediaListItemProps) => {
 	const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-	const cancelRef = useRef();
+	const cancelRef = useRef(null);
 	const handleDelete = () => {
 		setIsDeleteDialogOpen(true);
 	};
