@@ -13,11 +13,11 @@ import {
 	MenuItem,
 	MenuList,
 	Text,
-	AlertDialog, 
-	AlertDialogBody, 
-	AlertDialogFooter, 
-	AlertDialogHeader, 
-	AlertDialogContent, 
+	AlertDialog,
+	AlertDialogBody,
+	AlertDialogFooter,
+	AlertDialogHeader,
+	AlertDialogContent,
 	AlertDialogOverlay
 } from '@chakra-ui/react';
 import { FiMoreHorizontal } from "react-icons/fi"
@@ -45,16 +45,16 @@ interface MediaListItemProps extends BoxProps {
 
 export const MediaListItem = ({ onMenuItemClick, showWarning, showPrimaryActionButton, isPrimaryButtonLoading, onPrimaryActionButtonClick, className, ...restProps }: MediaListItemProps) => {
 	const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const cancelRef = useRef();
+	const cancelRef = useRef();
 	const handleDelete = () => {
 		setIsDeleteDialogOpen(true);
 	};
-	
+
 	const handleConfirmDelete = () => {
 		setIsDeleteDialogOpen(false);
-			onSelect("delete");
+		onSelect("delete");
 	};
-	
+
 	const handleCancelDelete = () => {
 		setIsDeleteDialogOpen(false);
 	};
@@ -76,7 +76,7 @@ export const MediaListItem = ({ onMenuItemClick, showWarning, showPrimaryActionB
 			<HStack
 				shadow='xs'
 				p='4'
-				bg={showWarning ? 'orange.50': 'white'}
+				bg={showWarning ? 'orange.50' : 'white'}
 				borderRadius='lg'
 				className={className || '' + ' ' + styles.container}
 				spacing='4'
@@ -107,7 +107,7 @@ export const MediaListItem = ({ onMenuItemClick, showWarning, showPrimaryActionB
 						)}
 					</Flex>
 					<Flex alignSelf='start' direction='column'>
-						<Heading cursor="pointer" mb='8px' fontSize='lg' onClick={()=>{
+						<Heading cursor="pointer" mb='8px' fontSize='lg' onClick={() => {
 							onSelect('edit')
 						}}>
 							{restProps.name}
@@ -168,6 +168,11 @@ export const MediaListItem = ({ onMenuItemClick, showWarning, showPrimaryActionB
 								}}>
 									Get code
 								</MenuItem> : null}
+								<MenuItem fontSize="14" textAlign="right" fontWeight="medium" color="gray.600" onClick={() => {
+									onSelect('rename')
+								}}>
+									Rename
+								</MenuItem>
 								<MenuItem fontSize="14" textAlign="right" fontWeight="medium" color="gray.600" onClick={handleDelete}>
 									Delete
 								</MenuItem>
@@ -181,27 +186,27 @@ export const MediaListItem = ({ onMenuItemClick, showWarning, showPrimaryActionB
 				isOpen={isDeleteDialogOpen}
 				leastDestructiveRef={cancelRef}
 				onClose={handleCancelDelete}
-				>
+			>
 				<AlertDialogOverlay>
-				<AlertDialogContent>
-					<AlertDialogHeader fontSize="lg" fontWeight="bold">
-					Delete chatbot?
-					</AlertDialogHeader>
-					<AlertDialogBody>
-						You can't undo this action afterwards.
-					</AlertDialogBody>
-					<AlertDialogFooter>
-					<Button ref={cancelRef} size='sm' onClick={handleCancelDelete}>
-						Cancel
-					</Button>
-					<Button 
-							size="sm"
-							colorScheme="red"
-							variant="solid" onClick={handleConfirmDelete} ml={3}>
-						Delete
-					</Button>
-					</AlertDialogFooter>
-				</AlertDialogContent>
+					<AlertDialogContent>
+						<AlertDialogHeader fontSize="lg" fontWeight="bold">
+							Delete chatbot?
+						</AlertDialogHeader>
+						<AlertDialogBody>
+							You can't undo this action afterwards.
+						</AlertDialogBody>
+						<AlertDialogFooter>
+							<Button ref={cancelRef} size='sm' onClick={handleCancelDelete}>
+								Cancel
+							</Button>
+							<Button
+								size="sm"
+								colorScheme="red"
+								variant="solid" onClick={handleConfirmDelete} ml={3}>
+								Delete
+							</Button>
+						</AlertDialogFooter>
+					</AlertDialogContent>
 				</AlertDialogOverlay>
 			</AlertDialog>
 		</>

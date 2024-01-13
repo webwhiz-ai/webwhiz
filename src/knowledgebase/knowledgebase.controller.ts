@@ -20,6 +20,7 @@ import {
   CreateKnowledgebaseDTO,
   KbCustomKeysDTO,
   SetAdminEmailDTO,
+  SetChatBotNameDTO,
   SetCustomDomainDTO,
   SetKnowledgebaseDefaultAnswerDTO,
   SetModelNameDTO,
@@ -129,6 +130,19 @@ export class KnowledgebaseController {
   ) {
     const { user } = req;
     return this.kbService.setModelName(user, id, data.model);
+  }
+
+  /**
+   * Update name of the chatbot
+   */
+  @Put('/:id/name')
+  async setChatbotName(
+    @Req() req: RequestWithUser,
+    @Param('id') id: string,
+    @Body() data: SetChatBotNameDTO,
+  ) {
+    const { user } = req;
+    return this.kbService.setKnowledgebaseName(user, id, data.name);
   }
 
   /**

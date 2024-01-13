@@ -539,4 +539,22 @@ export class KnowledgebaseService {
 
     return 'Done';
   }
+
+  /**
+   * Sets the name of a knowledgebase.
+   *
+   * @param user
+   * @param id
+   * @param name
+   * @returns
+   */
+  async setKnowledgebaseName(user: UserSparse, id: string, name: string) {
+    const kbId = new ObjectId(id);
+    const kb = await this.kbDbService.getKnowledgebaseSparseById(kbId);
+    checkUserIsOwnerOfKb(user, kb);
+
+    await this.kbDbService.updateKnowledgebase(kbId, { name: name });
+
+    return 'Done';
+  }
 }
