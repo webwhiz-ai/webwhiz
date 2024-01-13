@@ -408,7 +408,7 @@
         }
 
         async function initSocketConnection(sessionId) {
-            var socket = io(`${baseURL}`, { transports: ["websocket"], query: { id: sessionId, knowledgebaseId: knowledgebaseId } });
+            var socket = io(`${baseURL}`, { transports: ["websocket"], query: { id: sessionId, knowledgeBaseId: knowledgebaseId } });
             socket.on('connect', function() {
                 console.log('connected');
 
@@ -916,12 +916,16 @@
 
 
             if (isManualChat) {
-                const msgData = { 'sender': 'user', 'msg': message,  id: uuidv4(), 'sessionId': sessionId }
-                // send message to admin
-                socketData.emit('user_chat', msgData);
-                console.log('message sent:', msgData, 'socketData:', socketData);
-                messages.push(newMessageUser);
-                notifyNewMessage([newMessageUser])
+                if(sessionId) {
+                    const msgData = { 'sender': 'user', 'msg': message,  id: uuidv4(), 'sessionId': sessionId }
+                    // send message to admin
+                    socketData.emit('user_chat', msgData);
+                    console.log('message sent:', msgData, 'socketData:', socketData);
+                    messages.push(newMessageUser);
+                    notifyNewMessage([newMessageUser])
+                } else {
+                    console.log('sessionId not found');
+                }
                 return;
             }
             if (STREAM_RESPONSE) {

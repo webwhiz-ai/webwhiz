@@ -9,15 +9,15 @@ class SocketService {
         this.sockets = {};
     }
 
-    public getSocket(chatbotID: string): Socket {
+    public getSocket(chatbotID: string, userId: string): Socket {
         if (!this.sockets[chatbotID]) {
-            this.sockets[chatbotID] = this.createSocket(chatbotID);
+            this.sockets[chatbotID] = this.createSocket(chatbotID, userId);
         }
         return this.sockets[chatbotID];
     }
 
-    private createSocket(chatbotID: string): Socket {
-        const socket: Socket = io(baseURL as string, { transports: ["websocket"], query: { id: 'Admin', isAdmin: true, knowledgeBaseId: chatbotID } });
+    private createSocket(chatbotID: string, userId: string): Socket {
+        const socket: Socket = io(baseURL as string, { transports: ["websocket"], query: { id: userId, isAdmin: true, knowledgeBaseId: chatbotID } });
 
         return socket;
     }

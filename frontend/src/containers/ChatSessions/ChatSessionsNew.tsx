@@ -11,11 +11,12 @@ import { ChatSession, ChatSessionDetail, ChatSessionPagination } from '../../typ
 
 export type ChatSessionsProps = {
     chatbotId: string
+    userId: string
 }
 
 interface IChatEmitData { msg: string; sessionId: string; sender: 'admin' | 'user' }
 
-export const ChatSessionsNew = ({ chatbotId }: ChatSessionsProps) => {
+export const ChatSessionsNew = ({ chatbotId, userId }: ChatSessionsProps) => {
     const history = useHistory()
     const { search } = useLocation();
     const { showConfirmation } = useConfirmation()
@@ -44,10 +45,10 @@ export const ChatSessionsNew = ({ chatbotId }: ChatSessionsProps) => {
             const updatedChatData = addManualMessage(chatData, { msg: msg, sessionId, sender: 'admin' });
             setChatData(updatedChatData);
         }
-        const socket = socketService.getSocket(chatbotId);
+        const socket = socketService.getSocket(chatbotId, userId);
         socket.emit('admin_chat', { sender: 'admin', sessionId, msg });
         console.log(msg, 'sent from sendReplyToUser');
-    }, [addManualMessage, chatData, chatbotId]);
+    }, [addManualMessage, chatData, chatbotId, userId]);
 
     const handlePageClick = useCallback(async (selectedPage: number) => {
         try {
@@ -156,7 +157,7 @@ export const ChatSessionsNew = ({ chatbotId }: ChatSessionsProps) => {
     }, []);
 
     useEffect(() => {
-        const socket = socketService.getSocket(chatbotId);
+        const socket = socketService.getSocket(chatbotId, userId);
         console.log('useEffect: socket', socket)
         socket.on('admin_chat', onChatEvent);
         socket.on('new_session', onNewSessionEvent);
@@ -164,7 +165,7 @@ export const ChatSessionsNew = ({ chatbotId }: ChatSessionsProps) => {
         return () => {
             socketService.disconnectSocket(chatbotId);
         };
-    }, [chatbotId, onChatEvent, onNewBotReply, onNewSessionEvent]);
+    }, [chatbotId, onChatEvent, onNewBotReply, onNewSessionEvent, userId]);
 
 
     if (!chatSessions?.results.length) {
