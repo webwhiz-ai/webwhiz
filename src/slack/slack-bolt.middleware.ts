@@ -121,7 +121,8 @@ export class SlackBoltMiddleware implements NestMiddleware {
             // remove webwhizKbId from cookie
             res.setHeader(
               'Set-Cookie',
-              'webwhizKbId=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;');
+              'webwhizKbId=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;',
+            );
             const regex = /webwhizKbId=([a-zA-Z0-9]+)/; // Regular expression to match the botid value
             const match = cookie.match(regex);
             let webwhizbotId;

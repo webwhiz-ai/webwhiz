@@ -35,15 +35,18 @@ export class SlackBotService {
 
     /* if not parent message then check for existing session else, create a new session. */
     let sessionId = null;
+    let webwhizKbId = null;
     try {
-      // Fetch webwhiz botId
-      const webwhizKbId =
-        await this.slackTokenService.fetchWebWhizBotIdFromDatabase(teamId);
-      if (!isParentMessage) {
-        sessionId = await this.kbDbService.getSessionIdBySlackThreadId(
-          parentMessageTs,
-        );
-      }
+      // Fetch webwhiz botId and session id
+      const webwhizKbIdPromise =
+        this.slackTokenService.fetchWebWhizBotIdFromDatabase(teamId);
+      const sessionIdPromise = isParentMessage
+        ? null
+        : this.kbDbService.getSessionIdBySlackThreadId(parentMessageTs);
+      [webwhizKbId, sessionId] = await Promise.all([
+        webwhizKbIdPromise,
+        sessionIdPromise,
+      ]);
 
       if (sessionId === null) {
         sessionId = await this.chatbotService.createChatSession(
