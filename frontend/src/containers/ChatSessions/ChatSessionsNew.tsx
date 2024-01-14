@@ -28,15 +28,6 @@ export const ChatSessionsNew = ({ chatbotId, userId }: ChatSessionsProps) => {
     const [isChatSessionsLoading, setIsChatSessionsLoading] = useState<boolean>(true);
     const [isChatDataLoading, setIsChatDataLoading] = useState(true)
 
-    const handleSelectChat = useCallback((chatSession?: ChatSession) => {
-        history.replace({
-            pathname: `/app/edit-chatbot/${chatbotId}/chat-sessions`,
-            search: chatSession?._id ? `?session=${chatSession?._id}` : undefined
-
-        })
-
-    }, [chatbotId, history]);
-
     const addManualMessage = useCallback((chatData: ChatSessionDetail, data: IChatEmitData) => {
         const newMessage = { type: 'MANUAL', ...data, ts: new Date() } as any;
         const updatedChatData = {
@@ -56,6 +47,37 @@ export const ChatSessionsNew = ({ chatbotId, userId }: ChatSessionsProps) => {
         console.log(msg, 'sent from sendReplyToUser');
     }, [addManualMessage, chatData, chatbotId, userId]);
 
+    const updateChatSessionReadStatus = useCallback(async (chatId: string, isUnread: boolean, needStateUpdate: boolean = true) => {
+        try {
+            // Toggle read/unread based on isUnread flag
+            await (isUnread ? unReadChatSession : readChatSession)(chatId);
+            if (needStateUpdate) {
+                setChatSessions((prev) => {
+                    if (!prev) return undefined;
+                    const updatedResults = prev.results.map(item =>
+                        item._id === chatId ? { ...item, isUnread } : item
+                    );
+                    return { ...prev, results: updatedResults };
+                });
+            }
+        } catch (error) {
+            console.log("Unable to update chatSessions", error);
+        }
+    }, []);
+
+
+    const handleSelectChat = useCallback((chatSession?: ChatSession) => {
+        history.replace({
+            pathname: `/app/edit-chatbot/${chatbotId}/chat-sessions`,
+            search: chatSession?._id ? `?session=${chatSession?._id}` : undefined
+
+        })
+        if (chatSession?._id && chatSession.isUnread) {
+            updateChatSessionReadStatus(chatSession?._id, false)
+        }
+    }, [chatbotId, history, updateChatSessionReadStatus]);
+
+
     const handlePageClick = useCallback(async (selectedPage: number) => {
         try {
             setIsChatSessionsLoading(true);
@@ -69,30 +91,6 @@ export const ChatSessionsNew = ({ chatbotId, userId }: ChatSessionsProps) => {
             setIsChatSessionsLoading(false);
         }
     }, [chatbotId, handleSelectChat]);
-
-    const updateChatSessionReadStatus = useCallback(async (chatId: string, isUnread: boolean) => {
-        try {
-            // Toggle read/unread based on isUnread flag
-            await (isUnread ? unReadChatSession : readChatSession)(chatId);
-            setChatSessions((prev) => {
-                if (!prev) return undefined;
-                const updatedResults = prev.results.map(item =>
-                    item._id === chatId ? { ...item, isUnread } : item
-                );
-                return { ...prev, results: updatedResults };
-            });
-        } catch (error) {
-            console.log("Unable to update chatSessions", error);
-        }
-    }, []);
-
-    useEffect(() => {
-        if (!sessionId) return;
-        const selectedChat = chatSessions?.results.find((item) => item._id === sessionId) || chatSessions?.results[0];
-        if (selectedChat && selectedChat.isUnread && selectedChat._id === sessionId) {
-            updateChatSessionReadStatus(sessionId, false);
-        }
-    }, [chatSessions?.results, sessionId, updateChatSessionReadStatus]);
 
     const fetchChatSessionDetails = useCallback(async () => {
         if (!sessionId) { setIsChatDataLoading(false); return; }
@@ -156,6 +154,7 @@ export const ChatSessionsNew = ({ chatbotId, userId }: ChatSessionsProps) => {
         setChatSessions((prev) => {
             const chatSession = prev?.results.find(item => item._id === data.sessionId)
             if (chatSession) {
+                data?.sessionId !== chatData?._id && !chatSession.isUnread && updateChatSessionReadStatus(chatSession?._id, true, false)
                 chatSession.isUnread = true
                 chatSession.updatedAt = new Date().toString()
             }
@@ -163,12 +162,11 @@ export const ChatSessionsNew = ({ chatbotId, userId }: ChatSessionsProps) => {
                 ...prev, results: [...prev?.results || []]
             }
         });
-
         if (chatData?._id === data.sessionId) {
             const updatedChatData = addManualMessage(chatData, { msg: data.msg, sessionId: data.sessionId, sender: 'user' });
             setChatData(updatedChatData);
         }
-    }, [addManualMessage, chatData]);
+    }, [addManualMessage, chatData, updateChatSessionReadStatus]);
 
     const onNewSessionEvent = useCallback((data: { id: string, type: 'SYSTEM', ts: string, msg: string; sessionId: string; sender: 'admin' }) => {
         console.log(data, 'onNewSessionEvent:received');
