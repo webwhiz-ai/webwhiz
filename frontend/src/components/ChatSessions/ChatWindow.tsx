@@ -1,16 +1,17 @@
 import React, { useRef, useEffect } from 'react';
-import { Box, Spinner, Flex, VStack, HStack, Text } from '@chakra-ui/react';
-import { MessageList } from '../../types/knowledgebase.type';
+import { Box, Spinner, Flex, VStack, HStack, Text, Heading } from '@chakra-ui/react';
+import { MessageList, ChatSessionDetail } from '../../types/knowledgebase.type';
 import { ChatBubble } from './ChatBubble';
 import { getBrowserName } from '../../utils/commonUtils';
 import { format } from 'date-fns';
 import styles from "./ChatWindow.module.scss";
 import TextareaAutosize from 'react-textarea-autosize'
+import { NoDataChatSessions } from '../Icons/noData/NoDataChatSessions';
 type ChatWindowProps = {
     messages?: MessageList[];
     isMessagesLoading?: boolean;
     userData: any;
-    chatData: any;
+    chatData?: ChatSessionDetail;
     onChatReply: (sessionId: string, msg: string) => void
 };
 
@@ -143,6 +144,37 @@ export const ChatWindow = ({
             </Box>
         );
     }, [chatData, userData]);
+
+    if (!isMessagesLoading && !chatData?._id) {
+        return (
+            <VStack
+                alignItems="center"
+                direction="column"
+                justifyContent="center"
+                w="calc(100% - 450px)"
+                h="100%"
+                pt={32}
+                pb={32}
+                spacing={9}
+            >
+                <NoDataChatSessions height={400} width={400} />
+                <Box textAlign="center">
+                    <Heading
+                        maxW="580px"
+                        fontSize="xl"
+                        fontWeight="500"
+                        as="h3"
+                        mb={4}
+                        color="gray.500"
+                        lineHeight="medium"
+                        textAlign="center"
+                    >
+                        Chat history with your customers will appear here.
+                     </Heading>
+                </Box>
+            </VStack>
+        )
+    }
 
     return (
         <Box w="calc(100% - 450px)" h="100%" position="relative">
