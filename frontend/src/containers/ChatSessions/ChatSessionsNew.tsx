@@ -188,7 +188,7 @@ export const ChatSessionsNew = ({ chatbotId, userId }: ChatSessionsProps) => {
     const onNewBotReply = useCallback((data: MessageList) => {
         console.log(data, 'onNewBotReply:received');
         if (chatData?._id === data.sessionId) {
-            const updatedChatData = addManualMessage(chatData, { ...data });
+            const updatedChatData = addManualMessage(chatData, { ...data, type: data?.type || 'MANUAL' });
             setChatData(updatedChatData);
         }
         setChatSessions((prev) => {
