@@ -161,7 +161,7 @@ export const ChatSessionsNew = ({ chatbotId, userId }: ChatSessionsProps) => {
             }
         });
         if (chatData?._id === data.sessionId) {
-            const updatedChatData = addManualMessage(chatData, { msg: data.msg, type: data?.type, sessionId: data.sessionId, sender: 'user', });
+            const updatedChatData = addManualMessage(chatData, { msg: data.msg, type: data?.type || 'MANUAL', sessionId: data.sessionId, sender: 'user', });
             setChatData(updatedChatData);
         }
     }, [addManualMessage, chatData, updateChatSessionReadStatus]);
