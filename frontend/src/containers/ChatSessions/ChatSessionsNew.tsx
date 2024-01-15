@@ -14,8 +14,6 @@ export type ChatSessionsProps = {
     userId: string
 }
 
-interface IChatEmitData { msg: string; sessionId: string; sender: 'admin' | 'user' }
-
 export const ChatSessionsNew = ({ chatbotId, userId }: ChatSessionsProps) => {
     const history = useHistory()
     const { search } = useLocation();
@@ -28,8 +26,8 @@ export const ChatSessionsNew = ({ chatbotId, userId }: ChatSessionsProps) => {
     const [isChatSessionsLoading, setIsChatSessionsLoading] = useState<boolean>(true);
     const [isChatDataLoading, setIsChatDataLoading] = useState(true)
 
-    const addManualMessage = useCallback((chatData: ChatSessionDetail, data: IChatEmitData) => {
-        const newMessage = { type: 'MANUAL', ...data, ts: new Date() } as any;
+    const addManualMessage = useCallback((chatData: ChatSessionDetail, data: Partial<MessageList>) => {
+        const newMessage = { ...data, ts: new Date() } as any;
         const updatedChatData = {
             ...chatData,
             messages: chatData.messages ? [...chatData.messages, newMessage] : [newMessage],
@@ -37,14 +35,15 @@ export const ChatSessionsNew = ({ chatbotId, userId }: ChatSessionsProps) => {
         return updatedChatData;
     }, []);
 
-    const sendReplyToUser = useCallback((sessionId: string, msg: string) => {
+    const onChatReplyEvent = useCallback((sessionId: string, msg: string) => {
+        const data = { sender: 'admin', sessionId, msg }
         if (chatData) {
-            const updatedChatData = addManualMessage(chatData, { msg: msg, sessionId, sender: 'admin' });
+            const updatedChatData = addManualMessage(chatData, { ...data, type: 'MANUAL' });
             setChatData(updatedChatData);
         }
         const socket = socketService.getSocket(chatbotId, userId);
-        socket.emit('admin_chat', { sender: 'admin', sessionId, msg });
-        console.log(msg, 'sent from sendReplyToUser');
+        socket.emit('admin_chat', data);
+        console.log(data, 'onChatReplyEvent:send');
     }, [addManualMessage, chatData, chatbotId, userId]);
 
     const updateChatSessionReadStatus = useCallback(async (chatId: string, isUnread: boolean, needStateUpdate: boolean = true) => {
@@ -83,14 +82,12 @@ export const ChatSessionsNew = ({ chatbotId, userId }: ChatSessionsProps) => {
             setIsChatSessionsLoading(true);
             const response = await getChatSessions(chatbotId, (selectedPage + 1).toString());
             setChatSessions(response.data);
-            setChatData(undefined)
-            handleSelectChat(undefined)
         } catch (error) {
             console.log("Unable to fetch chatSessions", error);
         } finally {
             setIsChatSessionsLoading(false);
         }
-    }, [chatbotId, handleSelectChat]);
+    }, [chatbotId]);
 
     const fetchChatSessionDetails = useCallback(async () => {
         if (!sessionId) { setIsChatDataLoading(false); return; }
@@ -149,40 +146,33 @@ export const ChatSessionsNew = ({ chatbotId, userId }: ChatSessionsProps) => {
         }
     }, [chatData?._id, chatSessions, handlePageClick, handleSelectChat])
 
-    const onChatEvent = useCallback((data: IChatEmitData) => {
+    const onChatEvent = useCallback((data: MessageList) => {
         console.log(data, 'onChatEvent:received');
         setChatSessions((prev) => {
-            const chatSession = prev?.results.find(item => item._id === data.sessionId)
+            let chatSession = prev?.results.find(item => item._id === data.sessionId)
             if (chatSession) {
                 data?.sessionId !== chatData?._id && !chatSession.isUnread && updateChatSessionReadStatus(chatSession?._id, true, false)
                 chatSession.isUnread = true
                 chatSession.updatedAt = new Date().toString()
-            }
+                chatSession.firstMessage = data;
+            } else return prev
             return {
-                ...prev, results: [...prev?.results || []]
+                ...prev, results: [chatSession, ...prev?.results.filter(item => item._id !== data.sessionId) || []]
             }
         });
         if (chatData?._id === data.sessionId) {
-            const updatedChatData = addManualMessage(chatData, { msg: data.msg, sessionId: data.sessionId, sender: 'user' });
+            const updatedChatData = addManualMessage(chatData, { msg: data.msg, type: data?.type, sessionId: data.sessionId, sender: 'user', });
             setChatData(updatedChatData);
         }
     }, [addManualMessage, chatData, updateChatSessionReadStatus]);
 
-    const onNewSessionEvent = useCallback((data: { id: string, type: 'SYSTEM', ts: string, msg: string; sessionId: string; sender: 'admin' }) => {
+    const onNewSessionEvent = useCallback(async (data: MessageList) => {
         console.log(data, 'onNewSessionEvent:received');
         const newSession: ChatSession = {
             _id: data.sessionId,
             startedAt: data.ts,
             updatedAt: data.ts,
-            isUnread: true,
-            firstMessage: {
-                id: data.id,
-                type: "MANUAL",
-                ts: data.ts,
-                msg: data.msg,
-                sender: data.sender,
-                sessionId: data.sessionId
-            } as MessageList
+            isUnread: true
         } as ChatSession
         setChatSessions((prev) => {
             const prevResults = prev?.results.find(item => item._id === data.sessionId);
@@ -195,24 +185,23 @@ export const ChatSessionsNew = ({ chatbotId, userId }: ChatSessionsProps) => {
         });
     }, []);
 
-    const onNewBotReply = useCallback((data: { msg: string; sessionId: string; sender: 'admin' }) => {
+    const onNewBotReply = useCallback((data: MessageList) => {
         console.log(data, 'onNewBotReply:received');
         if (chatData?._id === data.sessionId) {
-            const updatedChatData = addManualMessage(chatData, { msg: data.msg, sessionId: data.sessionId, sender: 'admin' });
+            const updatedChatData = addManualMessage(chatData, { ...data });
             setChatData(updatedChatData);
-
-            setChatSessions((prev) => {
-                const chatSession = prev?.results.find(item => item._id === data.sessionId)
-                if (chatSession) {
-                    chatSession.isUnread = true
-                    chatSession.updatedAt = new Date().toString()
-                }
-                return {
-                    ...prev, results: [...prev?.results || []]
-                }
-            });
-
         }
+        setChatSessions((prev) => {
+            let chatSession = prev?.results.find(item => item._id === data.sessionId)
+            if (chatSession) {
+                chatSession.isUnread = true
+                chatSession.updatedAt = new Date().toString()
+                chatSession.firstMessage = data;
+            }
+            return {
+                ...prev, results: [...prev?.results || []]
+            }
+        });
     }, [addManualMessage, chatData]);
 
     useEffect(() => {
@@ -283,7 +272,7 @@ export const ChatSessionsNew = ({ chatbotId, userId }: ChatSessionsProps) => {
                 }}
 
             />
-            <ChatWindow onChatReply={sendReplyToUser} chatData={chatData} userData={chatData?.userData} messages={chatData?.messages} isMessagesLoading={isChatDataLoading} />
+            <ChatWindow onChatReply={onChatReplyEvent} chatData={chatData} userData={chatData?.userData} messages={chatData?.messages} isMessagesLoading={isChatDataLoading} />
         </Flex>
     )
 }
