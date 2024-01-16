@@ -341,7 +341,7 @@ export class ChatbotService {
 
     const sessionData = await this.getChatSessionDataFromCache(sessionId);
     if (!sessionData) {
-      throw new HttpException('Invalid Session Id', HttpStatus.NOT_FOUND);
+      return null;
     }
 
     const msg = {

@@ -134,17 +134,24 @@ export class WebSocketChatGateway
       msgData,
     );
 
-    const onlineAdmins = await this.redisClient.hgetall(
-      `onlineAdmins_${knowledgeBaseId}`,
-    );
-
-    if (Object.keys(onlineAdmins).length === 0) {
-      // send email if the admin is offline
-      this.logger.log('No online admins online!!!!');
-      this.offlineMsgService.sendEmailForOfflineManualMessage(
-        knowledgeBaseId,
-        msgData.msg,
+    if (knowledgeBaseId) {
+      const onlineAdmins = await this.redisClient.hgetall(
+        `onlineAdmins_${knowledgeBaseId}`,
       );
+
+      if (Object.keys(onlineAdmins).length === 0) {
+        // send email if the admin is offline
+        this.logger.log('No online admins online!!!!');
+        this.offlineMsgService.sendEmailForOfflineManualMessage(
+          knowledgeBaseId,
+          msgData.msg,
+        );
+      }
+    } else {
+      // Chat session is not present
+      // sending custom message to user for initiation a new session
+      const msg = { type: 'SESSION_NOT_FOUND', msg: '', ts: new Date() };
+      client.to(msgData.sessionId).emit('custom_message', msg);
     }
   }
 }
