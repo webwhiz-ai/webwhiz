@@ -636,6 +636,7 @@
                 const sampleMessages = document.getElementById('chat-sample-messages');
                 sampleMessages.classList.remove('hide-sample-messages');
                 chatWidgetData.questionExamples.forEach((message) => {
+                    if(!message.label || !message.question) return;
                     const sampleMessage = document.createElement('div');
                     sampleMessage.classList.add('chat-sample-message');
                     sampleMessage.setAttribute('data-message', message.question);

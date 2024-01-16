@@ -1,16 +1,17 @@
 import React, { useRef, useEffect } from 'react';
-import { Box, Spinner, Flex, VStack, HStack, Text } from '@chakra-ui/react';
-import { MessageList } from '../../types/knowledgebase.type';
+import { Box, Spinner, Flex, VStack, HStack, Text, Heading } from '@chakra-ui/react';
+import { MessageList, ChatSessionDetail } from '../../types/knowledgebase.type';
 import { ChatBubble } from './ChatBubble';
 import { getBrowserName } from '../../utils/commonUtils';
 import { format } from 'date-fns';
 import styles from "./ChatWindow.module.scss";
 import TextareaAutosize from 'react-textarea-autosize'
+import { NoDataChatSessions } from '../Icons/noData/NoDataChatSessions';
 type ChatWindowProps = {
     messages?: MessageList[];
     isMessagesLoading?: boolean;
     userData: any;
-    chatData: any;
+    chatData?: ChatSessionDetail;
     onChatReply: (sessionId: string, msg: string) => void
 };
 
@@ -144,8 +145,39 @@ export const ChatWindow = ({
         );
     }, [chatData, userData]);
 
+    if (!isMessagesLoading && !chatData?._id) {
+        return (
+            <VStack
+                alignItems="center"
+                direction="column"
+                justifyContent="center"
+                w="calc(100% - 450px)"
+                h="100%"
+                pt={32}
+                pb={32}
+                spacing={9}
+            >
+                <NoDataChatSessions height={400} width={400} />
+                <Box textAlign="center">
+                    <Heading
+                        maxW="580px"
+                        fontSize="xl"
+                        fontWeight="500"
+                        as="h3"
+                        mb={4}
+                        color="gray.500"
+                        lineHeight="medium"
+                        textAlign="center"
+                    >
+                        Chat history with your customers will appear here.
+                     </Heading>
+                </Box>
+            </VStack>
+        )
+    }
+
     return (
-        <Box w="calc(100% - 450px)" h="100%" maxW="620px" position="relative">
+        <Box w="calc(100% - 450px)" h="100%" position="relative">
             {isMessagesLoading && (
                 <Flex
                     pos="absolute"
@@ -178,12 +210,12 @@ export const ChatWindow = ({
                         );
                     })}
             </Box>
-            <Box className="chat-input-wrap" style={{ position: 'absolute' }} w={'100%'} bottom={0} bgColor={'white'}>
-                <TextareaAutosize ref={inputRef} autoFocus value={question} onChange={handleChatChange} onKeyDown={handleKeyDown} rows="1" className="chat-input textarea js-auto-size" id="chat-input" placeholder="Type your message" />
+            {chatData ? <Box className="chat-input-wrap" style={{ position: 'absolute' }} w={'100%'} bottom={0} bgColor={'white'} overflow={'hidden'} >
+                <TextareaAutosize ref={inputRef} autoFocus value={question} onChange={handleChatChange} onKeyDown={handleKeyDown} rows={1} className="chat-input textarea js-auto-size" id="chat-input" placeholder="Type your message" />
                 <button onClick={handleSubmit} className="chat-submit-btn" type="submit"><svg width="16" height="16" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path fillRule="evenodd" clipRule="evenodd" d="M4.394 14.7L13.75 9.3c1-.577 1-2.02 0-2.598L4.394 1.299a1.5 1.5 0 00-2.25 1.3v3.438l4.059 1.088c.494.132.494.833 0 .966l-4.06 1.087v4.224a1.5 1.5 0 002.25 1.299z" style={{ fill: '#000' }}></path>
                 </svg></button>
-            </Box>
+            </Box> : null}
         </Box>
     );
 };

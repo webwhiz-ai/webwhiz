@@ -164,10 +164,14 @@ export interface MessageList {
     ts: string;
     msg: string
     type: 'MANUAL' | 'BOT'
+    id: string;
+    sessionId: string;
 }
 
 export interface UserData {
     ip: string;
+    userAgent: string;
+    origin: string;
 }
 
 export interface ChatSession {
@@ -175,9 +179,10 @@ export interface ChatSession {
     firstMessage: MessageList;
     startedAt: string;
     updatedAt: string;
-    userData: UserData;
+    userData?: UserData;
     _id: string;
 }
+
 
 export interface SubscriptionData {
     name: string;
@@ -219,7 +224,7 @@ export interface OfflineMessagePagination {
     results: OfflineMessage[];
 }
 export interface ChatSessionPagination {
-    pages: number;
+    pages?: number;
     results: ChatSession[];
 }
 
