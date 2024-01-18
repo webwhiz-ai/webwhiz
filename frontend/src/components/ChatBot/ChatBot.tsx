@@ -7,6 +7,9 @@ import { CurrentUser } from '../../services/appConfig';
 import { ChatBotCustomizeData } from '../../types/knowledgebase.type';
 import ChatBotLauncher from '../../containers/ChatBotLauncher/ChatBotLauncher';
 import { Heading,Text, Box } from '@chakra-ui/react';
+import ReactMarkdown from 'react-markdown';
+import ChakraUIRenderer from 'chakra-ui-markdown-renderer'
+import { markdownTheme } from '../../theme/markdownTheme'
 export interface ChatBotProps {
 	customStyle: ChatBotCustomizeData,
 	knowledgeBaseId: string,
@@ -105,7 +108,7 @@ export const ChatBot = ({
 			const response = await getChatBotAnswer(newSessionId, question);
 			setNumberOfMessagesLeft(numberOfMessagesLeft - 1);
 			const messagesToUpdate = newMessages.filter(message => !message.isLoading);
-
+ 
 			if(response.data?.response) {
 				setMessages([...messagesToUpdate, { type: 'bot', message: response.data?.response, id: uuidv4(), }])
 			} else if(typeof response.data === 'string' && response.data.trim() === 'Sorry I cannot respond right now')  {
@@ -168,7 +171,9 @@ export const ChatBot = ({
 						}
 
 						return <div className={className} key={message.id}>
-							<div className="chat-message-text" style={style}>{message.message}</div>
+							<div className="chat-message-text" style={style}>
+								<ReactMarkdown components={ChakraUIRenderer(markdownTheme)} >{message.message}</ReactMarkdown>
+							</div>	
 						</div>
 					})}
 				</div>
