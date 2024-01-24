@@ -1,4 +1,10 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  Inject,
+  forwardRef,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { AppConfigService } from '../common/config/appConfig.service';
 import { CreateUserDTO } from '../user/user.dto';
@@ -8,6 +14,7 @@ import { GoogleAuthDTO } from './auth.dto';
 import { getGoogleUserProfile } from './google-auth';
 import { JwtPayload, JwtToken } from './types/jwt-types.dto';
 import { EmailService } from '../common/email/email.service';
+import { KnowledgebaseService } from '../knowledgebase/knowledgebase.service';
 
 @Injectable()
 export class AuthService {
@@ -16,6 +23,7 @@ export class AuthService {
     private userService: UserService,
     private appConfig: AppConfigService,
     private emailService: EmailService,
+    private knowledgebaseService: KnowledgebaseService,
   ) {}
 
   /**

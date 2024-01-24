@@ -14,6 +14,9 @@ import {
   UserSparse,
   USER_COLLECTION,
   WebhookData,
+  InvitedEmails,
+  INVITED_EMAILS_COLLECTION,
+  InvitedEmailsParse,
 } from './user.schema';
 import { CustomKeyData } from '../knowledgebase/knowledgebase.schema';
 
@@ -30,6 +33,7 @@ function sanitizeUser<T>(user: T): Exclude<T, 'password'> {
 @Injectable()
 export class UserService {
   private readonly userCollection: Collection<User>;
+  private readonly invitedEmailsCollection: Collection<InvitedEmails>;
 
   constructor(
     private appConfig: AppConfigService,
@@ -37,6 +41,9 @@ export class UserService {
     private subsPlanService: SubscriptionPlanInfoService,
   ) {
     this.userCollection = this.db.collection<User>(USER_COLLECTION);
+    this.invitedEmailsCollection = this.db.collection<InvitedEmails>(
+      INVITED_EMAILS_COLLECTION,
+    );
   }
 
   /**
@@ -384,5 +391,29 @@ export class UserService {
         },
       },
     ]);
+  }
+
+  async insertOrUpdateInvitedEmail(
+    email: string,
+    knowledgebaseId: ObjectId,
+    role: string,
+  ) {
+    const query = { email, knowledgebaseId };
+
+    // Update with upsert option
+    const update = {
+      $set: { email, knowledgebaseId, role, createdAt: new Date() },
+    };
+
+    return await this.invitedEmailsCollection.updateOne(query, update, {
+      upsert: true,
+    });
+  }
+
+  async getInvitedEmail(email: string) {
+    const invitedList = await this.invitedEmailsCollection
+      .find({ email: email })
+      .toArray();
+    return invitedList as InvitedEmailsParse[];
   }
 }

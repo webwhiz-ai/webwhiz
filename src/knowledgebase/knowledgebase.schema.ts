@@ -71,20 +71,6 @@ export type KnowledgebaseSparse = Pick<
 >;
 
 /*********************************************************
- * INVITED EMAILS
- *********************************************************/
-
-export const INVITED_EMAILS_COLLECTION = 'invitedEmails';
-
-export interface InvitedEmails {
-  _id?: ObjectId;
-  email: string;
-  role: string;
-  knowledgebaseId: ObjectId;
-  createdAt: Date;
-}
-
-/*********************************************************
  * KB DATA STORE
  *********************************************************/
 
