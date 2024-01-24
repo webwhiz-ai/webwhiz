@@ -549,6 +549,32 @@ export class KnowledgebaseService {
     return 'Done';
   }
 
+  async updateKnowLedgeBaseOwners(
+    userId: ObjectId,
+    kbId: ObjectId,
+    role: string,
+    kb,
+  ) {
+    const updatedOwners = kb.owners.map((owner) => {
+      if (owner.id === userId) {
+        // Update the existing invitation for the user
+        return {
+          id: userId,
+          role: role,
+        };
+      }
+      return owner;
+    });
+
+    // Check if the user was not already invited before updating
+    if (!kb.owners.some((owner) => owner.id === userId)) {
+      // Add the new invitation for the user
+      updatedOwners.push({ id: userId, role: role });
+    }
+
+    await this.kbDbService.updateKnowledgebaseOwners(kbId, updatedOwners);
+  }
+
   async inviteUserToKnowledgeBase(
     user: UserSparse,
     id: string,
@@ -571,27 +597,10 @@ export class KnowledgebaseService {
     if (invitedUser) {
       // If user present
       const userId = invitedUser._id;
-      const updatedOwners = kb.owners.map((owner) => {
-        if (owner.id === userId) {
-          // Update the existing invitation for the user
-          return {
-            id: userId,
-            role: data.role,
-          };
-        }
-        return owner;
-      });
-
-      // Check if the user was not already invited before updating
-      if (!kb.owners.some((owner) => owner.id === userId)) {
-        // Add the new invitation for the user
-        updatedOwners.push({ id: userId, role: data.role });
-      }
-
-      await this.kbDbService.updateKnowledgebaseOwners(kbId, updatedOwners);
+      await this.updateKnowLedgeBaseOwners(userId, kbId, data.role, kb);
     } else {
       // save invite details
-      await this.kbDbService.insertOrUpdateInvitedEmail(
+      await this.userService.insertOrUpdateInvitedEmail(
         data.email,
         kbId,
         data.role,
@@ -601,6 +610,27 @@ export class KnowledgebaseService {
     // send invite email
     await this.emailService.sendInviteUserEmail(data.email);
 
+    return 'Done';
+  }
+
+  async AddInvitedUsersToKnowledgeBase(email: string, userId: ObjectId) {
+    const invitedList = await this.userService.getInvitedEmail(email);
+
+    if (invitedList.length !== 0) {
+      for (const invitedData of invitedList) {
+        const kb = await this.kbDbService.getKnowledgebaseSparseById(
+          invitedData.knowledgebaseId,
+        );
+        if (kb) {
+          await this.updateKnowLedgeBaseOwners(
+            userId,
+            kb._id,
+            invitedData.role,
+            kb,
+          );
+        }
+      }
+    }
     return 'Done';
   }
 }

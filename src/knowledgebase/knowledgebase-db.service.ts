@@ -19,13 +19,10 @@ import {
   KnowledgebaseSparse,
   KnowledgebaseStatus,
   KNOWLEDGEBASE_COLLECTION,
-  INVITED_EMAILS_COLLECTION,
   Prompt,
   PROMPT_COLLECTION,
   ChatSessionSparse,
   ChatAnswerFeedbackType,
-  OwnersData,
-  InvitedEmails,
 } from './knowledgebase.schema';
 
 @Injectable()
@@ -36,7 +33,6 @@ export class KnowledgebaseDbService {
   private readonly kbEmbeddingCollection: Collection<KbEmbedding>;
   private readonly chatSessionCollection: Collection<ChatSession>;
   private readonly promptCollection: Collection<Prompt>;
-  private readonly invitedEmailsCollection: Collection<InvitedEmails>;
 
   constructor(@Inject(MONGODB) private db: Db) {
     this.knowledgebaseCollection = this.db.collection<Knowledgebase>(
@@ -53,9 +49,6 @@ export class KnowledgebaseDbService {
       CHAT_SESSION_COLLECTION,
     );
     this.promptCollection = this.db.collection<Prompt>(PROMPT_COLLECTION);
-    this.invitedEmailsCollection = this.db.collection<InvitedEmails>(
-      INVITED_EMAILS_COLLECTION,
-    );
   }
 
   /*********************************************************
@@ -238,27 +231,6 @@ export class KnowledgebaseDbService {
 
   async deleteKnowledgebase(id: ObjectId) {
     await this.knowledgebaseCollection.deleteOne({ _id: id });
-  }
-
-  /*********************************************************
-   * KNOWLEDGEBASE EMAIL INVITE
-   *********************************************************/
-
-  async insertOrUpdateInvitedEmail(
-    email: string,
-    knowledgebaseId: ObjectId,
-    role: string,
-  ) {
-    const query = { email, knowledgebaseId };
-
-    // Update with upsert option
-    const update = {
-      $set: { email, knowledgebaseId, role, createdAt: new Date() },
-    };
-
-    return await this.invitedEmailsCollection.updateOne(query, update, {
-      upsert: true,
-    });
   }
 
   /*********************************************************
