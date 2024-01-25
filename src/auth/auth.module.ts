@@ -9,7 +9,6 @@ import { JwtStrategy } from './strategies/jwt.strategy';
 import { LocalStrategy } from './strategies/local.strategy';
 import { EmailModule } from '../common/email/email.module';
 import { KnowledgebaseModule } from '../knowledgebase/knowledgebase.module';
-import { KnowledgebaseService } from '../knowledgebase/knowledgebase.service';
 @Module({
   imports: [
     UserModule,
@@ -22,8 +21,9 @@ import { KnowledgebaseService } from '../knowledgebase/knowledgebase.service';
       }),
     }),
     EmailModule,
+    KnowledgebaseModule,
   ],
   controllers: [AuthController],
-  providers: [AuthService, LocalStrategy, JwtStrategy, KnowledgebaseService],
+  providers: [AuthService, LocalStrategy, JwtStrategy],
 })
 export class AuthModule {}

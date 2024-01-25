@@ -51,6 +51,6 @@ import { WebSocketChatGateway } from './websocketchat.gateway';
     CustomKeyService,
     WebSocketChatGateway,
   ],
-  exports: [KnowledgebaseDbService, DataStoreService],
+  exports: [KnowledgebaseDbService, DataStoreService, KnowledgebaseService],
 })
 export class KnowledgebaseModule {}
