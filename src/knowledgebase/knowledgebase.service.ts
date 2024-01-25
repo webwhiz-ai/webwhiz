@@ -549,7 +549,7 @@ export class KnowledgebaseService {
     return 'Done';
   }
 
-  async updateKnowLedgeBaseOwners(
+  private async updateKnowLedgeBaseOwnersList(
     userId: ObjectId,
     kbId: ObjectId,
     role: string,
@@ -597,7 +597,7 @@ export class KnowledgebaseService {
     if (invitedUser) {
       // If user present
       const userId = invitedUser._id;
-      await this.updateKnowLedgeBaseOwners(userId, kbId, data.role, kb);
+      await this.updateKnowLedgeBaseOwnersList(userId, kbId, data.role, kb);
     } else {
       // save invite details
       await this.userService.insertOrUpdateInvitedEmail(
@@ -613,7 +613,7 @@ export class KnowledgebaseService {
     return 'Done';
   }
 
-  async AddInvitedUsersToKnowledgeBase(email: string, userId: ObjectId) {
+  async addInvitedUsersToKnowledgeBase(email: string, userId: ObjectId) {
     const invitedList = await this.userService.getInvitedEmail(email);
 
     if (invitedList.length !== 0) {
@@ -622,7 +622,7 @@ export class KnowledgebaseService {
           invitedData.knowledgebaseId,
         );
         if (kb) {
-          await this.updateKnowLedgeBaseOwners(
+          await this.updateKnowLedgeBaseOwnersList(
             userId,
             kb._id,
             invitedData.role,
