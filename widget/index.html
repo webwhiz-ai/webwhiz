@@ -250,6 +250,8 @@
                 chatMessages.scrollTop = chatMessages.scrollHeight;
             } else if (event.data.messageType === 'webwhiz:recieve_session_id') {
                 sessionId = event.data.sessionId;
+            } else if (event.data.messageType === 'webwhiz:expandWidget') {
+                expandWidget();
             }
         }
 
