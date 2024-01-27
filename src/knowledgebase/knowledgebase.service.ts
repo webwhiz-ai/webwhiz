@@ -23,7 +23,7 @@ import {
   DataStoreType,
   Knowledgebase,
   KnowledgebaseStatus,
-  OwnersData,
+  ParticipantsData,
   UserRoles,
 } from './knowledgebase.schema';
 import { CustomKeyService } from './custom-key.service';
@@ -155,7 +155,7 @@ export class KnowledgebaseService {
           exclude: data.exclude,
         })
       : undefined;
-    const ownersData: OwnersData = {
+    const participantsData: ParticipantsData = {
       id: user._id,
       role: UserRoles.ADMIN,
     };
@@ -164,7 +164,7 @@ export class KnowledgebaseService {
     const kb: Knowledgebase = {
       name: data.name,
       owner: user._id,
-      owners: [ownersData],
+      participants: [participantsData],
       status: KnowledgebaseStatus.CREATED,
       websiteData,
       createdAt: ts,
@@ -323,7 +323,22 @@ export class KnowledgebaseService {
    * @returns
    */
   async listKnowledgebasesForUser(user: UserSparse) {
-    return this.kbDbService.getKnowledgesbaseListForUser(user._id);
+    // this is for backward compatibility
+    // we can remove this after running migration script(copy owner to participants).
+    const kbs = await this.kbDbService.getKnowledgesbaseListForUser(user._id);
+
+    const participatedList =
+      await this.kbDbService.getParticipatedKnowledgesbaseListForUser(user._id);
+
+    // this is for backward compatibility
+    // we can remove this after running migration script(copy owner to participants).
+    participatedList.forEach((kb) => {
+      console.log(kb);
+      if (!kbs.some((entry) => entry._id.equals(kb._id))) {
+        kbs.push(kb);
+      }
+    });
+    return kbs;
   }
 
   /**
@@ -549,13 +564,13 @@ export class KnowledgebaseService {
     return 'Done';
   }
 
-  private async updateKnowLedgeBaseOwnersList(
+  private async updateKnowLedgeBaseParticipantsList(
     userId: ObjectId,
     kbId: ObjectId,
     role: string,
     kb,
   ) {
-    const updatedOwners = kb.owners.map((owner) => {
+    const updatedParticipants = kb.participants.map((owner) => {
       if (owner.id === userId) {
         // Update the existing invitation for the user
         return {
@@ -567,12 +582,15 @@ export class KnowledgebaseService {
     });
 
     // Check if the user was not already invited before updating
-    if (!kb.owners.some((owner) => owner.id === userId)) {
+    if (!kb.participants.some((owner) => owner.id === userId)) {
       // Add the new invitation for the user
-      updatedOwners.push({ id: userId, role: role });
+      updatedParticipants.push({ id: userId, role: role });
     }
 
-    await this.kbDbService.updateKnowledgebaseOwners(kbId, updatedOwners);
+    await this.kbDbService.updateKnowledgebaseParticipants(
+      kbId,
+      updatedParticipants,
+    );
   }
 
   async inviteUserToKnowledgeBase(
@@ -594,10 +612,17 @@ export class KnowledgebaseService {
 
     const invitedUser = await this.userService.getUserByEmail(data.email);
 
+    let userExist = false;
     if (invitedUser) {
       // If user present
       const userId = invitedUser._id;
-      await this.updateKnowLedgeBaseOwnersList(userId, kbId, data.role, kb);
+      await this.updateKnowLedgeBaseParticipantsList(
+        userId,
+        kbId,
+        data.role,
+        kb,
+      );
+      userExist = true;
     } else {
       // save invite details
       await this.userService.insertOrUpdateInvitedEmail(
@@ -608,7 +633,12 @@ export class KnowledgebaseService {
     }
 
     // send invite email
-    await this.emailService.sendInviteUserEmail(data.email);
+    await this.emailService.sendInviteUserEmail(
+      data.email,
+      user.email,
+      kb.name,
+      userExist,
+    );
 
     return 'Done';
   }
@@ -622,7 +652,7 @@ export class KnowledgebaseService {
           invitedData.knowledgebaseId,
         );
         if (kb) {
-          await this.updateKnowLedgeBaseOwnersList(
+          await this.updateKnowLedgeBaseParticipantsList(
             userId,
             kb._id,
             invitedData.role,
