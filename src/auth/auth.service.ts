@@ -94,7 +94,7 @@ export class AuthService {
   async signup(data: CreateUserDTO) {
     const user = await this.userService.createUser(data);
     // Check user is present in the invited list
-    // Add to owners list of user is present
+    // Add to participants list of user is present
     await this.knowledgebaseService.addInvitedUsersToKnowledgeBase(
       data.email,
       user._id,
@@ -134,7 +134,7 @@ export class AuthService {
     if (user) {
       await this.userService.updateLastLoginTs(user);
       // Check user is present in the invited list
-      // Add to owners list of user is present
+      // Add to participants list of user is present
       await this.knowledgebaseService.addInvitedUsersToKnowledgeBase(
         userProfile.email,
         user._id,
@@ -145,7 +145,7 @@ export class AuthService {
     // Create user
     const newUser = await this.userService.createGoogleOAuthUser(userProfile);
     // Check user is present in the invited list
-    // Add to owners list of user is present
+    // Add to participants list of user is present
     await this.knowledgebaseService.addInvitedUsersToKnowledgeBase(
       userProfile.email,
       newUser._id,
