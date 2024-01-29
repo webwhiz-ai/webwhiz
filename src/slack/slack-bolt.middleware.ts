@@ -12,15 +12,6 @@ import { SlackBotService } from './slackbot.service';
 export class SlackBoltMiddleware implements NestMiddleware {
   private readonly logger: Logger;
   private appRunner: AppRunner;
-  private webwhizbotIdStore: any = {
-    data: {},
-    set: function (key, value) {
-      this.data[key] = value;
-    },
-    get: function (key) {
-      return this.data[key];
-    },
-  };
 
   public constructor(
     private readonly slackBotService: SlackBotService,
@@ -101,13 +92,21 @@ export class SlackBoltMiddleware implements NestMiddleware {
         stateVerification: false,
         installPathOptions: {
           beforeRedirection: async (req, res) => {
+            // console.log('beforeRedirection');
             const webwhizbotId = req.url.split('webwhizKbId=')[1];
-            this.logger.log('webwhizKbId: ', webwhizbotId);
+            this.logger.log(`webwhizKbId: ${webwhizbotId}`);
             if (
               webwhizbotId &&
               (await this.isValidKnowledgebase(webwhizbotId))
             ) {
-              this.webwhizbotIdStore.set('webwhizKbId', webwhizbotId);
+              // Set webwhizKbId as cookie with expiry of 5 minutes
+              const d = new Date();
+              d.setTime(d.getTime() + 5 * 60 * 1000); // 5 minutes in milliseconds
+              const expires = 'expires=' + d.toUTCString();
+              res.setHeader(
+                'Set-Cookie',
+                `webwhizKbId=${webwhizbotId}; ${expires}; path=/;`,
+              );
               return true;
             } else {
               return false;
@@ -115,14 +114,26 @@ export class SlackBoltMiddleware implements NestMiddleware {
           },
         },
         callbackOptions: {
-          afterInstallation: async (installation, req, res) => {
-            const webwhizbotId = this.webwhizbotIdStore.get('webwhizKbId');
-            if (webwhizbotId) {
-              installation.metadata = webwhizbotId;
-              return true;
-            } else {
-              return false;
+          beforeInstallation: async (options, req, res) => {
+            // console.log('beforeInstallation');
+            const cookie = req.headers.cookie;
+            // console.log('cookie before removal', cookie);
+            // remove webwhizKbId from cookie
+            res.setHeader(
+              'Set-Cookie',
+              'webwhizKbId=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;',
+            );
+            const regex = /webwhizKbId=([a-zA-Z0-9]+)/; // Regular expression to match the botid value
+            const match = cookie.match(regex);
+            let webwhizbotId;
+            if (match) {
+              webwhizbotId = match[1];
             }
+            if (webwhizbotId) {
+              options.metadata = webwhizbotId;
+              return true;
+            }
+            return false;
           },
         },
       },
