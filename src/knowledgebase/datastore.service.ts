@@ -8,7 +8,7 @@ import { UserService } from '../user/user.service';
 import { OpenaiChatbotService } from './chatbot/openaiChatbotService';
 import { CustomKeyService } from './custom-key.service';
 import { KnowledgebaseDbService } from './knowledgebase-db.service';
-import { checkUserIsOwnerOfKb } from './knowledgebase-utils';
+import { checkUserPermissionForKb } from './knowledgebase-utils';
 import { AddCustomChunkDTO } from './knowledgebase.dto';
 import {
   CHUNK_SIZE,
@@ -205,7 +205,7 @@ export class DataStoreService {
   ) {
     const kbId = new ObjectId(knowledgebaseId);
     const kb = await this.kbDbService.getKnowledgebaseSparseById(kbId);
-    checkUserIsOwnerOfKb(user, kb);
+    checkUserPermissionForKb(user, kb);
 
     const ts = new Date();
 
@@ -240,7 +240,7 @@ export class DataStoreService {
 
     // Validations
     const kb = await this.kbDbService.getKnowledgebaseSparseById(kbId);
-    checkUserIsOwnerOfKb(user, kb);
+    checkUserPermissionForKb(user, kb);
 
     const dsItem = await this.kbDbService.getKbDataStoreItemById(dId);
     if (!dsItem || !dsItem.knowledgebaseId.equals(kbId)) {
@@ -265,7 +265,7 @@ export class DataStoreService {
   ) {
     const kbId = new ObjectId(knowledgebaseId);
     const kb = await this.kbDbService.getKnowledgebaseSparseById(kbId);
-    checkUserIsOwnerOfKb(user, kb);
+    checkUserPermissionForKb(user, kb);
 
     return this.kbDbService.getPaginatedDataStoreItemsForKnowledgebase(
       kbId,
@@ -285,7 +285,7 @@ export class DataStoreService {
 
     // Validations
     const kb = await this.kbDbService.getKnowledgebaseSparseById(kbId);
-    checkUserIsOwnerOfKb(user, kb);
+    checkUserPermissionForKb(user, kb);
     const dsItem = await this.kbDbService.getKbDataStoreItemById(dId);
     if (!dsItem.knowledgebaseId.equals(kbId)) {
       throw new HttpException('Invalid DataStore Id', HttpStatus.UNAUTHORIZED);
@@ -305,7 +305,7 @@ export class DataStoreService {
 
     // Validations
     const kb = await this.kbDbService.getKnowledgebaseSparseById(kbId);
-    checkUserIsOwnerOfKb(user, kb);
+    checkUserPermissionForKb(user, kb);
     const dsItem = await this.kbDbService.getKbDataStoreItemById(dId);
     if (!dsItem.knowledgebaseId.equals(kbId)) {
       throw new HttpException('Invalid DataStore Id', HttpStatus.UNAUTHORIZED);

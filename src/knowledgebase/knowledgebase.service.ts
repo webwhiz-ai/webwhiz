@@ -12,7 +12,7 @@ import { SubscriptionPlanInfo } from '../subscription/subscription.const';
 import { Subscription, UserSparse } from '../user/user.schema';
 import { DEFAULT_CHATGPT_PROMPT } from './chatbot/openaiChatbot.constant';
 import { KnowledgebaseDbService } from './knowledgebase-db.service';
-import { checkUserIsOwnerOfKb } from './knowledgebase-utils';
+import { checkUserPermissionForKb } from './knowledgebase-utils';
 import {
   CreateKnowledgebaseDTO,
   InviteUserDTO,
@@ -199,7 +199,7 @@ export class KnowledgebaseService {
   ) {
     const kbId = new ObjectId(id);
     const kb = await this.kbDbService.getKnowledgebaseSparseById(kbId);
-    checkUserIsOwnerOfKb(user, kb);
+    checkUserPermissionForKb(user, kb);
 
     if (
       kb.status === KnowledgebaseStatus.CRAWLING ||
@@ -267,7 +267,7 @@ export class KnowledgebaseService {
     const kbId = new ObjectId(id);
 
     const kb = await this.kbDbService.getKnowledgebaseSparseById(kbId);
-    checkUserIsOwnerOfKb(user, kb);
+    checkUserPermissionForKb(user, kb);
 
     if (
       kb.status === KnowledgebaseStatus.CRAWLING ||
@@ -333,7 +333,6 @@ export class KnowledgebaseService {
     // this is for backward compatibility
     // we can remove this after running migration script(copy owner to participants).
     participatedList.forEach((kb) => {
-      console.log(kb);
       if (!kbs.some((entry) => entry._id.equals(kb._id))) {
         kbs.push(kb);
       }
@@ -349,7 +348,7 @@ export class KnowledgebaseService {
    */
   async getKnowledgeBaseDetail(user: UserSparse, id: string) {
     const kb = await this.kbDbService.getKnowledgebaseById(new ObjectId(id));
-    checkUserIsOwnerOfKb(user, kb);
+    checkUserPermissionForKb(user, kb, ['read']);
 
     // Set Default prompt if knowledgebase prompt is not defined
     if (!kb.prompt) {
@@ -387,7 +386,7 @@ export class KnowledgebaseService {
     const kbId = new ObjectId(id);
 
     const kb = await this.kbDbService.getKnowledgebaseSparseById(kbId);
-    checkUserIsOwnerOfKb(user, kb);
+    checkUserPermissionForKb(user, kb);
 
     await Promise.all([
       this.kbDbService.deleteKnowledgebase(kbId),
@@ -406,7 +405,7 @@ export class KnowledgebaseService {
   async setKnowledgebaseChatWidgeData(user: UserSparse, id: string, data: any) {
     const kbId = new ObjectId(id);
     const kb = await this.kbDbService.getKnowledgebaseSparseById(kbId);
-    checkUserIsOwnerOfKb(user, kb);
+    checkUserPermissionForKb(user, kb);
 
     await this.kbDbService.setKnowledgebaseChatWidgetData(kbId, data);
   }
@@ -479,7 +478,7 @@ export class KnowledgebaseService {
     const kbId = new ObjectId(id);
 
     const kb = await this.kbDbService.getKnowledgebaseSparseById(kbId);
-    checkUserIsOwnerOfKb(user, kb);
+    checkUserPermissionForKb(user, kb);
 
     await this.kbDbService.updateKnowledgebase(kbId, {
       defaultAnswer,
@@ -490,7 +489,7 @@ export class KnowledgebaseService {
     const kbId = new ObjectId(id);
 
     const kb = await this.kbDbService.getKnowledgebaseSparseById(kbId);
-    checkUserIsOwnerOfKb(user, kb);
+    checkUserPermissionForKb(user, kb);
 
     prompt = this.constructPromptFromBaseSystemMsg(prompt);
 
@@ -521,7 +520,7 @@ export class KnowledgebaseService {
   ) {
     const kbId = new ObjectId(id);
     const kb = await this.kbDbService.getKnowledgebaseSparseById(kbId);
-    checkUserIsOwnerOfKb(user, kb);
+    checkUserPermissionForKb(user, kb);
 
     await this.kbDbService.updateKnowledgebase(kbId, { adminEmail: email });
   }
@@ -536,7 +535,7 @@ export class KnowledgebaseService {
   async setCustomDomain(user: UserSparse, id: string, domain: string) {
     const kbId = new ObjectId(id);
     const kb = await this.kbDbService.getKnowledgebaseSparseById(kbId);
-    checkUserIsOwnerOfKb(user, kb);
+    checkUserPermissionForKb(user, kb);
 
     await this.kbDbService.updateKnowledgebase(kbId, {
       customDomain: domain,
@@ -555,7 +554,7 @@ export class KnowledgebaseService {
   async setModelName(user: UserSparse, id: string, model: string) {
     const kbId = new ObjectId(id);
     const kb = await this.kbDbService.getKnowledgebaseSparseById(kbId);
-    checkUserIsOwnerOfKb(user, kb);
+    checkUserPermissionForKb(user, kb);
 
     await this.kbDbService.updateKnowledgebase(kbId, {
       model,
@@ -600,7 +599,7 @@ export class KnowledgebaseService {
   ) {
     const kbId = new ObjectId(id);
     const kb = await this.kbDbService.getKnowledgebaseSparseById(kbId);
-    checkUserIsOwnerOfKb(user, kb);
+    checkUserPermissionForKb(user, kb);
 
     if (!data.email || !data.role) {
       throw new HttpException('Not email/role found!', HttpStatus.NOT_FOUND);
@@ -651,6 +650,7 @@ export class KnowledgebaseService {
         const kb = await this.kbDbService.getKnowledgebaseSparseById(
           invitedData.knowledgebaseId,
         );
+        console.log('>>>>>>>>>>>>>>>>>>>11');
         if (kb) {
           await this.updateKnowLedgeBaseParticipantsList(
             userId,
@@ -658,9 +658,34 @@ export class KnowledgebaseService {
             invitedData.role,
             kb,
           );
+          console.log('>>>>>>>>>>>>>>>>>>>2222');
+          await this.userService.deleteFromInvitedEmail(email, kb._id);
         }
       }
     }
     return 'Done';
+  }
+
+  async deleteUserFromKnowledgeBase(
+    user: UserSparse,
+    id: string,
+    userId: string,
+  ) {
+    const kbId = new ObjectId(id);
+    const kb = await this.kbDbService.getKnowledgebaseSparseById(kbId);
+    checkUserPermissionForKb(user, kb, ['admin']);
+
+    const index = kb.participants.findIndex(
+      (participant) => participant.id.toString() === userId,
+    );
+    if (index !== -1) {
+      const updatedParticipants = kb.participants.splice(index, 1);
+
+      await this.kbDbService.updateKnowledgebaseParticipants(
+        kbId,
+        updatedParticipants,
+      );
+    }
+    return;
   }
 }

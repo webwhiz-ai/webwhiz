@@ -26,7 +26,7 @@ import { WebhookService } from '../../webhook/webhook.service';
 import { WebhookEventType } from '../../webhook/webhook.types';
 import { CustomKeyService } from '../custom-key.service';
 import { KnowledgebaseDbService } from '../knowledgebase-db.service';
-import { checkUserIsOwnerOfKb } from '../knowledgebase-utils';
+import { checkUserPermissionForKb } from '../knowledgebase-utils';
 
 import {
   ChatAnswerFeedbackType,
@@ -679,7 +679,7 @@ export class ChatbotService {
     const kbId = new ObjectId(knowledgebaseId);
 
     const kb = await this.kbDbService.getKnowledgebaseSparseById(kbId);
-    checkUserIsOwnerOfKb(user, kb);
+    checkUserPermissionForKb(user, kb);
 
     return this.kbDbService.getPaginatedChatSessionsForKnowledgebase(
       kbId,

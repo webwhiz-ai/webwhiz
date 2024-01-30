@@ -4,7 +4,7 @@ import { ObjectId } from 'mongodb';
 import { extname } from 'node:path';
 import { AppConfigService } from '../../common/config/appConfig.service';
 import { KnowledgebaseDbService } from '../../knowledgebase/knowledgebase-db.service';
-import { checkUserIsOwnerOfKb } from '../../knowledgebase/knowledgebase-utils';
+import { checkUserPermissionForKb } from '../../knowledgebase/knowledgebase-utils';
 import {
   DataStoreStatus,
   DataStoreType,
@@ -73,7 +73,7 @@ export class TextractImporterService {
     const kbId = new ObjectId(knowledgebaseId);
 
     const kb = await this.kbDbService.getKnowledgebaseSparseById(kbId);
-    checkUserIsOwnerOfKb(user, kb);
+    checkUserPermissionForKb(user, kb);
 
     // Extract content
     const content = await this.extractContentForFile(file);
