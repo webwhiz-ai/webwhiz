@@ -383,7 +383,7 @@ export class KnowledgebaseService {
   }
 
   /**
-   * Set chat widge data for Knowledgebase
+   * Set chat widget data for Knowledgebase
    * @param user
    * @param id
    * @param data
@@ -545,6 +545,24 @@ export class KnowledgebaseService {
     await this.kbDbService.updateKnowledgebase(kbId, {
       model,
     });
+
+    return 'Done';
+  }
+
+  /**
+   * Sets the name of a knowledgebase.
+   *
+   * @param user
+   * @param id
+   * @param name
+   * @returns
+   */
+  async setKnowledgebaseName(user: UserSparse, id: string, name: string) {
+    const kbId = new ObjectId(id);
+    const kb = await this.kbDbService.getKnowledgebaseSparseById(kbId);
+    checkUserIsOwnerOfKb(user, kb);
+
+    await this.kbDbService.updateKnowledgebase(kbId, { name: name });
 
     return 'Done';
   }

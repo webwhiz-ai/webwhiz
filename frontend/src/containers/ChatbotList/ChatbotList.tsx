@@ -11,6 +11,16 @@ import {
 	Link as ChakraLink,
 	useToast,
 	VStack,
+	Modal,
+	ModalBody,
+	ModalCloseButton,
+	ModalContent,
+	ModalFooter,
+	ModalHeader,
+	ModalOverlay,
+	useDisclosure,
+	FormControl,
+	Input,
 } from "@chakra-ui/react";
 import { Link, useHistory } from "react-router-dom";
 
@@ -22,7 +32,7 @@ import { User } from '../../services/appConfig';
 import { CurrentUser } from "../../services/appConfig";
 import { NoDataSubscribeIcon } from "../../components/Icons/noData/NoDataSubscribeIcon";
 import { NoDataProjectIcon } from "../../components/Icons/noData/NoDataProjectIcon";
-import { deleteKnowledgebase, fetchKnowledgebases, generateEmbeddings } from "../../services/knowledgebaseService";
+import { deleteKnowledgebase, fetchKnowledgebases, generateEmbeddings, updateChatbotName } from "../../services/knowledgebaseService";
 import { SELF_HOST } from "../../config";
 
 let PAID_ONLY = false;
@@ -35,6 +45,9 @@ export const ChatbotList = () => {
 	const toast = useToast();
 	const [chatbotsList, setChatBotList] = React.useState<any>();
 	const [chatbotsLoaded, setChatbotsLoaded] = React.useState<boolean>(false);
+	const [chatbotName, setChatbotName] = React.useState<string>('');
+	const [selectedChatbotId, setSelectedChatbotId] = React.useState<any>();
+	const { isOpen, onOpen, onClose } = useDisclosure();
 
 	const [user, setUser] = React.useState<User>(CurrentUser.get());
 	React.useEffect(() => {
@@ -71,10 +84,42 @@ export const ChatbotList = () => {
 					status: "success",
 					isClosable: true,
 				});
+			} else if (type === "rename") {
+				setSelectedChatbotId(chatbot._id);
+				setChatbotName(chatbot.name);
+				onOpen();
 			}
 		},
-		[history, chatbotsList, toast]
+		[history, chatbotsList, toast, onOpen]
 	);
+
+	const handleRename = React.useCallback(async () => {
+		try {
+			await updateChatbotName(selectedChatbotId, chatbotName);
+			setChatBotList(chatbotsList?.map((_chatbot) => {
+				if (_chatbot._id === selectedChatbotId) {
+					return {
+						..._chatbot,
+						name: chatbotName
+					}
+				}
+				return _chatbot;
+			}));
+			toast({
+				title: `Chatbot has been renamed successfully `,
+				status: "success",
+				isClosable: true,
+			});
+		} catch (error) {
+			console.log("Unable to rename chatbot", error);
+			toast({
+				title: `Unable to rename chatbot`,
+				status: "error",
+				isClosable: true,
+			});
+		}
+		onClose();
+	}, [chatbotName, chatbotsList, onClose, selectedChatbotId, toast]);
 
 	useEffect(() => {
 		async function fetchData() {
@@ -223,6 +268,7 @@ export const ChatbotList = () => {
 
 
 	return (
+		<>
 		<Box
 			w="100%"
 			maxW="1200px"
@@ -240,10 +286,52 @@ export const ChatbotList = () => {
 					</Tooltip> : <Link to="/app/create-chatbot">
 						<Button colorScheme='blue' size='md'>Create new chatbot</Button>
 					</Link>}
-					
+
 				</Flex>
 				<Box width="100%">{getChatbotsList()}</Box>
 			</VStack>
 		</Box>
+			<Modal isOpen={isOpen} onClose={onClose}>
+				<ModalOverlay />
+				<ModalContent>
+					<ModalHeader>Rename Chatbot</ModalHeader>
+					<ModalCloseButton />
+					<ModalBody>
+						<FormControl>
+							<Input
+								placeholder="Chatbot Name"
+								isRequired
+								value={chatbotName}
+								onChange={(e) => setChatbotName(e.target.value)}
+								ref={(input) => {
+									if (input) {
+										input.focus();
+									}
+								}}
+								onKeyDown={(e) => {
+									if (e.key === 'Enter' && chatbotName) {
+										handleRename();
+									}
+								}}
+							/>
+						</FormControl>
+					</ModalBody>
+
+					<ModalFooter>
+						<Button type='reset' colorScheme='blue' mr={3} onClick={onClose}>
+							Cancel
+						</Button>
+						<Button
+							type='submit'
+							colorScheme='green'
+							onClick={handleRename}
+							disabled={!chatbotName} // Disable the button if chatbotName is empty
+						>
+							Rename
+						</Button>
+					</ModalFooter>
+				</ModalContent>
+			</Modal>
+		</>
 	);
 };
