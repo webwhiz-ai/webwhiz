@@ -4,7 +4,10 @@ import { ObjectId } from 'mongodb';
 import { extname } from 'node:path';
 import { AppConfigService } from '../../common/config/appConfig.service';
 import { KnowledgebaseDbService } from '../../knowledgebase/knowledgebase-db.service';
-import { checkUserPermissionForKb } from '../../knowledgebase/knowledgebase-utils';
+import {
+  checkUserPermissionForKb,
+  UserPermissions,
+} from '../../knowledgebase/knowledgebase-utils';
 import {
   DataStoreStatus,
   DataStoreType,
@@ -73,7 +76,7 @@ export class TextractImporterService {
     const kbId = new ObjectId(knowledgebaseId);
 
     const kb = await this.kbDbService.getKnowledgebaseSparseById(kbId);
-    checkUserPermissionForKb(user, kb);
+    checkUserPermissionForKb(user, kb, [UserPermissions.EDIT]);
 
     // Extract content
     const content = await this.extractContentForFile(file);

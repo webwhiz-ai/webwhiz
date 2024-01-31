@@ -1,12 +1,25 @@
 import { HttpException, HttpStatus } from '@nestjs/common';
 import { UserSparse } from '../user/user.schema';
 import { KnowledgebaseSparse, UserRoles } from './knowledgebase.schema';
-import { use } from 'passport';
+
+export enum UserPermissions {
+  READ = 'read',
+  EDIT = 'edit',
+  DELETE = 'delete',
+  INVITE_USER = 'invite_user',
+  DELETE_USER = 'delete_user',
+}
 
 const rolePermissions = {
-  [UserRoles.READER]: ['read'],
-  [UserRoles.EDITOR]: ['read', 'edit'],
-  [UserRoles.ADMIN]: ['read', 'edit', 'admin'],
+  [UserRoles.READER]: [UserPermissions.READ],
+  [UserRoles.EDITOR]: [UserPermissions.READ, UserPermissions.EDIT],
+  [UserRoles.ADMIN]: [
+    UserPermissions.READ,
+    UserPermissions.EDIT,
+    UserPermissions.DELETE,
+    UserPermissions.INVITE_USER,
+    UserPermissions.DELETE_USER,
+  ],
 };
 
 export function checkUserPermissionForKb(
@@ -30,8 +43,9 @@ export function checkUserPermissionForKb(
 
         if (requiredPermissions) {
           // Check if the user's permissions include all required permissions
-          const hasPermission = requiredPermissions.every((permission) =>
-            userPermissions.includes(permission),
+          const hasPermission = requiredPermissions.every(
+            (permission: UserPermissions) =>
+              userPermissions.includes(permission),
           );
 
           if (!hasPermission) {
