@@ -50,6 +50,8 @@ export class AppModule {
       path: '*',
       method: RequestMethod.ALL,
     });
-    consumer.apply(SlackBoltMiddleware).forRoutes('');
+    if (process.env.ENABLE_SLACK_BOT === 'true') {
+      consumer.apply(SlackBoltMiddleware).forRoutes('');
+    }
   }
 }
