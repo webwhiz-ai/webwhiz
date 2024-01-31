@@ -15,6 +15,7 @@ import { KnowledgebaseDbService } from './knowledgebase-db.service';
 import { checkUserIsOwnerOfKb } from './knowledgebase-utils';
 import {
   CreateKnowledgebaseDTO,
+  InviteUserDTO,
   UpdateKnowledgebaseWebsiteDataDTO,
 } from './knowledgebase.dto';
 import {
@@ -22,9 +23,12 @@ import {
   DataStoreType,
   Knowledgebase,
   KnowledgebaseStatus,
+  OwnersData,
+  UserRoles,
 } from './knowledgebase.schema';
 import { CustomKeyService } from './custom-key.service';
 import { UserService } from '../user/user.service';
+import { EmailService } from '../common/email/email.service';
 
 @Injectable()
 export class KnowledgebaseService {
@@ -34,6 +38,7 @@ export class KnowledgebaseService {
     private subPlanInfoService: SubscriptionPlanInfoService,
     private customKeyService: CustomKeyService,
     private readonly userService: UserService,
+    private emailService: EmailService,
   ) {}
 
   /*********************************************************
@@ -150,12 +155,16 @@ export class KnowledgebaseService {
           exclude: data.exclude,
         })
       : undefined;
-
+    const ownersData: OwnersData = {
+      id: user._id,
+      role: UserRoles.ADMIN,
+    };
     // Create a new Kb in db
     const ts = new Date();
     const kb: Knowledgebase = {
       name: data.name,
       owner: user._id,
+      owners: [ownersData],
       status: KnowledgebaseStatus.CREATED,
       websiteData,
       createdAt: ts,
@@ -374,7 +383,7 @@ export class KnowledgebaseService {
   }
 
   /**
-   * Set chat widge data for Knowledgebase
+   * Set chat widget data for Knowledgebase
    * @param user
    * @param id
    * @param data
@@ -555,6 +564,91 @@ export class KnowledgebaseService {
 
     await this.kbDbService.updateKnowledgebase(kbId, { name: name });
 
+    return 'Done';
+  }
+
+  private async updateKnowLedgeBaseOwnersList(
+    userId: ObjectId,
+    kbId: ObjectId,
+    role: string,
+    kb,
+  ) {
+    const updatedOwners = kb.owners.map((owner) => {
+      if (owner.id === userId) {
+        // Update the existing invitation for the user
+        return {
+          id: userId,
+          role: role,
+        };
+      }
+      return owner;
+    });
+
+    // Check if the user was not already invited before updating
+    if (!kb.owners.some((owner) => owner.id === userId)) {
+      // Add the new invitation for the user
+      updatedOwners.push({ id: userId, role: role });
+    }
+
+    await this.kbDbService.updateKnowledgebaseOwners(kbId, updatedOwners);
+  }
+
+  async inviteUserToKnowledgeBase(
+    user: UserSparse,
+    id: string,
+    data: InviteUserDTO,
+  ) {
+    const kbId = new ObjectId(id);
+    const kb = await this.kbDbService.getKnowledgebaseSparseById(kbId);
+    checkUserIsOwnerOfKb(user, kb);
+
+    if (!data.email || !data.role) {
+      throw new HttpException('Not email/role found!', HttpStatus.NOT_FOUND);
+    }
+
+    if (!Object.values(UserRoles).includes(data.role as UserRoles)) {
+      throw new HttpException('Invalid role!', HttpStatus.NOT_FOUND);
+    }
+
+    const invitedUser = await this.userService.getUserByEmail(data.email);
+
+    if (invitedUser) {
+      // If user present
+      const userId = invitedUser._id;
+      await this.updateKnowLedgeBaseOwnersList(userId, kbId, data.role, kb);
+    } else {
+      // save invite details
+      await this.userService.insertOrUpdateInvitedEmail(
+        data.email,
+        kbId,
+        data.role,
+      );
+    }
+
+    // send invite email
+    await this.emailService.sendInviteUserEmail(data.email);
+
+    return 'Done';
+  }
+
+  async addInvitedUsersToKnowledgeBase(email: string, userId: ObjectId) {
+    const invitedList = await this.userService.getInvitedEmail(email);
+
+    if (invitedList.length !== 0) {
+      for (const invitedData of invitedList) {
+        const kb = await this.kbDbService.getKnowledgebaseSparseById(
+          invitedData.knowledgebaseId,
+        );
+        if (kb) {
+          await this.updateKnowLedgeBaseOwnersList(
+            userId,
+            kb._id,
+            invitedData.role,
+            kb,
+          );
+        }
+      }
+    }
     return 'Done';
   }
 }

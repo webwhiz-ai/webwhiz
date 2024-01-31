@@ -75,6 +75,7 @@ export class KnowledgebaseDbService {
           monthUsage: 1,
           crawlData: 1,
           owner: 1,
+          owners: 1,
         },
       },
     );
@@ -156,6 +157,13 @@ export class KnowledgebaseDbService {
     return this.knowledgebaseCollection.updateOne(
       { _id: id },
       { $set: { ...update, updatedAt: new Date() } },
+    );
+  }
+
+  async updateKnowledgebaseOwners(id: ObjectId, owners: any) {
+    return this.knowledgebaseCollection.updateOne(
+      { _id: id },
+      { $set: { owners: owners, updatedAt: new Date() } },
     );
   }
 
@@ -479,6 +487,7 @@ export class KnowledgebaseDbService {
         projection: {
           _id: 1,
           src: 1,
+          isManual: 1,
           messages: 1,
           userData: 1,
           startedAt: 1,

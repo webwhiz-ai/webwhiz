@@ -4,10 +4,12 @@ import {
   Inject,
   Injectable,
   MessageEvent,
+  forwardRef,
 } from '@nestjs/common';
 import { Redis } from 'ioredis';
 import { ObjectId } from 'mongodb';
 import { endWith, map, of, skipLast } from 'rxjs';
+import { v4 as uuidv4 } from 'uuid';
 import {
   CELERY_CLIENT,
   CeleryClientQueue,
@@ -25,6 +27,7 @@ import { WebhookEventType } from '../../webhook/webhook.types';
 import { CustomKeyService } from '../custom-key.service';
 import { KnowledgebaseDbService } from '../knowledgebase-db.service';
 import { checkUserIsOwnerOfKb } from '../knowledgebase-utils';
+
 import {
   ChatAnswerFeedbackType,
   ChatQueryAnswer,
@@ -36,6 +39,7 @@ import {
 } from '../knowledgebase.schema';
 import { PromptTestDTO, UpdateChatbotSessionDTO } from './chatbot.dto';
 import { OpenaiChatbotService } from './openaiChatbotService';
+import { WebSocketChatGateway } from '../websocketchat.gateway';
 
 const CHAT_SESION_EXPIRY_TIME = 5 * 60;
 const CHUNK_FILTER_THRESHOLD = 0.3;
@@ -54,6 +58,8 @@ export class ChatbotService {
     private readonly webhookService: WebhookService,
     @Inject(CELERY_CLIENT) private celeryClient: CeleryClientService,
     @Inject(REDIS) private redis: Redis,
+    @Inject(forwardRef(() => WebSocketChatGateway))
+    private webSocketChatGateway: WebSocketChatGateway,
   ) {}
 
   private async putChatSessionDataToCache(sessionData: ChatSession) {
@@ -65,7 +71,7 @@ export class ChatbotService {
     );
   }
 
-  private async getChatSessionDataFromCache(sessionId: string) {
+  async getChatSessionDataFromCache(sessionId: string) {
     const sessionKey = `c_${sessionId}`;
     const sId = new ObjectId(sessionId);
     const data = await this.redis.get(sessionKey);
@@ -96,7 +102,7 @@ export class ChatbotService {
     );
   }
 
-  private async updateSessionDataWithNewMsg(
+  async updateSessionDataWithNewMsg(
     session: ChatSession,
     msg: ChatQueryAnswer,
   ) {
@@ -253,6 +259,7 @@ export class ChatbotService {
     if (!allowUsage) {
       const answer = 'Sorry I cannot respond right now';
       const msg = {
+        id: uuidv4(),
         type: MessageType.BOT,
         q: query,
         a: answer,
@@ -302,6 +309,7 @@ export class ChatbotService {
     );
 
     const msg = {
+      id: uuidv4(),
       type: MessageType.BOT,
       q: query,
       a: answer.response,
@@ -333,10 +341,11 @@ export class ChatbotService {
 
     const sessionData = await this.getChatSessionDataFromCache(sessionId);
     if (!sessionData) {
-      throw new HttpException('Invalid Session Id', HttpStatus.NOT_FOUND);
+      return null;
     }
 
     const msg = {
+      id: uuidv4(),
       type: MessageType.MANUAL,
       q: null,
       a: null,
@@ -347,7 +356,8 @@ export class ChatbotService {
       sender: chatData.sender,
       sessionId: sessionId,
     };
-    await this.updateSessionDataWithNewMsg(sessionData, msg);
+    await this.updateSessionDataWithNewManualMsg(sessionData, msg);
+    return sessionData.knowledgebaseId;
   }
 
   /**
@@ -375,6 +385,7 @@ export class ChatbotService {
     if (!allowUsage) {
       const answer = 'Sorry I cannot respond right now';
       const msg = {
+        id: uuidv4(),
         type: MessageType.BOT,
         q: query,
         a: answer,
@@ -386,6 +397,7 @@ export class ChatbotService {
         sender: null,
         sessionId: sessionId,
       };
+      this.webSocketChatGateway.server.emit('chat_broadcast', msg);
       await this.updateSessionDataWithNewMsg(sessionData, msg);
       return of(answer);
     }
@@ -418,6 +430,7 @@ export class ChatbotService {
       prevMessages,
       async (answer, usage) => {
         const msg = {
+          id: uuidv4(),
           type: MessageType.BOT,
           q: query,
           a: answer,
@@ -429,6 +442,7 @@ export class ChatbotService {
           sender: null,
           sessionId: sessionId,
         };
+        this.webSocketChatGateway.server.emit('chat_broadcast', msg);
         await this.updateSessionDataWithNewMsg(sessionData, msg);
 
         // Call webhook with msg
@@ -556,17 +570,27 @@ export class ChatbotService {
       this.kbDbService.insertChatSession(sessionData),
     ]);
 
+    const msgData = {
+      id: uuidv4(),
+      type: 'SYSTEM',
+      ts: new Date(),
+      msg: 'New session',
+      sender: 'SYSTEM',
+      sessionId: sessionId,
+    };
+    this.webSocketChatGateway.server.emit('new_session', msgData);
+
     return sessionId.toString();
   }
 
-  async initiateManualChatSession(sessionId: string) {
+  async switchChatSession(sessionId: string, isManual: boolean) {
     const sessionData = await this.getChatSessionDataFromCache(sessionId);
 
     if (!sessionData) return;
 
     const updatedSessionData: ChatSession = {
       ...sessionData,
-      isManual: true,
+      isManual: isManual,
     };
 
     await Promise.all([

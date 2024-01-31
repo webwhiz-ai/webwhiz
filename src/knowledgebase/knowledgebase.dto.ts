@@ -116,3 +116,10 @@ export class SetChatBotNameDTO {
   @IsNotEmpty()
   name: string;
 }
+
+export class InviteUserDTO {
+  @IsString()
+  @IsNotEmpty()
+  email: string;
+  role: string;
+}

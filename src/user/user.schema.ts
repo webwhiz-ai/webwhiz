@@ -83,3 +83,18 @@ export type UserProfile = Pick<
   User,
   '_id' | 'email' | 'avatarUrl' | 'monthUsage' | 'activeSubscription'
 >;
+
+export const INVITED_EMAILS_COLLECTION = 'invitedEmails';
+
+export interface InvitedEmails {
+  _id?: ObjectId;
+  email: string;
+  role: string;
+  knowledgebaseId: ObjectId;
+  createdAt: Date;
+}
+
+export type InvitedEmailsParse = Pick<
+  InvitedEmails,
+  '_id' | 'email' | 'role' | 'knowledgebaseId'
+>;

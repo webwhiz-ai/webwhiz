@@ -61,6 +61,27 @@ export class EmailService {
     return res;
   }
 
+  async sendManualMsgEmail(
+    email: string,
+    queryText: string,
+    websiteUrl: string,
+  ) {
+    if (!this.isSgInitialized) return;
+
+    const msg = {
+      to: email,
+      from: { email: 'hi@webwhiz.ai', name: 'WebWhiz.ai' },
+      templateId: 'd-a4f34375b9504c5d94f6d9e3eafe0214',
+      dynamicTemplateData: {
+        website_url: websiteUrl,
+        msg_msg: queryText,
+      },
+    };
+
+    const res = await sgMail.send(msg);
+    return res;
+  }
+
   async sendToken80ExhaustedEmail(email: string) {
     if (!this.isSgInitialized) return;
 
@@ -81,6 +102,20 @@ export class EmailService {
       to: email,
       from: { email: 'hi@webwhiz.ai', name: 'WebWhiz.ai' },
       templateId: 'd-7d140563825745a2b4c8e02afab18aea',
+    };
+
+    const res = await sgMail.send(msg);
+    return res;
+  }
+
+  async sendInviteUserEmail(email: string) {
+    if (!this.isSgInitialized) return;
+
+    const msg = {
+      to: email,
+      from: { email: 'hi@webwhiz.ai', name: 'WebWhiz.ai' },
+      templateId: 'd-4ba3b2bf1f9e4fcea8c5e881c934a2c6',
+      dynamicTemplateData: {},
     };
 
     const res = await sgMail.send(msg);
