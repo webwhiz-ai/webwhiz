@@ -666,9 +666,7 @@ export class ChatbotService {
       session.knowledgebaseId,
     );
 
-    if (!user._id.equals(kb.owner)) {
-      throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
-    }
+    checkUserPermissionForKb(user, kb, [UserPermissions.READ]);
 
     return session;
   }
@@ -708,9 +706,7 @@ export class ChatbotService {
       session.knowledgebaseId,
     );
 
-    if (!user._id.equals(kb.owner)) {
-      throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
-    }
+    checkUserPermissionForKb(user, kb, [UserPermissions.EDIT]);
 
     try {
       await this.kbDbService.deleteChatSession(new ObjectId(sessionId));
@@ -735,9 +731,7 @@ export class ChatbotService {
       session.knowledgebaseId,
     );
 
-    if (!user._id.equals(kb.owner)) {
-      throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
-    }
+    checkUserPermissionForKb(user, kb, [UserPermissions.EDIT]);
 
     try {
       this.kbDbService.updateChatSession(new ObjectId(sessionId), {
@@ -765,9 +759,7 @@ export class ChatbotService {
       session.knowledgebaseId,
     );
 
-    if (!user._id.equals(kb.owner)) {
-      throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
-    }
+    checkUserPermissionForKb(user, kb, [UserPermissions.EDIT]);
 
     try {
       this.kbDbService.updateChatSession(new ObjectId(sessionId), {
