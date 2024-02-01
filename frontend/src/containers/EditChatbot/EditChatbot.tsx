@@ -791,7 +791,7 @@ const EditChatbot = (props: EditChatbotProps) => {
 			formSubmitErrorMsg: chatBot.chatWidgeData?.formSubmitErrorMsg || chatWidgetDefaultValues.formSubmitErrorMsg,
 			formSendAgainBtnLabel: chatBot.chatWidgeData?.formSendAgainBtnLabel || chatWidgetDefaultValues.formSendAgainBtnLabel,
 			formTryAgainBtnLabel: chatBot.chatWidgeData?.formTryAgainBtnLabel || chatWidgetDefaultValues.formTryAgainBtnLabel,
-			model: chatBot.chatWidgeData?.model || chatWidgetDefaultValues.model,
+			model: chatBot.model || chatWidgetDefaultValues.model,
 		};
 	}, [chatBot]);
 
