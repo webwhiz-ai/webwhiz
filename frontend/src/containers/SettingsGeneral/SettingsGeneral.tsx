@@ -47,7 +47,7 @@ export const SettingsGeneral = () => {
       if (!apiKey.includes('**')) {
 		if(user && user.subscriptionData && user.subscriptionData.name === 'FREE') {
 			toast({
-				title: `Pleas upgrade to a paid plan to use your own API key`,
+        title: `Please upgrade to a paid plan to use your own API key`,
 				status: 'warning',
 				isClosable: true,
 			  });
@@ -61,7 +61,7 @@ export const SettingsGeneral = () => {
 		}
       } else {
         toast({
-          title: `Pleas enter a valid API key. If you want to disable your own API key, please remove it and save.`,
+          title: `Please enter a valid API key. If you want to disable your own API key, please remove it and save.`,
           status: 'warning',
           isClosable: true,
         });
