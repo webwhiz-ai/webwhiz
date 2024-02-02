@@ -17,7 +17,10 @@ export class SlackTokenService {
   async saveInstallationToDatabase(teamId: string, installation: any) {
     await this.slackTokenCollection.updateOne(
       { teamId },
-      { $set: { installation } },
+      {
+        $set: { installation, updatedAt: new Date() },
+        $setOnInsert: { createdAt: new Date() },
+      },
       { upsert: true },
     );
   }
