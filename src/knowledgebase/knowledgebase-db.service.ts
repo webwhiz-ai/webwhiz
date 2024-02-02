@@ -190,6 +190,7 @@ export class KnowledgebaseDbService {
   }
 
   async updateMonthlyUsageByN(kbId: ObjectId, n: number) {
+    const messgCount = n > 0 ? 1 : 0;
     await this.knowledgebaseCollection.updateOne({ _id: kbId }, [
       {
         $set: {
@@ -214,6 +215,9 @@ export class KnowledgebaseDbService {
               then: {
                 month: '$monthUsage.month',
                 count: { $add: ['$monthUsage.count', n] },
+                msgCount: {
+                  $add: [{ $ifNull: ['$monthUsage.msgCount', 0] }, messgCount],
+                },
               },
               else: {
                 month: {
@@ -228,6 +232,7 @@ export class KnowledgebaseDbService {
                   ],
                 },
                 count: n,
+                msgCount: messgCount,
               },
             },
           },

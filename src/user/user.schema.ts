@@ -27,6 +27,7 @@ export enum Subscription {
 export interface UserMonthlyUsage {
   month: string;
   count: number;
+  msgCount: number;
 }
 
 export interface SubscriptionData {
