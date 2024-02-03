@@ -78,7 +78,7 @@ export const FreeComponent = ({ currentSubscription, discountData, userEmail,  a
                     type: 'AppSumo tier 3',
                     pageCount: 10000,
                     tokenSize: '5M',
-                    projectCount: 'unlimited'
+                    projectCount: 'Unlimited'
                 }}
                 discountData={discountData}
                 isCurrentSubscription={isCurrentPlan('Base')}
@@ -250,8 +250,8 @@ export const FreeComponent = ({ currentSubscription, discountData, userEmail,  a
                             subscriptionData={{
                                 type: 'Enterprise',
                                 pageCount: 10000,
-                                tokenSize: 'unlimited',
-                                projectCount: 'unlimited'
+                                tokenSize: 'Unlimited',
+                                projectCount: 'Unlimited'
                             }}
                             discountData={discountData}
                             isCurrentSubscription={isCurrentPlan('Enterprise')}
