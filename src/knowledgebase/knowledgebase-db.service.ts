@@ -189,7 +189,11 @@ export class KnowledgebaseDbService {
     );
   }
 
-  async updateMonthlyUsageByN(kbId: ObjectId, n: number) {
+  async updateMonthlyUsageByN(
+    kbId: ObjectId,
+    n: number,
+    rawTokenCount: number,
+  ) {
     const messgCount = n > 0 ? 1 : 0;
     await this.knowledgebaseCollection.updateOne({ _id: kbId }, [
       {
@@ -218,6 +222,17 @@ export class KnowledgebaseDbService {
                 msgCount: {
                   $add: [{ $ifNull: ['$monthUsage.msgCount', 0] }, messgCount],
                 },
+                rawTokenCount: {
+                  $add: [
+                    {
+                      $ifNull: [
+                        '$monthUsage.rawTokenCount',
+                        '$monthUsage.count',
+                      ],
+                    },
+                    rawTokenCount,
+                  ],
+                },
               },
               else: {
                 month: {
@@ -233,6 +248,7 @@ export class KnowledgebaseDbService {
                 },
                 count: n,
                 msgCount: messgCount,
+                rawTokenCount: rawTokenCount,
               },
             },
           },

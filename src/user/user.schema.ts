@@ -26,8 +26,9 @@ export enum Subscription {
 
 export interface UserMonthlyUsage {
   month: string;
-  count: number;
+  count: number; // Total token count (considering model used)
   msgCount: number;
+  rawTokenCount: number; // Token count (not considering model used)
 }
 
 export interface SubscriptionData {

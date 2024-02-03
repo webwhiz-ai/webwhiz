@@ -118,10 +118,15 @@ export class ChatbotService {
     return Promise.all([
       this.setChatSessionData(session),
       this.kbDbService.addMsgToChatSession(session._id, msg),
-      this.userService.updateMonthlyUsageByN(session.userId, totalTokens),
+      this.userService.updateMonthlyUsageByN(
+        session.userId,
+        totalTokens,
+        msg.qTokens + msg.aTokens,
+      ),
       this.kbDbService.updateMonthlyUsageByN(
         session.knowledgebaseId,
         totalTokens,
+        msg.qTokens + msg.aTokens,
       ),
     ]);
   }
