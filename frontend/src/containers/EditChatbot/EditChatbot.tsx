@@ -859,6 +859,7 @@ const EditChatbot = (props: EditChatbotProps) => {
                             isSubmitting={isSubmitting}
                             primaryButtonLabel="Update widget style"
                             defaultCustomizationValues={getDefaultCustomizationValues()}
+														subscriptionName={user?.subscriptionData?.name}
 														onNextClick={async (formData: ChatBotCustomizeData) => {
 															try {
 																setIsSubmitting(true)
