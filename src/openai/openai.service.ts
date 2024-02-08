@@ -93,7 +93,7 @@ export class OpenaiService {
     try {
       const res = await openAiClient.createEmbedding({
         input,
-        model: 'text-embedding-3-small',
+        model: 'text-embedding-ada-002',
       });
       return res.data.data?.[0].embedding;
     } catch (err) {
