@@ -1,5 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
 import { Collection, Db, FindCursor, ObjectId, WithId } from 'mongodb';
+import { Repository } from 'typeorm';
+import { KbEmbeddings } from '../common/entity/kbEmbeddings.entity';
 import { MONGODB } from '../common/mongo/mongo.module';
 import { getLimitOffsetPaginatedResponse } from '../common/utils';
 import {
@@ -35,7 +38,11 @@ export class KnowledgebaseDbService {
   private readonly chatSessionCollection: Collection<ChatSession>;
   private readonly promptCollection: Collection<Prompt>;
 
-  constructor(@Inject(MONGODB) private db: Db) {
+  constructor(
+    @Inject(MONGODB) private readonly db: Db,
+    @InjectRepository(KbEmbeddings)
+    private readonly usersRepository: Repository<KbEmbeddings>,
+  ) {
     this.knowledgebaseCollection = this.db.collection<Knowledgebase>(
       KNOWLEDGEBASE_COLLECTION,
     );
@@ -468,6 +475,11 @@ export class KnowledgebaseDbService {
       _id: res.insertedId,
       ...data,
     };
+  }
+
+  async insertEmbeddingsToPg(data: KbEmbeddings) {
+    // await this.kbEmbeddingCollection.insertOne(data);
+    await this.usersRepository.save(data);
   }
 
   /**

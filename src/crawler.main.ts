@@ -27,6 +27,7 @@ import { TaskModule } from './task/task.module';
 import { ChatbotService } from './knowledgebase/chatbot/chatbot.service';
 import { AppConfigService } from './common/config/appConfig.service';
 import { MaxJobQueue } from './common/max-job-queue';
+import { TypeOrmModule } from '@nestjs/typeorm';
 
 @Module({
   imports: [
@@ -37,6 +38,17 @@ import { MaxJobQueue } from './common/max-job-queue';
     ImportersModule,
     EmailModule,
     TaskModule,
+    // TypeOrmModule.forFeature([KbEmbeddings]),
+    TypeOrmModule.forRoot({
+      type: 'postgres',
+      host: process.env.POSTGRES_HOST,
+      port: parseInt(process.env.POSTGRES_PORT, 10),
+      username: process.env.POSTGRES_USER,
+      password: process.env.POSTGRES_PASSWORD,
+      database: process.env.POSTGRES_DB,
+      entities: [__dirname + '/**/*.entity{.ts,.js}'],
+      synchronize: true,
+    }),
   ],
 })
 class CrawlerAppModule {}

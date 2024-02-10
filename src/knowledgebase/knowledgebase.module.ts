@@ -21,6 +21,8 @@ import { TaskModule } from '../task/task.module';
 import { CustomKeyService } from './custom-key.service';
 import { WebhookModule } from '../webhook/webhook.module';
 import { WebSocketChatGateway } from './websocketchat.gateway';
+import { KbEmbeddings } from '../common/entity/kbEmbeddings.entity';
+import { TypeOrmModule } from '@nestjs/typeorm';
 
 @Module({
   imports: [
@@ -33,6 +35,7 @@ import { WebSocketChatGateway } from './websocketchat.gateway';
     EmailModule,
     TaskModule,
     WebhookModule,
+    TypeOrmModule.forFeature([KbEmbeddings]),
   ],
   controllers: [
     ChatbotController,
