@@ -18,11 +18,11 @@ import {
   Chunk,
   ChunkStatus,
   CustomKeyData,
-  Knowledgebase,
 } from '../knowledgebase.schema';
 import { PromptService } from '../prompt/prompt.service';
 import { DEFAULT_CHATGPT_PROMPT } from './openaiChatbot.constant';
 import { CustomKeyService } from '../custom-key.service';
+import { KbEmbeddings } from '../../common/entity/kbEmbeddings.entity';
 
 interface CosineSimilarityWorkerResponse {
   chunkId: {
@@ -119,6 +119,16 @@ export class OpenaiChatbotService {
       embeddings,
       type: chunk.type,
     });
+
+    // Save to postgres db
+    const embeddingData: KbEmbeddings = {
+      _id: chunk._id.toString(),
+      kbId: kbId.toString(),
+      embeddings: embeddings,
+      type: chunk.type,
+    };
+    await this.kbDbService.insertEmbeddingsToPg(embeddingData);
+
     await this.kbDbService.updateChunkById(chunk._id, {
       status: ChunkStatus.EMBEDDING_GENERATED,
     });
