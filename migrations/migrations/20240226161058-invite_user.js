@@ -4,8 +4,8 @@ module.exports = {
     // See https://github.com/seppevs/migrate-mongo/#creating-a-new-migration-script
     // Example:
     // await db.collection('albums').updateOne({artist: 'The Beatles'}, {$set: {blacklisted: true}});
-    db.knowledgebase.find({ "owner": { $exists: true } }).forEach(function(doc) {
-          db.knowledgebase.updateOne(
+    db.collection('knowledgebase').find({ "owner": { $exists: true } }).forEach(function(doc) {
+          db.collection('knowledgebase').updateOne(
               { "_id": doc._id },
               {
                   $set: {
@@ -19,7 +19,7 @@ module.exports = {
           );
       });
       
-      db.knowledgebase.createIndex({ "participants.id": 1 });
+      db.collection('knowledgebase').createIndex({ "participants.id": 1 });
   },
 
   async down(db, client) {
