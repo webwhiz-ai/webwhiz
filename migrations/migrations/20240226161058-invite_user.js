@@ -4,22 +4,25 @@ module.exports = {
     // See https://github.com/seppevs/migrate-mongo/#creating-a-new-migration-script
     // Example:
     // await db.collection('albums').updateOne({artist: 'The Beatles'}, {$set: {blacklisted: true}});
-    db.collection('knowledgebase').find({ "owner": { $exists: true } }).forEach(function(doc) {
-          db.collection('knowledgebase').updateOne(
-              { "_id": doc._id },
-              {
-                  $set: {
-                      "participants": [{
-                              "id": doc.owner,
-                              "role": "admin" // admin/editor/reader
-                          }],
-                      "schemaVersion": 2 // Optional: Set the new schema version
-                  }
-              }
-          );
-      });
-      
-      db.collection('knowledgebase').createIndex({ "participants.id": 1 });
+
+    const knowledgebase = await db.collection('knowledgebase').find({ "owner": { $exists: true } });
+    for await (const kb of knowledgebase) {
+      await db.collection('knowledgebase').updateOne(
+        { "_id": kb._id },
+        {
+          $set: {
+            "participants": [{
+              "id": kb.owner,
+              "role": "admin" // admin/editor/reader
+            }],
+            "schemaVersion": 2 // Optional: Set the new schema version
+          }
+        }
+      );
+    }
+    await db.collection('knowledgebase').createIndex({ "participants.id": 1 });
+
+
   },
 
   async down(db, client) {
