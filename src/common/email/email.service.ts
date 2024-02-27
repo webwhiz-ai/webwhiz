@@ -64,6 +64,7 @@ export class EmailService {
   }
 
   async sendManualMsgEmail(email: string, queryText: string) {
+
     if (!this.isSgInitialized) return;
 
     const msg = {

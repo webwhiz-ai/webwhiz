@@ -36,6 +36,8 @@
     "@sendgrid/mail": "^7.7.0",
     "@sentry/node": "^7.43.0",
     "@sentry/tracing": "^7.43.0",
+    "@seratch_/bolt-http-runner": "^1.0.3",
+    "@slack/bolt": "^3.14.0",
     "@socket.io/redis-adapter": "^8.2.1",
     "axios": "^1.3.4",
     "bcrypt": "^5.1.0",

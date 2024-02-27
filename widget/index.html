@@ -1,7 +1,7 @@
 <html lang="en">
 
 <head>
-    <meta name="viewport" content="width=device-width,initial-scale=1,shrink-to-fit=no">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>WebWhiz Live Chat</title>
     <base target="_parent">
     <link rel="stylesheet" href="app.css">
@@ -263,6 +263,8 @@
                 chatMessages.scrollTop = chatMessages.scrollHeight;
             } else if (event.data.messageType === 'webwhiz:recieve_session_id') {
                 sessionId = event.data.sessionId;
+            } else if (event.data.messageType === 'webwhiz:expandWidget') {
+                expandWidget();
             }
         }
 

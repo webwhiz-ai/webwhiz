@@ -766,7 +766,7 @@ const EditChatbot = (props: EditChatbotProps) => {
 			popupDelay: chatBot.chatWidgeData?.popupDelay || chatWidgetDefaultValues.popupDelay,
 			collectEmailText: chatBot.chatWidgeData?.collectEmailText || chatWidgetDefaultValues.collectEmailText,
 			collectEmail: chatBot.chatWidgeData?.collectEmail,
-			adminEmail: chatBot.chatWidgeData?.adminEmail,
+			adminEmail: chatBot.adminEmail || chatWidgetDefaultValues.adminEmail,
 			customCSS: chatBot.chatWidgeData?.customCSS || chatWidgetDefaultValues.customCSS,
 			questionExamples: chatBot.chatWidgeData?.questionExamples || chatWidgetDefaultValues.questionExamples,
 			welcomeMessages: chatBot.chatWidgeData?.welcomeMessage ? [chatBot.chatWidgeData?.welcomeMessage] : chatBot.chatWidgeData?.welcomeMessages || chatWidgetDefaultValues.welcomeMessages,
@@ -793,7 +793,7 @@ const EditChatbot = (props: EditChatbotProps) => {
 			formSubmitErrorMsg: chatBot.chatWidgeData?.formSubmitErrorMsg || chatWidgetDefaultValues.formSubmitErrorMsg,
 			formSendAgainBtnLabel: chatBot.chatWidgeData?.formSendAgainBtnLabel || chatWidgetDefaultValues.formSendAgainBtnLabel,
 			formTryAgainBtnLabel: chatBot.chatWidgeData?.formTryAgainBtnLabel || chatWidgetDefaultValues.formTryAgainBtnLabel,
-			model: chatBot.chatWidgeData?.model || chatWidgetDefaultValues.model,
+			model: chatBot.model || chatWidgetDefaultValues.model,
 		};
 	}, [chatBot]);
 
@@ -885,29 +885,31 @@ const EditChatbot = (props: EditChatbotProps) => {
                             isSubmitting={isSubmitting}
                             primaryButtonLabel="Update widget style"
                             defaultCustomizationValues={getDefaultCustomizationValues()}
-                            onNextClick={async (formData: ChatBotCustomizeData) => {
-
-                                try {
-                                    setIsSubmitting(true)
-                                    customizeWidget(chatBot._id, formData);
-                                    updatePrompt(chatBot._id, formData.prompt || '');
-                                    updateDefaultAnswer(chatBot._id, formData.defaultAnswer || '');
-																	updateAdminEmail(chatBot._id, formData.adminEmail || '');
-																	updateModelName(chatBot._id, formData.model || '');
-									toast({
-										title: `Chatbot customizations have been updated successfully`,
-										status: "success",
-										isClosable: true,
-									});
-                                } catch (error) {
-									toast({
-										title: `Oops! Something went wrong`,
-										status: "error",
-										isClosable: true,
-									});
-                                } finally {
-                                    setIsSubmitting(false)
-                                }
+														subscriptionName={user?.subscriptionData?.name}
+														onNextClick={async (formData: ChatBotCustomizeData) => {
+															try {
+																setIsSubmitting(true)
+																await Promise.all([
+																	updateModelName(chatBot._id, formData.model || ''),
+																	updatePrompt(chatBot._id, formData.prompt || ''),
+																	updateDefaultAnswer(chatBot._id, formData.defaultAnswer || ''),
+																	updateAdminEmail(chatBot._id, formData.adminEmail || '')
+																]);
+																await customizeWidget(chatBot._id, formData);
+																toast({
+																	title: `Chatbot customizations have been updated successfully`,
+																	status: "success",
+																	isClosable: true,
+																});
+															} catch (error) {
+																toast({
+																	title: `Oops! Something went wrong`,
+																	status: "error",
+																	isClosable: true,
+																});
+															} finally {
+																setIsSubmitting(false)
+															}
                             }}
                         />
                     }

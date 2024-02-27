@@ -344,7 +344,7 @@ export class ChatbotService {
 
     const sessionData = await this.getChatSessionDataFromCache(sessionId);
     if (!sessionData) {
-      throw new HttpException('Invalid Session Id', HttpStatus.NOT_FOUND);
+      return null;
     }
 
     const msg = {
@@ -506,6 +506,7 @@ export class ChatbotService {
     userData?: any,
     isAuthenticated = false,
     src?: string,
+    slackThreadId?: string,
   ) {
     const sessionId = new ObjectId();
 
@@ -549,6 +550,7 @@ export class ChatbotService {
     const sessionData: ChatSession = {
       _id: sessionId,
       knowledgebaseId: kbId,
+      slackThreadId: slackThreadId,
       kbName: `${kb.name} assistant`,
       defaultAnswer: kb.defaultAnswer,
       model: kb.model,

@@ -106,6 +106,13 @@ export class KnowledgebaseDbService {
     return res;
   }
 
+  async getSessionIdBySlackThreadId(slackThreadId: string): Promise<string> {
+    const result = await this.chatSessionCollection.findOne({
+      slackThreadId,
+    });
+    return result && result._id ? result._id.toHexString() : null;
+  }
+
   async getKnowledgebaseCountForUser(userId: ObjectId) {
     const kbCount = await this.knowledgebaseCollection.countDocuments({
       owner: userId,
@@ -211,6 +218,7 @@ export class KnowledgebaseDbService {
   }
 
   async updateMonthlyUsageByN(kbId: ObjectId, n: number) {
+    const messgCount = n > 0 ? 1 : 0;
     await this.knowledgebaseCollection.updateOne({ _id: kbId }, [
       {
         $set: {
@@ -235,6 +243,9 @@ export class KnowledgebaseDbService {
               then: {
                 month: '$monthUsage.month',
                 count: { $add: ['$monthUsage.count', n] },
+                msgCount: {
+                  $add: [{ $ifNull: ['$monthUsage.msgCount', 0] }, messgCount],
+                },
               },
               else: {
                 month: {
@@ -249,6 +260,7 @@ export class KnowledgebaseDbService {
                   ],
                 },
                 count: n,
+                msgCount: messgCount,
               },
             },
           },
@@ -489,6 +501,15 @@ export class KnowledgebaseDbService {
 
   async getChatSessionById(id: ObjectId): Promise<ChatSession> {
     const session = await this.chatSessionCollection.findOne({ _id: id });
+    return session;
+  }
+
+  async getChatSessionBySlackThreadId(
+    slackThreadId: string,
+  ): Promise<ChatSession> {
+    const session = await this.chatSessionCollection.findOne({
+      slackThreadId: slackThreadId,
+    });
     return session;
   }
 

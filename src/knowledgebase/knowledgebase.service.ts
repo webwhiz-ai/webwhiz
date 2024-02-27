@@ -400,7 +400,7 @@ export class KnowledgebaseService {
   }
 
   /**
-   * Set chat widge data for Knowledgebase
+   * Set chat widget data for Knowledgebase
    * @param user
    * @param id
    * @param data
@@ -559,9 +559,36 @@ export class KnowledgebaseService {
     const kb = await this.kbDbService.getKnowledgebaseSparseById(kbId);
     checkUserPermissionForKb(user, kb, [UserPermissions.EDIT]);
 
+    const subscriptionData: SubscriptionPlanInfo =
+      this.getUserSubscriptionData(user);
+
+    if (subscriptionData.name === 'FREE') {
+      throw new HttpException(
+        'You need to upgrade to a paid plan for using this feature',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
     await this.kbDbService.updateKnowledgebase(kbId, {
       model,
     });
+
+    return 'Done';
+  }
+
+  /**
+   * Sets the name of a knowledgebase.
+   *
+   * @param user
+   * @param id
+   * @param name
+   * @returns
+   */
+  async setKnowledgebaseName(user: UserSparse, id: string, name: string) {
+    const kbId = new ObjectId(id);
+    const kb = await this.kbDbService.getKnowledgebaseSparseById(kbId);
+    checkUserIsOwnerOfKb(user, kb);
+
+    await this.kbDbService.updateKnowledgebase(kbId, { name: name });
 
     return 'Done';
   }

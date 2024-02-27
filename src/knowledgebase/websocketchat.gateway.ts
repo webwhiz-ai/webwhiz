@@ -135,6 +135,7 @@ export class WebSocketChatGateway
         knowledgeBaseId,
         msgData.msg,
       );
+
     }
   }
 }

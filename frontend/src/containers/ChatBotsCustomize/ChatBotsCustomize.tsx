@@ -25,6 +25,7 @@ import {
 	AccordionPanel,
 	AccordionButton,
 	Select,
+	Badge,
 } from "@chakra-ui/react";
 
 import { ErrorMessage, Field, FieldArray, Form, Formik } from "formik";
@@ -58,6 +59,7 @@ interface ChatBotsCustomizeProps {
 	isSubmitting?: boolean;
 	showheader?: boolean;
 	showTimeMessage?: boolean;
+	subscriptionName?: string;
 }
 
 
@@ -75,6 +77,7 @@ export const ChatBotsCustomize = ({
 	defaultCustomizationValues,
 	primaryButtonLabel = "Update widget style",
 	isSubmitting = false,
+	subscriptionName = "FREE",
 }: ChatBotsCustomizeProps) => {
 
 	const [message, setMessage] = React.useState("");
@@ -619,12 +622,18 @@ export const ChatBotsCustomize = ({
 																		form.errors.model && form.touched.model
 																	}
 																>
-																	<FormLabel fontSize="sm" htmlFor="model" color="gray.700" fontWeight="400" >
-																		Model
-																	</FormLabel>
-																	<Select {...field}>
-																		<option value="gpt-3.5-turbo-1106">GPT-3.5-turbo</option>
+																	<Flex alignItems="center">
+																		<FormLabel fontSize="sm" htmlFor="model" color="gray.700" fontWeight="400" >
+																			Model
+																		</FormLabel>
+																		<Badge ml='1' fontSize='0.6em' colorScheme='teal' mb='2' mr='2' variant={'subtle'}>
+																			Pro
+																		</Badge>
+																	</Flex>
+																	<Select {...field} isDisabled={subscriptionName === "FREE"} cursor="pointer">
+																		<option value="gpt-3.5-turbo">GPT-3.5-Turbo</option>
 																		<option value="gpt-4-0613">GPT-4</option>
+																		<option value="gpt-4-turbo-preview">GPT-4-Turbo</option>
 																	</Select>
 																	<FormHelperText fontSize="sm">Token consumption will be 30 times higher for GPT-4 compared to GPT-3.5.</FormHelperText>
 																</FormControl>

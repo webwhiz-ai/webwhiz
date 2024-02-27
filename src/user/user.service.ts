@@ -209,10 +209,11 @@ export class UserService {
       userData?.monthUsage?.month !== currentMonth
     ) {
       if (userData.monthUsage === undefined) {
-        userData.monthUsage = { month: '', count: 0 };
+        userData.monthUsage = { month: '', count: 0, msgCount: 0 };
       }
       userData.monthUsage.month = currentMonth;
       userData.monthUsage.count = 0;
+      userData.monthUsage.msgCount = 0;
     }
 
     const subscriptionData = this.subsPlanService.getSubscriptionPlanInfo(
@@ -347,6 +348,7 @@ export class UserService {
   }
 
   async updateMonthlyUsageByN(userId: ObjectId, n: number) {
+    const messgCount = n > 0 ? 1 : 0;
     await this.userCollection.updateOne({ _id: userId }, [
       {
         $set: {
@@ -371,6 +373,9 @@ export class UserService {
               then: {
                 month: '$monthUsage.month',
                 count: { $add: ['$monthUsage.count', n] },
+                msgCount: {
+                  $add: [{ $ifNull: ['$monthUsage.msgCount', 0] }, messgCount],
+                },
               },
               else: {
                 month: {
@@ -385,6 +390,7 @@ export class UserService {
                   ],
                 },
                 count: n,
+                msgCount: messgCount,
               },
             },
           },

@@ -26,15 +26,15 @@ export type SubscriptionTier = 'MONTHLY' | 'YEARLY' | 'LIFETIME';
 
 export type PageCount = 100 | 1000 | 2500 | 10000;
 
-export type TokenSize = "400K" | "1M" | "2.5M" | "unlimited";
+export type TokenSize = "400K" | "1M" | "2.5M" | "Unlimited";
 
-export type ProjectCount = 5 | 10 | 100 | "unlimited";
+export type ProjectCount = 5 | 10 | 100 | "Unlimited";
 
 export type PageCountLTD = 2000 | 5000 | 10000;
 
 export type TokenSizeLTD = "1M" | "2.5M" | "5M";
 
-export type ProjectCountLTD = 20 | 50 | "unlimited";
+export type ProjectCountLTD = 20 | 50 | "Unlimited";
 
 export interface SubscriptionData {
     type: SubscriptionType;
