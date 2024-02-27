@@ -26,7 +26,10 @@ import { WebhookService } from '../../webhook/webhook.service';
 import { WebhookEventType } from '../../webhook/webhook.types';
 import { CustomKeyService } from '../custom-key.service';
 import { KnowledgebaseDbService } from '../knowledgebase-db.service';
-import { checkUserIsOwnerOfKb } from '../knowledgebase-utils';
+import {
+  checkUserPermissionForKb,
+  UserPermissions,
+} from '../knowledgebase-utils';
 
 import {
   ChatAnswerFeedbackType,
@@ -665,9 +668,7 @@ export class ChatbotService {
       session.knowledgebaseId,
     );
 
-    if (!user._id.equals(kb.owner)) {
-      throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
-    }
+    checkUserPermissionForKb(user, kb, [UserPermissions.READ]);
 
     return session;
   }
@@ -681,7 +682,7 @@ export class ChatbotService {
     const kbId = new ObjectId(knowledgebaseId);
 
     const kb = await this.kbDbService.getKnowledgebaseSparseById(kbId);
-    checkUserIsOwnerOfKb(user, kb);
+    checkUserPermissionForKb(user, kb, [UserPermissions.READ]);
 
     return this.kbDbService.getPaginatedChatSessionsForKnowledgebase(
       kbId,
@@ -707,9 +708,7 @@ export class ChatbotService {
       session.knowledgebaseId,
     );
 
-    if (!user._id.equals(kb.owner)) {
-      throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
-    }
+    checkUserPermissionForKb(user, kb, [UserPermissions.EDIT]);
 
     try {
       await this.kbDbService.deleteChatSession(new ObjectId(sessionId));
@@ -734,9 +733,7 @@ export class ChatbotService {
       session.knowledgebaseId,
     );
 
-    if (!user._id.equals(kb.owner)) {
-      throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
-    }
+    checkUserPermissionForKb(user, kb, [UserPermissions.EDIT]);
 
     try {
       this.kbDbService.updateChatSession(new ObjectId(sessionId), {
@@ -764,9 +761,7 @@ export class ChatbotService {
       session.knowledgebaseId,
     );
 
-    if (!user._id.equals(kb.owner)) {
-      throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
-    }
+    checkUserPermissionForKb(user, kb, [UserPermissions.EDIT]);
 
     try {
       this.kbDbService.updateChatSession(new ObjectId(sessionId), {

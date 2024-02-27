@@ -422,4 +422,11 @@ export class UserService {
       .toArray();
     return invitedList as InvitedEmailsParse[];
   }
+
+  async deleteFromInvitedEmail(email: string, knowledgebaseId: ObjectId) {
+    return await this.invitedEmailsCollection.deleteMany({
+      email,
+      knowledgebaseId,
+    });
+  }
 }

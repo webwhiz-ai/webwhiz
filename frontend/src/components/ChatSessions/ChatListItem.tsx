@@ -92,7 +92,7 @@ export const ChatListItem = ({ chatSessionData, isSelected, onSelectChat, update
                 {getFormattedTime(chatSessionData.updatedAt)}
             </Text>
             <Text fontSize="sm" noOfLines={2} fontWeight={chatSessionData.isUnread ? '500' : '400'}>
-                {chatSessionData.firstMessage.q}
+                { chatSessionData.firstMessage.q ||chatSessionData.firstMessage.msg }
             </Text>
         </Flex >
     )

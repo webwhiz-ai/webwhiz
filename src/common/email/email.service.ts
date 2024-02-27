@@ -2,6 +2,8 @@ import { Injectable, Logger } from '@nestjs/common';
 import * as sgMail from '@sendgrid/mail';
 import { AppConfigService } from '../config/appConfig.service';
 
+const FROND_END_URL = 'app.webwhiz.ai';
+
 @Injectable()
 export class EmailService {
   private readonly logger: Logger;
@@ -61,11 +63,8 @@ export class EmailService {
     return res;
   }
 
-  async sendManualMsgEmail(
-    email: string,
-    queryText: string,
-    websiteUrl: string,
-  ) {
+  async sendManualMsgEmail(email: string, queryText: string) {
+
     if (!this.isSgInitialized) return;
 
     const msg = {
@@ -73,7 +72,6 @@ export class EmailService {
       from: { email: 'hi@webwhiz.ai', name: 'WebWhiz.ai' },
       templateId: 'd-a4f34375b9504c5d94f6d9e3eafe0214',
       dynamicTemplateData: {
-        website_url: websiteUrl,
         msg_msg: queryText,
       },
     };
@@ -108,14 +106,29 @@ export class EmailService {
     return res;
   }
 
-  async sendInviteUserEmail(email: string) {
+  async sendInviteUserEmail(
+    email: string,
+    ownerEmail: string,
+    kbName: string,
+    userExist: boolean,
+  ) {
     if (!this.isSgInitialized) return;
+
+    const btnName = userExist ? 'Sign in' : 'Sign up';
+    const websiteUrl = userExist
+      ? `https://${FROND_END_URL}/login`
+      : `https://${FROND_END_URL}/sign-up`;
 
     const msg = {
       to: email,
       from: { email: 'hi@webwhiz.ai', name: 'WebWhiz.ai' },
-      templateId: 'd-4ba3b2bf1f9e4fcea8c5e881c934a2c6',
-      dynamicTemplateData: {},
+      templateId: 'd-46f484fb64ae432aa8ca732e5ab2c1a9',
+      dynamicTemplateData: {
+        owner_email: ownerEmail,
+        kb_name: kbName,
+        action_type: btnName,
+        website_url: websiteUrl,
+      },
     };
 
     const res = await sgMail.send(msg);

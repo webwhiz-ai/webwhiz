@@ -869,7 +869,8 @@ span.form-required {
     flex-wrap: wrap;
 }
 
-.chat-sample-message {
+.chat-sample-message, 
+.chat-with-human {
     font-size: 12px;
     border-radius: 6px;
     border: 1px solid rgba(0, 0, 0, 0.12);
@@ -895,6 +896,26 @@ span.form-required {
     box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.08) inset;
 }
 
+.divider {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    color: #333;
+    font-size: 12px;
+    margin: 20px 0;
+}
+
+.divider-line {
+    background-color: #F0F0F0;
+    flex-grow: 1;
+    height: 1px;
+}
+
+.divider-text {
+    background-color: #fff;
+    margin: 0 20px;
+    flex-shrink: 0;
+}
 
 .chat-source-read-more {
     margin-right: 8px;
