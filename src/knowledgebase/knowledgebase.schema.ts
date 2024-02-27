@@ -19,9 +19,20 @@ export enum KnowledgebaseStatus {
   READY = 'READY',
 }
 
+export enum UserRoles {
+  ADMIN = 'admin',
+  EDITOR = 'editor',
+  READER = 'reader',
+}
+
 export interface CustomKeyData {
   useOwnKey: boolean;
   keys?: string[];
+}
+
+export interface ParticipantsData {
+  id: ObjectId;
+  role: UserRoles;
 }
 
 export interface Knowledgebase {
@@ -41,6 +52,7 @@ export interface Knowledgebase {
   monthUsage?: UserMonthlyUsage;
   chatWidgeData?: any;
   owner: ObjectId;
+  participants: ParticipantsData[];
   // Alternate email for knowledgebase
   adminEmail?: string;
   createdAt: Date;
@@ -55,7 +67,13 @@ export interface Knowledgebase {
 
 export type KnowledgebaseSparse = Pick<
   Knowledgebase,
-  '_id' | 'name' | 'status' | 'monthUsage' | 'crawlData' | 'owner'
+  | '_id'
+  | 'name'
+  | 'status'
+  | 'monthUsage'
+  | 'crawlData'
+  | 'owner'
+  | 'participants'
 >;
 
 /*********************************************************

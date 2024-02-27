@@ -1,4 +1,10 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  Inject,
+  forwardRef,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { AppConfigService } from '../common/config/appConfig.service';
 import { CreateUserDTO } from '../user/user.dto';
@@ -8,6 +14,7 @@ import { GoogleAuthDTO } from './auth.dto';
 import { getGoogleUserProfile } from './google-auth';
 import { JwtPayload, JwtToken } from './types/jwt-types.dto';
 import { EmailService } from '../common/email/email.service';
+import { KnowledgebaseService } from '../knowledgebase/knowledgebase.service';
 
 @Injectable()
 export class AuthService {
@@ -16,6 +23,7 @@ export class AuthService {
     private userService: UserService,
     private appConfig: AppConfigService,
     private emailService: EmailService,
+    private knowledgebaseService: KnowledgebaseService,
   ) {}
 
   /**
@@ -85,6 +93,12 @@ export class AuthService {
    */
   async signup(data: CreateUserDTO) {
     const user = await this.userService.createUser(data);
+    // Check user is present in the invited list
+    // Add to participants list of user is present
+    await this.knowledgebaseService.addInvitedUsersToKnowledgeBase(
+      data.email,
+      user._id,
+    );
     await this.emailService.sendWelcomeEmail(user.email);
     const token = await this.getJwtTokenForUser(user);
     return {
@@ -119,11 +133,23 @@ export class AuthService {
     // If user already exists generate jwt token
     if (user) {
       await this.userService.updateLastLoginTs(user);
+      // Check user is present in the invited list
+      // Add to participants list of user is present
+      await this.knowledgebaseService.addInvitedUsersToKnowledgeBase(
+        userProfile.email,
+        user._id,
+      );
       return this.getJwtTokenForUser(user);
     }
 
     // Create user
     const newUser = await this.userService.createGoogleOAuthUser(userProfile);
+    // Check user is present in the invited list
+    // Add to participants list of user is present
+    await this.knowledgebaseService.addInvitedUsersToKnowledgeBase(
+      userProfile.email,
+      newUser._id,
+    );
     await this.emailService.sendWelcomeEmail(newUser.email);
     return this.getJwtTokenForUser(newUser);
   }

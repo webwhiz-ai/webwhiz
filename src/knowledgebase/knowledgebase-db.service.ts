@@ -75,6 +75,7 @@ export class KnowledgebaseDbService {
           monthUsage: 1,
           crawlData: 1,
           owner: 1,
+          participants: 1,
         },
       },
     );
@@ -124,8 +125,36 @@ export class KnowledgebaseDbService {
         monthUsage: 1,
         'crawlData.stats': 1,
         owner: 1,
+        participants: 1,
       })
       .toArray();
+    return kbs as KnowledgebaseSparse[];
+  }
+
+  async getParticipatedKnowledgesbaseListForUser(
+    userId: ObjectId,
+  ): Promise<KnowledgebaseSparse[]> {
+    const kbs = await this.knowledgebaseCollection
+      .aggregate([
+        {
+          $match: {
+            'participants.id': userId,
+          },
+        },
+        {
+          $project: {
+            _id: 1,
+            name: 1,
+            status: 1,
+            monthUsage: 1,
+            'crawlData.stats': 1,
+            owner: 1,
+            participants: 1,
+          },
+        },
+      ])
+      .toArray();
+
     return kbs as KnowledgebaseSparse[];
   }
 
@@ -149,6 +178,13 @@ export class KnowledgebaseDbService {
     return this.knowledgebaseCollection.updateOne(
       { _id: id },
       { $set: { ...update, updatedAt: new Date() } },
+    );
+  }
+
+  async updateKnowledgebaseParticipants(id: ObjectId, participants: any) {
+    return this.knowledgebaseCollection.updateOne(
+      { _id: id },
+      { $set: { participants: participants, updatedAt: new Date() } },
     );
   }
 

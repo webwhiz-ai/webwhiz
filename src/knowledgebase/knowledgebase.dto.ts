@@ -111,3 +111,10 @@ export class SetCustomDomainDTO {
   @IsNotEmpty()
   domain: string;
 }
+
+export class InviteUserDTO {
+  @IsString()
+  @IsNotEmpty()
+  email: string;
+  role: string;
+}
