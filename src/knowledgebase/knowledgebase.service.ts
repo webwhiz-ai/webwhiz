@@ -586,7 +586,7 @@ export class KnowledgebaseService {
   async setKnowledgebaseName(user: UserSparse, id: string, name: string) {
     const kbId = new ObjectId(id);
     const kb = await this.kbDbService.getKnowledgebaseSparseById(kbId);
-    checkUserIsOwnerOfKb(user, kb);
+    checkUserPermissionForKb(user, kb, [UserPermissions.EDIT]);
 
     await this.kbDbService.updateKnowledgebase(kbId, { name: name });
 
