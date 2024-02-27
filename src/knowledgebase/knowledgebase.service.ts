@@ -542,6 +542,15 @@ export class KnowledgebaseService {
     const kb = await this.kbDbService.getKnowledgebaseSparseById(kbId);
     checkUserIsOwnerOfKb(user, kb);
 
+    const subscriptionData: SubscriptionPlanInfo =
+      this.getUserSubscriptionData(user);
+
+    if (subscriptionData.name === 'FREE') {
+      throw new HttpException(
+        'You need to upgrade to a paid plan for using this feature',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
     await this.kbDbService.updateKnowledgebase(kbId, {
       model,
     });
