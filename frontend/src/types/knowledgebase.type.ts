@@ -127,6 +127,16 @@ export interface Knowledgebase {
         count: number;
         month: string;
     }
+    participants: Array<{
+        id: string;
+        email: string;
+        role: "admin" | "editor" | "reader"
+    }>;
+    model: string;
+    prompt: string;
+    defaultAnswer: string;
+    adminEmail: string;
+    customDomain: string
 }
 
 export interface KnowledgeBaseWebsiteData {

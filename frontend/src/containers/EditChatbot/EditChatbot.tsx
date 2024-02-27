@@ -55,13 +55,14 @@ import { AddTrainingData } from "../AddTrainingData/AddTrainingData";
 import { AddTrainingDataForm } from "../AddTrainingDataForm/AddTrainingDataForm";
 import { SectionTitle } from "../../components/SectionTitle/SectionTitle";
 import { CurrentUser, User } from "../../services/appConfig";
-import { ChatBotCustomizeData, TrainingData, OfflineMessagePagination, ChatSessionPagination, CustomDataPagination, ProductSetupData, DocsKnowledgeData, ChatSession, ChatSessionDetail } from "../../types/knowledgebase.type";
+import { ChatBotCustomizeData, TrainingData, OfflineMessagePagination, ChatSessionPagination, CustomDataPagination, ProductSetupData, DocsKnowledgeData, ChatSession, ChatSessionDetail, Knowledgebase } from "../../types/knowledgebase.type";
 import { OfflineMessagesNew } from "../OfflineMessages/OfflineMessagesNew";
 import { ChatSessionsNew } from "../ChatSessions/ChatSessionsNew";
 import { Paginator } from "../../widgets/Paginator/Paginator";
 import { CustomDomain } from "../CustomDomain/CustomDomain";
 import { useConfirmation } from "../../providers/providers";
 import { socket } from "../../socket";
+import Members from "../Members/Members";
 export function validateEmailAddress(email: string) {
 	return email && !/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(email);
 }
@@ -74,7 +75,7 @@ type Steps =
 	| "chat-sessions"
 	| "offline-messages"
 	| "chatbot"
-	| "custom-domain";
+	| "custom-domain" | "members";
 
 interface MatchParams {
 	chatbotId: string;
@@ -106,7 +107,7 @@ const EditChatbot = (props: EditChatbotProps) => {
 	const [isSubmitting, setIsSubmitting] = React.useState<boolean>(false);
 	const [isUploadingDocs, setIsUploadingDocs] = React.useState<boolean>(false);
 	const [questionsToDelete, setQuestionsToDelete] = React.useState<string>('0');
-	const [chatBot, setChatbot] = React.useState({} as any);
+	const [chatBot, setChatbot] = React.useState<Knowledgebase>({} as Knowledgebase);
 	const [defaultCrauledData, setDefaultCrauledData] = React.useState<any>();
 
 
@@ -972,7 +973,34 @@ const EditChatbot = (props: EditChatbotProps) => {
 						description="Access the chatbot from your domain"
 					/>
 						{chatBot._id? <CustomDomain defaultCustomDomain={chatBot.customDomain} chatBotId={chatBot._id}></CustomDomain>: null}
-					</Flex>
+				</Flex>
+				<Flex
+					direction="column"
+					style={{
+						display: currentStep === 'members' ? 'flex' : 'none',
+					}}
+					h="100%"
+					overflow="auto"
+				>
+					<SectionTitle
+						title="Members"
+						description="Manage who has access to this workspace"
+					/>
+					{chatBot._id ? <Members
+						onDeleteParticipant={(id) => {
+							const participants = chatBot.participants.filter(item => item.id !== id);
+							setChatbot(prev => ({ ...prev, participants }));
+						}}
+						onAddParticipant={(participant: any) => {
+							setChatbot(prev => ({
+								...prev,
+								participants: [participant, ...prev.participants.filter(item => item.email !== participant.email)]
+							}));
+						}}
+						participants={chatBot.participants}
+						chatBotId={chatBot._id}
+					/> : null}
+				</Flex>
 				<Flex
 					direction="column"
 					style={{
@@ -1218,6 +1246,21 @@ const EditChatbot = (props: EditChatbotProps) => {
 
 
 								Custom domain
+							</ListItem>
+							<ListItem
+								display="flex"
+								alignItems="center"
+								fontSize="md"
+								cursor="pointer"
+								onClick={() => {
+									goToStep("members");
+								}}
+								className={currentStep === "members" ? styles.active : ""}
+							>
+								<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 20 20">
+									<path d="M10.795 10.9a3.085 3.085 0 013.085 3.085V16a.6.6 0 01-1.2 0v-2.015c0-1.041-.844-1.885-1.885-1.885h-6.03c-1.041 0-1.885.844-1.885 1.885V16a.6.6 0 01-1.2 0v-2.015A3.085 3.085 0 014.765 10.9zm5.412-.82c1.187 0 2.126 1.025 2.126 2.265v1.899a.6.6 0 11-1.2 0v-1.9c0-.598-.427-1.064-.926-1.064h-1.918a.6.6 0 110-1.2zM7.78 3.4a3.35 3.35 0 110 6.7 3.35 3.35 0 010-6.7zm6.75 1.5a2.35 2.35 0 110 4.7 2.35 2.35 0 010-4.7zm-6.75-.3a2.15 2.15 0 100 4.3 2.15 2.15 0 000-4.3zm6.75 1.5a1.15 1.15 0 100 2.3 1.15 1.15 0 000-2.3z" fill="currentColor" fill-rule="nonzero"></path>
+								</svg>
+								Members
 							</ListItem>
 						</List>
 					</Box>
