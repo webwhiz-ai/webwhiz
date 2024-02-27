@@ -1,16 +1,17 @@
-import React from 'react';
+import React, {  useRef, useEffect } from 'react';
 import { Box, Spinner, Flex, VStack, HStack, Text } from '@chakra-ui/react';
 import { MessageList } from '../../types/knowledgebase.type';
 import { ChatBubble } from './ChatBubble';
 import { getBrowserName } from '../../utils/commonUtils';
 import { format } from 'date-fns';
 import styles from "./ChatWindow.module.scss";
-
+import TextareaAutosize from 'react-textarea-autosize'
 type ChatWindowProps = {
     messages?: MessageList[];
     isMessagesLoading?: boolean;
     userData: any;
     chatData: any;
+    onChatReply: (sessionId: string, msg: string) => void
 };
 
 export const ChatWindow = ({
@@ -18,12 +19,41 @@ export const ChatWindow = ({
     messages,
     isMessagesLoading,
     userData,
+    onChatReply
 }: ChatWindowProps) => {
+    const chatListRef = useRef<HTMLDivElement | null>(null);
+    const [question, setQuestion] = React.useState<string>('');
+
+    const handleChatChange = React.useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
+        setQuestion(e.target.value)
+    }, []);
+
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+        if (e.key === "Enter" || e.keyCode === 13) {
+            e.preventDefault();
+            const target = e.target as HTMLTextAreaElement;
+            if (target.value) {
+                handleSubmit();
+            }
+        }
+    }
+
+    const handleSubmit = () => {
+        chatData && onChatReply(chatData?._id, question)
+        setQuestion('')
+    }
+    useEffect(() => {
+        if (chatListRef.current) {
+            chatListRef.current.scrollTop = chatListRef.current.scrollHeight;
+        }
+    }, [chatListRef?.current, messages]);
+
+
     const getChatHeader = React.useCallback(() => {
         if (!userData || !chatData) return null;
         return (
-            <Box>
-                <VStack alignItems={"start"} className={styles.meta}  spacing="3" pb="4" mb="4" borderBottom="1px solid" borderColor="gray.100">
+            <Box >
+                <VStack alignItems={"start"} className={styles.meta} spacing="3" pb="4" mb="4" borderBottom="1px solid" borderColor="gray.100">
                     <HStack className={styles.metaItemGroup} fontSize="sm" color="gray.500">
                         <Flex className={styles.metaItem}>
                             <svg
@@ -108,6 +138,7 @@ export const ChatWindow = ({
             </Box>
         );
     }, [chatData, userData]);
+
     return (
         <Box w="calc(100% - 450px)" h="100%" maxW="620px" position="relative">
             {isMessagesLoading && (
@@ -125,18 +156,28 @@ export const ChatWindow = ({
                     <Spinner />
                 </Flex>
             )}
-
-            <Box h="100%" overflowX="hidden" overflowY="auto" p={4}>
+            <Box ref={chatListRef} h="100%" overflowX="hidden" overflowY="auto" p={4} position={'relative'} pb={'100px'}>
                 {getChatHeader()}
                 {messages &&
                     messages.map((message) => {
                         return (
                             <Box key={message.ts.toString()}>
-                                <ChatBubble message={message.q} type={'user'} />
-                                <ChatBubble message={message.a} type={'bot'} />
+                                {message.type === 'MANUAL' ? <ChatBubble message={message.msg} type={message.sender === 'admin' ? 'bot': 'user'} /> :
+                                    <>
+                                        <ChatBubble message={message.q || message.msg} type={'user'} />
+                                        <ChatBubble message={message.a || message.msg} type={'bot'} />
+                                    </>
+                                }
+
                             </Box>
                         );
                     })}
+            </Box>
+            <Box className="chat-input-wrap" style={{ position: 'absolute' }} w={'100%'} bottom={0} bgColor={'white'}>
+                <TextareaAutosize value={question} onChange={handleChatChange} onKeyDown={handleKeyDown} rows="1" className="chat-input textarea js-auto-size" id="chat-input" placeholder="Type your message" />
+                <button onClick={handleSubmit} className="chat-submit-btn" type="submit"><svg width="16" height="16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path fillRule="evenodd" clipRule="evenodd" d="M4.394 14.7L13.75 9.3c1-.577 1-2.02 0-2.598L4.394 1.299a1.5 1.5 0 00-2.25 1.3v3.438l4.059 1.088c.494.132.494.833 0 .966l-4.06 1.087v4.224a1.5 1.5 0 002.25 1.299z" style={{ fill: '#000' }}></path>
+                </svg></button>
             </Box>
         </Box>
     );

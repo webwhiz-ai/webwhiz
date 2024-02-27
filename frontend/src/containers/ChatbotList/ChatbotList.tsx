@@ -71,11 +71,11 @@ export const ChatbotList = () => {
 	const onMenuItemClick = React.useCallback(
 		async (type, chatbot) => {
 			if (type === "edit") {
-				history.push(`/app/edit-chatbot/${chatbot._id}/`);
+				history.push(`/app/edit-chatbot/${chatbot._id}/product-setup`);
 			} else if (type === "getCode") {
-				history.push(`/app/edit-chatbot/${chatbot._id}/?step=add-to-site`);
+				history.push(`/app/edit-chatbot/${chatbot._id}/add-to-site`);
 			} else if (type === "customize") {
-				history.push(`/app/edit-chatbot/${chatbot._id}/?step=customize`);
+				history.push(`/app/edit-chatbot/${chatbot._id}/customize`);
 			} else if (type === "delete") {
 				await deleteKnowledgebase(chatbot._id as string);
 				setChatBotList(chatbotsList?.filter((_chatbot) => _chatbot._id !== chatbot._id));

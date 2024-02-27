@@ -3,13 +3,6 @@
 Train ChatGPT on Your Website Data and Build an AI Chatbot that can instantly answer your customers queries.
 
 ![webwhiz](https://user-images.githubusercontent.com/6586706/236858939-4f3e4ac0-f3f7-4f76-8fee-add747b09ce1.png)
-
-| Branch   |      Last commit       |
-|----------|:-------------:|
-| Main |  ![commit](https://badgen.net/github/last-commit/webwhiz-ai/webwhiz/main) |
-| Prod |    ![commit](https://badgen.net/github/last-commit/webwhiz-ai/webwhiz/prod) |
-| Invite user | ![commit](https://badgen.net/github/last-commit/webwhiz-ai/webwhiz/invite_user) |
-| Manual chat |  ![commit](https://badgen.net/github/last-commit/webwhiz-ai/webwhiz/manul-chat) |
     
 
 ## 🔥 Core features

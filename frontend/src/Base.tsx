@@ -102,7 +102,7 @@ export class Base extends React.Component<AppProps, AppState> {
 							></PrivateRoute>
 							<PrivateRoute
 								isAuthenticated={this.state.isAuthenticated}
-								path='/app/edit-chatbot/:chatbotId'
+								path='/app/edit-chatbot/:chatbotId/:step/'
 								component={EditChatbot}
 							></PrivateRoute>
 							<PrivateRoute

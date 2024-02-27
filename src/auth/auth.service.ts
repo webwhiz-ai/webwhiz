@@ -93,6 +93,12 @@ export class AuthService {
    */
   async signup(data: CreateUserDTO) {
     const user = await this.userService.createUser(data);
+    // Check user is present in the invited list
+    // Add to participants list of user is present
+    await this.knowledgebaseService.addInvitedUsersToKnowledgeBase(
+      data.email,
+      user._id,
+    );
     await this.emailService.sendWelcomeEmail(user.email);
     const token = await this.getJwtTokenForUser(user);
     return {
@@ -127,11 +133,23 @@ export class AuthService {
     // If user already exists generate jwt token
     if (user) {
       await this.userService.updateLastLoginTs(user);
+      // Check user is present in the invited list
+      // Add to participants list of user is present
+      await this.knowledgebaseService.addInvitedUsersToKnowledgeBase(
+        userProfile.email,
+        user._id,
+      );
       return this.getJwtTokenForUser(user);
     }
 
     // Create user
     const newUser = await this.userService.createGoogleOAuthUser(userProfile);
+    // Check user is present in the invited list
+    // Add to participants list of user is present
+    await this.knowledgebaseService.addInvitedUsersToKnowledgeBase(
+      userProfile.email,
+      newUser._id,
+    );
     await this.emailService.sendWelcomeEmail(newUser.email);
     return this.getJwtTokenForUser(newUser);
   }

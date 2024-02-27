@@ -1,16 +1,19 @@
 import { Box, Flex, Heading, VStack } from '@chakra-ui/react'
-import React, { useEffect, useCallback } from 'react'
+import React, { useCallback, useEffect } from 'react'
+import { useHistory, useLocation } from 'react-router-dom'
 import { ChatList } from '../../components/ChatSessions/ChatList'
 import { ChatWindow } from '../../components/ChatSessions/ChatWindow'
 import { NoDataChatSessions } from '../../components/Icons/noData/NoDataChatSessions'
 import { useConfirmation } from '../../providers/providers'
 import { deleteChatSession, getChatSessionDetails, getChatSessions, readChatSession, unReadChatSession } from '../../services/knowledgebaseService'
+import { socket } from '../../socket'
 import { ChatSession, ChatSessionDetail, ChatSessionPagination } from '../../types/knowledgebase.type'
-
 
 export type ChatSessionsProps = {
     chatbotId: string
 }
+
+interface IChatEmitData { msg: string; sessionId: string; sender: 'admin' | 'user' }
 
 export const ChatSessionsNew = ({ chatbotId }: ChatSessionsProps) => {
     const [chatSessions, setChatSessions] = React.useState<ChatSessionPagination>();
@@ -18,13 +21,23 @@ export const ChatSessionsNew = ({ chatbotId }: ChatSessionsProps) => {
     const { showConfirmation } = useConfirmation()
     const [selectedChat, setSelectedChat] = React.useState<ChatSession>();
     const [chatData, setChatData] = React.useState<ChatSessionDetail>();
+    const history = useHistory()
+	let { search } = useLocation();
+    const sessionId = new URLSearchParams(search).get("session") 
+
+    const handleSelectChat = React.useCallback((chatSession: ChatSession) => {
+        setSelectedChat(chatSession);
+        history.push(`/app/edit-chatbot/${chatbotId}/chat-sessions?session=${chatSession._id}`)
+    }, [chatbotId, history]);
+
 
     useEffect(() => {
         async function fetchData() {
             try {
                 const response = await getChatSessions(chatbotId, '1');
                 setChatSessions(response.data);
-                setSelectedChat(response.data.results.find((chatSession) => chatSession.firstMessage) || response.data.results[0])
+                const session =  response.data.results.find((chatSession) => chatSession._id === sessionId ) || response.data.results[0]
+                handleSelectChat(session)
             } catch (error) {
                 console.log("Unable to fetch chatSessions", error);
             } finally {
@@ -32,21 +45,56 @@ export const ChatSessionsNew = ({ chatbotId }: ChatSessionsProps) => {
 
         }
         fetchData();
-    }, [chatbotId]);
+    }, [chatbotId, handleSelectChat, sessionId]);
 
+    const addManualMessage = (chatData: ChatSessionDetail, data: IChatEmitData) => {
+        const newMessage = { type: 'MANUAL', ...data, ts: new Date() } as any;
+        const updatedChatData = {
+            ...chatData,
+            messages: chatData.messages ? [...chatData.messages, newMessage] : [newMessage],
+        };
+        return updatedChatData;
+    };
+
+
+    const onChatEvent = useCallback((data: IChatEmitData) => {
+        console.log(data.msg, 'received');
+        if (chatData) {
+            const updatedChatData = addManualMessage(chatData, { msg: data.msg, sessionId: data.sessionId, sender: 'user' });
+            setChatData(updatedChatData);
+        }
+    }, [chatData]);
+
+
+    useEffect(() => {
+        socket.on('admin_chat', onChatEvent);
+        return () => {
+            socket.off('admin_chat', onChatEvent);
+        };
+    }, [onChatEvent]);
+
+
+    const sendReplyToUser = (sessionId: string, msg: string) => {
+        if (chatData) {
+            const updatedChatData = addManualMessage(chatData, { msg: msg, sessionId, sender: 'admin' });
+            setChatData(updatedChatData);
+        }
+        console.log(msg, 'sent');
+        socket.emit('admin_chat', { sender: 'admin', sessionId, msg });
+    };
 
     const handlePageClick = React.useCallback(async (selectedPage: number) => {
         try {
             setIsChatLoading(true);
             const response = await getChatSessions(chatbotId, (selectedPage + 1).toString());
             setChatSessions(response.data);
-            setSelectedChat(response.data.results.find((chatSession) => chatSession.firstMessage) || response.data.results[0])
+            handleSelectChat(response.data.results.find((chatSession) => chatSession.firstMessage) || response.data.results[0])
         } catch (error) {
             console.log("Unable to fetch chatSessions", error);
         } finally {
             setIsChatLoading(false);
         }
-    }, [chatbotId]);
+    }, [chatbotId, handleSelectChat]);
 
     const updateChatSessionReadStatus = useCallback(async (chatId: string, isUnread: boolean) => {
         try {
@@ -65,7 +113,6 @@ export const ChatSessionsNew = ({ chatbotId }: ChatSessionsProps) => {
             console.log("Unable to update chatSessions", error);
         }
     }, [chatSessions, setChatSessions]);
-
 
     React.useEffect(() => {
         let ignore = false;
@@ -86,7 +133,7 @@ export const ChatSessionsNew = ({ chatbotId }: ChatSessionsProps) => {
         }
         fetchData();
         return () => { ignore = true };
-    }, [selectedChat]);
+    }, [selectedChat, updateChatSessionReadStatus]);
 
     const onDeleteChat = useCallback(async (chatId: string) => {
         try {
@@ -102,12 +149,7 @@ export const ChatSessionsNew = ({ chatbotId }: ChatSessionsProps) => {
         } catch (error) {
             console.log("Unable to delete chatSessions", error);
         }
-    }, [chatSessions, setChatSessions])
-
-
-    const handleSelectChat = React.useCallback((chatSession: ChatSession) => {
-        setSelectedChat(chatSession);
-    }, []);
+    }, [chatSessions, handlePageClick])
 
 
     if (!chatSessions?.results.length) {
@@ -167,7 +209,7 @@ export const ChatSessionsNew = ({ chatbotId }: ChatSessionsProps) => {
                 }}
 
             />
-            <ChatWindow chatData={chatData} userData={chatData?.userData} messages={chatData?.messages} isMessagesLoading={isChatLoading} />
+            <ChatWindow onChatReply={sendReplyToUser} chatData={chatData} userData={chatData?.userData} messages={chatData?.messages} isMessagesLoading={isChatLoading} />
         </Flex>
     )
 }

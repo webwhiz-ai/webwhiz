@@ -9,7 +9,10 @@ import {
 } from '../../common/celery/celery-client.module';
 import { DataStoreService } from '../../knowledgebase/datastore.service';
 import { KnowledgebaseDbService } from '../../knowledgebase/knowledgebase-db.service';
-import { checkUserIsOwnerOfKb } from '../../knowledgebase/knowledgebase-utils';
+import {
+  checkUserPermissionForKb,
+  UserPermissions,
+} from '../../knowledgebase/knowledgebase-utils';
 import { UserSparse } from '../../user/user.schema';
 
 const MAX_PDF_PAGES = 50;
@@ -53,7 +56,7 @@ export class PdfImporterService {
     const kbId = new ObjectId(knowledgebaseId);
 
     const kb = await this.kbDbService.getKnowledgebaseSparseById(kbId);
-    checkUserIsOwnerOfKb(user, kb);
+    checkUserPermissionForKb(user, kb, [UserPermissions.EDIT]);
 
     const absPath = resolve(file.path);
     await this.addPdfToDataStoreTask(
