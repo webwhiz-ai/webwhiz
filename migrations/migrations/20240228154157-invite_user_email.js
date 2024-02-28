@@ -7,17 +7,17 @@ module.exports = {
 
     const knowledgebase = await db.collection('knowledgebase').find({ "owner": { $exists: true } });
     for await (const kb of knowledgebase) {
-      const email = await db.collection('users').findOne({ "_id": kb.owner }).email;
+      const user = await db.collection('users').findOne({ "_id": kb.owner });
       await db.collection('knowledgebase').updateOne(
         { "_id": kb._id },
         {
           $set: {
             "participants": [{
               "id": kb.owner,
-              "email": email,
+              "email": user.email,
               "role": "admin" // admin/editor/reader
             }],
-            "schemaVersion": 3 // Optional: Set the new schema version
+            "schemaVersion": 4 // Optional: Set the new schema version
           }
         }
       );
