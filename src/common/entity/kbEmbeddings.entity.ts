@@ -1,12 +1,12 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, PrimaryColumn, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
 export class KbEmbeddings {
-  @PrimaryGeneratedColumn()
+  @PrimaryColumn()
   _id: string;
 
   @Column()
-  kbId: string;
+  kbid: string;
 
   @Column()
   embeddings: string;
