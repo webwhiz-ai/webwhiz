@@ -10,6 +10,7 @@ from openai.embeddings_utils import cosine_similarity
 from pymongo.collection import Collection
 from pymongo.database import Database
 from redis import Redis
+from psycopg2.extensions import connection
 
 EMBEDDINGS_TTL = 5 * 60
 
@@ -89,3 +90,27 @@ def get_top_chunks(
     except Exception as e:
         print(e)
         traceback.print_exc()
+
+def get_top_chunks_from_pg(
+    target_embedding: List[float],
+    knowledgebase_id: str,
+    chunk_count: int,
+    pg: connection,
+):
+    cursor = pg.cursor()
+    target_embedding_array = np.array(target_embedding)
+    try:
+        cursor.execute('SELECT _id, (1 - (vector(embeddings) <=> vector(%s))) as similarity FROM kb_embeddings WHERE kb_embeddings.kbId = %s ORDER BY similarity DESC LIMIT %d', (target_embedding_array, knowledgebase_id, chunk_count))
+        result = cursor.fetchall()
+        formatted_result = []
+        for row in result:
+            formatted_result.append({
+                "chunkId": { "$oid": str(row[0]) },
+                "similarity": row[1]
+            })
+        return json_util.dumps(formatted_result)
+    except Exception as e:
+        print(e)
+        traceback.print_exc()
+    finally:
+        cursor.close()
