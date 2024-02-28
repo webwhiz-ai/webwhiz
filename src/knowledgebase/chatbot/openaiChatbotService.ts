@@ -23,6 +23,7 @@ import { PromptService } from '../prompt/prompt.service';
 import { DEFAULT_CHATGPT_PROMPT } from './openaiChatbot.constant';
 import { CustomKeyService } from '../custom-key.service';
 import { KbEmbeddings } from '../../common/entity/kbEmbeddings.entity';
+import { toSql } from 'pgvector/pg';
 
 interface CosineSimilarityWorkerResponse {
   chunkId: {
@@ -123,8 +124,8 @@ export class OpenaiChatbotService {
     // Save to postgres db
     const embeddingData: KbEmbeddings = {
       _id: chunk._id.toString(),
-      kbId: kbId.toString(),
-      embeddings: embeddings,
+      kbid: kbId.toString(),
+      embeddings: toSql(embeddings),
       type: chunk.type,
     };
     await this.kbDbService.insertEmbeddingsToPg(embeddingData);
@@ -169,10 +170,17 @@ export class OpenaiChatbotService {
 
     const client = this.celeryClient.get(CeleryClientQueue.DEFAULT);
     const task = client.createTask('worker.get_top_n_chunks');
+    const taskFromPg = client.createTask('worker.get_top_n_chunks_from_pg');
 
-    const topChunks: CosineSimilarityWorkerResponse[] = JSON.parse(
-      await task.applyAsync([queryEmbedding, kbId.toString(), 3]).get(),
-    );
+    const respFromMongo = await task
+      .applyAsync([queryEmbedding, kbId.toString(), 3])
+      .get();
+    const respFromPg = await taskFromPg
+      .applyAsync([queryEmbedding, kbId.toString(), 3])
+      .get();
+    console.log('respFromMongo', respFromMongo);
+    console.log('respFromPg', respFromPg);
+    const topChunks: CosineSimilarityWorkerResponse[] = JSON.parse(respFromPg);
 
     const filteredChunks =
       topChunks.length > 2
