@@ -478,8 +478,7 @@ export class KnowledgebaseDbService {
   }
 
   async insertEmbeddingsToPg(data: KbEmbeddings) {
-    // await this.kbEmbeddingCollection.insertOne(data);
-    await this.usersRepository.save(data);
+    await this.usersRepository.insert(data);
   }
 
   /**
