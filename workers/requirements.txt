@@ -33,10 +33,12 @@ orjson==3.8.7
 packaging==23.0
 pandas==1.5.3
 pathspec==0.11.0
+pgvector==0.2.5
 Pillow==9.4.0
 platformdirs==3.1.0
 plotly==5.13.1
 prompt-toolkit==3.0.38
+psycopg2==2.9.9
 pymongo==4.3.3
 PyMuPDF==1.21.1
 pyparsing==3.0.9
