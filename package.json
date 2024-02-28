@@ -30,8 +30,9 @@
     "@nestjs/jwt": "^10.0.2",
     "@nestjs/passport": "^9.0.3",
     "@nestjs/platform-express": "^9.0.0",
-    "@nestjs/platform-socket.io": "^10.3.0",
+    "@nestjs/platform-socket.io": "^9.3.0",
     "@nestjs/swagger": "^6.2.1",
+    "@nestjs/typeorm": "^10.0.2",
     "@nestjs/websockets": "^9.4.3",
     "@sendgrid/mail": "^7.7.0",
     "@sentry/node": "^7.43.0",
@@ -55,6 +56,8 @@
     "passport-headerapikey": "^1.2.2",
     "passport-jwt": "^4.0.1",
     "passport-local": "^1.0.0",
+    "pg": "^8.11.3",
+    "pgvector": "^0.1.8",
     "playwright": "^1.31.2",
     "rate-limiter-flexible": "^2.4.1",
     "reflect-metadata": "^0.1.13",
@@ -62,6 +65,7 @@
     "socket.io": "^4.7.2",
     "socket.io-redis": "^6.1.1",
     "turndown": "^7.1.2",
+    "typeorm": "^0.3.20",
     "uuid": "^9.0.1"
   },
   "devDependencies": {
