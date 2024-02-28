@@ -3,11 +3,13 @@ from typing import List
 
 import pymongo
 import redis
+import psycopg2
 from celery import Celery
 from dotenv import load_dotenv
 
-from cosine_similarity import get_top_chunks
+from cosine_similarity import get_top_chunks, get_top_chunks_from_pg
 from extract_text import get_text_from_pdf, get_text_from_html
+from pgvector.psycopg2 import register_vector
 
 load_dotenv()
 
@@ -32,12 +34,33 @@ REDIS_CONN_STR = f"redis://{REDIS_HOST}:{REDIS_PORT}/"
 app = Celery("cosine_similiary_worker", broker=REDIS_CONN_STR, backend=REDIS_CONN_STR)
 app.conf.result_expires = 60
 
+# PostgreSQL Related
+POSTGRES_HOST = os.getenv("POSTGRES_HOST") or "localhost"
+POSTGRES_PORT = int(os.getenv("POSTGRES_PORT") or "5432")
+POSTGRES_USER = os.getenv("POSTGRES_USER")
+POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD")
+POSTGRES_DBNAME = os.getenv("POSTGRES_DB")
+
+pg = psycopg2.connect(
+    host=POSTGRES_HOST,
+    port=POSTGRES_PORT,
+    user=POSTGRES_USER,
+    password=POSTGRES_PASSWORD,
+    dbname=POSTGRES_DBNAME
+)
+register_vector(pg)
 
 @app.task
 def get_top_n_chunks(
     target_embedding: List[float], knowledgebase_id: str, chunk_count: int
 ):
     return get_top_chunks(target_embedding, knowledgebase_id, chunk_count, db, r)
+
+@app.task
+def get_top_n_chunks_from_pg(
+    target_embedding: List[float], knowledgebase_id: str, chunk_count: int
+):
+    return get_top_chunks_from_pg(target_embedding, knowledgebase_id, chunk_count, pg)
 
 
 @app.task
