@@ -33,6 +33,7 @@ export interface CustomKeyData {
 export interface ParticipantsData {
   id: ObjectId;
   role: UserRoles;
+  email: string;
 }
 
 export interface Knowledgebase {
