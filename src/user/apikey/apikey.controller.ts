@@ -6,9 +6,11 @@ import {
   Get,
   HttpCode,
   Param,
+  Body,
 } from '@nestjs/common';
 import { RequestWithUser } from '../../common/@types/nest.types';
 import { ApikeyData } from '../user.schema';
+import { CreateApiKeyDTO } from './apikey.dto';
 import { ApikeyService } from './apikey.service';
 
 @Controller('user/apikey')
@@ -34,9 +36,12 @@ export class ApikeyController {
    */
   @Post()
   @HttpCode(201)
-  async createApiKey(@Req() req: RequestWithUser): Promise<string> {
+  async createApiKey(
+    @Req() req: RequestWithUser,
+    @Body() data: CreateApiKeyDTO,
+  ): Promise<string> {
     const { user } = req;
-    return this.apikeyService.createApiKey(user);
+    return this.apikeyService.createApiKey(user, data.name);
   }
 
   /**

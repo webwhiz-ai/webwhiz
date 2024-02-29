@@ -6,7 +6,7 @@ import { UserService } from '../user.service';
 
 @Injectable()
 export class ApikeyService {
-  constructor(private readonly userService: UserService) { }
+  constructor(private readonly userService: UserService) {}
 
   /**
    * Retrieves all API keys for a given user.
@@ -46,12 +46,14 @@ export class ApikeyService {
    * @param user - The user for whom the API key is being created.
    * @returns A promise that resolves to the generated API key.
    */
-  async createApiKey(user: UserSparse): Promise<string> {
+  async createApiKey(user: UserSparse, keyName: string): Promise<string> {
     const apikey = uuidv4();
 
     const apikeyData: ApikeyData = {
       id: new ObjectId(),
       apiKey: apikey,
+      name: keyName,
+      createdAt: new Date(),
     };
     return await this.userService.addNewApikey(user._id, apikeyData);
   }

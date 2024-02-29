@@ -51,6 +51,8 @@ export interface WebhookData {
 export interface ApikeyData {
   id: ObjectId;
   apiKey: string;
+  name?: string;
+  createdAt: Date;
 }
 
 export interface User {
