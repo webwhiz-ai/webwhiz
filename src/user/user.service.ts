@@ -7,6 +7,7 @@ import { MONGODB } from '../common/mongo/mongo.module';
 import { SubscriptionPlanInfoService } from '../subscription/subscription-plan.service';
 import { CreateUserDTO } from './user.dto';
 import {
+  ApikeyData,
   Subscription,
   SubscriptionData,
   User,
@@ -64,6 +65,19 @@ export class UserService {
   async findUserByIdSparse(id: string): Promise<UserSparse> {
     const user: UserSparse = await this.userCollection.findOne(
       { _id: new ObjectId(id) },
+      { projection: { _id: 1, email: 1, activeSubscription: 1 } },
+    );
+    return sanitizeUser(user);
+  }
+
+  /**
+   * Finds a user by their API key.
+   * @param key - The API key to search for.
+   * @returns A Promise that resolves to a UserSparse object.
+   */
+  async findUserByApiKey(key: string): Promise<UserSparse> {
+    const user: UserSparse = await this.userCollection.findOne(
+      { 'apiKeys.apiKey': key },
       { projection: { _id: 1, email: 1, activeSubscription: 1 } },
     );
     return sanitizeUser(user);
@@ -330,6 +344,58 @@ export class UserService {
       { projection: { webhooks: 1 } },
     );
     return res;
+  }
+
+  /** **************************************************
+   * API KEY RELATED
+   *************************************************** */
+
+  /**
+   * Adds a new API key for a user.
+   * @param userId - The ID of the user.
+   * @param apikeyData - The data for the new API key.
+   * @returns The generated API key.
+   */
+  async addNewApikey(
+    userId: ObjectId,
+    apikeyData: ApikeyData,
+  ): Promise<string> {
+    const update: UpdateFilter<User> = {
+      $push: {
+        apiKeys: apikeyData,
+      },
+    };
+
+    const result = await this.userCollection.updateOne({ _id: userId }, update);
+    if (result.modifiedCount == 1) {
+      return apikeyData.apiKey;
+    }
+  }
+
+  /**
+   * Retrieves the API keys of a user.
+   * @param userId The ID of the user.
+   * @returns A promise that resolves to an object containing the user's API keys.
+   */
+  async getUserApikeys(userId: ObjectId): Promise<Pick<User, 'apiKeys'>> {
+    const res = await this.userCollection.findOne(
+      { _id: userId },
+      { projection: { apiKeys: 1 } },
+    );
+    return res;
+  }
+
+  async deleteApiKey(userId: ObjectId, apiKeyId: ObjectId) {
+    const update: UpdateFilter<User> = {
+      $pull: { apiKeys: { id: apiKeyId } },
+    };
+
+    const result = await this.userCollection.updateOne({ _id: userId }, update);
+    if (result.matchedCount === 0) {
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+    } else if (result.modifiedCount === 0) {
+      throw new HttpException('API-key not found', HttpStatus.NOT_FOUND);
+    }
   }
 
   /** **************************************************
