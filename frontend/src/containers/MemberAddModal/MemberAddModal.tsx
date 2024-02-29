@@ -1,4 +1,4 @@
-import { Button, FormControl, FormLabel, Input, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay, Select, toast, useToast } from '@chakra-ui/react';
+import { Button, FormControl, FormLabel, Input, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay, Select, toast, useToast, Text } from '@chakra-ui/react';
 import { useFormik } from 'formik';
 import React from 'react';
 import { inviteUser, InviteUserParams } from '../../services/userServices';
@@ -45,18 +45,25 @@ export const MemberAddModal = (
         },
     });
     return (
-        <Modal isOpen={isOpen} onClose={onClose} isCentered>
+        <Modal isOpen={isOpen} onClose={onClose} isCentered size="lg">
             <ModalOverlay />
             <ModalContent as={'form'} onSubmit={(e: any) => formik.handleSubmit(e)}>
-                <ModalHeader>Invite people</ModalHeader>
+                <ModalHeader>
+                    <Text>
+                        Invite Members
+                    </Text>
+                    <Text fontSize="15px" color="gray.600" fontWeight="500" mt="2">
+                        Assign roles & define access privileges for new team members to manage chatbot settings and functions.
+                    </Text>
+                </ModalHeader>
                 <ModalCloseButton />
                 <ModalBody>
-                    <FormControl mb={'4'}>
-                        <FormLabel>Email</FormLabel>
-                        <Input placeholder={'email@example.com'} type='email' name={'email'} onChange={formik.handleChange} />
+                    <FormControl mb={'4'} isRequired>
+                        <FormLabel fontSize="sm" color="gray.500">Email</FormLabel>
+                        <Input placeholder={'name@example.com'} type='email' name={'email'} onChange={formik.handleChange} />
                     </FormControl>
                     <FormControl>
-                        <FormLabel>Access level</FormLabel>
+                        <FormLabel fontSize="sm" color="gray.500">Access level</FormLabel>
                         <Select cursor="pointer" onChange={(e) => formik.setFieldValue('role', e.target.value)}>
                             <option value="admin">Admin</option>
                             <option value="editor">Editor</option>

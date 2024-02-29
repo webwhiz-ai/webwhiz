@@ -1,6 +1,9 @@
-import { Badge, Box, Button, IconButton, List, ListItem, Menu, MenuButton, MenuItem, MenuList, useDisclosure, useToast } from '@chakra-ui/react';
+import { Badge, Box, Flex, Button, IconButton, List, ListItem, Menu, MenuButton, MenuItem, MenuList, useDisclosure, useToast, Text } from '@chakra-ui/react';
 import React, { useCallback } from 'react';
+import { FiUserPlus } from "react-icons/fi";
 import { DeleteIcon } from '../../components/Icons/DeleteIcon';
+import { UserAddIcon } from '../../components/Icons/UserAddIcon';
+import { UserIcon } from '../../components/Icons/UserIcon';
 import { ThreeDotIcon } from '../../components/Icons/ThreeDotIcon';
 import { useConfirmation } from '../../providers/providers';
 import { deleteUser, InviteUserParams } from '../../services/userServices';
@@ -44,23 +47,27 @@ const Members = (
 
     return (
         <Box maxWidth='800px'>
-            <Box display='flex' justifyContent='end' mb='5'>
-                <Button onClick={onOpen}> Add people</Button>
+            <Box display='flex' justifyContent='end' mb='8'>
+                <Button leftIcon={<UserAddIcon />} onClick={onOpen} colorScheme='blue' onClick={onOpen}> Add Members</Button>
             </Box>
-            <List spacing={3}>
+            <List spacing={4}>
                 {props.participants.map(item => {
                     return <ListItem position="relative" key={item.id} display='flex' justifyContent="space-between" alignItems={'center'}>
-                        <Box >
-                            {item.email || item.id}
-                        </Box>
+                        <Flex alignItems="center" color="gray.500">
+                            <UserIcon color="gray.500" />
+                            <Text fontSize="sm" color="gray.600" marginLeft="6px">
+                                {item.email || item.id}
+                            </Text>
+                        </Flex>
                         <Box display={'flex'} alignItems={'center'}>
                             <Badge
                                 mr={'20px'}
                                 px={'12px'}
                                 fontSize='12px'
                                 textTransform={'capitalize'}
-                                colorScheme={item.role === 'admin' ? 'blue' : item.role === 'editor' ? 'cyan' : 'teal'}
+                                colorScheme={item.role === 'admin' ? 'green' : item.role === 'editor' ? 'yellow' : 'red'}
                                 h={'18px'}
+                                fontWeight="500"
                                 variant={'subtle'} alignItems='center'>
                                 {item.role}
                             </Badge>

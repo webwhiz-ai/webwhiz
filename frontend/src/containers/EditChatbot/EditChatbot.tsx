@@ -63,6 +63,7 @@ import { CustomDomain } from "../CustomDomain/CustomDomain";
 import { useConfirmation } from "../../providers/providers";
 import { socket } from "../../socket";
 import Members from "../Members/Members";
+import { getUserProfile } from "../../services/userServices";
 export function validateEmailAddress(email: string) {
 	return email && !/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(email);
 }
@@ -89,18 +90,6 @@ const EditChatbot = (props: EditChatbotProps) => {
 	let history = useHistory();
 
 	const [user, setUser] = React.useState<User>(CurrentUser.get());
-	React.useEffect(() => {
-		async function fetchData() {
-			try {
-				const userData = CurrentUser.get();
-				setUser(userData);
-			} catch (error) {
-				console.log("Unable to fetch user ID", error);
-			} finally {
-			}
-		}
-		fetchData();
-	}, [])
 
 	const defaultStep = history.location.pathname.split('/').pop() as Steps
 
@@ -281,6 +270,12 @@ const EditChatbot = (props: EditChatbotProps) => {
 	useEffect(() => {
 		async function fetchData() {
 			try {
+				const userData = CurrentUser.get();
+				if(!userData.email) {
+					const response = await getUserProfile();
+					CurrentUser.set(response.data);
+					setUser(userData);
+				}
 				const response = await fetcKnowledgebase(props.match.params.chatbotId);
 				//generateEmbeddings(response.data._id);
 				const chatBotData = response.data;
@@ -984,7 +979,7 @@ const EditChatbot = (props: EditChatbotProps) => {
 				>
 					<SectionTitle
 						title="Members"
-						description="Manage who has access to this workspace"
+						description="Manage who has access to this chatbot"
 					/>
 					{chatBot._id ? <Members
 						onDeleteParticipant={(id) => {
@@ -1257,9 +1252,10 @@ const EditChatbot = (props: EditChatbotProps) => {
 								}}
 								className={currentStep === "members" ? styles.active : ""}
 							>
-								<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 20 20">
-									<path d="M10.795 10.9a3.085 3.085 0 013.085 3.085V16a.6.6 0 01-1.2 0v-2.015c0-1.041-.844-1.885-1.885-1.885h-6.03c-1.041 0-1.885.844-1.885 1.885V16a.6.6 0 01-1.2 0v-2.015A3.085 3.085 0 014.765 10.9zm5.412-.82c1.187 0 2.126 1.025 2.126 2.265v1.899a.6.6 0 11-1.2 0v-1.9c0-.598-.427-1.064-.926-1.064h-1.918a.6.6 0 110-1.2zM7.78 3.4a3.35 3.35 0 110 6.7 3.35 3.35 0 010-6.7zm6.75 1.5a2.35 2.35 0 110 4.7 2.35 2.35 0 010-4.7zm-6.75-.3a2.15 2.15 0 100 4.3 2.15 2.15 0 000-4.3zm6.75 1.5a1.15 1.15 0 100 2.3 1.15 1.15 0 000-2.3z" fill="currentColor" fill-rule="nonzero"></path>
+								<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+									<path d="M22 21V19C22 17.1362 20.7252 15.5701 19 15.126M15.5 3.29076C16.9659 3.88415 18 5.32131 18 7C18 8.67869 16.9659 10.1159 15.5 10.7092M17 21C17 19.1362 17 18.2044 16.6955 17.4693C16.2895 16.4892 15.5108 15.7105 14.5307 15.3045C13.7956 15 12.8638 15 11 15H8C6.13623 15 5.20435 15 4.46927 15.3045C3.48915 15.7105 2.71046 16.4892 2.30448 17.4693C2 18.2044 2 19.1362 2 21M13.5 7C13.5 9.20914 11.7091 11 9.5 11C7.29086 11 5.5 9.20914 5.5 7C5.5 4.79086 7.29086 3 9.5 3C11.7091 3 13.5 4.79086 13.5 7Z" stroke="currentcolor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
 								</svg>
+
 								Members
 							</ListItem>
 						</List>
