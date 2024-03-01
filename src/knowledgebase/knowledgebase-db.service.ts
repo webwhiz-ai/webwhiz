@@ -23,6 +23,7 @@ import {
   PROMPT_COLLECTION,
   ChatSessionSparse,
   ChatAnswerFeedbackType,
+  ChatSessionMessageSparse,
 } from './knowledgebase.schema';
 
 @Injectable()
@@ -529,6 +530,29 @@ export class KnowledgebaseDbService {
         },
       },
     );
+    return session;
+  }
+
+  /**
+   * Retrieves chat messages from chatSessions by sessionId.
+   * @param id - The ID of the chat session.
+   * @returns A promise that resolves to a sparse chat session message.
+   */
+  async getChatSessionSparseForWidgetById(
+    id: ObjectId,
+  ): Promise<ChatSessionMessageSparse> {
+    const session = await this.chatSessionCollection.findOne(
+      { _id: id },
+      {
+        projection: {
+          _id: 1,
+          'messages.type': 1,
+          'messages.q': 1,
+          'messages.a': 1,
+        },
+      },
+    );
+
     return session;
   }
 
