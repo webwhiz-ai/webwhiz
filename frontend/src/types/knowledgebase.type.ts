@@ -172,6 +172,7 @@ export interface UserData {
 export interface ChatSession {
     isUnread: boolean;
     firstMessage: MessageList;
+    latestMessage: MessageList;
     startedAt: string;
     updatedAt: string;
     userData: UserData;

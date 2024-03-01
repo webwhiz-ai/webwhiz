@@ -45,7 +45,7 @@ export const ChatList = ({ isChatListLoading, chatSessionsPage, selectedChat, on
                 <Flex direction="column">
                     {
                         chatSessionsPage.results
-                            .filter((chatSession: ChatSession) => chatSession.firstMessage)
+                            .filter((chatSession: ChatSession) => chatSession.latestMessage)
                             .map((chatSession: ChatSession) => (
                                 <ChatListItem
                                     key={chatSession._id}
