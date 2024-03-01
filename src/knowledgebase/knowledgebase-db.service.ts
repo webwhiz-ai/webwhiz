@@ -556,7 +556,7 @@ export class KnowledgebaseDbService {
       this.chatSessionCollection,
       filter,
       projectionFields,
-      '_id',
+      'updatedAt',
       -1,
       itemsPerPage,
       page,
