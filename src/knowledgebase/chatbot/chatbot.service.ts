@@ -35,6 +35,7 @@ import {
   ChatAnswerFeedbackType,
   ChatQueryAnswer,
   ChatSession,
+  ChatSessionMessageSparse,
   ChatSessionSparse,
   CustomKeyData,
   KnowledgebaseStatus,
@@ -669,6 +670,32 @@ export class ChatbotService {
     );
 
     checkUserPermissionForKb(user, kb, [UserPermissions.READ]);
+
+    return session;
+  }
+
+  /**
+   * Retrieves the chat session messages by session ID.
+   * @param sessionId - The ID of the chat session.
+   * @returns A Promise that resolves to a ChatSessionMessageSparse object.
+   * @throws HttpException with status code HttpStatus.NOT_FOUND if the session ID is invalid or the session is not found.
+   */
+  async getChatSessionsMessagesById(
+    sessionId: string,
+  ): Promise<ChatSessionMessageSparse> {
+    //validate sessionId
+    let sessionObjId: ObjectId;
+    try {
+      sessionObjId = new ObjectId(sessionId);
+    } catch {
+      throw new HttpException('Invalid Session Id', HttpStatus.NOT_FOUND);
+    }
+    const session: ChatSessionMessageSparse =
+      await this.kbDbService.getChatSessionSparseForWidgetById(sessionObjId);
+
+    if (!session) {
+      throw new HttpException('Invalid Session', HttpStatus.NOT_FOUND);
+    }
 
     return session;
   }

@@ -211,6 +211,8 @@ export type ChatSessionSparse = Pick<
   | 'updatedAt'
 >;
 
+export type ChatSessionMessageSparse = Pick<ChatSession, 'messages'>;
+
 export interface ChatMessageWebhookPayload {
   q: string;
   a: string;
