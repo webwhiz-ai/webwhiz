@@ -604,7 +604,7 @@ export class KnowledgebaseService {
 
     if (kb.participants && Array.isArray(kb.participants)) {
       updatedParticipants = kb.participants.map((owner) => {
-        if (owner.id === userId.toString()) {
+        if (owner.id.toString() === userId.toString()) {
           // Update the existing invitation for the user
           return {
             id: userId,
