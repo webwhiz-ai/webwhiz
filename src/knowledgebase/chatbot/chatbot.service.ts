@@ -290,6 +290,7 @@ export class ChatbotService {
       query,
       CHUNK_FILTER_THRESHOLD,
       sessionData.customKeys,
+      sessionData.embeddingModel,
     );
 
     //
@@ -417,6 +418,7 @@ export class ChatbotService {
       query,
       CHUNK_FILTER_THRESHOLD,
       sessionData.customKeys,
+      sessionData.embeddingModel,
     );
 
     //
@@ -524,10 +526,10 @@ export class ChatbotService {
     }
 
     // IF its a demo knowledgebase then the user should be authenticated
-    // ie. Demo chatbots are not avialable to the public, but only to
+    // ie. Demo chatbots are not available to the public, but only to
     // authenticated users inside the app
     if (kb.isDemo && !isAuthenticated) {
-      throw new HttpException('Unauthorised', HttpStatus.UNAUTHORIZED);
+      throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
     }
 
     // Check if knowledgebase is ready
@@ -566,6 +568,7 @@ export class ChatbotService {
       messages: [],
       userData,
       src,
+      ...(kb.embeddingModel && { embeddingModel: kb.embeddingModel }),
     };
 
     await Promise.all([

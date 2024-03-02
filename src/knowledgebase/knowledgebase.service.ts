@@ -24,6 +24,7 @@ import {
 import {
   CustomKeyData,
   DataStoreType,
+  EmbeddingModel,
   Knowledgebase,
   KnowledgebaseStatus,
   ParticipantsData,
@@ -172,6 +173,7 @@ export class KnowledgebaseService {
       websiteData,
       createdAt: ts,
       updatedAt: ts,
+      embeddingModel: EmbeddingModel.OPENAI_EMBEDDING_3,
     };
     const kbData = await this.kbDbService.insertKnowledgebase(kb);
 

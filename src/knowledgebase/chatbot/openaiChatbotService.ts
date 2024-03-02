@@ -18,7 +18,7 @@ import {
   Chunk,
   ChunkStatus,
   CustomKeyData,
-  Knowledgebase,
+  EmbeddingModel,
 } from '../knowledgebase.schema';
 import { PromptService } from '../prompt/prompt.service';
 import { DEFAULT_CHATGPT_PROMPT } from './openaiChatbot.constant';
@@ -75,7 +75,11 @@ export class OpenaiChatbotService {
    * @param chunk
    * @returns
    */
-  async getEmbeddingsForChunk(chunk: Chunk, customKeys?: CustomKeyData) {
+  async getEmbeddingsForChunk(
+    chunk: Chunk,
+    customKeys?: CustomKeyData,
+    embeddingModel?: EmbeddingModel,
+  ) {
     if (!chunk._id) {
       throw new Error('Invalid Chunk! No _id present');
     }
@@ -90,6 +94,7 @@ export class OpenaiChatbotService {
         const embeddings = await this.openaiService.getEmbedding(
           text,
           this.getCustomKeys(customKeys),
+          embeddingModel,
         );
         return embeddings;
       },
@@ -109,8 +114,13 @@ export class OpenaiChatbotService {
     kbId: ObjectId,
     chunk: Chunk,
     customKeys?: CustomKeyData,
+    embeddingModel?: EmbeddingModel,
   ) {
-    const embeddings = await this.getEmbeddingsForChunk(chunk, customKeys);
+    const embeddings = await this.getEmbeddingsForChunk(
+      chunk,
+      customKeys,
+      embeddingModel,
+    );
 
     // Add embedding for new chunk into embeddings collection
     await this.kbDbService.insertEmbeddingForChunk({
@@ -128,8 +138,13 @@ export class OpenaiChatbotService {
     kbId: ObjectId,
     chunk: Chunk,
     customKeys?: CustomKeyData,
+    embeddingModel?: EmbeddingModel,
   ) {
-    const embeddings = await this.getEmbeddingsForChunk(chunk, customKeys);
+    const embeddings = await this.getEmbeddingsForChunk(
+      chunk,
+      customKeys,
+      embeddingModel,
+    );
 
     // Add embedding for new chunk into embeddings collection
     await this.kbDbService.updateEmbeddingForChunk(chunk._id, embeddings);
@@ -139,7 +154,7 @@ export class OpenaiChatbotService {
   }
 
   /**
-   * Get top n chunks in the knowledgedbase for the given query
+   * Get top n chunks in the knowledgebase for the given query
    * @param kbId
    * @param query
    * @param threshold
@@ -150,11 +165,13 @@ export class OpenaiChatbotService {
     query: string,
     threshold = 0.0,
     customKeys?: CustomKeyData,
+    embeddingModel?: EmbeddingModel,
   ): Promise<ChunkForCompletion[]> {
     // Get embeddings for given query
     const queryEmbedding = await this.openaiService.getEmbedding(
       query,
       this.getCustomKeys(customKeys),
+      embeddingModel,
     );
 
     const client = this.celeryClient.get(CeleryClientQueue.DEFAULT);

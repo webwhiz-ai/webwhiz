@@ -6,6 +6,7 @@ import { Subject } from 'rxjs';
 import { AppConfigService } from '../common/config/appConfig.service';
 import * as tiktoken from '@dqbd/tiktoken';
 import { createHash } from 'node:crypto';
+import { EmbeddingModel } from '../knowledgebase/knowledgebase.schema';
 
 const TOKENIZERS = {
   chatgtp: tiktoken.encoding_for_model('gpt-3.5-turbo'),
@@ -76,6 +77,7 @@ export class OpenaiService {
   async getEmbedding(
     input: string,
     keys?: string[],
+    model: EmbeddingModel = EmbeddingModel.OPENAI_EMBEDDING_2,
   ): Promise<number[] | undefined> {
     // Get openAi client from the given keys
     keys = keys || this.defaultKeys;
@@ -85,7 +87,7 @@ export class OpenaiService {
     try {
       await this.embedRateLimiter.consume(`openai-emd-${openAiKeyHash}`, 1);
     } catch (err) {
-      this.logger.error('OpenAI Embedding Request exeeced rate limiting');
+      this.logger.error('OpenAI Embedding Request exceeded rate limiting');
       throw new Error('Requests exceeded maximum rate');
     }
 
@@ -93,7 +95,7 @@ export class OpenaiService {
     try {
       const res = await openAiClient.createEmbedding({
         input,
-        model: 'text-embedding-ada-002',
+        model: model,
       });
       return res.data.data?.[0].embedding;
     } catch (err) {
