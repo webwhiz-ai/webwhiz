@@ -2,15 +2,20 @@ import { Injectable, Logger } from '@nestjs/common';
 import * as sgMail from '@sendgrid/mail';
 import { AppConfigService } from '../config/appConfig.service';
 
-const FROND_END_URL = 'app.webwhiz.ai';
-
 @Injectable()
 export class EmailService {
   private readonly logger: Logger;
   private isSgInitialized: boolean;
+  private senderEmail: string;
+  private senderName: string;
+  private clientUrl: string;
 
   constructor(private appConfig: AppConfigService) {
     this.logger = new Logger(EmailService.name);
+
+    this.senderEmail = this.appConfig.get('senderEmail');
+    this.senderName = this.appConfig.get('senderName');
+    this.clientUrl = this.appConfig.get('clientUrl');
 
     const sendGridApiKey = this.appConfig.get('sendGridApiKey');
     if (!sendGridApiKey) {
@@ -26,7 +31,7 @@ export class EmailService {
 
     const msg = {
       to: email,
-      from: { email: 'hi@webwhiz.ai', name: 'WebWhiz.ai' },
+      from: { email: this.senderEmail, name: this.senderName },
       templateId: 'd-4ba3b2bf1f9e4fcea8c5e881c934a2c6',
       dynamicTemplateData: {
         username,
@@ -48,7 +53,7 @@ export class EmailService {
 
     const msg = {
       to: email,
-      from: { email: 'hi@webwhiz.ai', name: 'WebWhiz.ai' },
+      from: { email: this.senderEmail, name: this.senderName },
       replyTo: queryEmail,
       templateId: 'd-a4f34375b9504c5d94f6d9e3eafe0214',
       dynamicTemplateData: {
@@ -68,7 +73,7 @@ export class EmailService {
 
     const msg = {
       to: email,
-      from: { email: 'hi@webwhiz.ai', name: 'WebWhiz.ai' },
+      from: { email: this.senderEmail, name: this.senderName },
       templateId: 'd-a4f34375b9504c5d94f6d9e3eafe0214',
       dynamicTemplateData: {
         msg_msg: queryText,
@@ -84,7 +89,7 @@ export class EmailService {
 
     const msg = {
       to: email,
-      from: { email: 'hi@webwhiz.ai', name: 'WebWhiz.ai' },
+      from: { email: this.senderEmail, name: this.senderName },
       templateId: 'd-8bcb4db974004aa080a4c06e011ddc8a',
     };
 
@@ -97,7 +102,7 @@ export class EmailService {
 
     const msg = {
       to: email,
-      from: { email: 'hi@webwhiz.ai', name: 'WebWhiz.ai' },
+      from: { email: this.senderEmail, name: this.senderName },
       templateId: 'd-7d140563825745a2b4c8e02afab18aea',
     };
 
@@ -114,12 +119,12 @@ export class EmailService {
     if (!this.isSgInitialized) return;
 
     const websiteUrl = userExist
-      ? `https://${FROND_END_URL}/login`
-      : `https://${FROND_END_URL}/sign-up`;
+      ? `${this.clientUrl}/login`
+      : `${this.clientUrl}/sign-up`;
 
     const msg = {
       to: email,
-      from: { email: 'hi@webwhiz.ai', name: 'WebWhiz.ai' },
+      from: { email: this.senderEmail, name: this.senderName },
       templateId: 'd-46f484fb64ae432aa8ca732e5ab2c1a9',
       dynamicTemplateData: {
         owner_email: ownerEmail,
