@@ -161,6 +161,7 @@ export class KnowledgebaseService {
     const participantsData: ParticipantsData = {
       id: user._id,
       role: UserRoles.ADMIN,
+      email: user.email,
     };
     // Create a new Kb in db
     const ts = new Date();
