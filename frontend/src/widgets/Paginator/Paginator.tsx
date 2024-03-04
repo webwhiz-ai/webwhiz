@@ -24,7 +24,7 @@ export const Paginator = ({
 		<ReactPaginate
 			className={styles.pagination}
 			breakLabel="..."
-			nextLabel="next"
+			nextLabel="Next"
 			containerClassName={styles.container}
 			previousClassName={styles.previous}
 			nextClassName={styles.next}
@@ -34,7 +34,7 @@ export const Paginator = ({
 			onPageChange={handlePageChange}
 			pageRangeDisplayed={pageRangeDisplayed}
 			pageCount={pageCount}
-			previousLabel="previous"
+			previousLabel="Previous"
 			renderOnZeroPageCount={null}
 		/>
 	);

@@ -90,6 +90,21 @@ const EditChatbot = (props: EditChatbotProps) => {
 	let history = useHistory();
 
 	const [user, setUser] = React.useState<User>(CurrentUser.get());
+	React.useEffect(() => {
+		async function fetchData() {
+			try {
+				if(!user._id) {
+					const response = await getUserProfile();
+					CurrentUser.set(response.data);
+					setUser(response.data);
+				}
+			} catch (error) {
+				console.log("Unable to fetch user ID", error);
+			} finally {
+			}
+		}
+		fetchData();
+	}, [user._id])
 
 	const defaultStep = history.location.pathname.split('/').pop() as Steps
 
@@ -784,6 +799,7 @@ const EditChatbot = (props: EditChatbotProps) => {
 			requiredFieldMsg: chatBot.chatWidgeData?.requiredFieldMsg || chatWidgetDefaultValues.requiredFieldMsg,
 			invalidEmailMsg: chatBot.chatWidgeData?.invalidEmailMsg || chatWidgetDefaultValues.invalidEmailMsg,
 			formSubmitBtnLabel: chatBot.chatWidgeData?.formSubmitBtnLabel || chatWidgetDefaultValues.formSubmitBtnLabel,
+			enableHumanChat: chatBot.chatWidgeData?.enableHumanChat || chatWidgetDefaultValues.enableHumanChat,
 			formSubmitBtnSubmittingText: chatBot.chatWidgeData?.formSubmitBtnSubmittingText || chatWidgetDefaultValues.formSubmitBtnSubmittingText,
 			formSubmitSuccessMsg: chatBot.chatWidgeData?.formSubmitSuccessMsg || chatWidgetDefaultValues.formSubmitSuccessMsg,
 			formSubmitErrorMsg: chatBot.chatWidgeData?.formSubmitErrorMsg || chatWidgetDefaultValues.formSubmitErrorMsg,
@@ -793,28 +809,10 @@ const EditChatbot = (props: EditChatbotProps) => {
 		};
 	}, [chatBot]);
 
-
-	const onChatEvent = React.useCallback((data: { msg: string; sessionId: string; sender: 'admin' }) => {
-        console.log(data.msg, 'received');
-    }, []);
-
-	useEffect(() => {
-		const onConnect = () => {
-			console.log('connected');
-		}
-		const onDisconnect = () => {
-			console.log('disconnected');
-		}
-		socket.on('connect', onConnect);
-		socket.on('disconnect', onDisconnect);
-		socket.on('admin_chat', onChatEvent);
-		return () => {
-			console.log('unmounting');
-			socket.off('connect', onConnect);
-			socket.off('disconnect', onDisconnect);
-			socket.off('admin_chat', onChatEvent);
-		};
-	}, [onChatEvent]);
+	const getChatSessionsComponent = React.useCallback(() => {
+		if(!user._id) return null;
+		return <ChatSessionsNew userId={user._id as unknown as string} chatbotId={props.match.params.chatbotId}  />
+	}, [props.match.params.chatbotId, user._id])
 
 
 	const getMainComponent = React.useCallback(() => {
@@ -952,7 +950,7 @@ const EditChatbot = (props: EditChatbotProps) => {
 				>
 					<SectionTitle title="Chat sessions" description="All the chat sessions with your customers." />
 					<Flex w="100%" className={styles.trainingDataCont}>
-						{ <ChatSessionsNew chatbotId={props.match.params.chatbotId}  />}
+						{ getChatSessionsComponent() }
 					</Flex>
 				</Flex> : null}
 				<Flex
@@ -1069,7 +1067,7 @@ const EditChatbot = (props: EditChatbotProps) => {
 				</Flex>
 			</>
 		);
-	}, [chatBot._id, chatBot.websiteData?.websiteUrl, chatBot.customDomain, chatBot.chatWidgeData, currentStep, getCrawlDataPagination, getDocsDataPagination, getExcludedPaths, getIncludedPaths, handleTabChange, defaultCrauledData, isSubmitting, isUploadingDocs, docsDataLoading, docsData, crawlDataLoading, productSetupLoadingText, primaryButtonLabel, getDefaultCustomizationValues, getAddToWebsiteContent, props.match.params.chatbotId, handleTrainingDataSave, getCustomDataComponent, isChatLoading, offlineMessages, handleOfflinePageClick, history, handleChatbotUpdate, toast, goToStep]);
+	}, [chatBot._id, chatBot.websiteData?.websiteUrl, chatBot.customDomain, chatBot.chatWidgeData, currentStep, getCrawlDataPagination, getDocsDataPagination, getExcludedPaths, getIncludedPaths, handleTabChange, defaultCrauledData, isSubmitting, isUploadingDocs, docsDataLoading, docsData, crawlDataLoading, productSetupLoadingText, primaryButtonLabel, getDefaultCustomizationValues, getAddToWebsiteContent, props.match.params.chatbotId, handleTrainingDataSave, getCustomDataComponent, getChatSessionsComponent, offlineMessages, isChatLoading, handleOfflinePageClick, history, handleChatbotUpdate, toast, goToStep]);
 
 	const getEmbedErrorComponent = React.useCallback(() => {
 		if(!isEmbedError) return null;

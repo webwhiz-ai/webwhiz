@@ -1,27 +1,26 @@
-import React from 'react'
 import { Box, Flex, Spinner } from '@chakra-ui/react'
-import { ChatListItem } from './ChatListItem'
+import React from 'react'
+import { ChatSession, ChatSessionPagination } from '../../types/knowledgebase.type'
 import { Paginator } from '../../widgets/Paginator/Paginator'
-import { ChatSessionPagination, ChatSession } from '../../types/knowledgebase.type'
+import { ChatListItem } from './ChatListItem'
 
 type ChatListProps = {
     isChatListLoading: boolean;
-    chatSessionsPage: ChatSessionPagination;
-    selectedChat: ChatSession;
+    chatSessionsPage?: ChatSessionPagination;
+    selectedChat?: ChatSession;
     onPageChange: (page: number) => void;
     onSelectChat: (chatSession: ChatSession) => void;
-    updateChatSessionReadStatus: (chatId: string, isUnread: boolean) =>void
+    updateChatSessionReadStatus: (chatId: string, isUnread: boolean) => void
     onDeleteChat: (chatId: string) => void
 }
 
 export const ChatList = ({ isChatListLoading, chatSessionsPage, selectedChat, onPageChange, onSelectChat, updateChatSessionReadStatus, onDeleteChat }: ChatListProps) => {
 
     return (
-        <Box w="450px"
-            pos="relative"
-        >
+        <Box w="450px" pos="relative" display={'flex'} flexDirection={'column'} justifyContent={'space-between'} borderRight="1px"
+            borderColor="gray.200">
             {
-                isChatListLoading && <Flex
+                isChatListLoading && !chatSessionsPage?.results.length && <Flex
                     pos="absolute"
                     align="center"
                     justify="center"
@@ -30,6 +29,7 @@ export const ChatList = ({ isChatListLoading, chatSessionsPage, selectedChat, on
                     right={0}
                     left={0}
                     bg="whiteAlpha.700"
+                    zIndex={10}
                 >
                     <Spinner />
                 </Flex>
@@ -38,18 +38,16 @@ export const ChatList = ({ isChatListLoading, chatSessionsPage, selectedChat, on
             <Box
                 overflowY="auto"
                 overflowX="hidden"
-                h="calc(100% - 47px)"
-                borderRight="1px"
-                borderColor="gray.200"
+                h={'100%'}
             >
                 <Flex direction="column">
                     {
-                        chatSessionsPage.results
-                            .filter((chatSession: ChatSession) => chatSession.latestMessage)
-                            .map((chatSession: ChatSession) => (
+                        chatSessionsPage?.results
+                            .filter((chatSession) => chatSession.firstMessage)
+                            .map((chatSession) => (
                                 <ChatListItem
                                     key={chatSession._id}
-                                    isSelected={selectedChat._id === chatSession._id}
+                                    isSelected={selectedChat?._id === chatSession._id}
                                     chatSessionData={chatSession}
                                     onSelectChat={() => onSelectChat(chatSession)}
                                     updateChatSessionReadStatus={updateChatSessionReadStatus}
@@ -59,15 +57,17 @@ export const ChatList = ({ isChatListLoading, chatSessionsPage, selectedChat, on
                     }
                 </Flex>
             </Box>
-            <Box
+            {chatSessionsPage?.pages && chatSessionsPage.pages > 1 ? <Box
                 bg="white"
                 borderTop="1px"
-                borderRight="1px"
                 borderColor="gray.200"
-                justifyContent="center"
+                justifyContent="end"
+                display={'flex'}
+                alignItems={'center'}
+                minH={'66.5px'}
             >
-                <Paginator onPageChange={onPageChange} pageRangeDisplayed={5} pageCount={chatSessionsPage.pages} />
-            </Box>
+                <Paginator onPageChange={onPageChange} pageRangeDisplayed={5} pageCount={chatSessionsPage.pages || 1} />
+            </Box> : null}
         </Box >
     )
 }

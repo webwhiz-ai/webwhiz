@@ -1,139 +1,130 @@
 import { Box, Flex, Heading, VStack } from '@chakra-ui/react'
-import React, { useCallback, useEffect } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { useHistory, useLocation } from 'react-router-dom'
 import { ChatList } from '../../components/ChatSessions/ChatList'
 import { ChatWindow } from '../../components/ChatSessions/ChatWindow'
 import { NoDataChatSessions } from '../../components/Icons/noData/NoDataChatSessions'
 import { useConfirmation } from '../../providers/providers'
 import { deleteChatSession, getChatSessionDetails, getChatSessions, readChatSession, unReadChatSession } from '../../services/knowledgebaseService'
-import { socket } from '../../socket'
-import { ChatSession, ChatSessionDetail, ChatSessionPagination } from '../../types/knowledgebase.type'
+import socketService from '../../services/SocketService'
+import { ChatSession, ChatSessionDetail, ChatSessionPagination, MessageList } from '../../types/knowledgebase.type'
 
 export type ChatSessionsProps = {
     chatbotId: string
+    userId: string
 }
 
-interface IChatEmitData { msg: string; sessionId: string; sender: 'admin' | 'user' }
-
-export const ChatSessionsNew = ({ chatbotId }: ChatSessionsProps) => {
-    const [chatSessions, setChatSessions] = React.useState<ChatSessionPagination>();
-    const [isChatLoading, setIsChatLoading] = React.useState<boolean>(false);
-    const { showConfirmation } = useConfirmation()
-    const [selectedChat, setSelectedChat] = React.useState<ChatSession>();
-    const [chatData, setChatData] = React.useState<ChatSessionDetail>();
+export const ChatSessionsNew = ({ chatbotId, userId }: ChatSessionsProps) => {
     const history = useHistory()
-	let { search } = useLocation();
-    const sessionId = new URLSearchParams(search).get("session") 
+    const { search } = useLocation();
+    const { showConfirmation } = useConfirmation()
 
-    const handleSelectChat = React.useCallback((chatSession: ChatSession) => {
-        setSelectedChat(chatSession);
-        history.push(`/app/edit-chatbot/${chatbotId}/chat-sessions?session=${chatSession._id}`)
-    }, [chatbotId, history]);
+    const sessionId = new URLSearchParams(search).get("session") || ''
 
+    const [chatSessions, setChatSessions] = React.useState<ChatSessionPagination>();
+    const [chatData, setChatData] = React.useState<ChatSessionDetail>();
+    const [isChatSessionsLoading, setIsChatSessionsLoading] = useState<boolean>(true);
+    const [isChatDataLoading, setIsChatDataLoading] = useState(true)
 
-    useEffect(() => {
-        async function fetchData() {
-            try {
-                const response = await getChatSessions(chatbotId, '1');
-                setChatSessions(response.data);
-                const session =  response.data.results.find((chatSession) => chatSession._id === sessionId ) || response.data.results[0]
-                handleSelectChat(session)
-            } catch (error) {
-                console.log("Unable to fetch chatSessions", error);
-            } finally {
-            }
-
-        }
-        fetchData();
-    }, [chatbotId, handleSelectChat, sessionId]);
-
-    const addManualMessage = (chatData: ChatSessionDetail, data: IChatEmitData) => {
-        const newMessage = { type: 'MANUAL', ...data, ts: new Date() } as any;
+    const addManualMessage = useCallback((chatData: ChatSessionDetail, data: Partial<MessageList>) => {
+        const newMessage = { ...data, ts: new Date() } as any;
         const updatedChatData = {
             ...chatData,
             messages: chatData.messages ? [...chatData.messages, newMessage] : [newMessage],
         };
         return updatedChatData;
-    };
+    }, []);
 
-
-    const onChatEvent = useCallback((data: IChatEmitData) => {
-        console.log(data.msg, 'received');
+    const onChatReplyEvent = useCallback((sessionId: string, msg: string) => {
+        const data = { sender: 'admin', sessionId, msg }
         if (chatData) {
-            const updatedChatData = addManualMessage(chatData, { msg: data.msg, sessionId: data.sessionId, sender: 'user' });
+            const updatedChatData = addManualMessage(chatData, { ...data, type: 'MANUAL' });
             setChatData(updatedChatData);
         }
-    }, [chatData]);
+        const socket = socketService.getSocket(chatbotId, userId);
+        socket.emit('admin_chat', data);
+        console.log(data, 'onChatReplyEvent:send');
+    }, [addManualMessage, chatData, chatbotId, userId]);
 
-
-    useEffect(() => {
-        socket.on('admin_chat', onChatEvent);
-        return () => {
-            socket.off('admin_chat', onChatEvent);
-        };
-    }, [onChatEvent]);
-
-
-    const sendReplyToUser = (sessionId: string, msg: string) => {
-        if (chatData) {
-            const updatedChatData = addManualMessage(chatData, { msg: msg, sessionId, sender: 'admin' });
-            setChatData(updatedChatData);
-        }
-        console.log(msg, 'sent');
-        socket.emit('admin_chat', { sender: 'admin', sessionId, msg });
-    };
-
-    const handlePageClick = React.useCallback(async (selectedPage: number) => {
-        try {
-            setIsChatLoading(true);
-            const response = await getChatSessions(chatbotId, (selectedPage + 1).toString());
-            setChatSessions(response.data);
-            handleSelectChat(response.data.results.find((chatSession) => chatSession.firstMessage) || response.data.results[0])
-        } catch (error) {
-            console.log("Unable to fetch chatSessions", error);
-        } finally {
-            setIsChatLoading(false);
-        }
-    }, [chatbotId, handleSelectChat]);
-
-    const updateChatSessionReadStatus = useCallback(async (chatId: string, isUnread: boolean) => {
+    const updateChatSessionReadStatus = useCallback(async (chatId: string, isUnread: boolean, needStateUpdate: boolean = true) => {
         try {
             // Toggle read/unread based on isUnread flag
             await (isUnread ? unReadChatSession : readChatSession)(chatId);
-            if (chatSessions) {
-                const updatedResults = chatSessions.results.map(item =>
-                    item._id === chatId ? { ...item, isUnread } : item
-                );
+            if (needStateUpdate) {
                 setChatSessions((prev) => {
                     if (!prev) return undefined;
+                    const updatedResults = prev.results.map(item =>
+                        item._id === chatId ? { ...item, isUnread } : item
+                    );
                     return { ...prev, results: updatedResults };
                 });
             }
         } catch (error) {
             console.log("Unable to update chatSessions", error);
         }
-    }, [chatSessions, setChatSessions]);
+    }, []);
 
-    React.useEffect(() => {
-        let ignore = false;
-        async function fetchData() {
-            if (!selectedChat) return;
-            setIsChatLoading(true);
-            try {
-                const response = await getChatSessionDetails(selectedChat._id);
-                if (selectedChat.isUnread) {
-                    updateChatSessionReadStatus(selectedChat._id, false)
-                }
-                if (!ignore) setChatData(response.data);
-            } catch (error) {
-                console.log("Unable to fetch deals", error);
-            } finally {
-                setIsChatLoading(false);
-            }
+
+    const handleSelectChat = useCallback((chatSession?: ChatSession) => {
+        history.replace({
+            pathname: `/app/edit-chatbot/${chatbotId}/chat-sessions`,
+            search: chatSession?._id ? `?session=${chatSession?._id}` : undefined
+
+        })
+        if (chatSession?._id && chatSession.isUnread) {
+            updateChatSessionReadStatus(chatSession?._id, false)
         }
-        fetchData();
-        return () => { ignore = true };
-    }, [selectedChat, updateChatSessionReadStatus]);
+    }, [chatbotId, history, updateChatSessionReadStatus]);
+
+
+    const handlePageClick = useCallback(async (selectedPage: number) => {
+        try {
+            setIsChatSessionsLoading(true);
+            const response = await getChatSessions(chatbotId, (selectedPage + 1).toString());
+            setChatSessions(response.data);
+        } catch (error) {
+            console.log("Unable to fetch chatSessions", error);
+        } finally {
+            setIsChatSessionsLoading(false);
+        }
+    }, [chatbotId]);
+
+    const fetchChatSessionDetails = useCallback(async () => {
+        if (!sessionId) { setIsChatDataLoading(false); return; }
+        try {
+            setIsChatDataLoading(true);
+            const res = await getChatSessionDetails(sessionId);
+            setChatData(res.data);
+        } catch (error) {
+            console.log("Unable to fetch deals", error);
+        } finally {
+            setIsChatDataLoading(false);
+        }
+    }, [sessionId])
+
+    useEffect(() => {
+        fetchChatSessionDetails();
+    }, [fetchChatSessionDetails]);
+
+
+    const fetchChatSessionData = useCallback(async () => {
+        if (!chatbotId || !!chatSessions) { setIsChatSessionsLoading(false); return; }
+        try {
+            setIsChatSessionsLoading(true);
+            const response = await getChatSessions(chatbotId, '1');
+            setChatSessions(response.data);
+        } catch (error) {
+            console.log("Unable to fetch chatSessions", error);
+        } finally {
+            setIsChatSessionsLoading(false);
+        }
+
+    }, [chatSessions, chatbotId])
+
+
+    useEffect(() => {
+        fetchChatSessionData();
+    }, [fetchChatSessionData]);
 
     const onDeleteChat = useCallback(async (chatId: string) => {
         try {
@@ -143,16 +134,89 @@ export const ChatSessionsNew = ({ chatbotId }: ChatSessionsProps) => {
                 if (updatedResults.length === 0) {
                     handlePageClick(0)
                 } else {
-                    setChatSessions({ ...chatSessions, results: updatedResults });
+                    setChatSessions((prev) => ({ ...prev, results: updatedResults }));
+                }
+                if (chatData?._id === chatId) {
+                    handleSelectChat(undefined)
+                    setChatData(undefined)
                 }
             }
         } catch (error) {
             console.log("Unable to delete chatSessions", error);
         }
-    }, [chatSessions, handlePageClick])
+    }, [chatData?._id, chatSessions, handlePageClick, handleSelectChat])
+
+    const onChatEvent = useCallback((data: MessageList) => {
+        console.log(data, 'onChatEvent:received');
+        setChatSessions((prev) => {
+            let chatSession = prev?.results.find(item => item._id === data.sessionId)
+            if (chatSession) {
+                data?.sessionId !== chatData?._id && !chatSession.isUnread && updateChatSessionReadStatus(chatSession?._id, true, false)
+                chatSession.isUnread = true
+                chatSession.updatedAt = new Date().toString()
+                chatSession.firstMessage = data;
+            } else return prev
+            return {
+                ...prev, results: [chatSession, ...prev?.results.filter(item => item._id !== data.sessionId) || []]
+            }
+        });
+        if (chatData?._id === data.sessionId) {
+            const updatedChatData = addManualMessage(chatData, { msg: data.msg, type: data?.type || 'MANUAL', sessionId: data.sessionId, sender: 'user', });
+            setChatData(updatedChatData);
+        }
+    }, [addManualMessage, chatData, updateChatSessionReadStatus]);
+
+    const onNewSessionEvent = useCallback(async (data: MessageList) => {
+        console.log(data, 'onNewSessionEvent:received');
+        const newSession: ChatSession = {
+            _id: data.sessionId,
+            startedAt: data.ts,
+            updatedAt: data.ts,
+            isUnread: true
+        } as ChatSession
+        setChatSessions((prev) => {
+            const prevResults = prev?.results.find(item => item._id === data.sessionId);
+            if (prevResults) {
+                return prev
+            }
+            return {
+                ...prev, results: [newSession, ...prev?.results || []]
+            }
+        });
+    }, []);
+
+    const onNewBotReply = useCallback((data: MessageList) => {
+        console.log(data, 'onNewBotReply:received');
+        if (chatData?._id === data.sessionId) {
+            const updatedChatData = addManualMessage(chatData, { ...data, type: data?.type || 'MANUAL' });
+            setChatData(updatedChatData);
+        }
+        setChatSessions((prev) => {
+            let chatSession = prev?.results.find(item => item._id === data.sessionId)
+            if (chatSession) {
+                chatSession.isUnread = true
+                chatSession.updatedAt = new Date().toString()
+                chatSession.firstMessage = data;
+            }
+            return {
+                ...prev, results: [...prev?.results || []]
+            }
+        });
+    }, [addManualMessage, chatData]);
+
+    useEffect(() => {
+        const socket = socketService.getSocket(chatbotId, userId);
+        console.log('useEffect: socket', socket)
+        socket.on('admin_chat', onChatEvent);
+        socket.on('new_session', onNewSessionEvent);
+        socket.on('chat_broadcast', onNewBotReply);
+        return () => {
+            socketService.disconnectSocket(chatbotId);
+        };
+    }, [chatbotId, onChatEvent, onNewBotReply, onNewSessionEvent, userId]);
 
 
-    if (!chatSessions?.results.length) {
+    if (!isChatSessionsLoading && !chatSessions?.results.length) {
         return (
             <VStack
                 alignItems="center"
@@ -183,13 +247,12 @@ export const ChatSessionsNew = ({ chatbotId }: ChatSessionsProps) => {
         )
     }
 
-    if (!chatSessions || !selectedChat) {
-        return null
-    }
+    const selectedChat = chatSessions?.results.find((item) => item._id === sessionId)
+
     return (
         <Flex w="100%">
             <ChatList
-                isChatListLoading={isChatLoading}
+                isChatListLoading={isChatSessionsLoading}
                 chatSessionsPage={chatSessions}
                 selectedChat={selectedChat}
                 onSelectChat={handleSelectChat}
@@ -209,7 +272,7 @@ export const ChatSessionsNew = ({ chatbotId }: ChatSessionsProps) => {
                 }}
 
             />
-            <ChatWindow onChatReply={sendReplyToUser} chatData={chatData} userData={chatData?.userData} messages={chatData?.messages} isMessagesLoading={isChatLoading} />
+            <ChatWindow onChatReply={onChatReplyEvent} chatData={chatData} userData={chatData?.userData} messages={chatData?.messages} isMessagesLoading={isChatDataLoading} />
         </Flex>
     )
 }

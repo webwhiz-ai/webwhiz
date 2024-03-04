@@ -252,6 +252,10 @@ function __WEBWHIZ__getEventHandler(ifrm) {
       localStorage.setItem("chatHistory", JSON.stringify(chatHistory));
     } else if(e.data && e.data.messageType === 'webwhiz:recieve_new_session_id') {
       localStorage.setItem("sessionId", e.data.sessionId);
+    } else if(e.data === 'webwhiz:request_is_manual_chat') {
+      e.source.postMessage({ messageType: 'webwhiz:recieve_is_manual_chat', isManualChat: JSON.parse(localStorage.getItem("isManualChat") || 'false') }, '*');
+    }  else if(e.data && e.data.messageType === 'webwhiz:update_is_manual_chat') {
+      localStorage.setItem("isManualChat", e.data.isManualChat);
     }
   }
 

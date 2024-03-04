@@ -63,7 +63,11 @@ export class EmailService {
     return res;
   }
 
-  async sendManualMsgEmail(email: string, queryText: string) {
+  async sendManualMsgEmail(
+    email: string,
+    queryText: string,
+    websiteUrl: string,
+  ) {
     if (!this.isSgInitialized) return;
 
     const msg = {
@@ -71,6 +75,7 @@ export class EmailService {
       from: { email: 'hi@webwhiz.ai', name: 'WebWhiz.ai' },
       templateId: 'd-a4f34375b9504c5d94f6d9e3eafe0214',
       dynamicTemplateData: {
+        website_url: websiteUrl,
         msg_msg: queryText,
       },
     };

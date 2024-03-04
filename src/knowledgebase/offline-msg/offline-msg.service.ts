@@ -202,7 +202,11 @@ export class OfflineMsgService {
     }
 
     // Send email
-    await this.emailService.sendManualMsgEmail(email, msg);
+    await this.emailService.sendManualMsgEmail(
+      email,
+      msg,
+      kb.websiteData.websiteUrl,
+    );
 
     return;
   }
