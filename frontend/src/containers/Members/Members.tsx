@@ -1,6 +1,5 @@
 import { Badge, Box, Flex, Button, IconButton, List, ListItem, Menu, MenuButton, MenuItem, MenuList, useDisclosure, useToast, Text } from '@chakra-ui/react';
 import React, { useCallback } from 'react';
-import { FiUserPlus } from "react-icons/fi";
 import { DeleteIcon } from '../../components/Icons/DeleteIcon';
 import { UserAddIcon } from '../../components/Icons/UserAddIcon';
 import { UserIcon } from '../../components/Icons/UserIcon';
@@ -8,6 +7,7 @@ import { ThreeDotIcon } from '../../components/Icons/ThreeDotIcon';
 import { useConfirmation } from '../../providers/providers';
 import { deleteUser, InviteUserParams } from '../../services/userServices';
 import MemberAddModal from '../MemberAddModal/MemberAddModal';
+import { CurrentUser } from '../../services/appConfig';
 
 
 interface MembersProps {
@@ -48,10 +48,11 @@ const Members = (
     return (
         <Box maxWidth='800px'>
             <Box display='flex' justifyContent='end' mb='8'>
-                <Button leftIcon={<UserAddIcon />} onClick={onOpen} colorScheme='blue' onClick={onOpen}> Add Members</Button>
+                <Button leftIcon={<UserAddIcon />} onClick={onOpen} colorScheme='blue'> Add Members</Button>
             </Box>
             <List spacing={4}>
                 {props.participants.map(item => {
+                    const isOwner = item.id === CurrentUser.get()._id
                     return <ListItem position="relative" key={item.id} display='flex' justifyContent="space-between" alignItems={'center'}>
                         <Flex alignItems="center" color="gray.500">
                             <UserIcon color="gray.500" />
@@ -71,7 +72,7 @@ const Members = (
                                 variant={'subtle'} alignItems='center'>
                                 {item.role}
                             </Badge>
-                            <Menu placement={'bottom-end'}>
+                         <Menu placement={'bottom-end'}>
                                 <MenuButton
                                     as={IconButton}
                                     aria-label='Options'
@@ -79,6 +80,8 @@ const Members = (
                                     variant='outline'
                                     boxSize={'28px'}
                                     minWidth={0}
+                                    opacity={isOwner ? 0 : 1}
+                                    visibility={isOwner ? 'hidden' : 'visible'}
                                     onClick={(e) => {
                                         e.stopPropagation();
                                     }}
@@ -105,7 +108,7 @@ const Members = (
                                         Delete user
                     </MenuItem>
                                 </MenuList>
-                            </Menu>
+                            </Menu> 
                         </Box>
                     </ListItem>
                 })}

@@ -6,6 +6,7 @@ import { ThreeDotIcon } from '../Icons/ThreeDotIcon'
 import { DeleteIcon } from '../Icons/DeleteIcon'
 import { ReadIcon } from '../Icons/ReadIcon'
 import { UnreadIcon } from '../Icons/UnreadIcon'
+import { permissions } from '../../services/appConfig'
 
 
 type ChatListItemProps = {
@@ -36,7 +37,7 @@ export const ChatListItem = ({ chatSessionData, isSelected, onSelectChat, update
             borderRightColor={isSelected ? "blue.500" : "transparent"}
             onClick={() => !isSelected && onSelectChat(chatSessionData)}
         >
-            <Menu>
+            {permissions.get().isAdmin || permissions.get().isEditor ? <Menu>
                 <MenuButton
                     as={IconButton}
                     aria-label='Options'
@@ -76,7 +77,7 @@ export const ChatListItem = ({ chatSessionData, isSelected, onSelectChat, update
                                 Mark as unread
                     </MenuItem>
                     }
-                    <MenuItem
+                     <MenuItem
                         fontSize={14}
                         borderRadius={6}
                         icon={<DeleteIcon />}
@@ -87,7 +88,7 @@ export const ChatListItem = ({ chatSessionData, isSelected, onSelectChat, update
                         Delete chat
                     </MenuItem>
                 </MenuList>
-            </Menu>
+            </Menu>: null}
             <Text fontSize="xs" color="gray.500" mb={2}>
                 {getFormattedTime(chatSessionData.updatedAt)}
             </Text>
