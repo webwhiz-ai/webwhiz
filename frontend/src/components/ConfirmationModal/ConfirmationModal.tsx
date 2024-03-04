@@ -6,7 +6,7 @@ import {
   ModalContent,
   ModalFooter,
   ModalHeader,
-  ModalOverlay
+  ModalOverlay,
 } from '@chakra-ui/react';
 import React, { ReactNode, useState, useEffect } from 'react';
 
@@ -27,12 +27,12 @@ const ConfirmationModal = ({
   title,
   content,
   confirmButtonText = 'Confirm',
-  cancelButtonText = 'Cancel'
+  cancelButtonText = 'Cancel',
 }: ConfirmationModalProps) => {
   const [disableConfirmationBtn, setDisableConfirmationBtn] = useState(false);
   const onConfirmation = () => {
     setDisableConfirmationBtn(true);
-    onConfirm()
+    onConfirm();
   };
   useEffect(() => {
     setTimeout(() => {
@@ -46,20 +46,22 @@ const ConfirmationModal = ({
       <ModalContent>
         <ModalHeader>{title}</ModalHeader>
         <ModalCloseButton />
-        <ModalBody>
-          {content}
-        </ModalBody>
+        <ModalBody>{content}</ModalBody>
         <ModalFooter>
-          <Button colorScheme='gray' mr={3} onClick={onClose}>
+          <Button colorScheme="gray" mr={3} onClick={onClose}>
             {cancelButtonText}
           </Button>
-          <Button disabled={disableConfirmationBtn} colorScheme='red' onClick={onConfirmation}>
+          <Button
+            disabled={disableConfirmationBtn}
+            colorScheme="red"
+            onClick={onConfirmation}
+          >
             {confirmButtonText}
           </Button>
         </ModalFooter>
       </ModalContent>
     </Modal>
-  )
-}
+  );
+};
 
 export default ConfirmationModal;

@@ -1,14 +1,14 @@
 import React, { HTMLAttributes } from 'react';
 interface IconProps extends HTMLAttributes<SVGElement> {
-	width?: number;
-	height?: number;
+  width?: number;
+  height?: number;
 }
 export const NoDataChatSessions = ({
-	width = 200,
-	height = 200,
-	...restProps
+  width = 200,
+  height = 200,
+  ...restProps
 }: IconProps) => {
-	return (
+  return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
       fillRule="evenodd"
@@ -17,8 +17,8 @@ export const NoDataChatSessions = ({
       clipRule="evenodd"
       viewBox="0 0 2892 1884"
       {...restProps}
-		width={width}
-			height={height}
+      width={width}
+      height={height}
     >
       <g>
         <g>
@@ -168,4 +168,5 @@ export const NoDataChatSessions = ({
         </linearGradient>
       </defs>
     </svg>
-    		)};
+  );
+};

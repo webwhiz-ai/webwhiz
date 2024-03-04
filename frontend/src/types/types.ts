@@ -1,3 +1,3 @@
 export interface SignUp {
-	token: string;
+  token: string;
 }

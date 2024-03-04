@@ -29,9 +29,9 @@ export const SettingsGeneral = () => {
         setIsApiKeyLoading(true);
         const response = await getUserProfile();
         if (response.data.customKeys && response.data.customKeys.useOwnKey) {
-			setApiKey('***************************************************');
+          setApiKey('***************************************************');
         }
-		setUser(response.data);
+        setUser(response.data);
       } catch (error) {
         console.log('Unable to fetch deals', error);
       } finally {
@@ -45,20 +45,24 @@ export const SettingsGeneral = () => {
     try {
       setIsLoading(true);
       if (!apiKey.includes('**')) {
-		if(user && user.subscriptionData && user.subscriptionData.name === 'FREE') {
-			toast({
-        title: `Please upgrade to a paid plan to use your own API key`,
-				status: 'warning',
-				isClosable: true,
-			  });
-		} else {
-			await setOpenAIKey(apiKey, !!apiKey);
-			toast({
-				title: `API key has been updated successfully!`,
-				status: 'success',
-				isClosable: true,
-			  });
-		}
+        if (
+          user &&
+          user.subscriptionData &&
+          user.subscriptionData.name === 'FREE'
+        ) {
+          toast({
+            title: `Please upgrade to a paid plan to use your own API key`,
+            status: 'warning',
+            isClosable: true,
+          });
+        } else {
+          await setOpenAIKey(apiKey, !!apiKey);
+          toast({
+            title: `API key has been updated successfully!`,
+            status: 'success',
+            isClosable: true,
+          });
+        }
       } else {
         toast({
           title: `Please enter a valid API key. If you want to disable your own API key, please remove it and save.`,
@@ -86,11 +90,15 @@ export const SettingsGeneral = () => {
               OpenAI API key
             </Heading>
             <Text className={styles.subHeading} mb="2">
-				We securely encrypt your API key. Once encrypted, you cannot view the original key in your WebWhiz account.
-				However, you can always replace it.
+              We securely encrypt your API key. Once encrypted, you cannot view
+              the original key in your WebWhiz account. However, you can always
+              replace it.
             </Text>
             <Text className={styles.subHeading} mb="6">
-				If the API key is invalid, WebWhiz will use its default API key. Please note that if your plan requires your own API key for brand removal, branding will be displayed if the API key is empty or invalid.
+              If the API key is invalid, WebWhiz will use its default API key.
+              Please note that if your plan requires your own API key for brand
+              removal, branding will be displayed if the API key is empty or
+              invalid.
             </Text>
           </Box>
           <Input
@@ -105,7 +113,7 @@ export const SettingsGeneral = () => {
               colorScheme="teal"
               size="md"
               isLoading={isLoading}
-			  isDisabled={isApiKeyLoading}
+              isDisabled={isApiKeyLoading}
               loadingText={'Saving...'}
               onClick={handleApiKeySave}
             >
@@ -113,7 +121,7 @@ export const SettingsGeneral = () => {
             </Button>
           </HStack>
         </Flex>
-		{/* {user? (<><Divider maxW="3xl" orientation="horizontal" />
+        {/* {user? (<><Divider maxW="3xl" orientation="horizontal" />
         <Flex direction={'column'} w="100%">
           <Box>
             <Flex alignItems="center" justifyContent="space-between">
@@ -136,9 +144,7 @@ export const SettingsGeneral = () => {
             </Text>
           </Box>
         </Flex></>):null} */}
-		
       </VStack>
-
     </Flex>
   );
 };

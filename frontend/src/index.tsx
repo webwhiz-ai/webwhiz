@@ -7,11 +7,11 @@ import theme from './theme/theme';
 import * as serviceWorker from './serviceWorker';
 
 ReactDOM.render(
-	<React.StrictMode>
-		<ColorModeScript initialColorMode={theme.config.initialColorMode} />
-		<Base />
-	</React.StrictMode>,
-	document.getElementById('root')
+  <React.StrictMode>
+    <ColorModeScript initialColorMode={theme.config.initialColorMode} />
+    <Base />
+  </React.StrictMode>,
+  document.getElementById('root'),
 );
 
 // If you want your app to work offline and load faster, you can change

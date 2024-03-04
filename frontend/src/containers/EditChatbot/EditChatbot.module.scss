@@ -1,156 +1,151 @@
-
-
 .trainingDataCont {
-    border: 1px solid rgba(0, 0, 0, 0.12);
-    border-radius: 12px;
-    overflow: hidden;
-    height: 100%;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 12px;
+  overflow: hidden;
+  height: 100%;
 }
 
 .answerCont {
-    padding: 20px 20px 40px 20px;
-    background-color: #FFF;
-    position: relative;
+  padding: 20px 20px 40px 20px;
+  background-color: #fff;
+  position: relative;
 }
 
 .questionCont {
-    border-right: 1px solid rgba(0, 0, 0, 0.12);
-    overflow-y: auto;
-    overflow-x: hidden;
+  border-right: 1px solid rgba(0, 0, 0, 0.12);
+  overflow-y: auto;
+  overflow-x: hidden;
 }
-
 
 .questionTab {
-    border-bottom: 0;
-    padding: 12px 20px;
-    cursor: pointer;
-    font-size: 14px;
-    z-index: 9;
-    font-weight: 600;
-    position: relative;
-    margin-right: -1px;
-    color: var(--chakra-colors-gray-600);
-    transition: color 0.2s ease-in-out;
-    &:hover {
-        color: var(--chakra-colors-gray-900);
-        .questionDeleteBtn {
-            opacity: 1;
-        }
+  border-bottom: 0;
+  padding: 12px 20px;
+  cursor: pointer;
+  font-size: 14px;
+  z-index: 9;
+  font-weight: 600;
+  position: relative;
+  margin-right: -1px;
+  color: var(--chakra-colors-gray-600);
+  transition: color 0.2s ease-in-out;
+  &:hover {
+    color: var(--chakra-colors-gray-900);
+    .questionDeleteBtn {
+      opacity: 1;
     }
+  }
 }
 .questionDeleteBtn {
-    position: absolute !important;
-    right: 10px;
-    top: 50%;
-    transform: translate3d(0%, -50%, 0px);
-    opacity: 0;
-    transition: opacity 0.2s ease-in-out;
+  position: absolute !important;
+  right: 10px;
+  top: 50%;
+  transform: translate3d(0%, -50%, 0px);
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
 }
 .activeQuestion {
-    color: var(--chakra-colors-gray-900) !important;   
-    background-color: #FFF;
-    border-right: 3px solid var(--chakra-colors-blue-500);
+  color: var(--chakra-colors-gray-900) !important;
+  background-color: #fff;
+  border-right: 3px solid var(--chakra-colors-blue-500);
 }
 
 .customDataloadingCont {
-    position: absolute;
-    right: 0;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: rgba(255, 255, 255, 0.6);
-    z-index: 9;
+  position: absolute;
+  right: 0;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(255, 255, 255, 0.6);
+  z-index: 9;
 }
-
 
 .resultTips {
-    position: absolute;
-    right: 0;
-    bottom: 0;
-    top: 0;
-    padding: 20px;
-    border-left: 1px solid rgba(0, 0, 0, 0.12);
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  top: 0;
+  padding: 20px;
+  border-left: 1px solid rgba(0, 0, 0, 0.12);
 }
 .resultTip {
-    padding-left: 52px;
-    position: relative;
-    margin-top: 24px;
+  padding-left: 52px;
+  position: relative;
+  margin-top: 24px;
 }
 .resultTipNumber {
-    font-size: 16px;
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    position: absolute;
-    left: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 1px solid;
-    border-color: var(--chakra-colors-gray-400);
-    color: var(--chakra-colors-gray-500) !important;
-    top: 0;
-    font-weight: 600;
+  font-size: 16px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  position: absolute;
+  left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid;
+  border-color: var(--chakra-colors-gray-400);
+  color: var(--chakra-colors-gray-500) !important;
+  top: 0;
+  font-weight: 600;
 }
 .resultTipHeading {
-    margin: 0 0 10px 0 !important;
-    color: var(--chakra-colors-gray-800) !important;   
+  margin: 0 0 10px 0 !important;
+  color: var(--chakra-colors-gray-800) !important;
 }
 .resultTipDescg {
-    margin: 0;
-    color: var(--chakra-colors-gray-600) !important;   
-    font-size: 14px;
+  margin: 0;
+  color: var(--chakra-colors-gray-600) !important;
+  font-size: 14px;
 }
 
 .sidebar {
-    li {
-        font-size: 15px;
-        font-weight: 400;
-        color: #513fb1;
-        padding-left: var(--chakra-space-6);
-        padding-top: 8px;
-        padding-bottom: 8px;
-        padding-right: var(--chakra-space-6);
-        border-right: 4px solid transparent;
-        svg {
-            width: 19px;
-            margin-right: 10px;
-            color: #9f90ee;
-        }
+  li {
+    font-size: 15px;
+    font-weight: 400;
+    color: #513fb1;
+    padding-left: var(--chakra-space-6);
+    padding-top: 8px;
+    padding-bottom: 8px;
+    padding-right: var(--chakra-space-6);
+    border-right: 4px solid transparent;
+    svg {
+      width: 19px;
+      margin-right: 10px;
+      color: #9f90ee;
     }
-    .title {
-        text-transform: uppercase;
-        font-weight: 600;
-        font-size: 14px;
-        padding: var(--chakra-space-5) var(--chakra-space-6);
-        padding-top: 0;
-        margin-bottom: 0px;
-        color: #7f58ff;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
+  }
+  .title {
+    text-transform: uppercase;
+    font-weight: 600;
+    font-size: 14px;
+    padding: var(--chakra-space-5) var(--chakra-space-6);
+    padding-top: 0;
+    margin-bottom: 0px;
+    color: #7f58ff;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .active {
+    border-color: #7f58ff !important;
+    color: #48389f !important;
+    background-color: #eee8ff;
+    svg {
+      color: #48389f;
     }
-    .active {
-        border-color: #7f58ff !important;
-        color: #48389f !important;
-        background-color: #eee8ff;
-        svg {
-            color: #48389f
-        }
-    }
+  }
 }
 
-
 .codeBlock {
-    font-size: 14px;
-    font-style: italic;
-    margin: 2px;
-    padding: 40px 0;
-    box-shadow: var(--chakra-shadows-base);
-    background: #faf9ff;
-    padding: var(--chakra-space-5);
-    border-radius: 6px;
+  font-size: 14px;
+  font-style: italic;
+  margin: 2px;
+  padding: 40px 0;
+  box-shadow: var(--chakra-shadows-base);
+  background: #faf9ff;
+  padding: var(--chakra-space-5);
+  border-radius: 6px;
 }

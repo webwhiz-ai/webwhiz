@@ -1,108 +1,106 @@
 .nestedForm {
-    position: relative;
+  position: relative;
 }
 .questionDeleteBtn {
-    position: absolute !important;
-    right: 0;
-    top: 0;
-    z-index: 9;
+  position: absolute !important;
+  right: 0;
+  top: 0;
+  z-index: 9;
 }
-
-
-
 
 .poweredBy {
-    background-color: rgb(0, 0, 0, 0.06);
-    padding: 8px 10px;
-    text-align: center;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 12px;
-    cursor: pointer;
-    color: #656565;
-    box-shadow: 0px 1px 1px 0px inset rgba(0, 0, 0, 0.12);
-    text-decoration: none;
+  background-color: rgb(0, 0, 0, 0.06);
+  padding: 8px 10px;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  cursor: pointer;
+  color: #656565;
+  box-shadow: 0px 1px 1px 0px inset rgba(0, 0, 0, 0.12);
+  text-decoration: none;
 }
 .chatSampleMessages {
-    padding: 5px 10px;
-    margin-right: -5px;
-    margin-bottom: -5px;
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
+  padding: 5px 10px;
+  margin-right: -5px;
+  margin-bottom: -5px;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
 }
 .chatSampleMessage {
-    font-size: 12px;
-    border-radius: 6px;
-    border: 1px solid rgba(0, 0, 0, 0.12);
-    margin-right: 5px;
-    margin-bottom: 5px;
-    cursor: pointer;
-    padding: 5px 8px;
-    transition: all 0.2s ease-in-out;
-    color: #333;
-    box-shadow: 0px 1px 1px 0px rgba(0, 0, 0, 0.08);
+  font-size: 12px;
+  border-radius: 6px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  margin-right: 5px;
+  margin-bottom: 5px;
+  cursor: pointer;
+  padding: 5px 8px;
+  transition: all 0.2s ease-in-out;
+  color: #333;
+  box-shadow: 0px 1px 1px 0px rgba(0, 0, 0, 0.08);
 }
 
 .chatSampleMessage:hover {
-    background-color: rgba(0, 0, 0, 0.04);
-    box-shadow: 0px 1px 2px 1px rgba(0, 0, 0, 0.08);
+  background-color: rgba(0, 0, 0, 0.04);
+  box-shadow: 0px 1px 2px 1px rgba(0, 0, 0, 0.08);
 }
 .chatSampleMessage:active {
-    box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.08) inset;
+  box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.08) inset;
 }
 .activeTab {
-    z-index: -1;
-    width: 100%;
-    position: absolute;
-    top: 4px;
-    bottom: 4px;
-    // left: 4px;
-    border-radius: 12px;
-    transition: width 0.35s cubic-bezier(0.215, 0.61, 0.355, 1), left 0.35s cubic-bezier(0.215, 0.61, 0.355, 1),
+  z-index: -1;
+  width: 100%;
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  // left: 4px;
+  border-radius: 12px;
+  transition: width 0.35s cubic-bezier(0.215, 0.61, 0.355, 1),
+    left 0.35s cubic-bezier(0.215, 0.61, 0.355, 1);
 }
 .formGroup {
-    margin-bottom: 8px;
+  margin-bottom: 8px;
 }
 .formLabel {
-    display: block;
-    font-size: 14px;
-    margin-bottom: 5px;
-    color: #333;
+  display: block;
+  font-size: 14px;
+  margin-bottom: 5px;
+  color: #333;
 }
 .formRequired {
-    color: #bf1212;
+  color: #bf1212;
 }
 .formControl {
-    color: #333;
-    border: 1px solid #dee2e6;
-    height: 36px;
-    padding: 5px 10px;
-    box-sizing: border-box;
-    border-radius: 4px;
-    font-size: 13px;
-    width: 100%;
-    box-shadow: 0px 0px 2px 0px rgba(0, 0, 0, 0.06);
-    outline: none;
+  color: #333;
+  border: 1px solid #dee2e6;
+  height: 36px;
+  padding: 5px 10px;
+  box-sizing: border-box;
+  border-radius: 4px;
+  font-size: 13px;
+  width: 100%;
+  box-shadow: 0px 0px 2px 0px rgba(0, 0, 0, 0.06);
+  outline: none;
 }
 .formSubmit {
-    background-color: #ff90e8;
-    border-radius: 5px;
-    padding: 12px 10px;
-    width: 100%;
-    text-align: center;
-    box-sizing: border-box;
-    cursor: pointer;
-    margin-bottom: 10px;
-    font-weight: 400;
-    color: #FFF;
-    border: 1px solid rgba(0, 0, 0, 0.08);
-    box-shadow: 0 1px 2px rgba(16, 24, 40, .05);
+  background-color: #ff90e8;
+  border-radius: 5px;
+  padding: 12px 10px;
+  width: 100%;
+  text-align: center;
+  box-sizing: border-box;
+  cursor: pointer;
+  margin-bottom: 10px;
+  font-weight: 400;
+  color: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.05);
 }
 .invalidFeedback {
-    font-size: 12px;
-    color: #bf1212;
-    // margin-top: 5px;
-    // display: none;
+  font-size: 12px;
+  color: #bf1212;
+  // margin-top: 5px;
+  // display: none;
 }

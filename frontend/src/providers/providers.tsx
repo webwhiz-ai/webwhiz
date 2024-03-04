@@ -1,28 +1,29 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { useContext } from 'react';
-import ConfirmationModal, { ConfirmationModalProps } from '../components/ConfirmationModal/ConfirmationModal';
-
+import ConfirmationModal, {
+  ConfirmationModalProps,
+} from '../components/ConfirmationModal/ConfirmationModal';
 
 type Props = {
   children: React.ReactNode;
 };
 
-export type ConfirmationAttributes = Omit<ConfirmationModalProps, 'isOpen'>
+export type ConfirmationAttributes = Omit<ConfirmationModalProps, 'isOpen'>;
 
 const confirmationDefaultValue = {
   showConfirmation: (
     open: boolean,
-    confirmationModalAttrs?: ConfirmationAttributes
-  ) => null
+    confirmationModalAttrs?: ConfirmationAttributes,
+  ) => null,
 };
 
 export const ConfirmationContext = React.createContext(
-  confirmationDefaultValue
+  confirmationDefaultValue,
 );
 
 const ConfirmationModalProvider = ({ children }: Props) => {
   const [confirmationState, setConfirmationState] = useState(
-    {} as ConfirmationAttributes
+    {} as ConfirmationAttributes,
   );
   const [open, setOpen] = useState<boolean>(false);
   const showConfirmation = useCallback(
@@ -32,7 +33,7 @@ const ConfirmationModalProvider = ({ children }: Props) => {
       }
       setOpen(open);
     },
-    []
+    [],
   );
 
   const value = useMemo(() => ({ showConfirmation }), [showConfirmation]);
