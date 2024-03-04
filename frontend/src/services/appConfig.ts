@@ -2,7 +2,7 @@ import { SubscriptionType } from "../types/subscription.type";
 
 export interface User {
     email: string;
-    id: number;
+    _id: string;
     activeSubscription: string;
     customKeys: {
         useOwnKey: boolean
