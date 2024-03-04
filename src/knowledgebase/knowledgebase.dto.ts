@@ -95,8 +95,7 @@ export class KbCustomKeysDTO {
 }
 
 export class SetAdminEmailDTO {
-  @IsNotEmpty()
-  @IsEmail()
+  @IsString()
   email: string;
 }
 
@@ -110,4 +109,17 @@ export class SetCustomDomainDTO {
   @IsString()
   @IsNotEmpty()
   domain: string;
+}
+
+export class SetChatBotNameDTO {
+  @IsString()
+  @IsNotEmpty()
+  name: string;
+}
+
+export class InviteUserDTO {
+  @IsString()
+  @IsNotEmpty()
+  email: string;
+  role: string;
 }

@@ -134,9 +134,20 @@ export async function updateModelName(id: string, modelName: string): Promise<Ax
 		baseURL: baseURL,
 		method: 'put',
 		data: {
-			modelName: modelName
+			model: modelName
 		},
 		url: `knowledgebase/${id}/model`,
+	});
+}
+
+export async function updateChatbotName(id: string, chatbotName: string): Promise<AxiosResponse<string>> {
+	return await axios({
+		baseURL: baseURL,
+		method: 'put',
+		data: {
+			name: chatbotName
+		},
+		url: `knowledgebase/${id}/name`,
 	});
 }
 

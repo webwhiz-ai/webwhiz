@@ -93,7 +93,7 @@ export const AddTrainingData = ({
 						<FormControl>
 							<FormLabel fontSize="sm">Title</FormLabel>
 							<Input ref={initialRef} value={question}
-								onChange={handleQuestionChange} placeholder='Question' />
+								onChange={handleQuestionChange} placeholder='Title' />
 						</FormControl>
 
 						<FormControl mt={6}>

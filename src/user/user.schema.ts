@@ -27,6 +27,7 @@ export enum Subscription {
 export interface UserMonthlyUsage {
   month: string;
   count: number;
+  msgCount: number;
 }
 
 export interface SubscriptionData {
@@ -45,6 +46,13 @@ export interface WebhookData {
   id: ObjectId;
   url: string;
   secret?: string;
+}
+
+export interface ApikeyData {
+  id: ObjectId;
+  apiKey: string;
+  name?: string;
+  createdAt: Date;
 }
 
 export interface User {
@@ -72,6 +80,8 @@ export interface User {
     secret: string;
   };
   webhooks?: WebhookData[];
+  // API keys
+  apiKeys?: ApikeyData[];
   createdAt: Date;
   updatedAt: Date;
   lastLogin?: Date;
@@ -82,4 +92,19 @@ export type UserSparse = Pick<User, '_id' | 'email' | 'activeSubscription'>;
 export type UserProfile = Pick<
   User,
   '_id' | 'email' | 'avatarUrl' | 'monthUsage' | 'activeSubscription'
+>;
+
+export const INVITED_EMAILS_COLLECTION = 'invitedEmails';
+
+export interface InvitedEmails {
+  _id?: ObjectId;
+  email: string;
+  role: string;
+  knowledgebaseId: ObjectId;
+  createdAt: Date;
+}
+
+export type InvitedEmailsParse = Pick<
+  InvitedEmails,
+  '_id' | 'email' | 'role' | 'knowledgebaseId'
 >;

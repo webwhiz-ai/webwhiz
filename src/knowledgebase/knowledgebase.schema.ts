@@ -19,9 +19,21 @@ export enum KnowledgebaseStatus {
   READY = 'READY',
 }
 
+export enum UserRoles {
+  ADMIN = 'admin',
+  EDITOR = 'editor',
+  READER = 'reader',
+}
+
 export interface CustomKeyData {
   useOwnKey: boolean;
   keys?: string[];
+}
+
+export interface ParticipantsData {
+  id: ObjectId;
+  role: UserRoles;
+  email: string;
 }
 
 export interface Knowledgebase {
@@ -41,6 +53,7 @@ export interface Knowledgebase {
   monthUsage?: UserMonthlyUsage;
   chatWidgeData?: any;
   owner: ObjectId;
+  participants: ParticipantsData[];
   // Alternate email for knowledgebase
   adminEmail?: string;
   createdAt: Date;
@@ -55,7 +68,13 @@ export interface Knowledgebase {
 
 export type KnowledgebaseSparse = Pick<
   Knowledgebase,
-  '_id' | 'name' | 'status' | 'monthUsage' | 'crawlData' | 'owner'
+  | '_id'
+  | 'name'
+  | 'status'
+  | 'monthUsage'
+  | 'crawlData'
+  | 'owner'
+  | 'participants'
 >;
 
 /*********************************************************
@@ -163,6 +182,7 @@ export const CHAT_SESSION_COLLECTION = 'chatSessions';
 export interface ChatSession {
   _id?: ObjectId;
   knowledgebaseId: ObjectId;
+  slackThreadId?: string;
   kbName: string;
   defaultAnswer?: string;
   prompt?: string;
@@ -190,6 +210,8 @@ export type ChatSessionSparse = Pick<
   | 'startedAt'
   | 'updatedAt'
 >;
+
+export type ChatSessionMessageSparse = Pick<ChatSession, 'messages'>;
 
 export interface ChatMessageWebhookPayload {
   q: string;

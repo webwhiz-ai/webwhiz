@@ -190,8 +190,7 @@ function addPopup(config) {
 function openWidget() {
   const iframe = document.getElementById("webwhiz-widget");
 
-  // Call the function inside the iframe
-  iframe.contentWindow.expandWidget();
+  iframe.contentWindow.postMessage({ messageType: 'webwhiz:expandWidget' }, '*');
 }
 
 function removePopup() {

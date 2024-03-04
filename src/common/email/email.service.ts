@@ -2,6 +2,8 @@ import { Injectable, Logger } from '@nestjs/common';
 import * as sgMail from '@sendgrid/mail';
 import { AppConfigService } from '../config/appConfig.service';
 
+const FROND_END_URL = 'app.webwhiz.ai';
+
 @Injectable()
 export class EmailService {
   private readonly logger: Logger;
@@ -102,6 +104,34 @@ export class EmailService {
       to: email,
       from: { email: 'hi@webwhiz.ai', name: 'WebWhiz.ai' },
       templateId: 'd-7d140563825745a2b4c8e02afab18aea',
+    };
+
+    const res = await sgMail.send(msg);
+    return res;
+  }
+
+  async sendInviteUserEmail(
+    email: string,
+    ownerEmail: string,
+    kbName: string,
+    userExist: boolean,
+  ) {
+    if (!this.isSgInitialized) return;
+
+    const websiteUrl = userExist
+      ? `https://${FROND_END_URL}/login`
+      : `https://${FROND_END_URL}/sign-up`;
+
+    const msg = {
+      to: email,
+      from: { email: 'hi@webwhiz.ai', name: 'WebWhiz.ai' },
+      templateId: 'd-46f484fb64ae432aa8ca732e5ab2c1a9',
+      dynamicTemplateData: {
+        owner_email: ownerEmail,
+        user_name: ownerEmail.split('@')[0],
+        kb_name: kbName,
+        website_url: websiteUrl,
+      },
     };
 
     const res = await sgMail.send(msg);

@@ -527,7 +527,7 @@ export const ChatBotProductSetup = ({
 																>
 																	{({ field, form }: any) => (
 																		<FormControl 
-																		// isRequired 
+																		isRequired 
 																		mb="8">
 																			<FormLabel fontWeight={400} color="gray.700" fontSize="sm" htmlFor="websiteUrl">
 																				Website URL

@@ -16,6 +16,10 @@ import { UserService } from '../../user/user.service';
 import { getLimitOffsetPaginatedResponse } from 'src/common/utils';
 import { WebhookService } from '../../webhook/webhook.service';
 import { WebhookEventType } from '../../webhook/webhook.types';
+import {
+  checkUserPermissionForKb,
+  UserPermissions,
+} from '../knowledgebase-utils';
 
 @Injectable()
 export class OfflineMsgService {
@@ -166,9 +170,10 @@ export class OfflineMsgService {
     const kbId = new ObjectId(knowledgebaseId);
 
     const kb = await this.kbDbService.getKnowledgebaseSparseById(kbId);
-    if (!kb || !user._id.equals(kb.owner)) {
-      throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
+    if (!kb) {
+      throw new HttpException('Invalid Knowledgebase Id', HttpStatus.NOT_FOUND);
     }
+    checkUserPermissionForKb(user, kb, [UserPermissions.READ]);
 
     return this.getPaginatedOfflineMsgsForKnowledgebase(kbId, pageSize, page);
   }

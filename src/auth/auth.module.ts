@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { AppConfigService } from '../common/config/appConfig.service';
@@ -8,6 +8,8 @@ import { AuthService } from './auth.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { LocalStrategy } from './strategies/local.strategy';
 import { EmailModule } from '../common/email/email.module';
+import { KnowledgebaseModule } from '../knowledgebase/knowledgebase.module';
+import { ApikeyStrategy } from './strategies/apikey.strategy';
 
 @Module({
   imports: [
@@ -21,8 +23,9 @@ import { EmailModule } from '../common/email/email.module';
       }),
     }),
     EmailModule,
+    KnowledgebaseModule,
   ],
   controllers: [AuthController],
-  providers: [AuthService, LocalStrategy, JwtStrategy],
+  providers: [AuthService, LocalStrategy, JwtStrategy, ApikeyStrategy],
 })
-export class AuthModule {}
+export class AuthModule { }

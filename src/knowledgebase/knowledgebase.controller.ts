@@ -20,11 +20,13 @@ import {
   CreateKnowledgebaseDTO,
   KbCustomKeysDTO,
   SetAdminEmailDTO,
+  SetChatBotNameDTO,
   SetCustomDomainDTO,
   SetKnowledgebaseDefaultAnswerDTO,
   SetModelNameDTO,
   SetPromptDTO,
   UpdateKnowledgebaseWebsiteDataDTO,
+  InviteUserDTO,
 } from './knowledgebase.dto';
 import { DataStoreType } from './knowledgebase.schema';
 import { KnowledgebaseService } from './knowledgebase.service';
@@ -129,6 +131,19 @@ export class KnowledgebaseController {
   ) {
     const { user } = req;
     return this.kbService.setModelName(user, id, data.model);
+  }
+
+  /**
+   * Update name of the chatbot
+   */
+  @Put('/:id/name')
+  async setChatbotName(
+    @Req() req: RequestWithUser,
+    @Param('id') id: string,
+    @Body() data: SetChatBotNameDTO,
+  ) {
+    const { user } = req;
+    return this.kbService.setKnowledgebaseName(user, id, data.name);
   }
 
   /**
@@ -309,5 +324,27 @@ export class KnowledgebaseController {
     const { user } = req;
 
     return this.kbService.createKnowledgebase(user, data);
+  }
+
+  @Post('/:id/invite_user')
+  async inviteUser(
+    @Req() req: RequestWithUser,
+    @Param('id') id: string,
+    @Body() data: InviteUserDTO,
+  ) {
+    const { user } = req;
+
+    return this.kbService.inviteUserToKnowledgeBase(user, id, data);
+  }
+
+  @Delete('/:id/delete_user/:uid')
+  async deleteUserFomKb(
+    @Req() req: RequestWithUser,
+    @Param('id') kbId: string,
+    @Param('uid') userId: string,
+  ) {
+    const { user } = req;
+
+    return this.kbService.deleteUserFromKnowledgeBase(user, kbId, userId);
   }
 }

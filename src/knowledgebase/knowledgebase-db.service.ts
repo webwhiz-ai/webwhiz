@@ -23,6 +23,7 @@ import {
   PROMPT_COLLECTION,
   ChatSessionSparse,
   ChatAnswerFeedbackType,
+  ChatSessionMessageSparse,
 } from './knowledgebase.schema';
 
 @Injectable()
@@ -75,6 +76,7 @@ export class KnowledgebaseDbService {
           monthUsage: 1,
           crawlData: 1,
           owner: 1,
+          participants: 1,
         },
       },
     );
@@ -105,6 +107,13 @@ export class KnowledgebaseDbService {
     return res;
   }
 
+  async getSessionIdBySlackThreadId(slackThreadId: string): Promise<string> {
+    const result = await this.chatSessionCollection.findOne({
+      slackThreadId,
+    });
+    return result && result._id ? result._id.toHexString() : null;
+  }
+
   async getKnowledgebaseCountForUser(userId: ObjectId) {
     const kbCount = await this.knowledgebaseCollection.countDocuments({
       owner: userId,
@@ -124,8 +133,36 @@ export class KnowledgebaseDbService {
         monthUsage: 1,
         'crawlData.stats': 1,
         owner: 1,
+        participants: 1,
       })
       .toArray();
+    return kbs as KnowledgebaseSparse[];
+  }
+
+  async getParticipatedKnowledgesbaseListForUser(
+    userId: ObjectId,
+  ): Promise<KnowledgebaseSparse[]> {
+    const kbs = await this.knowledgebaseCollection
+      .aggregate([
+        {
+          $match: {
+            'participants.id': userId,
+          },
+        },
+        {
+          $project: {
+            _id: 1,
+            name: 1,
+            status: 1,
+            monthUsage: 1,
+            'crawlData.stats': 1,
+            owner: 1,
+            participants: 1,
+          },
+        },
+      ])
+      .toArray();
+
     return kbs as KnowledgebaseSparse[];
   }
 
@@ -152,6 +189,13 @@ export class KnowledgebaseDbService {
     );
   }
 
+  async updateKnowledgebaseParticipants(id: ObjectId, participants: any) {
+    return this.knowledgebaseCollection.updateOne(
+      { _id: id },
+      { $set: { participants: participants, updatedAt: new Date() } },
+    );
+  }
+
   async setKnowledgebaseCrawlData(
     id: ObjectId,
     crawlData: Knowledgebase['crawlData'],
@@ -175,6 +219,7 @@ export class KnowledgebaseDbService {
   }
 
   async updateMonthlyUsageByN(kbId: ObjectId, n: number) {
+    const messgCount = n > 0 ? 1 : 0;
     await this.knowledgebaseCollection.updateOne({ _id: kbId }, [
       {
         $set: {
@@ -199,6 +244,9 @@ export class KnowledgebaseDbService {
               then: {
                 month: '$monthUsage.month',
                 count: { $add: ['$monthUsage.count', n] },
+                msgCount: {
+                  $add: [{ $ifNull: ['$monthUsage.msgCount', 0] }, messgCount],
+                },
               },
               else: {
                 month: {
@@ -213,6 +261,7 @@ export class KnowledgebaseDbService {
                   ],
                 },
                 count: n,
+                msgCount: messgCount,
               },
             },
           },
@@ -456,6 +505,15 @@ export class KnowledgebaseDbService {
     return session;
   }
 
+  async getChatSessionBySlackThreadId(
+    slackThreadId: string,
+  ): Promise<ChatSession> {
+    const session = await this.chatSessionCollection.findOne({
+      slackThreadId: slackThreadId,
+    });
+    return session;
+  }
+
   async getChatSessionSparseById(id: ObjectId): Promise<ChatSessionSparse> {
     const session = await this.chatSessionCollection.findOne(
       { _id: id },
@@ -475,6 +533,29 @@ export class KnowledgebaseDbService {
     return session;
   }
 
+  /**
+   * Retrieves chat messages from chatSessions by sessionId.
+   * @param id - The ID of the chat session.
+   * @returns A promise that resolves to a sparse chat session message.
+   */
+  async getChatSessionSparseForWidgetById(
+    id: ObjectId,
+  ): Promise<ChatSessionMessageSparse> {
+    const session = await this.chatSessionCollection.findOne(
+      { _id: id },
+      {
+        projection: {
+          _id: 1,
+          'messages.type': 1,
+          'messages.q': 1,
+          'messages.a': 1,
+        },
+      },
+    );
+
+    return session;
+  }
+
   async getPaginatedChatSessionsForKnowledgebase(
     kbId: ObjectId,
     pageSize: number,
@@ -482,6 +563,7 @@ export class KnowledgebaseDbService {
   ) {
     const itemsPerPage = Math.min(pageSize, 50);
 
+    // TODO: remove firstMessage if not required
     const projectionFields = {
       _id: 1,
       startedAt: 1,
@@ -489,6 +571,7 @@ export class KnowledgebaseDbService {
       userData: 1,
       isUnread: 1,
       firstMessage: { $first: '$messages' },
+      latestMessage: { $last: '$messages' },
     };
 
     const filter = {
@@ -499,7 +582,7 @@ export class KnowledgebaseDbService {
       this.chatSessionCollection,
       filter,
       projectionFields,
-      '_id',
+      'updatedAt',
       -1,
       itemsPerPage,
       page,

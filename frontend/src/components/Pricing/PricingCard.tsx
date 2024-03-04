@@ -106,7 +106,7 @@ export const PricingCard = ({
         let priceRounded = Math.ceil(price);
         return <Flex align="baseline">
             <Text fontSize="5xl" fontWeight="600">
-                {priceRounded}
+                {`$${priceRounded}`}
             </Text>
             <Text ml={2}>/mo</Text>
         </Flex>

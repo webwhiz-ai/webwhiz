@@ -26,12 +26,16 @@ import { WebhookService } from '../../webhook/webhook.service';
 import { WebhookEventType } from '../../webhook/webhook.types';
 import { CustomKeyService } from '../custom-key.service';
 import { KnowledgebaseDbService } from '../knowledgebase-db.service';
-import { checkUserIsOwnerOfKb } from '../knowledgebase-utils';
+import {
+  checkUserPermissionForKb,
+  UserPermissions,
+} from '../knowledgebase-utils';
 
 import {
   ChatAnswerFeedbackType,
   ChatQueryAnswer,
   ChatSession,
+  ChatSessionMessageSparse,
   ChatSessionSparse,
   CustomKeyData,
   KnowledgebaseStatus,
@@ -503,6 +507,7 @@ export class ChatbotService {
     userData?: any,
     isAuthenticated = false,
     src?: string,
+    slackThreadId?: string,
   ) {
     const sessionId = new ObjectId();
 
@@ -546,6 +551,7 @@ export class ChatbotService {
     const sessionData: ChatSession = {
       _id: sessionId,
       knowledgebaseId: kbId,
+      slackThreadId: slackThreadId,
       kbName: `${kb.name} assistant`,
       defaultAnswer: kb.defaultAnswer,
       model: kb.model,
@@ -663,8 +669,32 @@ export class ChatbotService {
       session.knowledgebaseId,
     );
 
-    if (!user._id.equals(kb.owner)) {
-      throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
+    checkUserPermissionForKb(user, kb, [UserPermissions.READ]);
+
+    return session;
+  }
+
+  /**
+   * Retrieves the chat session messages by session ID.
+   * @param sessionId - The ID of the chat session.
+   * @returns A Promise that resolves to a ChatSessionMessageSparse object.
+   * @throws HttpException with status code HttpStatus.NOT_FOUND if the session ID is invalid or the session is not found.
+   */
+  async getChatSessionsMessagesById(
+    sessionId: string,
+  ): Promise<ChatSessionMessageSparse> {
+    //validate sessionId
+    let sessionObjId: ObjectId;
+    try {
+      sessionObjId = new ObjectId(sessionId);
+    } catch {
+      throw new HttpException('Invalid Session Id', HttpStatus.NOT_FOUND);
+    }
+    const session: ChatSessionMessageSparse =
+      await this.kbDbService.getChatSessionSparseForWidgetById(sessionObjId);
+
+    if (!session) {
+      throw new HttpException('Invalid Session', HttpStatus.NOT_FOUND);
     }
 
     return session;
@@ -679,7 +709,7 @@ export class ChatbotService {
     const kbId = new ObjectId(knowledgebaseId);
 
     const kb = await this.kbDbService.getKnowledgebaseSparseById(kbId);
-    checkUserIsOwnerOfKb(user, kb);
+    checkUserPermissionForKb(user, kb, [UserPermissions.READ]);
 
     return this.kbDbService.getPaginatedChatSessionsForKnowledgebase(
       kbId,
@@ -705,9 +735,7 @@ export class ChatbotService {
       session.knowledgebaseId,
     );
 
-    if (!user._id.equals(kb.owner)) {
-      throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
-    }
+    checkUserPermissionForKb(user, kb, [UserPermissions.EDIT]);
 
     try {
       await this.kbDbService.deleteChatSession(new ObjectId(sessionId));
@@ -732,9 +760,7 @@ export class ChatbotService {
       session.knowledgebaseId,
     );
 
-    if (!user._id.equals(kb.owner)) {
-      throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
-    }
+    checkUserPermissionForKb(user, kb, [UserPermissions.EDIT]);
 
     try {
       this.kbDbService.updateChatSession(new ObjectId(sessionId), {
@@ -762,9 +788,7 @@ export class ChatbotService {
       session.knowledgebaseId,
     );
 
-    if (!user._id.equals(kb.owner)) {
-      throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
-    }
+    checkUserPermissionForKb(user, kb, [UserPermissions.EDIT]);
 
     try {
       this.kbDbService.updateChatSession(new ObjectId(sessionId), {
