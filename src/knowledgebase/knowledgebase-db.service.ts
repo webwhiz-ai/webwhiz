@@ -23,6 +23,7 @@ import {
   PROMPT_COLLECTION,
   ChatSessionSparse,
   ChatAnswerFeedbackType,
+  ChatSessionMessageSparse,
 } from './knowledgebase.schema';
 
 @Injectable()
@@ -532,6 +533,29 @@ export class KnowledgebaseDbService {
     return session;
   }
 
+  /**
+   * Retrieves chat messages from chatSessions by sessionId.
+   * @param id - The ID of the chat session.
+   * @returns A promise that resolves to a sparse chat session message.
+   */
+  async getChatSessionSparseForWidgetById(
+    id: ObjectId,
+  ): Promise<ChatSessionMessageSparse> {
+    const session = await this.chatSessionCollection.findOne(
+      { _id: id },
+      {
+        projection: {
+          _id: 1,
+          'messages.type': 1,
+          'messages.q': 1,
+          'messages.a': 1,
+        },
+      },
+    );
+
+    return session;
+  }
+
   async getPaginatedChatSessionsForKnowledgebase(
     kbId: ObjectId,
     pageSize: number,
@@ -539,6 +563,7 @@ export class KnowledgebaseDbService {
   ) {
     const itemsPerPage = Math.min(pageSize, 50);
 
+    // TODO: remove firstMessage if not required
     const projectionFields = {
       _id: 1,
       startedAt: 1,
@@ -546,6 +571,7 @@ export class KnowledgebaseDbService {
       userData: 1,
       isUnread: 1,
       firstMessage: { $first: '$messages' },
+      latestMessage: { $last: '$messages' },
     };
 
     const filter = {
@@ -556,7 +582,7 @@ export class KnowledgebaseDbService {
       this.chatSessionCollection,
       filter,
       projectionFields,
-      '_id',
+      'updatedAt',
       -1,
       itemsPerPage,
       page,

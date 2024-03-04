@@ -14,7 +14,10 @@ import {
 import { RealIP } from 'nestjs-real-ip';
 import { Public } from '../../auth/guards/public.guard';
 import { RequestWithUser } from '../../common/@types/nest.types';
-import { ChatSessionSparse } from '../knowledgebase.schema';
+import {
+  ChatSessionMessageSparse,
+  ChatSessionSparse,
+} from '../knowledgebase.schema';
 import {
   ChatbotQueryDTO,
   CreateChatbotSessionDTO,
@@ -96,6 +99,19 @@ export class ChatbotController {
   ): Promise<ChatSessionSparse> {
     const { user } = req;
     return this.chatbotService.getChatSessionData(user, id);
+  }
+
+  /**
+   * Retrieves the messages for a given chat-session ID.
+   * @param id The ID of the chat session.
+   * @returns A promise that resolves to the chat session messages.
+   */
+  @Public()
+  @Get('/session/:id/messages')
+  async getSessionMessages(
+    @Param('id') id: string,
+  ): Promise<ChatSessionMessageSparse> {
+    return this.chatbotService.getChatSessionsMessagesById(id);
   }
 
   @Public()

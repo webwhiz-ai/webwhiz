@@ -161,6 +161,7 @@ export class KnowledgebaseService {
     const participantsData: ParticipantsData = {
       id: user._id,
       role: UserRoles.ADMIN,
+      email: user.email,
     };
     // Create a new Kb in db
     const ts = new Date();
@@ -597,29 +598,43 @@ export class KnowledgebaseService {
     userId: ObjectId,
     kbId: ObjectId,
     role: string,
+    email: string,
     kb,
   ) {
-    const updatedParticipants = kb.participants.map((owner) => {
-      if (owner.id === userId) {
-        // Update the existing invitation for the user
-        return {
-          id: userId,
-          role: role,
-        };
-      }
-      return owner;
-    });
+    let updatedParticipants;
 
-    // Check if the user was not already invited before updating
-    if (!kb.participants.some((owner) => owner.id === userId)) {
-      // Add the new invitation for the user
-      updatedParticipants.push({ id: userId, role: role });
+    if (kb.participants && Array.isArray(kb.participants)) {
+      updatedParticipants = kb.participants.map((owner) => {
+        if (owner.id.toString() === userId.toString()) {
+          // Update the existing invitation for the user
+          return {
+            id: userId,
+            role: role,
+            email: email,
+          };
+        }
+        return owner;
+      });
+
+      // Check if the user was not already invited before updating
+      if (
+        !kb.participants.some(
+          (owner) => owner.id.toString() === userId.toString(),
+        )
+      ) {
+        // Add the new invitation for the user
+        updatedParticipants.push({ id: userId, role: role, email: email });
+      }
+    } else {
+      updatedParticipants = [{ id: userId, role: role, email: email }];
     }
 
-    await this.kbDbService.updateKnowledgebaseParticipants(
-      kbId,
-      updatedParticipants,
-    );
+    if (updatedParticipants) {
+      await this.kbDbService.updateKnowledgebaseParticipants(
+        kbId,
+        updatedParticipants,
+      );
+    }
   }
 
   async inviteUserToKnowledgeBase(
@@ -649,6 +664,7 @@ export class KnowledgebaseService {
         userId,
         kbId,
         data.role,
+        data.email,
         kb,
       );
       userExist = true;
@@ -685,6 +701,7 @@ export class KnowledgebaseService {
             userId,
             kb._id,
             invitedData.role,
+            email,
             kb,
           );
           await this.userService.deleteFromInvitedEmail(email, kb._id);
@@ -702,6 +719,13 @@ export class KnowledgebaseService {
     const kbId = new ObjectId(id);
     const kb = await this.kbDbService.getKnowledgebaseSparseById(kbId);
     checkUserPermissionForKb(user, kb, [UserPermissions.DELETE_USER]);
+
+    if (id == kb.owner.toString()) {
+      throw new HttpException(
+        "Sorry, you can't delete the owner of this knowledgebase!",
+        HttpStatus.NOT_FOUND,
+      );
+    }
 
     const index = kb.participants.findIndex(
       (participant) => participant.id.toString() === userId,

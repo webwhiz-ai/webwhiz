@@ -33,6 +33,7 @@ export interface CustomKeyData {
 export interface ParticipantsData {
   id: ObjectId;
   role: UserRoles;
+  email: string;
 }
 
 export interface Knowledgebase {
@@ -209,6 +210,8 @@ export type ChatSessionSparse = Pick<
   | 'startedAt'
   | 'updatedAt'
 >;
+
+export type ChatSessionMessageSparse = Pick<ChatSession, 'messages'>;
 
 export interface ChatMessageWebhookPayload {
   q: string;

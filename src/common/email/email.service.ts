@@ -64,7 +64,6 @@ export class EmailService {
   }
 
   async sendManualMsgEmail(email: string, queryText: string) {
-
     if (!this.isSgInitialized) return;
 
     const msg = {
@@ -114,7 +113,6 @@ export class EmailService {
   ) {
     if (!this.isSgInitialized) return;
 
-    const btnName = userExist ? 'Sign in' : 'Sign up';
     const websiteUrl = userExist
       ? `https://${FROND_END_URL}/login`
       : `https://${FROND_END_URL}/sign-up`;
@@ -125,8 +123,8 @@ export class EmailService {
       templateId: 'd-46f484fb64ae432aa8ca732e5ab2c1a9',
       dynamicTemplateData: {
         owner_email: ownerEmail,
+        user_name: ownerEmail.split('@')[0],
         kb_name: kbName,
-        action_type: btnName,
         website_url: websiteUrl,
       },
     };
