@@ -223,11 +223,17 @@ export class UserService {
       userData?.monthUsage?.month !== currentMonth
     ) {
       if (userData.monthUsage === undefined) {
-        userData.monthUsage = { month: '', count: 0, msgCount: 0 };
+        userData.monthUsage = {
+          month: '',
+          count: 0,
+          msgCount: 0,
+          rawTokenCount: 0,
+        };
       }
       userData.monthUsage.month = currentMonth;
       userData.monthUsage.count = 0;
       userData.monthUsage.msgCount = 0;
+      userData.monthUsage.rawTokenCount = 0;
     }
 
     const subscriptionData = this.subsPlanService.getSubscriptionPlanInfo(
@@ -413,7 +419,18 @@ export class UserService {
     return usageData;
   }
 
-  async updateMonthlyUsageByN(userId: ObjectId, n: number) {
+  /**
+   * Updates the monthly usage for a user by a given value.
+   *
+   * @param userId - The ID of the user.
+   * @param n - Token value normalized with the model used .
+   * @param rawTokenCount - The token count which is not normalized.
+   */
+  async updateMonthlyUsageByN(
+    userId: ObjectId,
+    n: number,
+    rawTokenCount: number,
+  ) {
     const messgCount = n > 0 ? 1 : 0;
     await this.userCollection.updateOne({ _id: userId }, [
       {
@@ -442,6 +459,17 @@ export class UserService {
                 msgCount: {
                   $add: [{ $ifNull: ['$monthUsage.msgCount', 0] }, messgCount],
                 },
+                rawTokenCount: {
+                  $add: [
+                    {
+                      $ifNull: [
+                        '$monthUsage.rawTokenCount',
+                        '$monthUsage.count',
+                      ],
+                    },
+                    rawTokenCount,
+                  ],
+                },
               },
               else: {
                 month: {
@@ -457,6 +485,7 @@ export class UserService {
                 },
                 count: n,
                 msgCount: messgCount,
+                rawTokenCount: rawTokenCount,
               },
             },
           },
