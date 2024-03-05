@@ -31,7 +31,7 @@ export const CurrentUser: any = {
 
 
 //Permissions
-interface PermissionsType {
+export interface PermissionsType {
     isOwner?: boolean;
     isAdmin?: boolean;
     isReader?: boolean;
