@@ -524,7 +524,7 @@ export class KnowledgebaseService {
   ) {
     const kbId = new ObjectId(id);
     const kb = await this.kbDbService.getKnowledgebaseSparseById(kbId);
-    checkUserPermissionForKb(user, kb, [UserPermissions.DELETE]);
+    checkUserPermissionForKb(user, kb, [UserPermissions.EDIT]);
 
     await this.kbDbService.updateKnowledgebase(kbId, { adminEmail: email });
   }
