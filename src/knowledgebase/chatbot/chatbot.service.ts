@@ -35,6 +35,7 @@ import {
   ChatAnswerFeedbackType,
   ChatQueryAnswer,
   ChatSession,
+  ChatSessionMessageSparse,
   ChatSessionSparse,
   CustomKeyData,
   KnowledgebaseStatus,
@@ -110,14 +111,26 @@ export class ChatbotService {
     msg: ChatQueryAnswer,
   ) {
     session.messages.push(msg);
-    const totalTokens = msg.qTokens + msg.aTokens;
+
+    // Calculate total tokens based on the model used and update the monthly usage for user and kb
+    const totalTokens = this.calculateTotalTokens(
+      msg.qTokens,
+      msg.aTokens,
+      session.model,
+    );
+
     return Promise.all([
       this.setChatSessionData(session),
       this.kbDbService.addMsgToChatSession(session._id, msg),
-      this.userService.updateMonthlyUsageByN(session.userId, totalTokens),
+      this.userService.updateMonthlyUsageByN(
+        session.userId,
+        totalTokens,
+        msg.qTokens + msg.aTokens,
+      ),
       this.kbDbService.updateMonthlyUsageByN(
         session.knowledgebaseId,
         totalTokens,
+        msg.qTokens + msg.aTokens,
       ),
     ]);
   }
@@ -290,6 +303,7 @@ export class ChatbotService {
       query,
       CHUNK_FILTER_THRESHOLD,
       sessionData.customKeys,
+      sessionData.embeddingModel,
     );
 
     //
@@ -417,6 +431,7 @@ export class ChatbotService {
       query,
       CHUNK_FILTER_THRESHOLD,
       sessionData.customKeys,
+      sessionData.embeddingModel,
     );
 
     //
@@ -524,10 +539,10 @@ export class ChatbotService {
     }
 
     // IF its a demo knowledgebase then the user should be authenticated
-    // ie. Demo chatbots are not avialable to the public, but only to
+    // ie. Demo chatbots are not available to the public, but only to
     // authenticated users inside the app
     if (kb.isDemo && !isAuthenticated) {
-      throw new HttpException('Unauthorised', HttpStatus.UNAUTHORIZED);
+      throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
     }
 
     // Check if knowledgebase is ready
@@ -566,6 +581,7 @@ export class ChatbotService {
       messages: [],
       userData,
       src,
+      ...(kb.embeddingModel && { embeddingModel: kb.embeddingModel }),
     };
 
     await Promise.all([
@@ -669,6 +685,32 @@ export class ChatbotService {
     );
 
     checkUserPermissionForKb(user, kb, [UserPermissions.READ]);
+
+    return session;
+  }
+
+  /**
+   * Retrieves the chat session messages by session ID.
+   * @param sessionId - The ID of the chat session.
+   * @returns A Promise that resolves to a ChatSessionMessageSparse object.
+   * @throws HttpException with status code HttpStatus.NOT_FOUND if the session ID is invalid or the session is not found.
+   */
+  async getChatSessionsMessagesById(
+    sessionId: string,
+  ): Promise<ChatSessionMessageSparse> {
+    //validate sessionId
+    let sessionObjId: ObjectId;
+    try {
+      sessionObjId = new ObjectId(sessionId);
+    } catch {
+      throw new HttpException('Invalid Session Id', HttpStatus.NOT_FOUND);
+    }
+    const session: ChatSessionMessageSparse =
+      await this.kbDbService.getChatSessionSparseForWidgetById(sessionObjId);
+
+    if (!session) {
+      throw new HttpException('Invalid Session', HttpStatus.NOT_FOUND);
+    }
 
     return session;
   }
@@ -791,6 +833,28 @@ export class ChatbotService {
       );
     } catch {
       throw new HttpException('Invalid Session', HttpStatus.NOT_FOUND);
+    }
+  }
+
+  /**
+   * Calculates the total number of tokens based on the number of question tokens, answer tokens, and the model.
+   *
+   * Input token usage ratio for gpt-3.5 : gpt-4 : gpt-4-turbo = 1 : 60 : 20
+   * Output token usage ratio for gpt-3.5 : gpt-4 : gpt-4-turbo = 1 : 40 : 20
+   *
+   * @param qTokens The number of question tokens.
+   * @param aTokens The number of answer tokens.
+   * @param model The model used for token calculation.
+   * @returns The total number of tokens.
+   */
+  calculateTotalTokens(qTokens: number, aTokens: number, model: string) {
+    switch (model) {
+      case 'gpt-4-0613': // GPT-4
+        return qTokens * 60 + aTokens * 40;
+      case 'gpt-4-turbo-preview': // GPT-4-Turbo
+        return qTokens * 20 + aTokens * 20;
+      default:
+        return qTokens + aTokens;
     }
   }
 }

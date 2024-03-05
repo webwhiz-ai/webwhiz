@@ -23,6 +23,7 @@ import {
   PROMPT_COLLECTION,
   ChatSessionSparse,
   ChatAnswerFeedbackType,
+  ChatSessionMessageSparse,
 } from './knowledgebase.schema';
 
 @Injectable()
@@ -217,7 +218,11 @@ export class KnowledgebaseDbService {
     );
   }
 
-  async updateMonthlyUsageByN(kbId: ObjectId, n: number) {
+  async updateMonthlyUsageByN(
+    kbId: ObjectId,
+    n: number,
+    rawTokenCount: number,
+  ) {
     const messgCount = n > 0 ? 1 : 0;
     await this.knowledgebaseCollection.updateOne({ _id: kbId }, [
       {
@@ -246,6 +251,17 @@ export class KnowledgebaseDbService {
                 msgCount: {
                   $add: [{ $ifNull: ['$monthUsage.msgCount', 0] }, messgCount],
                 },
+                rawTokenCount: {
+                  $add: [
+                    {
+                      $ifNull: [
+                        '$monthUsage.rawTokenCount',
+                        '$monthUsage.count',
+                      ],
+                    },
+                    rawTokenCount,
+                  ],
+                },
               },
               else: {
                 month: {
@@ -261,6 +277,7 @@ export class KnowledgebaseDbService {
                 },
                 count: n,
                 msgCount: messgCount,
+                rawTokenCount: rawTokenCount,
               },
             },
           },
@@ -532,6 +549,29 @@ export class KnowledgebaseDbService {
     return session;
   }
 
+  /**
+   * Retrieves chat messages from chatSessions by sessionId.
+   * @param id - The ID of the chat session.
+   * @returns A promise that resolves to a sparse chat session message.
+   */
+  async getChatSessionSparseForWidgetById(
+    id: ObjectId,
+  ): Promise<ChatSessionMessageSparse> {
+    const session = await this.chatSessionCollection.findOne(
+      { _id: id },
+      {
+        projection: {
+          _id: 1,
+          'messages.type': 1,
+          'messages.q': 1,
+          'messages.a': 1,
+        },
+      },
+    );
+
+    return session;
+  }
+
   async getPaginatedChatSessionsForKnowledgebase(
     kbId: ObjectId,
     pageSize: number,
@@ -539,13 +579,14 @@ export class KnowledgebaseDbService {
   ) {
     const itemsPerPage = Math.min(pageSize, 50);
 
+    // TODO: remove firstMessage if not required
     const projectionFields = {
       _id: 1,
       startedAt: 1,
       updatedAt: 1,
       userData: 1,
       isUnread: 1,
-      firstMessage: { $first: '$messages' },
+      firstMessage: { $first: '$messages' }
     };
 
     const filter = {
@@ -556,7 +597,7 @@ export class KnowledgebaseDbService {
       this.chatSessionCollection,
       filter,
       projectionFields,
-      '_id',
+      'updatedAt',
       -1,
       itemsPerPage,
       page,

@@ -1,67 +1,50 @@
-import * as React from "react";
-
 import {
-	Box,
-	Flex,
-	Heading,
-	Text,
-	HStack,
-	List,
-	ListItem,
-	VStack,
-	Spinner,
-	IconButton,
-	useToast,
 	Alert,
-	AlertIcon,
-	Button,
-	useDisclosure,
 	AlertDescription,
-	AlertTitle,
 	AlertDialog,
 	AlertDialogBody,
-	AlertDialogFooter,
+	AlertDialogContent, AlertDialogFooter,
 	AlertDialogHeader,
-	AlertDialogContent,
-	AlertDialogOverlay,
+	AlertDialogOverlay, AlertIcon,
+	AlertTitle, Box,
+	Button, Flex,
+	Heading,
+	HStack,
+	IconButton, List,
+	ListItem,
+	Spinner, Text,
+	useDisclosure, useToast, VStack
 } from "@chakra-ui/react";
-
-
+import classNames from "classnames";
+import * as React from "react";
 import { useEffect } from "react";
+import { RiDeleteBin5Line } from "react-icons/ri";
 import {
 	Link,
 	RouteComponentProps,
 	useHistory,
-	withRouter,
+	withRouter
 } from "react-router-dom";
-
-import { NoDataFineTuneIcon } from "../../components/Icons/noData/NoDataFineTuneIcon";
-
-import { RiDeleteBin5Line } from "react-icons/ri"
-
-import classNames from "classnames";
-
-import {
-	ChatBotProductSetup,
-} from "../ChatBotProductSetup/ChatBotProductSetup";
-import { ChatBotsCustomize } from "../ChatBotsCustomize/ChatBotsCustomize";
-import { useLocation } from "react-router-dom";
-
-import styles from "./EditChatbot.module.scss";
-import { fetchKnowledgebaseCrawlData, customizeWidget, deleteTrainingData, fetcKnowledgebase, fetchKnowledgebaseDetails, generateEmbeddings, getTrainingData, getTrainingDataDetails, updateWebsiteData, getChatSessions, getOfflineMessages, updatePrompt, updateDefaultAnswer, fetchKnowledgebaseCrawlDataForDocs, addTrainingDoc, updateAdminEmail, getChatSessionDetails, unReadChatSession, readChatSession, deleteChatSession, updateModelName } from "../../services/knowledgebaseService";
 import { ChatBot } from "../../components/ChatBot/ChatBot";
+import { NoDataFineTuneIcon } from "../../components/Icons/noData/NoDataFineTuneIcon";
+import { SectionTitle } from "../../components/SectionTitle/SectionTitle";
+import { CurrentUser, permissions, User } from "../../services/appConfig";
+import { addTrainingDoc, customizeWidget, deleteTrainingData, fetchKnowledgebaseCrawlData, fetchKnowledgebaseCrawlDataForDocs, fetchKnowledgebaseDetails, fetcKnowledgebase, generateEmbeddings, getOfflineMessages, getTrainingData, getTrainingDataDetails, updateAdminEmail, updateDefaultAnswer, updateModelName, updatePrompt, updateWebsiteData } from "../../services/knowledgebaseService";
+import { getUserProfile } from "../../services/userServices";
+import { ChatBotCustomizeData, CustomDataPagination, DocsKnowledgeData, Knowledgebase, OfflineMessagePagination, ProductSetupData, TrainingData } from "../../types/knowledgebase.type";
 import { chatWidgetDefaultValues } from "../../utils/commonUtils";
+import { Paginator } from "../../widgets/Paginator/Paginator";
 import { AddTrainingData } from "../AddTrainingData/AddTrainingData";
 import { AddTrainingDataForm } from "../AddTrainingDataForm/AddTrainingDataForm";
-import { SectionTitle } from "../../components/SectionTitle/SectionTitle";
-import { CurrentUser, User } from "../../services/appConfig";
-import { ChatBotCustomizeData, TrainingData, OfflineMessagePagination, ChatSessionPagination, CustomDataPagination, ProductSetupData, DocsKnowledgeData, ChatSession, ChatSessionDetail } from "../../types/knowledgebase.type";
-import { OfflineMessagesNew } from "../OfflineMessages/OfflineMessagesNew";
+import { ChatBotProductSetup } from "../ChatBotProductSetup/ChatBotProductSetup";
+import { ChatBotsCustomize } from "../ChatBotsCustomize/ChatBotsCustomize";
 import { ChatSessionsNew } from "../ChatSessions/ChatSessionsNew";
-import { Paginator } from "../../widgets/Paginator/Paginator";
 import { CustomDomain } from "../CustomDomain/CustomDomain";
-import { useConfirmation } from "../../providers/providers";
-import { socket } from "../../socket";
+import Members from "../Members/Members";
+import { OfflineMessagesNew } from "../OfflineMessages/OfflineMessagesNew";
+import styles from "./EditChatbot.module.scss";
+
+
 export function validateEmailAddress(email: string) {
 	return email && !/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(email);
 }
@@ -74,7 +57,7 @@ type Steps =
 	| "chat-sessions"
 	| "offline-messages"
 	| "chatbot"
-	| "custom-domain";
+	| "custom-domain" | "members";
 
 interface MatchParams {
 	chatbotId: string;
@@ -88,25 +71,29 @@ const EditChatbot = (props: EditChatbotProps) => {
 	let history = useHistory();
 
 	const [user, setUser] = React.useState<User>(CurrentUser.get());
+	const [access, setAccess] = React.useState(permissions.get());
 	React.useEffect(() => {
 		async function fetchData() {
 			try {
-				const userData = CurrentUser.get();
-				setUser(userData);
+				if(!user._id) {
+					const response = await getUserProfile();
+					CurrentUser.set(response.data);
+					setUser(response.data);
+				}
 			} catch (error) {
 				console.log("Unable to fetch user ID", error);
 			} finally {
 			}
 		}
 		fetchData();
-	}, [])
+	}, [user._id])
 
 	const defaultStep = history.location.pathname.split('/').pop() as Steps
 
 	const [isSubmitting, setIsSubmitting] = React.useState<boolean>(false);
 	const [isUploadingDocs, setIsUploadingDocs] = React.useState<boolean>(false);
 	const [questionsToDelete, setQuestionsToDelete] = React.useState<string>('0');
-	const [chatBot, setChatbot] = React.useState({} as any);
+	const [chatBot, setChatbot] = React.useState<Knowledgebase>({} as Knowledgebase);
 	const [defaultCrauledData, setDefaultCrauledData] = React.useState<any>();
 
 
@@ -130,7 +117,7 @@ const EditChatbot = (props: EditChatbotProps) => {
 
 	const { isOpen: isDeleteDialogOpen, onOpen: onDeleteDialogOpen, onClose: onDeleteDialogClose } = useDisclosure();
 
-	const cancelRef = React.useRef()
+	const cancelRef = React.useRef<any>()
 
 
 	const [isChatLoading, setIsChatLoading] = React.useState<boolean>(false);
@@ -280,6 +267,12 @@ const EditChatbot = (props: EditChatbotProps) => {
 	useEffect(() => {
 		async function fetchData() {
 			try {
+				const userData = CurrentUser.get();
+				if(!userData.email) {
+					const response = await getUserProfile();
+					CurrentUser.set(response.data);
+					setUser(response.data);
+				}
 				const response = await fetcKnowledgebase(props.match.params.chatbotId);
 				//generateEmbeddings(response.data._id);
 				const chatBotData = response.data;
@@ -293,6 +286,19 @@ const EditChatbot = (props: EditChatbotProps) => {
 					welcomeMessages: chatWidgetDefaultValues.welcomeMessages,
 					customCSS: chatWidgetDefaultValues.customCSS
 				}
+				const userRole = response.data.participants.find(access => access.id === CurrentUser.get()._id)?.role;
+				setAccess(prev => {
+					const values = {
+						...prev,
+						isAdmin: userRole === 'admin',
+						isEditor: userRole === 'editor',
+						isReader: userRole === 'reader',
+						isOwner:  CurrentUser.get()._id === response.data.owner
+					}
+					permissions.set(values)
+					return values
+				});
+				
 				if(chatBotData.status === 'EMBEDDING_ERROR' || chatBotData.status === 'CRAWL_ERROR') {
 					setIsEmbedError(true)
 					setPrimaryButtonLabel("Create chatbot")
@@ -363,7 +369,7 @@ const EditChatbot = (props: EditChatbotProps) => {
 		pages: 0,
 		results: [],
 	});
-
+console.log(permissions.get(), 'permissionspermissions')
 	const [isCustomDataLoading, setIsCustomDataLoading] = React.useState<boolean>(false);
 
 	const [selectedTrainingData, setSelectedTrainingData] = React.useState<TrainingData>(
@@ -788,6 +794,7 @@ const EditChatbot = (props: EditChatbotProps) => {
 			requiredFieldMsg: chatBot.chatWidgeData?.requiredFieldMsg || chatWidgetDefaultValues.requiredFieldMsg,
 			invalidEmailMsg: chatBot.chatWidgeData?.invalidEmailMsg || chatWidgetDefaultValues.invalidEmailMsg,
 			formSubmitBtnLabel: chatBot.chatWidgeData?.formSubmitBtnLabel || chatWidgetDefaultValues.formSubmitBtnLabel,
+			enableHumanChat: chatBot.chatWidgeData?.enableHumanChat || chatWidgetDefaultValues.enableHumanChat,
 			formSubmitBtnSubmittingText: chatBot.chatWidgeData?.formSubmitBtnSubmittingText || chatWidgetDefaultValues.formSubmitBtnSubmittingText,
 			formSubmitSuccessMsg: chatBot.chatWidgeData?.formSubmitSuccessMsg || chatWidgetDefaultValues.formSubmitSuccessMsg,
 			formSubmitErrorMsg: chatBot.chatWidgeData?.formSubmitErrorMsg || chatWidgetDefaultValues.formSubmitErrorMsg,
@@ -797,28 +804,10 @@ const EditChatbot = (props: EditChatbotProps) => {
 		};
 	}, [chatBot]);
 
-
-	const onChatEvent = React.useCallback((data: { msg: string; sessionId: string; sender: 'admin' }) => {
-        console.log(data.msg, 'received');
-    }, []);
-
-	useEffect(() => {
-		const onConnect = () => {
-			console.log('connected');
-		}
-		const onDisconnect = () => {
-			console.log('disconnected');
-		}
-		socket.on('connect', onConnect);
-		socket.on('disconnect', onDisconnect);
-		socket.on('admin_chat', onChatEvent);
-		return () => {
-			console.log('unmounting');
-			socket.off('connect', onConnect);
-			socket.off('disconnect', onDisconnect);
-			socket.off('admin_chat', onChatEvent);
-		};
-	}, [onChatEvent]);
+	const getChatSessionsComponent = React.useCallback(() => {
+		if(!user._id) return null;
+		return <ChatSessionsNew userId={user._id as unknown as string} chatbotId={props.match.params.chatbotId}  />
+	}, [props.match.params.chatbotId, user._id])
 
 
 	const getMainComponent = React.useCallback(() => {
@@ -837,7 +826,7 @@ const EditChatbot = (props: EditChatbotProps) => {
 		}
 		return (
 			<>
-				<Flex
+				{access.isAdmin || access.isEditor ? <Flex
 					h="100%"
 					direction="column"
 					style={{
@@ -869,8 +858,8 @@ const EditChatbot = (props: EditChatbotProps) => {
 							handleChatbotUpdate(formValues)
 						}}
 					/>
-				</Flex>
-				<Flex
+				</Flex> : null}
+				{access.isAdmin || access.isEditor ?<Flex
 					h="100%"
 					direction="column"
 					style={{
@@ -914,8 +903,8 @@ const EditChatbot = (props: EditChatbotProps) => {
                         />
                     }
 					
-				</Flex>
-				<Flex
+				</Flex>: null}
+				{access.isAdmin || access.isEditor ?<Flex
 					direction="column"
 					style={{
 						display: currentStep === "add-to-site" ? "flex" : "none",
@@ -926,8 +915,8 @@ const EditChatbot = (props: EditChatbotProps) => {
 					<Flex direction="column" alignItems="start">
 						{getAddToWebsiteContent()}
 					</Flex>
-				</Flex>
-				<Flex
+				</Flex>: null}
+				{access.isAdmin || access.isEditor ?<Flex
 					direction="column"
 					style={{
 						display: currentStep === "train-custom-data" ? "flex" : "none",
@@ -945,7 +934,7 @@ const EditChatbot = (props: EditChatbotProps) => {
 					<Flex w="100%" className={styles.trainingDataCont}>
 						{getCustomDataComponent()}
 					</Flex>
-				</Flex>
+				</Flex>: null}
 				{currentStep === "chat-sessions" ? <Flex
 					direction="column"
 					style={{
@@ -956,7 +945,7 @@ const EditChatbot = (props: EditChatbotProps) => {
 				>
 					<SectionTitle title="Chat sessions" description="All the chat sessions with your customers." />
 					<Flex w="100%" className={styles.trainingDataCont}>
-						{ <ChatSessionsNew chatbotId={props.match.params.chatbotId}  />}
+						{ getChatSessionsComponent() }
 					</Flex>
 				</Flex> : null}
 				<Flex
@@ -972,7 +961,34 @@ const EditChatbot = (props: EditChatbotProps) => {
 						description="Access the chatbot from your domain"
 					/>
 						{chatBot._id? <CustomDomain defaultCustomDomain={chatBot.customDomain} chatBotId={chatBot._id}></CustomDomain>: null}
-					</Flex>
+				</Flex>
+				{access.isOwner ? <Flex
+					direction="column"
+					style={{
+						display: currentStep === 'members' ? 'flex' : 'none',
+					}}
+					h="100%"
+					overflow="auto"
+				>
+					<SectionTitle
+						title="Members"
+						description="Manage who has access to this chatbot"
+					/>
+					{chatBot._id ? <Members
+						onDeleteParticipant={(id) => {
+							const participants = chatBot.participants.filter(item => item.id !== id);
+							setChatbot(prev => ({ ...prev, participants }));
+						}}
+						onAddParticipant={(participant: any) => {
+							setChatbot(prev => ({
+								...prev,
+								participants: [participant, ...prev.participants.filter(item => item.email !== participant.email)]
+							}));
+						}}
+						participants={chatBot.participants}
+						chatBotId={chatBot._id}
+					/> : null}
+				</Flex> : null}
 				<Flex
 					direction="column"
 					style={{
@@ -986,7 +1002,7 @@ const EditChatbot = (props: EditChatbotProps) => {
 						{offlineMessages && offlineMessages.results && <OfflineMessagesNew isChatListLoading={isChatLoading} onPageChange={handleOfflinePageClick} chatSessionsPage={offlineMessages} />}
 					</Flex>
 				</Flex>
-				<Flex
+				{access.isAdmin || access.isEditor ?<Flex
 					direction="column"
 					style={{
 						display: currentStep === "chatbot" ? "flex" : "none",
@@ -1043,10 +1059,10 @@ const EditChatbot = (props: EditChatbotProps) => {
 							</Flex>
 						</Box>
 					</HStack>
-				</Flex>
+				</Flex> : null}
 			</>
 		);
-	}, [chatBot._id, chatBot.websiteData?.websiteUrl, chatBot.customDomain, chatBot.chatWidgeData, currentStep, getCrawlDataPagination, getDocsDataPagination, getExcludedPaths, getIncludedPaths, handleTabChange, defaultCrauledData, isSubmitting, isUploadingDocs, docsDataLoading, docsData, crawlDataLoading, productSetupLoadingText, primaryButtonLabel, getDefaultCustomizationValues, getAddToWebsiteContent, props.match.params.chatbotId, handleTrainingDataSave, getCustomDataComponent, isChatLoading, offlineMessages, handleOfflinePageClick, history, handleChatbotUpdate, toast, goToStep]);
+	}, [chatBot._id, chatBot.websiteData?.websiteUrl, chatBot.customDomain, chatBot.participants, chatBot.chatWidgeData, access.isAdmin, access.isEditor, access.isOwner, currentStep, getCrawlDataPagination, getDocsDataPagination, getExcludedPaths, getIncludedPaths, handleTabChange, defaultCrauledData, isSubmitting, isUploadingDocs, docsDataLoading, docsData, crawlDataLoading, productSetupLoadingText, primaryButtonLabel, getDefaultCustomizationValues, user?.subscriptionData?.name, getAddToWebsiteContent, props.match.params.chatbotId, handleTrainingDataSave, getCustomDataComponent, getChatSessionsComponent, offlineMessages, isChatLoading, handleOfflinePageClick, history, handleChatbotUpdate, toast, goToStep]);
 
 	const getEmbedErrorComponent = React.useCallback(() => {
 		if(!isEmbedError) return null;
@@ -1061,7 +1077,7 @@ const EditChatbot = (props: EditChatbotProps) => {
 			<Flex shrink={0} alignItems="center" w="100%" justifyContent="start" h="48px" bg="blue.500" color="white" pl="5">
 				<Link to="/app/chat-bots/">
 					<Flex alignItems="center">
-						<svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+						<svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" className="css-i6dzq1"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
 						<Heading ml="2" color="white" fontSize="14" fontWeight="400">Chatbots</Heading>
 					</Flex>
 				</Link>
@@ -1084,7 +1100,7 @@ const EditChatbot = (props: EditChatbotProps) => {
 					>
 						<Box className={styles.title}>{chatBot.name}</Box>
 						<List spacing={2}>
-							<ListItem
+							{access.isAdmin || access.isEditor ? <ListItem
 								display="flex"
 								alignItems="center"
 								fontSize="md"
@@ -1099,8 +1115,8 @@ const EditChatbot = (props: EditChatbotProps) => {
 								</svg>
 
 								Data sources
-							</ListItem>
-							<ListItem
+							</ListItem> : null}
+							{access.isAdmin || access.isEditor ?<ListItem
 								display="flex"
 								alignItems="center"
 								fontSize="md"
@@ -1115,7 +1131,7 @@ const EditChatbot = (props: EditChatbotProps) => {
 								</svg>
 
 								Train Custom Data
-							</ListItem>
+							</ListItem>: null}
 							<ListItem
 								display="flex"
 								alignItems="center"
@@ -1150,7 +1166,7 @@ const EditChatbot = (props: EditChatbotProps) => {
 								Offline messages
 							</ListItem>
 							{/* You can also use custom icons from react-icons */}
-							<ListItem
+							{access.isAdmin || access.isEditor ?<ListItem
 								display="flex"
 								alignItems="center"
 								fontSize="md"
@@ -1168,8 +1184,8 @@ const EditChatbot = (props: EditChatbotProps) => {
 								</svg>
 
 								Customize
-							</ListItem>
-							<ListItem
+							</ListItem>: null}
+							{access.isAdmin || access.isEditor ?<ListItem
 								display="flex"
 								alignItems="center"
 								fontSize="md"
@@ -1185,8 +1201,8 @@ const EditChatbot = (props: EditChatbotProps) => {
 
 
 								Add to site
-							</ListItem>
-							<ListItem
+							</ListItem>: null}
+							{access.isAdmin || access.isEditor ? <ListItem
 								display="flex"
 								alignItems="center"
 								fontSize="md"
@@ -1201,8 +1217,8 @@ const EditChatbot = (props: EditChatbotProps) => {
 								</svg>
 
 								Try ChatBot
-							</ListItem>
-							<ListItem
+							</ListItem> : null}
+							{access.isAdmin || access.isEditor ?<ListItem
 								display="flex"
 								alignItems="center"
 								fontSize="md"
@@ -1218,7 +1234,23 @@ const EditChatbot = (props: EditChatbotProps) => {
 
 
 								Custom domain
-							</ListItem>
+							</ListItem>: null}
+							{access.isOwner ? <ListItem
+								display="flex"
+								alignItems="center"
+								fontSize="md"
+								cursor="pointer"
+								onClick={() => {
+									goToStep("members");
+								}}
+								className={currentStep === "members" ? styles.active : ""}
+							>
+								<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+									<path d="M22 21V19C22 17.1362 20.7252 15.5701 19 15.126M15.5 3.29076C16.9659 3.88415 18 5.32131 18 7C18 8.67869 16.9659 10.1159 15.5 10.7092M17 21C17 19.1362 17 18.2044 16.6955 17.4693C16.2895 16.4892 15.5108 15.7105 14.5307 15.3045C13.7956 15 12.8638 15 11 15H8C6.13623 15 5.20435 15 4.46927 15.3045C3.48915 15.7105 2.71046 16.4892 2.30448 17.4693C2 18.2044 2 19.1362 2 21M13.5 7C13.5 9.20914 11.7091 11 9.5 11C7.29086 11 5.5 9.20914 5.5 7C5.5 4.79086 7.29086 3 9.5 3C11.7091 3 13.5 4.79086 13.5 7Z" stroke="currentcolor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+								</svg>
+
+								Members
+							</ListItem> : null}
 						</List>
 					</Box>
 					<Box

@@ -9,6 +9,8 @@ import { JwtStrategy } from './strategies/jwt.strategy';
 import { LocalStrategy } from './strategies/local.strategy';
 import { EmailModule } from '../common/email/email.module';
 import { KnowledgebaseModule } from '../knowledgebase/knowledgebase.module';
+import { ApikeyStrategy } from './strategies/apikey.strategy';
+
 @Module({
   imports: [
     UserModule,
@@ -24,6 +26,6 @@ import { KnowledgebaseModule } from '../knowledgebase/knowledgebase.module';
     KnowledgebaseModule,
   ],
   controllers: [AuthController],
-  providers: [AuthService, LocalStrategy, JwtStrategy],
+  providers: [AuthService, LocalStrategy, JwtStrategy, ApikeyStrategy],
 })
-export class AuthModule {}
+export class AuthModule { }

@@ -26,8 +26,9 @@ export enum Subscription {
 
 export interface UserMonthlyUsage {
   month: string;
-  count: number;
+  count: number; // Total token count (considering model used)
   msgCount: number;
+  rawTokenCount: number; // Token count (not considering model used)
 }
 
 export interface SubscriptionData {
@@ -46,6 +47,13 @@ export interface WebhookData {
   id: ObjectId;
   url: string;
   secret?: string;
+}
+
+export interface ApikeyData {
+  id: ObjectId;
+  apiKey: string;
+  name?: string;
+  createdAt: Date;
 }
 
 export interface User {
@@ -73,6 +81,8 @@ export interface User {
     secret: string;
   };
   webhooks?: WebhookData[];
+  // API keys
+  apiKeys?: ApikeyData[];
   createdAt: Date;
   updatedAt: Date;
   lastLogin?: Date;

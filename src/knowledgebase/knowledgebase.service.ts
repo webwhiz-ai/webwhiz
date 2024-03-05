@@ -24,6 +24,7 @@ import {
 import {
   CustomKeyData,
   DataStoreType,
+  EmbeddingModel,
   Knowledgebase,
   KnowledgebaseStatus,
   ParticipantsData,
@@ -161,6 +162,7 @@ export class KnowledgebaseService {
     const participantsData: ParticipantsData = {
       id: user._id,
       role: UserRoles.ADMIN,
+      email: user.email,
     };
     // Create a new Kb in db
     const ts = new Date();
@@ -172,6 +174,7 @@ export class KnowledgebaseService {
       websiteData,
       createdAt: ts,
       updatedAt: ts,
+      embeddingModel: EmbeddingModel.OPENAI_EMBEDDING_3,
     };
     const kbData = await this.kbDbService.insertKnowledgebase(kb);
 
@@ -523,7 +526,7 @@ export class KnowledgebaseService {
   ) {
     const kbId = new ObjectId(id);
     const kb = await this.kbDbService.getKnowledgebaseSparseById(kbId);
-    checkUserPermissionForKb(user, kb, [UserPermissions.DELETE]);
+    checkUserPermissionForKb(user, kb, [UserPermissions.EDIT]);
 
     await this.kbDbService.updateKnowledgebase(kbId, { adminEmail: email });
   }
@@ -604,7 +607,7 @@ export class KnowledgebaseService {
 
     if (kb.participants && Array.isArray(kb.participants)) {
       updatedParticipants = kb.participants.map((owner) => {
-        if (owner.id === userId.toString()) {
+        if (owner.id.toString() === userId.toString()) {
           // Update the existing invitation for the user
           return {
             id: userId,

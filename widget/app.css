@@ -861,16 +861,22 @@ span.form-required {
 }
 
 .chat-sample-messages {
-    padding: 5px 10px;
-    margin-right: -5px;
-    margin-bottom: -5px;
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
 }
 
+.chat-options {
+    display: flex;
+    align-items: center;
+    padding: 5px 10px;
+    margin-right: -5px;
+    margin-bottom: -5px;
+}
+
 .chat-sample-message, 
-.chat-with-human {
+.chat-with-human, 
+.chat-with-bot {
     font-size: 12px;
     border-radius: 6px;
     border: 1px solid rgba(0, 0, 0, 0.12);

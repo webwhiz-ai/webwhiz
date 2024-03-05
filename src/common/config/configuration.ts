@@ -20,6 +20,9 @@ interface AppConfig {
   docStorageLocation: string;
   textractServiceUrl: string;
   defaultSubscription: Subscription;
+  senderEmail: string;
+  senderName: string;
+  clientUrl: string;
 }
 
 const config = (): AppConfig => ({
@@ -46,6 +49,9 @@ const config = (): AppConfig => ({
     process.env.TEXTRACT_URL || 'http://localhost:8080/textract',
   defaultSubscription:
     Subscription[process.env.DEFAULT_SUBSCRIPTION] || Subscription.FREE,
+  senderEmail: process.env.EMAIL_SENDER_EMAIL || 'hi@webwhiz.ai',
+  senderName: process.env.EMAIL_SENDER_NAME || 'WebWhiz.ai',
+  clientUrl: process.env.CLIENT_URL || 'https://app.webwhiz.ai',
 });
 
 export { AppConfig };

@@ -1,7 +1,7 @@
 import React, { HTMLAttributes } from 'react';
 interface IconProps extends HTMLAttributes<SVGElement> {
-	width?: number;
-	height?: number;
+	width?: number | string;
+	height?: number | string;
 }
 export const NoDataFineTuneIcon = ({
 	width = 200,
