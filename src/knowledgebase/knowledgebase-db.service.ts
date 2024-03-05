@@ -570,8 +570,7 @@ export class KnowledgebaseDbService {
       updatedAt: 1,
       userData: 1,
       isUnread: 1,
-      firstMessage: { $first: '$messages' },
-      firstMessage: { $last: '$messages' },
+      firstMessage: { $first: '$messages' }
     };
 
     const filter = {
