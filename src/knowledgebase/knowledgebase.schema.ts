@@ -25,6 +25,11 @@ export enum UserRoles {
   READER = 'reader',
 }
 
+export enum EmbeddingModel {
+  'OPENAI_EMBEDDING_2' = 'text-embedding-ada-002',
+  'OPENAI_EMBEDDING_3' = 'text-embedding-3-small',
+}
+
 export interface CustomKeyData {
   useOwnKey: boolean;
   keys?: string[];
@@ -64,6 +69,7 @@ export interface Knowledgebase {
   prompt?: string;
   // Custom domain
   customDomain?: string;
+  embeddingModel?: EmbeddingModel;
 }
 
 export type KnowledgebaseSparse = Pick<
@@ -198,6 +204,7 @@ export interface ChatSession {
   userData?: any;
   startedAt: Date;
   updatedAt: Date;
+  embeddingModel?: EmbeddingModel;
 }
 export type ChatSessionSparse = Pick<
   ChatSession,

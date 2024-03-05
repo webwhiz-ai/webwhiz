@@ -106,6 +106,7 @@ export class DataStoreService {
         dsItem.knowledgebaseId,
         chunk,
         user.customKeys,
+        kb.embeddingModel,
       );
       console.log(`Added embedding for ${chunk.title}`);
     }
