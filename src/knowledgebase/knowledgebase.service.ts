@@ -722,7 +722,7 @@ export class KnowledgebaseService {
     const kb = await this.kbDbService.getKnowledgebaseSparseById(kbId);
     checkUserPermissionForKb(user, kb, [UserPermissions.DELETE_USER]);
 
-    if (id == kb.owner.toString()) {
+    if (userId === kb.owner.toString()) {
       throw new HttpException(
         "Sorry, you can't delete the owner of this knowledgebase!",
         HttpStatus.NOT_FOUND,
