@@ -24,6 +24,7 @@ import {
 	Link,
 	RouteComponentProps,
 	useHistory,
+	useLocation,
 	withRouter
 } from "react-router-dom";
 import { ChatBot } from "../../components/ChatBot/ChatBot";
@@ -70,6 +71,10 @@ export type EditChatbotProps = RouteComponentProps<MatchParams>;
 const EditChatbot = (props: EditChatbotProps) => {
 	const toast = useToast();
 	let history = useHistory();
+
+	const location = useLocation();
+	const queryParams = new URLSearchParams(location.search);
+	const shouldActivateInviteMembers = queryParams.get('inviteMembers') === 'true';
 
 	const [user, setUser] = React.useState<User>(CurrentUser.get());
 	const [access, setAccess] = React.useState(permissions.get());
@@ -1254,7 +1259,7 @@ console.log(permissions.get(), 'permissionspermissions')
 
 								Custom domain
 							</ListItem>: null}
-							{access.isOwner ? <ListItem
+							{access.isOwner && shouldActivateInviteMembers ? <ListItem
 								display="flex"
 								alignItems="center"
 								fontSize="md"
