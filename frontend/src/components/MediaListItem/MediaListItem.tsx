@@ -27,7 +27,7 @@ import styles from './MediaListItem.module.scss';
 import { useEffect, useState, useRef } from 'react';
 import { DefaultMediaImage } from '../DefaultMediaImage/DefaultMediaImage';
 import { PermissionsType, CurrentUser, User } from '../../services/appConfig';
-import { InviteUserParams, getUserProfile } from '../../services/userServices';
+import { InviteUserParams } from '../../services/userServices';
 
 interface MediaListItemProps extends BoxProps {
 	imageUrl: string;
@@ -56,16 +56,15 @@ export const MediaListItem = ({ ownerId, participants, onMenuItemClick, showWarn
 	React.useEffect(() => {
 		async function fetchData() {
 			try {
-				const response = await getUserProfile();
-				CurrentUser.set(response.data);
-				setUser(response.data);
+				const userData = CurrentUser.get();
+				setUser(userData);
 				const userRole = participants?.find(
-					(access) => access?.id === CurrentUser.get()._id,
+					(access) => access?.id === userData._id,
 				)?.role;
 				setAccess({isAdmin: userRole === 'admin',
 					isEditor: userRole === 'editor',
 					isReader: userRole === 'reader',
-					isOwner: CurrentUser.get()._id === ownerId,
+					isOwner: userData._id === ownerId,
 				});
 			} catch (error) {
 				console.log('Unable to fetch user ID', error);
