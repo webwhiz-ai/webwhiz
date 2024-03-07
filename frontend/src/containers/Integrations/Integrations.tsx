@@ -32,8 +32,7 @@ const Integrations = ({ chatbotId }: IntegrationsProps) => {
             <Text fontSize="sm" color="gray.600">
               Connect your WebWhiz chatbot to your Slack workspace,
               enabling direct access right from within
-              Slack. Streamline communication and boost productivity
-              without leaving your favorite collaboration tool.
+              Slack.
             </Text>
             <Button
               variant="solid"
