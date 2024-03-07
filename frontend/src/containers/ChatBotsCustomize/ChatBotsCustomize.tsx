@@ -533,7 +533,9 @@ export const ChatBotsCustomize = ({
 																	<Flex justifyContent="space-between" w="100%" alignItems="center">
 
 																		<FormLabel fontWeight="400" fontSize="sm" color="gray.700" htmlFor="enableHumanChat">
-																			Enable human chat
+																			Enable human chat <Badge ml="8px" variant='outline' colorScheme='yellow'>
+											Beta
+										</Badge>
 																		</FormLabel>
 																		<Switch
 																			{...field}
