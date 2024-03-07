@@ -154,7 +154,7 @@ export const ChatSessionsNew = ({ chatbotId, userId }: ChatSessionsProps) => {
                 data?.sessionId !== chatData?._id && !chatSession.isUnread && updateChatSessionReadStatus(chatSession?._id, true, false)
                 chatSession.isUnread = true
                 chatSession.updatedAt = new Date().toString()
-                chatSession.firstMessage = data;
+                chatSession.latestMessage = data;
             } else return prev
             return {
                 ...prev, results: [chatSession, ...prev?.results.filter(item => item._id !== data.sessionId) || []]
@@ -196,7 +196,7 @@ export const ChatSessionsNew = ({ chatbotId, userId }: ChatSessionsProps) => {
             if (chatSession) {
                 chatSession.isUnread = true
                 chatSession.updatedAt = new Date().toString()
-                chatSession.firstMessage = data;
+                chatSession.latestMessage = data;
             }
             return {
                 ...prev, results: [...prev?.results || []]

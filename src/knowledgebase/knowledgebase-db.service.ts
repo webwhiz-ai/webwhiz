@@ -579,14 +579,14 @@ export class KnowledgebaseDbService {
   ) {
     const itemsPerPage = Math.min(pageSize, 50);
 
-    // TODO: remove firstMessage if not required
     const projectionFields = {
       _id: 1,
       startedAt: 1,
       updatedAt: 1,
       userData: 1,
       isUnread: 1,
-      firstMessage: { $first: '$messages' }
+      firstMessage: { $first: '$messages' },
+      latestMessage: { $last: '$messages' },
     };
 
     const filter = {

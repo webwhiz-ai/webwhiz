@@ -357,6 +357,11 @@
             chatMessages.innerHTML = '';
             sessionId = '';
             messages = [];
+            isManualChat = false;
+            if (enableHumanChat) {
+                chatWithHumanButton.style.display = 'block';
+                chatWithBotButton.style.display = 'none';
+            }
             notifyClearHistory();
         });
 
@@ -919,16 +924,19 @@
 
 
             if (isManualChat) {
-                if(sessionId) {
-                    const msgData = { 'sender': 'user', 'msg': message,  id: uuidv4(), 'sessionId': sessionId }
-                    // send message to admin
-                    socketData.emit('user_chat', msgData);
-                    console.log('message sent:', msgData, 'socketData:', socketData);
-                    messages.push(newMessageUser);
-                    notifyNewMessage([newMessageUser])
-                } else {
-                    console.log('sessionId not found');
+                if(!sessionId) {
+                    sessionId = await createSession({
+                        userAgent: getUserAgent(),
+                        origin: origin
+                    });
+                    notifyNewSession(sessionId);
                 }
+                const msgData = { 'sender': 'user', 'msg': message,  id: uuidv4(), 'sessionId': sessionId }
+                // send message to admin
+                socketData.emit('user_chat', msgData);
+                console.log('message sent:', msgData, 'socketData:', socketData);
+                messages.push(newMessageUser);
+                notifyNewMessage([newMessageUser])
                 return;
             }
             if (STREAM_RESPONSE) {
