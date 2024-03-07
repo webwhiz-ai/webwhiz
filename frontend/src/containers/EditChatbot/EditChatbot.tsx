@@ -40,6 +40,7 @@ import { ChatBotProductSetup } from "../ChatBotProductSetup/ChatBotProductSetup"
 import { ChatBotsCustomize } from "../ChatBotsCustomize/ChatBotsCustomize";
 import { ChatSessionsNew } from "../ChatSessions/ChatSessionsNew";
 import { CustomDomain } from "../CustomDomain/CustomDomain";
+import Integrations from "../Integrations/Integrations";
 import Members from "../Members/Members";
 import { OfflineMessagesNew } from "../OfflineMessages/OfflineMessagesNew";
 import styles from "./EditChatbot.module.scss";
@@ -57,7 +58,8 @@ type Steps =
 	| "chat-sessions"
 	| "offline-messages"
 	| "chatbot"
-	| "custom-domain" | "members";
+	| "custom-domain" | "members"
+	| "integrations";
 
 interface MatchParams {
 	chatbotId: string;
@@ -962,6 +964,20 @@ console.log(permissions.get(), 'permissionspermissions')
 					/>
 						{chatBot._id? <CustomDomain defaultCustomDomain={chatBot.customDomain} chatBotId={chatBot._id}></CustomDomain>: null}
 				</Flex>
+				<Flex
+					direction="column"
+					style={{
+						display: currentStep === 'integrations' ? 'flex' : 'none',
+					}}
+					h="100%"
+					overflow="auto"
+				>
+				<SectionTitle
+					title="Integrations"
+					description="Expand your chatbot's capabilities by seamlessly integrating with popular tools and platforms."
+				/>
+				{chatBot._id ? <Integrations chatbotId={chatBot._id} /> : null}
+				</Flex>
 				{access.isOwner ? <Flex
 					direction="column"
 					style={{
@@ -1250,6 +1266,29 @@ console.log(permissions.get(), 'permissionspermissions')
 								</svg>
 
 								Members
+							</ListItem> : null}
+
+							{access.isAdmin || access.isEditor ? <ListItem
+								display="flex"
+								alignItems="center"
+								fontSize="md"
+								cursor="pointer"
+								onClick={() => {
+									goToStep("integrations");
+								}}
+								className={currentStep === "integrations" ? styles.active : ""}
+							>
+								<svg
+									width="24"
+									height="24"
+									viewBox="0 0 24 24"
+									fill="none"
+									xmlns="http://www.w3.org/2000/svg"
+								>
+									<path d="M7.5 7H7C4.23858 7 2 9.23858 2 12C2 14.7614 4.23858 17 7 17H9C11.7614 17 14 14.7614 14 12M16.5 17H17C19.7614 17 22 14.7614 22 12C22 9.23858 19.7614 7 17 7H15C12.2386 7 10 9.23858 10 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+								</svg>
+
+								Integrations
 							</ListItem> : null}
 						</List>
 					</Box>
