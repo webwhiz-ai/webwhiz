@@ -6,6 +6,7 @@ import {
 	Flex,
 	Heading,
 	HStack,
+	Tooltip,
 	IconButton,
 	Image,
 	Menu,
@@ -102,6 +103,18 @@ export const MediaListItem = ({ ownerId, participants, onMenuItemClick, showWarn
 		onMenuItemClick && onMenuItemClick(type)
 	}, [onMenuItemClick])
 
+	const getTooltipText = () => {
+		if(access?.isAdmin) {
+			return 'This is an external chatbot. You have admin access.'
+		} else if(access?.isEditor) {
+			return 'This is an external chatbot. You have editor access.'
+		} else if(access?.isReader) {
+			return 'This is an external chatbot. You have reader access.'
+		}
+		return ''
+
+	}
+
 
 	return (
 		<>
@@ -144,7 +157,7 @@ export const MediaListItem = ({ ownerId, participants, onMenuItemClick, showWarn
 						}}>
 							{restProps.name}
 						</Heading>
-						{access ? <Badge
+						{!(access?.isOwner) ? <Tooltip label={getTooltipText()}><Badge
 							mr={'20px'}
 							px={'12px'}
 							fontSize="12px"
@@ -167,7 +180,7 @@ export const MediaListItem = ({ ownerId, participants, onMenuItemClick, showWarn
 								: access?.isEditor
 									? 'Editor'
 									: 'Reader'}
-						</Badge> : null}
+						</Badge></Tooltip>: null}
 						{restProps.description && <Text noOfLines={2} fontSize='sm' color='gray.500' dangerouslySetInnerHTML={{ __html: restProps.description }} >
 						</Text>}
 
