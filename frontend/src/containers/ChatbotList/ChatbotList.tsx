@@ -70,7 +70,9 @@ export const ChatbotList = () => {
 
 	const onMenuItemClick = React.useCallback(
 		async (type, chatbot) => {
-			if (type === "edit") {
+			if(type === 'view') {
+				history.push(`/app/edit-chatbot/${chatbot._id}/chat-sessions`);
+			} else if (type === "edit") {
 				history.push(`/app/edit-chatbot/${chatbot._id}/product-setup`);
 			} else if (type === "getCode") {
 				history.push(`/app/edit-chatbot/${chatbot._id}/add-to-site`);
@@ -239,9 +241,11 @@ export const ChatbotList = () => {
 		const chatbotListItems = chatbotsList?.map((chatbot) => {
 			return (
 				<MediaListItem
+					ownerId={chatbot.owner}
 					showCustomizeMenu
 					name={chatbot.name}
 					imageAlt={chatbot.name}
+					participants={chatbot.participants}
 					showGetCodeMenu
 					imageUrl={chatbot.imageUrl}
 					description={chatbot.description}

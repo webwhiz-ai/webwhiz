@@ -826,7 +826,7 @@ console.log(permissions.get(), 'permissionspermissions')
 		}
 		return (
 			<>
-				{access.isAdmin || access.isEditor ? <Flex
+				{access.isOwner || access.isAdmin || access.isEditor ? <Flex
 					h="100%"
 					direction="column"
 					style={{
@@ -859,7 +859,7 @@ console.log(permissions.get(), 'permissionspermissions')
 						}}
 					/>
 				</Flex> : null}
-				{access.isAdmin || access.isEditor ?<Flex
+				{access.isOwner || access.isAdmin || access.isEditor ?<Flex
 					h="100%"
 					direction="column"
 					style={{
@@ -904,7 +904,7 @@ console.log(permissions.get(), 'permissionspermissions')
                     }
 					
 				</Flex>: null}
-				{access.isAdmin || access.isEditor ?<Flex
+				{access.isOwner || access.isAdmin || access.isEditor ?<Flex
 					direction="column"
 					style={{
 						display: currentStep === "add-to-site" ? "flex" : "none",
@@ -916,7 +916,7 @@ console.log(permissions.get(), 'permissionspermissions')
 						{getAddToWebsiteContent()}
 					</Flex>
 				</Flex>: null}
-				{access.isAdmin || access.isEditor ?<Flex
+				{access.isOwner || access.isAdmin || access.isEditor ?<Flex
 					direction="column"
 					style={{
 						display: currentStep === "train-custom-data" ? "flex" : "none",
@@ -974,20 +974,38 @@ console.log(permissions.get(), 'permissionspermissions')
 						title="Members"
 						description="Manage who has access to this chatbot"
 					/>
-					{chatBot._id ? <Members
+				{chatBot._id ? (
+					<Members
 						onDeleteParticipant={(id) => {
-							const participants = chatBot.participants.filter(item => item.id !== id);
-							setChatbot(prev => ({ ...prev, participants }));
+						const participants = chatBot.participants.filter(
+							(item) => item.id !== id,
+						);
+						setChatbot((prev) => ({ ...prev, participants }));
 						}}
 						onAddParticipant={(participant: any) => {
-							setChatbot(prev => ({
-								...prev,
-								participants: [participant, ...prev.participants.filter(item => item.email !== participant.email)]
-							}));
+							setChatbot((prev) => {
+								if (participant.id) {
+									const updatedParticipants = prev.participants.map((item) => {
+										if (item.id === participant.id) {
+											return { ...item, role: participant.role };
+										}
+										return item;
+									});
+									return { ...prev, participants: updatedParticipants };
+								} else {
+									const newParticipants = [
+										participant,
+										...prev.participants.filter((item) => item.email !== participant.email),
+									];
+									return { ...prev, participants: newParticipants };
+								}
+							});
 						}}
 						participants={chatBot.participants}
 						chatBotId={chatBot._id}
-					/> : null}
+					/>
+					) : null}
+					
 				</Flex> : null}
 				<Flex
 					direction="column"
@@ -1002,7 +1020,7 @@ console.log(permissions.get(), 'permissionspermissions')
 						{offlineMessages && offlineMessages.results && <OfflineMessagesNew isChatListLoading={isChatLoading} onPageChange={handleOfflinePageClick} chatSessionsPage={offlineMessages} />}
 					</Flex>
 				</Flex>
-				{access.isAdmin || access.isEditor ?<Flex
+				{access.isOwner || access.isAdmin || access.isEditor ?<Flex
 					direction="column"
 					style={{
 						display: currentStep === "chatbot" ? "flex" : "none",
@@ -1100,7 +1118,7 @@ console.log(permissions.get(), 'permissionspermissions')
 					>
 						<Box className={styles.title}>{chatBot.name}</Box>
 						<List spacing={2}>
-							{access.isAdmin || access.isEditor ? <ListItem
+							{access.isOwner || access.isAdmin || access.isEditor ? <ListItem
 								display="flex"
 								alignItems="center"
 								fontSize="md"
@@ -1116,7 +1134,7 @@ console.log(permissions.get(), 'permissionspermissions')
 
 								Data sources
 							</ListItem> : null}
-							{access.isAdmin || access.isEditor ?<ListItem
+							{access.isOwner || access.isAdmin || access.isEditor ?<ListItem
 								display="flex"
 								alignItems="center"
 								fontSize="md"
@@ -1166,7 +1184,7 @@ console.log(permissions.get(), 'permissionspermissions')
 								Offline messages
 							</ListItem>
 							{/* You can also use custom icons from react-icons */}
-							{access.isAdmin || access.isEditor ?<ListItem
+							{access.isOwner || access.isAdmin || access.isEditor ?<ListItem
 								display="flex"
 								alignItems="center"
 								fontSize="md"
@@ -1185,7 +1203,7 @@ console.log(permissions.get(), 'permissionspermissions')
 
 								Customize
 							</ListItem>: null}
-							{access.isAdmin || access.isEditor ?<ListItem
+							{access.isOwner || access.isAdmin || access.isEditor ?<ListItem
 								display="flex"
 								alignItems="center"
 								fontSize="md"
@@ -1202,7 +1220,7 @@ console.log(permissions.get(), 'permissionspermissions')
 
 								Add to site
 							</ListItem>: null}
-							{access.isAdmin || access.isEditor ? <ListItem
+							{access.isOwner || access.isAdmin || access.isEditor ? <ListItem
 								display="flex"
 								alignItems="center"
 								fontSize="md"
@@ -1218,7 +1236,7 @@ console.log(permissions.get(), 'permissionspermissions')
 
 								Try ChatBot
 							</ListItem> : null}
-							{access.isAdmin || access.isEditor ?<ListItem
+							{access.isOwner || access.isAdmin || access.isEditor ?<ListItem
 								display="flex"
 								alignItems="center"
 								fontSize="md"
