@@ -18,13 +18,16 @@ import {
 	AlertDialogFooter,
 	AlertDialogHeader,
 	AlertDialogContent,
-	AlertDialogOverlay
+	AlertDialogOverlay,
+	Badge
 } from '@chakra-ui/react';
 import { FiMoreHorizontal } from "react-icons/fi"
 import styles from './MediaListItem.module.scss';
 
 import { useEffect, useState, useRef } from 'react';
 import { DefaultMediaImage } from '../DefaultMediaImage/DefaultMediaImage';
+import { PermissionsType, CurrentUser, User } from '../../services/appConfig';
+import { InviteUserParams } from '../../services/userServices';
 
 interface MediaListItemProps extends BoxProps {
 	imageUrl: string;
@@ -41,11 +44,38 @@ interface MediaListItemProps extends BoxProps {
 	onMenuItemClick?: (type: any) => void;
 	actionButtonLeftIcon?: React.ReactNode;
 	onActionButtonClick?: () => void;
+	participants?: InviteUserParams[]
+	ownerId: string
 }
 
-export const MediaListItem = ({ onMenuItemClick, showWarning, showPrimaryActionButton, isPrimaryButtonLoading, onPrimaryActionButtonClick, className, ...restProps }: MediaListItemProps) => {
+export const MediaListItem = ({ ownerId, participants, onMenuItemClick, showWarning, showPrimaryActionButton, isPrimaryButtonLoading, onPrimaryActionButtonClick, className, ...restProps }: MediaListItemProps) => {
 	const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 	const cancelRef = useRef(null);
+	const [user, setUser] = React.useState<User>(CurrentUser.get());
+	const [access, setAccess] = React.useState<PermissionsType>();
+	React.useEffect(() => {
+		async function fetchData() {
+			try {
+				const userData = CurrentUser.get();
+				setUser(userData);
+				const userRole = participants?.find(
+					(access) => access?.id === userData._id,
+				)?.role;
+				setAccess({isAdmin: userRole === 'admin',
+					isEditor: userRole === 'editor',
+					isReader: userRole === 'reader',
+					isOwner: userData._id === ownerId,
+				});
+			} catch (error) {
+				console.log('Unable to fetch user ID', error);
+			} finally {
+			}
+		}
+		fetchData();
+	}, [ownerId, participants, user._id]);
+
+
+
 	const handleDelete = () => {
 		setIsDeleteDialogOpen(true);
 	};
@@ -71,6 +101,8 @@ export const MediaListItem = ({ onMenuItemClick, showWarning, showPrimaryActionB
 	const onSelect = React.useCallback((type) => {
 		onMenuItemClick && onMenuItemClick(type)
 	}, [onMenuItemClick])
+
+
 	return (
 		<>
 			<HStack
@@ -103,15 +135,39 @@ export const MediaListItem = ({ onMenuItemClick, showWarning, showPrimaryActionB
 								alt={restProps.imageAlt}
 							/>
 						) : (
-							<DefaultMediaImage />
-						)}
+								<DefaultMediaImage />
+							)}
 					</Flex>
 					<Flex alignSelf='start' direction='column'>
 						<Heading cursor="pointer" mb='8px' fontSize='lg' onClick={() => {
-							onSelect('edit')
+							onSelect(access?.isAdmin || access?.isOwner || access?.isEditor ? 'edit' : 'view')
 						}}>
 							{restProps.name}
 						</Heading>
+						{access ? <Badge
+							mr={'20px'}
+							px={'12px'}
+							fontSize="12px"
+							textTransform={'capitalize'}
+							colorScheme={
+								access?.isOwner || access?.isAdmin
+									? 'green'
+									: access?.isEditor
+										? 'yellow'
+										: 'red'
+							}
+							w={'fit-content'}
+							h={'18px'}
+							fontWeight="500"
+							variant={'subtle'}
+							alignItems="center"
+						>
+							{access?.isOwner ? 'Owner' : access?.isAdmin
+								? 'Admin'
+								: access?.isEditor
+									? 'Editor'
+									: 'Reader'}
+						</Badge> : null}
 						{restProps.description && <Text noOfLines={2} fontSize='sm' color='gray.500' dangerouslySetInnerHTML={{ __html: restProps.description }} >
 						</Text>}
 
@@ -150,6 +206,8 @@ export const MediaListItem = ({ onMenuItemClick, showWarning, showPrimaryActionB
 								icon={<FiMoreHorizontal />}
 								color="gray.500"
 								variant='outline'
+								visibility={access?.isAdmin || access?.isOwner || access?.isEditor ? 'visible' : 'hidden'}
+								opacity={access?.isAdmin || access?.isOwner || access?.isEditor ? 1 : 0}
 							/>
 							<MenuList minW="140px">
 								<MenuItem fontSize="14" textAlign="right" fontWeight="medium" color="gray.600" onClick={() => {
