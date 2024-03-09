@@ -1294,7 +1294,7 @@ console.log(permissions.get(), 'permissionspermissions')
 										</Badge>
 							</ListItem> : null}
 
-							{access.isAdmin || access.isEditor ? <ListItem
+							{access.isOwner || access.isAdmin || access.isEditor ? <ListItem
 								display="flex"
 								alignItems="center"
 								fontSize="md"
