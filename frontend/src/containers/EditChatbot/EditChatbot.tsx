@@ -462,7 +462,7 @@ console.log(permissions.get(), 'permissionspermissions')
 
 	const goToStep = React.useCallback((step: Steps) => {
 		setCurrentStep(step);
-		history.push(`/app/edit-chatbot/${props.match.params.chatbotId}/${step}`)
+		history.push(`/app/edit-chatbot/${props.match.params.chatbotId}/${step}${shouldActivateInviteMembers ? '?inviteMembers=true' : ''}`);
 	}, []);
 
 	const handleTrainingDataSave = React.useCallback((values) => {
