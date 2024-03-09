@@ -100,7 +100,8 @@ def get_top_chunks_from_pg(
     cursor = pg.cursor()
     target_embedding_array = np.array(target_embedding)
     try:
-        cursor.execute('SELECT _id, (1 - (vector(embeddings) <=> vector(%s))) as similarity FROM kb_embeddings WHERE kb_embeddings.kbId = %s ORDER BY similarity DESC LIMIT %d', (target_embedding_array, knowledgebase_id, chunk_count))
+        query = 'SELECT _id, (1 - (vector(embeddings) <=> vector(%s))) as similarity FROM kb_embeddings WHERE kb_embeddings.kbId = %s ORDER BY similarity DESC LIMIT %s'
+        cursor.execute(query, (target_embedding_array, knowledgebase_id, chunk_count))
         result = cursor.fetchall()
         formatted_result = []
         for row in result:
