@@ -9,6 +9,7 @@ import {
 	AlertTitle, Box,
 	Button, Flex,
 	Heading,
+	Badge,
 	HStack,
 	IconButton, List,
 	ListItem,
@@ -23,6 +24,7 @@ import {
 	Link,
 	RouteComponentProps,
 	useHistory,
+	useLocation,
 	withRouter
 } from "react-router-dom";
 import { ChatBot } from "../../components/ChatBot/ChatBot";
@@ -40,6 +42,7 @@ import { ChatBotProductSetup } from "../ChatBotProductSetup/ChatBotProductSetup"
 import { ChatBotsCustomize } from "../ChatBotsCustomize/ChatBotsCustomize";
 import { ChatSessionsNew } from "../ChatSessions/ChatSessionsNew";
 import { CustomDomain } from "../CustomDomain/CustomDomain";
+import Integrations from "../Integrations/Integrations";
 import Members from "../Members/Members";
 import { OfflineMessagesNew } from "../OfflineMessages/OfflineMessagesNew";
 import styles from "./EditChatbot.module.scss";
@@ -57,7 +60,8 @@ type Steps =
 	| "chat-sessions"
 	| "offline-messages"
 	| "chatbot"
-	| "custom-domain" | "members";
+	| "custom-domain" | "members"
+	| "integrations";
 
 interface MatchParams {
 	chatbotId: string;
@@ -69,6 +73,10 @@ export type EditChatbotProps = RouteComponentProps<MatchParams>;
 const EditChatbot = (props: EditChatbotProps) => {
 	const toast = useToast();
 	let history = useHistory();
+
+	const location = useLocation();
+	const queryParams = new URLSearchParams(location.search);
+	const shouldActivateInviteMembers = queryParams.get('inviteMembers') === 'true';
 
 	const [user, setUser] = React.useState<User>(CurrentUser.get());
 	const [access, setAccess] = React.useState(permissions.get());
@@ -962,6 +970,20 @@ console.log(permissions.get(), 'permissionspermissions')
 					/>
 						{chatBot._id? <CustomDomain defaultCustomDomain={chatBot.customDomain} chatBotId={chatBot._id}></CustomDomain>: null}
 				</Flex>
+				<Flex
+					direction="column"
+					style={{
+						display: currentStep === 'integrations' ? 'flex' : 'none',
+					}}
+					h="100%"
+					overflow="auto"
+				>
+				<SectionTitle
+					title="Integrations"
+					description="Expand your chatbot's capabilities by seamlessly integrating with popular tools and platforms."
+				/>
+				{chatBot._id ? <Integrations chatbotId={chatBot._id} /> : null}
+				</Flex>
 				{access.isOwner ? <Flex
 					direction="column"
 					style={{
@@ -1253,7 +1275,7 @@ console.log(permissions.get(), 'permissionspermissions')
 
 								Custom domain
 							</ListItem>: null}
-							{access.isOwner ? <ListItem
+							{access.isOwner && shouldActivateInviteMembers ? <ListItem
 								display="flex"
 								alignItems="center"
 								fontSize="md"
@@ -1267,7 +1289,32 @@ console.log(permissions.get(), 'permissionspermissions')
 									<path d="M22 21V19C22 17.1362 20.7252 15.5701 19 15.126M15.5 3.29076C16.9659 3.88415 18 5.32131 18 7C18 8.67869 16.9659 10.1159 15.5 10.7092M17 21C17 19.1362 17 18.2044 16.6955 17.4693C16.2895 16.4892 15.5108 15.7105 14.5307 15.3045C13.7956 15 12.8638 15 11 15H8C6.13623 15 5.20435 15 4.46927 15.3045C3.48915 15.7105 2.71046 16.4892 2.30448 17.4693C2 18.2044 2 19.1362 2 21M13.5 7C13.5 9.20914 11.7091 11 9.5 11C7.29086 11 5.5 9.20914 5.5 7C5.5 4.79086 7.29086 3 9.5 3C11.7091 3 13.5 4.79086 13.5 7Z" stroke="currentcolor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
 								</svg>
 
-								Members
+								Members <Badge ml="8px" variant='outline' colorScheme='yellow'>
+											Beta
+										</Badge>
+							</ListItem> : null}
+
+							{access.isAdmin || access.isEditor ? <ListItem
+								display="flex"
+								alignItems="center"
+								fontSize="md"
+								cursor="pointer"
+								onClick={() => {
+									goToStep("integrations");
+								}}
+								className={currentStep === "integrations" ? styles.active : ""}
+							>
+								<svg
+									width="24"
+									height="24"
+									viewBox="0 0 24 24"
+									fill="none"
+									xmlns="http://www.w3.org/2000/svg"
+								>
+									<path d="M7.5 7H7C4.23858 7 2 9.23858 2 12C2 14.7614 4.23858 17 7 17H9C11.7614 17 14 14.7614 14 12M16.5 17H17C19.7614 17 22 14.7614 22 12C22 9.23858 19.7614 7 17 7H15C12.2386 7 10 9.23858 10 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+								</svg>
+
+								Integrations
 							</ListItem> : null}
 						</List>
 					</Box>

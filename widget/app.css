@@ -1053,3 +1053,13 @@ a.chat-source-btn {
 .offline-message.how-error-msg {
     overflow: hidden;
 }
+.switch-chat-btn {
+    display: flex;
+    align-items: center;
+}
+.switch-chat-btn svg {
+    width: 14px;
+    height: 14px;
+    margin-right: 5px;
+    color: #757575;
+}
