@@ -66,7 +66,7 @@ export class ChatbotService {
     @Inject(REDIS) private redis: Redis,
     @Inject(forwardRef(() => WebSocketChatGateway))
     private webSocketChatGateway: WebSocketChatGateway,
-  ) {}
+  ) { }
 
   private async putChatSessionDataToCache(sessionData: ChatSession) {
     return this.redis.set(
@@ -194,19 +194,22 @@ export class ChatbotService {
     );
 
     // We are sure that this function will be invoked only if the token
-    // limit is exeeded for the current month, so no need of verifying
+    // limit is exceeded for the current month, so no need of verifying
     // if the monthUsage.month is current month
 
-    const maxTokens = subscriptionPlan.maxTokens;
+    const maxMessages = subscriptionPlan.maxMessages;
 
     let emailSendFn: (email: string) => Promise<any>;
     let emailSendTaskName;
 
-    if (monthUsageData.monthUsage.count >= maxTokens) {
-      emailSendTaskName = `EMAIL_TOKEN_100_${userId}_${monthUsageData.monthUsage.month}`;
+    if (monthUsageData.monthUsage.weightedMsgCount >= maxMessages) {
+      emailSendTaskName = `EMAIL_MSG_100_${userId}_${monthUsageData.monthUsage.month}`;
       emailSendFn = this.emailService.sendToken100ExhaustedEmail;
-    } else if (monthUsageData.monthUsage.count >= 0.8 * maxTokens) {
-      emailSendTaskName = `EMAIL_TOKEN_80_${userId}_${monthUsageData.monthUsage.month}`;
+    } else if (
+      monthUsageData.monthUsage.weightedMsgCount >=
+      0.8 * maxMessages
+    ) {
+      emailSendTaskName = `EMAIL_MSG_80_${userId}_${monthUsageData.monthUsage.month}`;
       emailSendFn = this.emailService.sendToken80ExhaustedEmail;
     }
 
@@ -236,6 +239,13 @@ export class ChatbotService {
     });
   }
 
+  /**
+   * Checks if the user is under the usage limits.
+   * @param userId - The ID of the user.
+   * @param maxUsage - The maximum message count allowed per month.
+   * @param customKeys - Optional custom key data.
+   * @returns A Promise that resolves to a boolean indicating whether the user is under the usage limits.
+   */
   private async isUseUnderUsageLimits(
     userId: ObjectId,
     maxUsage: number,
@@ -264,13 +274,13 @@ export class ChatbotService {
       // If the last monthusage was reported for current month and year
       // check the usage count
       if (year === currYear && month === currMonth) {
-        if (monthUsageData.monthUsage.count >= 0.8 * maxUsage) {
+        if (monthUsageData.monthUsage.weightedMsgCount >= 0.8 * maxUsage) {
           // Trigger notification to user about token limit
           const client = this.celeryClient.get(CeleryClientQueue.CRAWLER);
           const task = client.createTask('tasks.notify_token_limit');
           await task.applyAsync([userId.toHexString()]);
         }
-        return monthUsageData.monthUsage.count < maxUsage;
+        return monthUsageData.monthUsage.weightedMsgCount < maxUsage;
       } else {
         // Else return true as this is the first call for current month
         return true;
@@ -294,10 +304,28 @@ export class ChatbotService {
       throw new HttpException('Invalid Session Id', HttpStatus.NOT_FOUND);
     }
 
+    // The maxMessages field is introduced newly and will not be available for old sessions. So,
+    // if the maxMessages field is not available, then we will fetch the subscription plan for the user
+    // and get the maxMessages from there. Then save it to the sessionData for future use.
+    let maxMessages = sessionData.subscriptionData.maxMessages;
+
+    if (!maxMessages) {
+      const user = await this.userService.findUserById(
+        sessionData.userId.toString(),
+      );
+      const subscriptionPlan = this.subPlanInfoService.getSubscriptionPlanInfo(
+        user.activeSubscription,
+      );
+
+      maxMessages = subscriptionPlan.maxMessages;
+      // update the sessionData with the maxMessages
+      sessionData.subscriptionData.maxMessages = maxMessages;
+    }
+
     // Check usage limits for user
     const allowUsage = await this.isUseUnderUsageLimits(
       sessionData.userId,
-      sessionData.subscriptionData.maxTokens,
+      sessionData.subscriptionData.maxMessages,
       sessionData.customKeys,
     );
     if (!allowUsage) {
@@ -421,10 +449,28 @@ export class ChatbotService {
       throw new HttpException('Invalid Session Id', HttpStatus.NOT_FOUND);
     }
 
+    // The maxMessages field is introduced newly and will not be available for old sessions. So,
+    // if the maxMessages field is not available, then we will fetch the subscription plan for the user
+    // and get the maxMessages from there. Then save it to the sessionData for future use.
+    let maxMessages = sessionData.subscriptionData.maxMessages;
+
+    if (!maxMessages) {
+      const user = await this.userService.findUserById(
+        sessionData.userId.toString(),
+      );
+      const subscriptionPlan = this.subPlanInfoService.getSubscriptionPlanInfo(
+        user.activeSubscription,
+      );
+
+      maxMessages = subscriptionPlan.maxMessages;
+      // update the sessionData with the maxMessages
+      sessionData.subscriptionData.maxMessages = maxMessages;
+    }
+
     // Check usage limits for user
     const allowUsage = await this.isUseUnderUsageLimits(
       sessionData.userId,
-      sessionData.subscriptionData.maxTokens,
+      sessionData.subscriptionData.maxMessages,
       sessionData.customKeys,
     );
     const kbId = sessionData.knowledgebaseId;
@@ -737,11 +783,11 @@ export class ChatbotService {
       data.query,
       data.context.map(
         (c) =>
-          ({
-            content: c,
-            score: 0.9,
-            url: 'http://test',
-          } as any),
+        ({
+          content: c,
+          score: 0.9,
+          url: 'http://test',
+        } as any),
       ),
       data.prevMessages as any,
       data.defaultAnswer,
