@@ -119,6 +119,12 @@ export class ChatbotService {
       session.model,
     );
 
+    const messageCount = totalTokens > 0 ? 1 : 0;
+    const weightedMsgCount =
+      messageCount > 0
+        ? this.calculateMsgCountBasedOnModel(messageCount, session.model)
+        : 0;
+
     return Promise.all([
       this.setChatSessionData(session),
       this.kbDbService.addMsgToChatSession(session._id, msg),
@@ -126,13 +132,33 @@ export class ChatbotService {
         session.userId,
         totalTokens,
         msg.qTokens + msg.aTokens,
+        weightedMsgCount,
       ),
       this.kbDbService.updateMonthlyUsageByN(
         session.knowledgebaseId,
         totalTokens,
         msg.qTokens + msg.aTokens,
+        weightedMsgCount,
       ),
     ]);
+  }
+
+  // TODO: Recheck the logic for calculating the message count based on the model
+  /**
+   * Calculates the message count based on the specified model.
+   * @param messageCount The number of messages.
+   * @param model The model to calculate the message count for.
+   * @returns The calculated message count.
+   */
+  calculateMsgCountBasedOnModel(messageCount: number, model: string) {
+    switch (model) {
+      case 'gpt-4-0613': // GPT-4
+        return messageCount * 60;
+      case 'gpt-4-turbo-preview': // GPT-4-Turbo
+        return messageCount * 20;
+      default:
+        return messageCount;
+    }
   }
 
   private async updateSessionDataWithNewManualMsg(
