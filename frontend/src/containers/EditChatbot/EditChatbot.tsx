@@ -80,22 +80,6 @@ const EditChatbot = (props: EditChatbotProps) => {
 
 	const [user, setUser] = React.useState<User>(CurrentUser.get());
 	const [access, setAccess] = React.useState(permissions.get());
-	React.useEffect(() => {
-		async function fetchData() {
-			try {
-				if(!user._id) {
-					const response = await getUserProfile();
-					CurrentUser.set(response.data);
-					setUser(response.data);
-				}
-			} catch (error) {
-				console.log("Unable to fetch user ID", error);
-			} finally {
-			}
-		}
-		fetchData();
-	}, [user._id])
-
 	const defaultStep = history.location.pathname.split('/').pop() as Steps
 
 	const [isSubmitting, setIsSubmitting] = React.useState<boolean>(false);
@@ -886,12 +870,23 @@ console.log(permissions.get(), 'permissionspermissions')
 														onNextClick={async (formData: ChatBotCustomizeData) => {
 															try {
 																setIsSubmitting(true)
-																await Promise.all([
-																	updateModelName(chatBot._id, formData.model || ''),
-																	updatePrompt(chatBot._id, formData.prompt || ''),
-																	updateDefaultAnswer(chatBot._id, formData.defaultAnswer || ''),
-																	updateAdminEmail(chatBot._id, formData.adminEmail || '')
-																]);
+																let updatePromiseList = [];
+																
+																// Limit Change model only for paid users
+																if (user.activeSubscription !== 'FREE' && formData.model !== chatBot.model) {
+																	updatePromiseList.push(updateModelName(chatBot._id, formData.model));
+																}
+																if (formData.prompt !== chatBot.prompt) {
+																	updatePromiseList.push(updatePrompt(chatBot._id, formData.prompt || ''));
+																}
+																if (formData.defaultAnswer !== chatBot.defaultAnswer) {
+																	updatePromiseList.push(updateDefaultAnswer(chatBot._id, formData.defaultAnswer || ''));
+																}
+																if (formData.adminEmail !== chatBot.adminEmail) {
+																	updatePromiseList.push(updateAdminEmail(chatBot._id, formData.adminEmail));
+																}
+
+																await Promise.all(updatePromiseList);
 																await customizeWidget(chatBot._id, formData);
 																toast({
 																	title: `Chatbot customizations have been updated successfully`,
@@ -1294,7 +1289,7 @@ console.log(permissions.get(), 'permissionspermissions')
 										</Badge>
 							</ListItem> : null}
 
-							{access.isAdmin || access.isEditor ? <ListItem
+							{access.isOwner || access.isAdmin || access.isEditor ? <ListItem
 								display="flex"
 								alignItems="center"
 								fontSize="md"

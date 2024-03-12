@@ -37,7 +37,7 @@ export const ChatListItem = ({ chatSessionData, isSelected, onSelectChat, update
             borderRightColor={isSelected ? "blue.500" : "transparent"}
             onClick={() => !isSelected && onSelectChat(chatSessionData)}
         >
-            {permissions.get().isAdmin || permissions.get().isEditor ? <Menu>
+            {permissions.get().isOwner || permissions.get().isAdmin || permissions.get().isEditor ? <Menu>
                 <MenuButton
                     as={IconButton}
                     aria-label='Options'
