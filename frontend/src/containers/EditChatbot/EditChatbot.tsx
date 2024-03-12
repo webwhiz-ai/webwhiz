@@ -886,12 +886,23 @@ console.log(permissions.get(), 'permissionspermissions')
 														onNextClick={async (formData: ChatBotCustomizeData) => {
 															try {
 																setIsSubmitting(true)
-																await Promise.all([
-																	updateModelName(chatBot._id, formData.model || ''),
-																	updatePrompt(chatBot._id, formData.prompt || ''),
-																	updateDefaultAnswer(chatBot._id, formData.defaultAnswer || ''),
-																	updateAdminEmail(chatBot._id, formData.adminEmail || '')
-																]);
+																let updatePromiseList = [];
+																
+																// Limit Change model only for paid users
+																if (user.activeSubscription !== 'FREE' && formData.model !== chatBot.model) {
+																	updatePromiseList.push(updateModelName(chatBot._id, formData.model));
+																}
+																if (formData.prompt !== chatBot.prompt) {
+																	updatePromiseList.push(updatePrompt(chatBot._id, formData.prompt || ''));
+																}
+																if (formData.defaultAnswer !== chatBot.defaultAnswer) {
+																	updatePromiseList.push(updateDefaultAnswer(chatBot._id, formData.defaultAnswer || ''));
+																}
+																if (formData.adminEmail !== chatBot.adminEmail) {
+																	updatePromiseList.push(updateAdminEmail(chatBot._id, formData.adminEmail));
+																}
+
+																await Promise.all(updatePromiseList);
 																await customizeWidget(chatBot._id, formData);
 																toast({
 																	title: `Chatbot customizations have been updated successfully`,
