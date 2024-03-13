@@ -607,10 +607,25 @@ export class ChatbotService {
 
     if (!sessionData) return;
 
+    const msg: ChatQueryAnswer = {
+      id: uuidv4(),
+      type: MessageType.DIVIDER,
+      q: null,
+      a: null,
+      qTokens: 0,
+      aTokens: 0,
+      ts: new Date(),
+      msg: isManual ? 'Chat with the Team' : 'Chat with the Bot',
+      sender: null,
+      sessionId: sessionId,
+    };
+
     const updatedSessionData: ChatSession = {
       ...sessionData,
       isManual: isManual,
     };
+
+    updatedSessionData.messages.push(msg);
 
     await Promise.all([
       this.setChatSessionData(updatedSessionData),
