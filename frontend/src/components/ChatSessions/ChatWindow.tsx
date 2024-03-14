@@ -1,5 +1,5 @@
 import React, { useRef, useEffect } from 'react';
-import { Box, Spinner, Flex, VStack, HStack, Text, Heading } from '@chakra-ui/react';
+import { Box, Spinner, Flex, VStack, HStack, Text, Heading, Divider, AbsoluteCenter } from '@chakra-ui/react';
 import { MessageList, ChatSessionDetail } from '../../types/knowledgebase.type';
 import { ChatBubble } from './ChatBubble';
 import { getBrowserName } from '../../utils/commonUtils';
@@ -206,7 +206,16 @@ export const ChatWindow = ({
                                             <>
                                                 <ChatBubble message={message.q || message.msg} type={'user'} />
                                                 <ChatBubble message={message.a || message.msg} type={'bot'} />
-                                            </> : null
+                                            </> : 
+                                            <Box position='relative' padding='10'>
+                                                <Divider />
+                                                <AbsoluteCenter bg='white' px='4'>
+                                                    <Text
+                                                    fontSize='xs'
+                                                    color='gray.600'
+                                                    >{message.msg}</Text>
+                                                </AbsoluteCenter>
+                                            </Box>
                                     }
                                 </Box>
 
