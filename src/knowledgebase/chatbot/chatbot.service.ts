@@ -620,6 +620,7 @@ export class ChatbotService {
       sessionId: sessionId,
     };
 
+    this.webSocketChatGateway.server.emit('chat_broadcast', msg);
     const updatedSessionData: ChatSession = {
       ...sessionData,
       isManual: isManual,
