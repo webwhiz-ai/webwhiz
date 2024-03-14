@@ -561,10 +561,13 @@ export class KnowledgebaseDbService {
       { _id: id },
       {
         projection: {
-          _id: 1,
+          'messages.id': 1,
           'messages.type': 1,
           'messages.q': 1,
           'messages.a': 1,
+          'messages.msg': 1,
+          'messages.sender': 1,
+          'messages.ts': 1,
         },
       },
     );
