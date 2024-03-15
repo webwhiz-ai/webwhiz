@@ -175,6 +175,7 @@ export class KnowledgebaseService {
       createdAt: ts,
       updatedAt: ts,
       embeddingModel: EmbeddingModel.OPENAI_EMBEDDING_3,
+      model: 'gpt-3.5-turbo',
     };
     const kbData = await this.kbDbService.insertKnowledgebase(kb);
 
