@@ -156,6 +156,7 @@ export class ChatbotService {
         return messageCount * 60;
       case 'gpt-4-turbo-preview': // GPT-4-Turbo
         return messageCount * 20;
+      case 'gpt-3.5-turbo': // GPT-3.5-Turbo
       default:
         return messageCount;
     }
@@ -926,6 +927,7 @@ export class ChatbotService {
         return qTokens * 60 + aTokens * 40;
       case 'gpt-4-turbo-preview': // GPT-4-Turbo
         return qTokens * 20 + aTokens * 20;
+      case 'gpt-3.5-turbo': // GPT-3.5
       default:
         return qTokens + aTokens;
     }
