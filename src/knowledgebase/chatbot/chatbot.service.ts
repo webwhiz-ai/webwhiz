@@ -642,7 +642,7 @@ export class ChatbotService {
       slackThreadId: slackThreadId,
       kbName: `${kb.name} assistant`,
       defaultAnswer: kb.defaultAnswer,
-      model: kb.model,
+      model: kb.model || 'gpt-3.5-turbo',
       prompt,
       isDemo: kb.isDemo,
       isManual: false,
