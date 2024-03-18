@@ -293,9 +293,12 @@
             }
         }
 
-        requestChatHistoryData();
+        // requestChatHistoryData();
         requestSessionId();
         requestIsManualChat();
+        setTimeout(() => {
+            getWidgetMessages()
+        }, 50);
 
         const defaultWidgetData = {
             backgroundColor: "#000",
@@ -421,6 +424,55 @@
             //return response;
         }
 
+
+    async function getWidgetMessages() {
+        const url = `${baseURL}/chatbot/session/${sessionId}/messages`;
+        try {
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                },
+                referrerPolicy: 'no-referrer',
+            });
+
+            if (response.status === 200) {
+                const { messages: _messages } = await response.json();
+
+                const messages = _messages.map(({ role, content, id }) => ({
+                    role: role === 'admin' || role === 'bot' ? 'assistant' : role,
+                    content,
+                    id,
+                }));
+
+                if (messages.length > 0) {
+                    isFirstMessage = false;
+                }
+
+                const msgHTML = messages.map(msg => {
+                    let msgContent = msg.content.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/<br\/>/g, '\n');
+                    const markdownRes = marked.parse(msgContent);
+
+                    if (msg.role === 'divider') {
+                        return createChatWithDivider(msgContent);
+                    }
+
+                    const type = msg.role === 'user' ? 'user' : 'chatbot';
+                    return `<div class="chat-message ${type}"><div class="chat-message-text">${markdownRes}</div></div>`;
+                }).join('');
+
+                const chatMessages = document.getElementById('chat-messages');
+                chatMessages.insertAdjacentHTML("beforeend", msgHTML);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            } else {
+                console.error('Failed to fetch messages: Status', response.status);
+            }
+        } catch (error) {
+            console.error('Error fetching messages:', error);
+        }
+    }
+
         async function initSocketConnection(sessionId) {
             var socket = io(`${baseURL}`, { transports: ["websocket"], query: { id: sessionId, knowledgeBaseId: knowledgebaseId } });
             socket.on('connect', function() {
@@ -435,7 +487,7 @@
                     content: msgData.msg,
                     id: uuidv4(),
                 };
-                notifyNewMessage([newMessageAdmin])
+                // notifyNewMessage([newMessageAdmin])
             });
             return socket;
         }
@@ -766,7 +818,7 @@
                         content: `Chat with the Team!`,
                         id: uuidv4(),
                     };
-                    notifyNewMessage([startChatDivider])
+                    // notifyNewMessage([startChatDivider])
                     isManualChat = true;
                     updateIsManualChat(isManualChat)
 
@@ -800,7 +852,7 @@
                         content: `Chat with the bot`,
                         id: uuidv4(),
                     };
-                    notifyNewMessage([botReadyDivider])
+                    // notifyNewMessage([botReadyDivider])
 
                 } else {
                     console.error('Error:', response.status);
@@ -939,7 +991,7 @@
                 // send message to admin
                 socketData.emit('user_chat', msgData);
                 messages.push(newMessageUser);
-                notifyNewMessage([newMessageUser])
+// notifyNewMessage([newMessageUser])
                 return;
             }
             if (STREAM_RESPONSE) {
@@ -995,7 +1047,7 @@
                         };
                         messages.push(newMessageUser);
                         messages.push(newMessageAssistant);
-                        notifyNewMessage([newMessageUser, newMessageAssistant])
+// notifyNewMessage([newMessageUser, newMessageAssistant])
                         msg = replaceAll(msg, '&lt;', '<')
                         msg = replaceAll(msg, '&gt;', '>')
                         msg = replaceAll(msg, '<br/>', '\n')
