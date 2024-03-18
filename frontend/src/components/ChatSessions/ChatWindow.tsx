@@ -1,5 +1,5 @@
 import React, { useRef, useEffect } from 'react';
-import { Box, Spinner, Flex, VStack, HStack, Text, Heading } from '@chakra-ui/react';
+import { Box, Spinner, Flex, VStack, HStack, Text, Heading, Divider, AbsoluteCenter } from '@chakra-ui/react';
 import { MessageList, ChatSessionDetail } from '../../types/knowledgebase.type';
 import { ChatBubble } from './ChatBubble';
 import { getBrowserName } from '../../utils/commonUtils';
@@ -200,12 +200,24 @@ export const ChatWindow = ({
                     messages.map((message) => {
                         return (
                             <Box key={message.ts.toString()}>
-                                {message.type === 'MANUAL' ? <ChatBubble message={message.msg} type={message.sender === 'admin' ? 'bot' : 'user'} /> :
-                                    <>
-                                        <ChatBubble message={message.q || message.msg} type={'user'} />
-                                        <ChatBubble message={message.a || message.msg} type={'bot'} />
-                                    </>
-                                }
+                                <Box key={message.ts.toString()}>
+                                    {message.type === 'MANUAL' ? <ChatBubble message={message.msg} type={message.sender === 'admin' ? 'bot' : 'user'} /> :
+                                        message.type === 'BOT' ?
+                                            <>
+                                                <ChatBubble message={message.q || message.msg} type={'user'} />
+                                                <ChatBubble message={message.a || message.msg} type={'bot'} />
+                                            </> : 
+                                            <Box position='relative' padding='10'>
+                                                <Divider />
+                                                <AbsoluteCenter bg='white' px='4'>
+                                                    <Text
+                                                    fontSize='xs'
+                                                    color='gray.600'
+                                                    >{message.msg}</Text>
+                                                </AbsoluteCenter>
+                                            </Box>
+                                    }
+                                </Box>
 
                             </Box>
                         );

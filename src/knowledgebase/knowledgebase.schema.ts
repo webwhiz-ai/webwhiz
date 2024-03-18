@@ -168,6 +168,7 @@ export enum ChatAnswerFeedbackType {
 export enum MessageType {
   BOT = 'BOT',
   MANUAL = 'MANUAL',
+  DIVIDER = 'DIVIDER',
 }
 
 export interface ChatQueryAnswer {
