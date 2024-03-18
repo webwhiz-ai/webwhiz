@@ -887,6 +887,11 @@ span.form-required {
     transition: all 0.2s ease-in-out;
     color: #333;
     box-shadow: 0px 1px 1px 0px rgba(0, 0, 0, 0.08);
+    white-space: nowrap;
+}
+
+.chat-with-bot svg {
+    flex-shrink: 0;
 }
 
 .chat-sample-messages.hide-sample-messages {
