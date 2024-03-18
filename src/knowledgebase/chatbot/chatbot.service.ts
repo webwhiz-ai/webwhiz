@@ -39,6 +39,8 @@ import {
   ChatSessionSparse,
   CustomKeyData,
   KnowledgebaseStatus,
+  ChatMessageForWidget,
+  ChatSessionForWidget,
   MessageType,
 } from '../knowledgebase.schema';
 import { PromptTestDTO, UpdateChatbotSessionDTO } from './chatbot.dto';
@@ -713,7 +715,7 @@ export class ChatbotService {
    */
   async getChatSessionsMessagesById(
     sessionId: string,
-  ): Promise<ChatSessionMessageSparse> {
+  ): Promise<ChatSessionForWidget> {
     //validate sessionId
     let sessionObjId: ObjectId;
     try {
@@ -728,7 +730,44 @@ export class ChatbotService {
       throw new HttpException('Invalid Session', HttpStatus.NOT_FOUND);
     }
 
-    return session;
+    const transformedMessages: ChatMessageForWidget[] = [];
+    session.messages.forEach((msg) => {
+      if (msg.type === MessageType.BOT) {
+        transformedMessages.push(
+          {
+            id: `${msg.id}-user`,
+            role: 'user',
+            content: msg.q,
+            timestamp: msg.ts,
+          },
+          {
+            id: `${msg.id}-bot`,
+            role: 'bot',
+            content: msg.a,
+            timestamp: msg.ts,
+          },
+        );
+      } else if (msg.type === MessageType.MANUAL) {
+        transformedMessages.push({
+          id: msg.id,
+          role: msg.sender,
+          content: msg.msg,
+          timestamp: msg.ts,
+        });
+      } else if (msg.type === MessageType.DIVIDER) {
+        transformedMessages.push({
+          id: msg.id,
+          role: 'divider',
+          content: msg.msg,
+          timestamp: msg.ts,
+        });
+      }
+    });
+
+    return {
+      id: sessionId,
+      messages: transformedMessages,
+    };
   }
 
   async getChatSessionsForKnowledgebase(
