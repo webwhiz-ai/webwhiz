@@ -25,7 +25,7 @@ export const subscriptionPlanData: Record<Subscription, SubscriptionPlanInfo> =
       maxTokens: 20000,
       maxPages: 25,
       maxChunksPerPage: 50,
-      maxMessages: 1000,
+      maxMessages: 20,
     },
     [Subscription.BASE_MONTHLY]: {
       name: 'Base',
@@ -34,7 +34,7 @@ export const subscriptionPlanData: Record<Subscription, SubscriptionPlanInfo> =
       maxTokens: 4000000,
       maxPages: 100,
       maxChunksPerPage: 100,
-      maxMessages: 5000,
+      maxMessages: 4000,
     },
     [Subscription.STANDARD_MONTHLY]: {
       name: 'Standard',
@@ -52,7 +52,7 @@ export const subscriptionPlanData: Record<Subscription, SubscriptionPlanInfo> =
       maxTokens: 25000000,
       maxPages: 2500,
       maxChunksPerPage: 100,
-      maxMessages: 50000,
+      maxMessages: 25000,
     },
     [Subscription.ENTERPRISE_MONTHLY]: {
       name: 'Enterprise',
@@ -70,7 +70,7 @@ export const subscriptionPlanData: Record<Subscription, SubscriptionPlanInfo> =
       maxTokens: 4000000,
       maxPages: 100,
       maxChunksPerPage: 100,
-      maxMessages: 5000,
+      maxMessages: 4000,
     },
     [Subscription.STANDARD_YEARLY]: {
       name: 'Standard',
@@ -88,7 +88,7 @@ export const subscriptionPlanData: Record<Subscription, SubscriptionPlanInfo> =
       maxTokens: 25000000,
       maxPages: 2500,
       maxChunksPerPage: 100,
-      maxMessages: 50000,
+      maxMessages: 25000,
     },
     [Subscription.ENTERPRISE_YEARLY]: {
       name: 'Enterprise',
@@ -116,7 +116,7 @@ export const subscriptionPlanData: Record<Subscription, SubscriptionPlanInfo> =
       maxTokens: 1000000,
       maxPages: 2000,
       maxChunksPerPage: 100,
-      maxMessages: 10000,
+      maxMessages: 1000,
     },
     [Subscription.APPSUMO_TIER2]: {
       name: 'App Sumo Tier 2',
@@ -125,7 +125,7 @@ export const subscriptionPlanData: Record<Subscription, SubscriptionPlanInfo> =
       maxTokens: 2500000,
       maxPages: 5000,
       maxChunksPerPage: 100,
-      maxMessages: 50000,
+      maxMessages: 2500,
     },
     [Subscription.APPSUMO_TIER3]: {
       name: 'App Sumo Tier 3',
@@ -134,7 +134,7 @@ export const subscriptionPlanData: Record<Subscription, SubscriptionPlanInfo> =
       maxTokens: 5000000,
       maxPages: 10000,
       maxChunksPerPage: 100,
-      maxMessages: 100000,
+      maxMessages: 5000,
     },
     [Subscription.SELF_HOSTED]: {
       name: 'Self Hosted',
