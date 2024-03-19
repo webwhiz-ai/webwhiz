@@ -155,9 +155,9 @@ export class ChatbotService {
   calculateMsgCountBasedOnModel(messageCount: number, model: string) {
     switch (model) {
       case 'gpt-4-0613': // GPT-4
-        return messageCount * 60;
-      case 'gpt-4-turbo-preview': // GPT-4-Turbo
         return messageCount * 20;
+      case 'gpt-4-turbo-preview': // GPT-4-Turbo
+        return messageCount * 10;
       case 'gpt-3.5-turbo': // GPT-3.5-Turbo
       default:
         return messageCount;
