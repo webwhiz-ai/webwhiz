@@ -218,8 +218,6 @@
 
         let sessionId = '';
 
-        let messages = [];
-
         function getDomainFromUrl(url) {
             if (!url) return '';
             const matches = url.match(/^https?\:\/\/([^\/?#]+)(?:[\/?#]|$)/i);
@@ -261,29 +259,6 @@
                         document.getElementById('chat-input').focus();
                     }, 320);
                 }
-            } else if (event.data.messageType === 'webwhiz:recieve_chat_data') {
-                messages = event.data.chatHistory;
-                if (messages.length > 0) {
-                    isFirstMessage = false;
-                }
-                let msgHTML = messages.map(msg => {
-                    const type = msg.role === 'user' ? 'user' : 'chatbot';
-                    let msgContent = msg.content;
-                    msgContent = replaceAll(msgContent, '&lt;', '<')
-                    msgContent = replaceAll(msgContent, '&gt;', '>')
-                    msgContent = replaceAll(msgContent, '<br/>', '\n')
-                    const markdownRes = marked.parse(msgContent);
-                    if (msg.role === 'divider') {
-                        return createChatWithDivider(msgContent)
-                    }
-                    return `<div class="chat-message ${type}"><div class="chat-message-text">${markdownRes}</div></div>`
-                })
-                msgHTML = msgHTML.join('');
-
-                const chatMessages = document.getElementById('chat-messages');
-                chatMessages.insertAdjacentHTML("beforeend", msgHTML)
-
-                chatMessages.scrollTop = chatMessages.scrollHeight;
             } else if (event.data.messageType === 'webwhiz:recieve_session_id') {
                 sessionId = event.data.sessionId;
             } else if (event.data.messageType === 'webwhiz:recieve_is_manual_chat') {
@@ -293,7 +268,6 @@
             }
         }
 
-        // requestChatHistoryData();
         requestSessionId();
         requestIsManualChat();
         setTimeout(() => {
@@ -366,7 +340,6 @@
             const chatMessages = document.getElementById('chat-messages');
             chatMessages.innerHTML = '';
             sessionId = '';
-            messages = [];
             isManualChat = false;
             if (enableHumanChat) {
                 chatWithHumanButton.style.display = 'flex';
@@ -482,12 +455,6 @@
                 // append to UI 
                 const chatMessage = createChatMessage(msgData.msg, true);
                 insertMessageIntoUI(chatMessage);
-                const newMessageAdmin = {
-                    role: "assistant",
-                    content: msgData.msg,
-                    id: uuidv4(),
-                };
-                // notifyNewMessage([newMessageAdmin])
             });
             return socket;
         }
@@ -695,7 +662,7 @@
             styleSheet.textContent = (chatWidgetData?.customCSS || '') + styles;
 
 
-            if (chatWidgetData.questionExamples && chatWidgetData.questionExamples.length > 0) {
+            if (chatWidgetData.questionExamples && chatWidgetData.questionExamples.length > 0 || chatWidgetData.enableHumanChat) {
                 const sampleMessages = document.getElementById('chat-sample-messages');
                 sampleMessages.classList.remove('hide-sample-messages');
                 chatWidgetData.questionExamples.forEach((message) => {
@@ -813,12 +780,7 @@
                 if (response.status === 200) {
                     const result = await response.text();
                     insertMessageIntoUI(createChatWithDivider(`Chat with the Team!`));
-                    const startChatDivider = {
-                        role: "divider",
-                        content: `Chat with the Team!`,
-                        id: uuidv4(),
-                    };
-                    // notifyNewMessage([startChatDivider])
+                 
                     isManualChat = true;
                     updateIsManualChat(isManualChat)
 
@@ -847,12 +809,7 @@
                     insertMessageIntoUI(createChatWithDivider('Chat with the bot!'));
                     isManualChat = false;
                     updateIsManualChat(isManualChat)
-                    const botReadyDivider = {
-                        role: "divider",
-                        content: `Chat with the bot`,
-                        id: uuidv4(),
-                    };
-                    // notifyNewMessage([botReadyDivider])
+               
 
                 } else {
                     console.error('Error:', response.status);
@@ -990,8 +947,7 @@
                 const msgData = { 'sender': 'user', 'msg': message,  id: uuidv4(), 'sessionId': sessionId }
                 // send message to admin
                 socketData.emit('user_chat', msgData);
-                messages.push(newMessageUser);
-// notifyNewMessage([newMessageUser])
+
                 return;
             }
             if (STREAM_RESPONSE) {
@@ -1045,9 +1001,6 @@
                             content: msg,
                             id: uuidv4(),
                         };
-                        messages.push(newMessageUser);
-                        messages.push(newMessageAssistant);
-// notifyNewMessage([newMessageUser, newMessageAssistant])
                         msg = replaceAll(msg, '&lt;', '<')
                         msg = replaceAll(msg, '&gt;', '>')
                         msg = replaceAll(msg, '<br/>', '\n')
@@ -1204,12 +1157,6 @@
             }, '*');
         }
 
-        function notifyNewMessage(message) {
-            window.top.postMessage({
-                messageType: 'webwhiz:recieve_new_message',
-                message: message
-            }, '*');
-        }
         function notifyNewSession(sessionId) {
             window.top.postMessage({
                 messageType: 'webwhiz:recieve_new_session_id',
@@ -1221,9 +1168,7 @@
             window.top.postMessage('webwhiz:request_meta_data', '*');
         }
 
-        function requestChatHistoryData() {
-            window.top.postMessage('webwhiz:request_chat_data', '*');
-        }
+
 
         function requestSessionId() {
             window.top.postMessage('webwhiz:request_session_id', '*');
