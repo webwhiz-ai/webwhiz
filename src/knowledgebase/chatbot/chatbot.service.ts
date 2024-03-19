@@ -39,6 +39,8 @@ import {
   ChatSessionSparse,
   CustomKeyData,
   KnowledgebaseStatus,
+  ChatMessageForWidget,
+  ChatSessionForWidget,
   MessageType,
 } from '../knowledgebase.schema';
 import { PromptTestDTO, UpdateChatbotSessionDTO } from './chatbot.dto';
@@ -681,10 +683,26 @@ export class ChatbotService {
 
     if (!sessionData) return;
 
+    const msg: ChatQueryAnswer = {
+      id: uuidv4(),
+      type: MessageType.DIVIDER,
+      q: null,
+      a: null,
+      qTokens: 0,
+      aTokens: 0,
+      ts: new Date(),
+      msg: isManual ? 'Chat with the Team' : 'Chat with the Bot',
+      sender: null,
+      sessionId: sessionId,
+    };
+
+    this.webSocketChatGateway.server.emit('chat_broadcast', msg);
     const updatedSessionData: ChatSession = {
       ...sessionData,
       isManual: isManual,
     };
+
+    updatedSessionData.messages.push(msg);
 
     await Promise.all([
       this.setChatSessionData(updatedSessionData),
@@ -771,7 +789,7 @@ export class ChatbotService {
    */
   async getChatSessionsMessagesById(
     sessionId: string,
-  ): Promise<ChatSessionMessageSparse> {
+  ): Promise<ChatSessionForWidget> {
     //validate sessionId
     let sessionObjId: ObjectId;
     try {
@@ -786,7 +804,44 @@ export class ChatbotService {
       throw new HttpException('Invalid Session', HttpStatus.NOT_FOUND);
     }
 
-    return session;
+    const transformedMessages: ChatMessageForWidget[] = [];
+    session.messages.forEach((msg) => {
+      if (msg.type === MessageType.BOT) {
+        transformedMessages.push(
+          {
+            id: `${msg.id}-user`,
+            role: 'user',
+            content: msg.q,
+            timestamp: msg.ts,
+          },
+          {
+            id: `${msg.id}-bot`,
+            role: 'bot',
+            content: msg.a,
+            timestamp: msg.ts,
+          },
+        );
+      } else if (msg.type === MessageType.MANUAL) {
+        transformedMessages.push({
+          id: msg.id,
+          role: msg.sender,
+          content: msg.msg,
+          timestamp: msg.ts,
+        });
+      } else if (msg.type === MessageType.DIVIDER) {
+        transformedMessages.push({
+          id: msg.id,
+          role: 'divider',
+          content: msg.msg,
+          timestamp: msg.ts,
+        });
+      }
+    });
+
+    return {
+      id: sessionId,
+      messages: transformedMessages,
+    };
   }
 
   async getChatSessionsForKnowledgebase(

@@ -168,6 +168,7 @@ export enum ChatAnswerFeedbackType {
 export enum MessageType {
   BOT = 'BOT',
   MANUAL = 'MANUAL',
+  DIVIDER = 'DIVIDER',
 }
 
 export interface ChatQueryAnswer {
@@ -219,6 +220,18 @@ export type ChatSessionSparse = Pick<
 >;
 
 export type ChatSessionMessageSparse = Pick<ChatSession, 'messages'>;
+
+export interface ChatSessionForWidget {
+  id: string;
+  messages: ChatMessageForWidget[];
+}
+
+export interface ChatMessageForWidget {
+  id: string;
+  role: string;
+  content: string;
+  timestamp: Date;
+}
 
 export interface ChatMessageWebhookPayload {
   q: string;

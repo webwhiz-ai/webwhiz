@@ -730,17 +730,15 @@ export class KnowledgebaseService {
       );
     }
 
-    const index = kb.participants.findIndex(
-      (participant) => participant.id.toString() === userId,
+    const updatedParticipants = kb.participants.filter(
+      (participant) => participant.id.toString() !== userId,
     );
-    if (index !== -1) {
-      const updatedParticipants = kb.participants.splice(index, 1);
 
-      await this.kbDbService.updateKnowledgebaseParticipants(
-        kbId,
-        updatedParticipants,
-      );
-    }
+    await this.kbDbService.updateKnowledgebaseParticipants(
+      kbId,
+      updatedParticipants,
+    );
+
     return;
   }
 }

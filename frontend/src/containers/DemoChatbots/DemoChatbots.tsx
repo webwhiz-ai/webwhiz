@@ -149,7 +149,7 @@ export const DemoChatbots = () => {
 				<Flex shrink={0} w="100%" justifyContent="space-between">
 					<Heading fontSize="30">Demo Chatbots</Heading>
 				</Flex>
-				<Box width="100%">{getChatBotLists()}</Box>
+				<Box zIndex={'-1'} width="100%">{getChatBotLists()}</Box>
 			</VStack>
 		</Box>
 	);
