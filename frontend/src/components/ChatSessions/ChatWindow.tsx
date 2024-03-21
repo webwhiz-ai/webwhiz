@@ -146,6 +146,31 @@ export const ChatWindow = ({
         );
     }, [chatData, userData]);
 
+    const renderMessage = React.useCallback((message) => {
+        switch (message.type) {
+            case 'MANUAL':
+                return <ChatBubble message={message.msg} type={message.sender === 'admin' ? 'bot' : 'user'} />;
+            case 'DIVIDER':
+                return (
+                    <Box position='relative' padding='10'>
+                        <Divider />
+                        <AbsoluteCenter bg='white' px='4'>
+                            <Text fontSize='xs' color='gray.600'>{message.msg}</Text>
+                        </AbsoluteCenter>
+                    </Box>
+                );
+            case 'BOT':
+            default:
+                // For older messages, type is not set.
+                return (
+                    <>
+                        <ChatBubble message={message.q || message.msg} type={'user'} />
+                        <ChatBubble message={message.a || message.msg} type={'bot'} />
+                    </>
+                );
+        }
+    }, []);
+
     if (!isMessagesLoading && !chatData?._id) {
         return (
             <VStack
@@ -200,25 +225,7 @@ export const ChatWindow = ({
                     messages.map((message) => {
                         return (
                             <Box key={message.ts.toString()}>
-                                <Box key={message.ts.toString()}>
-                                    {message.type === 'MANUAL' ? <ChatBubble message={message.msg} type={message.sender === 'admin' ? 'bot' : 'user'} /> :
-                                        message.type === 'BOT' ?
-                                            <>
-                                                <ChatBubble message={message.q || message.msg} type={'user'} />
-                                                <ChatBubble message={message.a || message.msg} type={'bot'} />
-                                            </> : 
-                                            <Box position='relative' padding='10'>
-                                                <Divider />
-                                                <AbsoluteCenter bg='white' px='4'>
-                                                    <Text
-                                                    fontSize='xs'
-                                                    color='gray.600'
-                                                    >{message.msg}</Text>
-                                                </AbsoluteCenter>
-                                            </Box>
-                                    }
-                                </Box>
-
+                                {renderMessage(message)}
                             </Box>
                         );
                     })}
