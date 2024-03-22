@@ -27,6 +27,7 @@ import { SlackModule } from './slack/slack.module';
 import { PublicApisModule } from './public-apis/public-apis.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
+import { KbEmbeddingsPg } from './common/entity/kbEmbeddings.entity';
 
 @Module({
   imports: [
@@ -34,6 +35,16 @@ import { DataSource } from 'typeorm';
     SentryModule.forRoot({
       dsn: process.env.SENTRY_DSN,
       tracesSampleRate: 0.3,
+    }),
+    TypeOrmModule.forRoot({
+      type: 'postgres',
+      host: process.env.POSTGRES_HOST,
+      port: parseInt(process.env.POSTGRES_PORT, 10),
+      username: process.env.POSTGRES_USER,
+      password: process.env.POSTGRES_PASSWORD,
+      database: process.env.POSTGRES_DB,
+      entities: [KbEmbeddingsPg],
+      synchronize: true, // TODO: Disable this in production
     }),
     RedisModule,
     MongoModule,
@@ -49,16 +60,6 @@ import { DataSource } from 'typeorm';
     WebhookModule,
     SlackModule,
     PublicApisModule,
-    TypeOrmModule.forRoot({
-      type: 'postgres',
-      host: process.env.POSTGRES_HOST,
-      port: parseInt(process.env.POSTGRES_PORT, 10),
-      username: process.env.POSTGRES_USER,
-      password: process.env.POSTGRES_PASSWORD,
-      database: process.env.POSTGRES_DB,
-      entities: [__dirname + '/**/*.entity{.ts,.js}'],
-      synchronize: true,
-    }),
   ],
   controllers: [AppController],
   providers: [AppService],
