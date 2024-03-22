@@ -1,4 +1,9 @@
-import { MiddlewareConsumer, Module, RequestMethod } from '@nestjs/common';
+import {
+  MiddlewareConsumer,
+  Module,
+  OnApplicationBootstrap,
+  RequestMethod,
+} from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { CeleryClientModule } from './common/celery/celery-client.module';
@@ -21,6 +26,7 @@ import { SlackBoltMiddleware } from './slack/slack-bolt.middleware';
 import { SlackModule } from './slack/slack.module';
 import { PublicApisModule } from './public-apis/public-apis.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
 
 @Module({
   imports: [
@@ -57,7 +63,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {
+export class AppModule implements OnApplicationBootstrap {
+  constructor(private dataSource: DataSource) { }
+
   configure(consumer: MiddlewareConsumer): void {
     consumer.apply(Sentry.Handlers.requestHandler()).forRoutes({
       path: '*',
@@ -66,5 +74,10 @@ export class AppModule {
     if (process.env.ENABLE_SLACK_BOT === 'true') {
       consumer.apply(SlackBoltMiddleware).forRoutes('');
     }
+  }
+
+  async onApplicationBootstrap() {
+    /* Create the vector extension for Postgres if it does not present */
+    await this.dataSource.query(`CREATE EXTENSION IF NOT EXISTS vector;`);
   }
 }
