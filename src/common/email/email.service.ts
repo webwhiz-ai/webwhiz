@@ -72,16 +72,20 @@ export class EmailService {
     email: string,
     queryText: string,
     websiteUrl: string,
+    knowledgeBaseId,
+    sessionId,
   ) {
     if (!this.isSgInitialized) return;
 
     const msg = {
       to: email,
       from: { email: this.senderEmail, name: this.senderName },
-      templateId: 'd-a4f34375b9504c5d94f6d9e3eafe0214',
+      templateId: 'd-f024c533a3344b5b835f6d9391ff9b52',
       dynamicTemplateData: {
         website_url: websiteUrl,
         msg_msg: queryText,
+        kb_id: knowledgeBaseId,
+        session_id: sessionId,
       },
     };
 
