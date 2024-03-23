@@ -134,6 +134,7 @@ export class WebSocketChatGateway
         this.logger.log('No online admins online!!!!');
         this.offlineMsgService.sendEmailForOfflineManualMessage(
           knowledgeBaseId,
+          msgData.sessionId,
           msgData.msg,
         );
       }

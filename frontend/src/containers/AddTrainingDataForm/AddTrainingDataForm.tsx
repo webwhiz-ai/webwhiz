@@ -58,7 +58,7 @@ export const AddTrainingDataForm = ({
 			<FormControl>
 				<FormLabel fontSize="sm">Title</FormLabel>
 				<Input value={question}
-					onChange={handleQuestionChange} placeholder='Question' />
+					onChange={handleQuestionChange} />
 			</FormControl>
 
 			<FormControl mt={6}>

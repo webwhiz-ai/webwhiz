@@ -180,6 +180,7 @@ export class OfflineMsgService {
 
   async sendEmailForOfflineManualMessage(
     knowledgebaseId: ObjectId,
+    sessionId: string,
     msg: string,
   ) {
     const kb = await this.kbDbService.getKnowledgebaseById(knowledgebaseId);
@@ -206,6 +207,8 @@ export class OfflineMsgService {
       email,
       msg,
       kb.websiteData.websiteUrl,
+      knowledgebaseId,
+      sessionId,
     );
 
     return;

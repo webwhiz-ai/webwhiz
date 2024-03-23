@@ -230,7 +230,6 @@ function __WEBWHIZ__getEventHandler(ifrm) {
         addPopup(config);
       }
     } else if (e.data === "webwhiz:widget_clear_history") {
-      localStorage.removeItem('chatHistory');
       localStorage.removeItem('sessionId');
       localStorage.removeItem('isManualChat');
       e.source.postMessage({ messageType: 'webwhiz:recieve_session_id', sessionId: '' }, '*');
@@ -238,19 +237,9 @@ function __WEBWHIZ__getEventHandler(ifrm) {
       const scriptEl = document.getElementById("__webwhizSdk__");
       const container = scriptEl.getAttribute('container') || scriptEl.getAttribute('data-container');
       e.source.postMessage({ messageType: 'webwhiz:recieve_meta_data', url: window.location.href, container: container }, '*');
-    } else if (e.data === "webwhiz:request_chat_data") {
-      const chatHistoryData = localStorage.getItem("chatHistory");
-      const chatHistory = JSON.parse(chatHistoryData || '[]');
-      e.source.postMessage({ messageType: 'webwhiz:recieve_chat_data', chatHistory: chatHistory }, '*');
     } else if (e.data === "webwhiz:request_session_id") {
       const sessionId = localStorage.getItem("sessionId");
       e.source.postMessage({ messageType: 'webwhiz:recieve_session_id', sessionId: sessionId }, '*');
-    } else if(e.data && e.data.messageType === 'webwhiz:recieve_new_message') {
-      const chatHistoryData = localStorage.getItem("chatHistory");
-      let chatHistory = JSON.parse(chatHistoryData || '[]');
-      const msg = e.data.message || []
-      chatHistory = [...chatHistory, ...msg];
-      localStorage.setItem("chatHistory", JSON.stringify(chatHistory));
     } else if(e.data && e.data.messageType === 'webwhiz:recieve_new_session_id') {
       localStorage.setItem("sessionId", e.data.sessionId);
     } else if(e.data === 'webwhiz:request_is_manual_chat') {
