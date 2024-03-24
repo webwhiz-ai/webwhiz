@@ -21,9 +21,12 @@ import { TaskModule } from '../task/task.module';
 import { CustomKeyService } from './custom-key.service';
 import { WebhookModule } from '../webhook/webhook.module';
 import { WebSocketChatGateway } from './websocketchat.gateway';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { KbEmbeddingsPg } from '../common/entity/kbEmbeddings.entity';
 
 @Module({
   imports: [
+    TypeOrmModule.forFeature([KbEmbeddingsPg]),
     MongoModule,
     RedisModule,
     OpenaiModule,
