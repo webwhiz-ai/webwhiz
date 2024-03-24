@@ -156,6 +156,13 @@ export interface KbEmbedding {
   type: DataStoreType;
 }
 
+export interface TopChunksResponse {
+  chunkId: {
+    $oid: string; // Same as chunkId
+  };
+  similarity: number;
+}
+
 /*********************************************************
  * CHAT SESSION
  *********************************************************/

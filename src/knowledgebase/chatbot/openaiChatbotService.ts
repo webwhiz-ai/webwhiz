@@ -25,13 +25,6 @@ import { DEFAULT_CHATGPT_PROMPT } from './openaiChatbot.constant';
 import { CustomKeyService } from '../custom-key.service';
 import { toSql } from 'pgvector/pg';
 
-interface CosineSimilarityWorkerResponse {
-  chunkId: {
-    $oid: string;
-  };
-  similarity: number;
-}
-
 interface ChunkForCompletion extends Chunk {
   content: string;
   score: number;
@@ -184,11 +177,10 @@ export class OpenaiChatbotService {
       embeddingModel,
     );
 
-    const client = this.celeryClient.get(CeleryClientQueue.DEFAULT);
-    const task = client.createTask('worker.get_top_n_chunks');
-
-    const topChunks: CosineSimilarityWorkerResponse[] = JSON.parse(
-      await task.applyAsync([queryEmbedding, kbId.toString(), 3]).get(),
+    const topChunks = await this.kbDbService.getTopNChunksForEmbedding(
+      queryEmbedding,
+      kbId,
+      3,
     );
 
     const filteredChunks =

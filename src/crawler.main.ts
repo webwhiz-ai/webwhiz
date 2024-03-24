@@ -32,6 +32,7 @@ import { KbEmbeddingsPg } from './common/entity/kbEmbeddings.entity';
 
 @Module({
   imports: [
+    // TODO: Check if the following is needed.
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: process.env.POSTGRES_HOST,

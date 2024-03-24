@@ -28,6 +28,7 @@ import {
   ChatSessionSparse,
   ChatAnswerFeedbackType,
   ChatSessionMessageSparse,
+  TopChunksResponse,
 } from './knowledgebase.schema';
 
 @Injectable()
@@ -536,7 +537,7 @@ export class KnowledgebaseDbService {
     queryEmbedding: number[],
     kbId: ObjectId,
     n: number,
-  ) {
+  ): Promise<TopChunksResponse[]> {
     const result = await this.pgEmbeddingsRepository
       .createQueryBuilder()
       .select('_id')
@@ -546,7 +547,12 @@ export class KnowledgebaseDbService {
       .limit(n)
       .setParameter('embeddings', toSql(queryEmbedding))
       .getRawMany();
-    return result;
+
+    const topChunks: TopChunksResponse[] = result.map((chunk) => ({
+      chunkId: { $oid: chunk._id },
+      similarity: chunk.similarity,
+    }));
+    return topChunks;
   }
 
   /*********************************************************
