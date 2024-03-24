@@ -23,6 +23,7 @@ import {
 import { PromptService } from '../prompt/prompt.service';
 import { DEFAULT_CHATGPT_PROMPT } from './openaiChatbot.constant';
 import { CustomKeyService } from '../custom-key.service';
+import { toSql } from 'pgvector/pg';
 
 interface CosineSimilarityWorkerResponse {
   chunkId: {
@@ -121,6 +122,15 @@ export class OpenaiChatbotService {
       customKeys,
       embeddingModel,
     );
+
+    await this.kbDbService.insertEmbeddingsToPg({
+      _id: chunk._id.toString(),
+      knowledgebaseId: kbId.toString(),
+      embeddings: toSql(embeddings),
+      type: chunk.type,
+      createdAt: new Date(),
+      embeddingModel: embeddingModel || EmbeddingModel.OPENAI_EMBEDDING_2,
+    });
 
     // Add embedding for new chunk into embeddings collection
     await this.kbDbService.insertEmbeddingForChunk({
