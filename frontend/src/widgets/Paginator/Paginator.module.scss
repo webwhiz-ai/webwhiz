@@ -3,6 +3,7 @@
     display: flex;
     list-style: none;
     padding: 10px 10px;
+    width: -webkit-fill-available;
 }
 
 .page, .previous, .next, .break {
