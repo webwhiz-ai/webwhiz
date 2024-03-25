@@ -436,13 +436,15 @@ export class ChatbotService {
       sessionData.embeddingModel,
     );
 
+    // Fetch previous messages from bot
+    const prevMessages = this.getPreviousNMessagesFromBot(
+      sessionData.messages,
+      2,
+    );
+
     //
     // Get answer for query
     //
-
-    // Get answer from chatgpt
-    const prevMessages = sessionData.messages.slice(-2);
-
     const answerStream = await this.openaiChatbotService.getAiAnswerStream(
       sessionData.kbName,
       query,
@@ -511,6 +513,33 @@ export class ChatbotService {
         '[DONE]',
       ),
     );
+  }
+
+  /**
+   * Retrieves the previous N messages from the bot.
+   *
+   * @param messages - An array of ChatQueryAnswer objects representing the chat messages.
+   * @param n - The maximum number of messages to retrieve.
+   * @returns An array of ChatQueryAnswer objects representing the previous N messages from the bot.
+   */
+  getPreviousNMessagesFromBot(messages: ChatQueryAnswer[], n: number) {
+    // if last message is of type 'MANUAL' or 'DIVIDER' then return empty array
+    // else return the last Max(n, 0) continues messages of type 'BOT'
+    const prevMessages = [];
+    if (
+      messages.length <= 0 ||
+      messages[messages.length - 1].type !== MessageType.BOT
+    ) {
+      return prevMessages;
+    }
+    for (let i = messages.length - 1; i >= 0 && prevMessages.length < n; i--) {
+      if (messages[i].type === MessageType.BOT) {
+        prevMessages.unshift(messages[i]);
+      } else {
+        break;
+      }
+    }
+    return prevMessages;
   }
 
   /**
