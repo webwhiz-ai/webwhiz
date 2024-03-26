@@ -23,6 +23,7 @@ import { WebhookModule } from '../webhook/webhook.module';
 import { WebSocketChatGateway } from './websocketchat.gateway';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { KbEmbeddingsPg } from '../common/entity/kbEmbeddings.entity';
+import { EmbeddingsDbService } from './embeddingsdb.service';
 
 @Module({
   imports: [
@@ -53,6 +54,7 @@ import { KbEmbeddingsPg } from '../common/entity/kbEmbeddings.entity';
     PromptService,
     CustomKeyService,
     WebSocketChatGateway,
+    EmbeddingsDbService,
   ],
   exports: [
     KnowledgebaseDbService,

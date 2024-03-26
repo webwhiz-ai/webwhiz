@@ -24,6 +24,7 @@ import { PromptService } from '../prompt/prompt.service';
 import { DEFAULT_CHATGPT_PROMPT } from './openaiChatbot.constant';
 import { CustomKeyService } from '../custom-key.service';
 import { toSql } from 'pgvector/pg';
+import { EmbeddingsDbService } from '../embeddingsdb.service';
 
 interface ChunkForCompletion extends Chunk {
   content: string;
@@ -37,6 +38,7 @@ export class OpenaiChatbotService {
   constructor(
     private openaiService: OpenaiService,
     private kbDbService: KnowledgebaseDbService,
+    private pgEmbeddingsdbService: EmbeddingsDbService,
     private readonly promptService: PromptService,
     private readonly customKeyService: CustomKeyService,
     @Inject(CELERY_CLIENT) private celeryClient: CeleryClientService,
@@ -116,7 +118,7 @@ export class OpenaiChatbotService {
       embeddingModel,
     );
 
-    await this.kbDbService.insertEmbeddingsToPg({
+    await this.pgEmbeddingsdbService.insertEmbeddingsToPg({
       _id: chunk._id.toString(),
       knowledgebaseId: kbId.toString(),
       embeddings: toSql(embeddings),
@@ -177,11 +179,12 @@ export class OpenaiChatbotService {
       embeddingModel,
     );
 
-    const topChunks = await this.kbDbService.getTopNChunksForEmbedding(
-      queryEmbedding,
-      kbId,
-      3,
-    );
+    const topChunks =
+      await this.pgEmbeddingsdbService.getTopNChunksForEmbedding(
+        queryEmbedding,
+        kbId,
+        3,
+      );
 
     const filteredChunks =
       topChunks.length > 2
