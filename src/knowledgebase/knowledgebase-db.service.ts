@@ -543,6 +543,7 @@ export class KnowledgebaseDbService {
           startedAt: 1,
           updatedAt: 1,
           knowledgebaseId: 1,
+          model: 1,
         },
       },
     );

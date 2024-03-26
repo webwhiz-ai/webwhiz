@@ -217,6 +217,7 @@ export type ChatSessionSparse = Pick<
   | 'userData'
   | 'startedAt'
   | 'updatedAt'
+  | 'model'
 >;
 
 export type ChatSessionMessageSparse = Pick<ChatSession, 'messages'>;
