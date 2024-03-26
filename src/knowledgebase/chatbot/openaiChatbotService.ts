@@ -124,6 +124,7 @@ export class OpenaiChatbotService {
       embeddings: toSql(embeddings),
       type: chunk.type,
       createdAt: new Date(),
+      updatedAt: new Date(),
       embeddingModel: embeddingModel || EmbeddingModel.OPENAI_EMBEDDING_2,
     });
 
@@ -152,7 +153,10 @@ export class OpenaiChatbotService {
     );
 
     // Add embedding for new chunk into embeddings collection
-    await this.kbDbService.updateEmbeddingForChunk(chunk._id, embeddings);
+    await this.pgEmbeddingsdbService.updateEmbeddingsForChunkInPg(
+      chunk._id,
+      embeddings,
+    );
     await this.kbDbService.updateChunkById(chunk._id, {
       status: ChunkStatus.EMBEDDING_GENERATED,
     });

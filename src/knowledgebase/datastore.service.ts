@@ -7,6 +7,7 @@ import { UserSparse } from '../user/user.schema';
 import { UserService } from '../user/user.service';
 import { OpenaiChatbotService } from './chatbot/openaiChatbotService';
 import { CustomKeyService } from './custom-key.service';
+import { EmbeddingsDbService } from './embeddingsdb.service';
 import { KnowledgebaseDbService } from './knowledgebase-db.service';
 import {
   checkUserPermissionForKb,
@@ -30,6 +31,7 @@ function getEmbeddingsCacheKey(kbId: ObjectId): string {
 export class DataStoreService {
   constructor(
     private kbDbService: KnowledgebaseDbService,
+    private readonly embeddingsDbService: EmbeddingsDbService,
     private openaiChatbotService: OpenaiChatbotService,
     private readonly userService: UserService,
     private readonly customKeyService: CustomKeyService,
@@ -143,7 +145,7 @@ export class DataStoreService {
     id: ObjectId,
     data: Pick<KbDataStore, 'content' | 'title'>,
   ) {
-    // Get the existing data store ite
+    // Get the existing data store item
     const dsItem = await this.kbDbService.getKbDataStoreItemById(id);
 
     // Get existing chunks for given data store item (To Remove later)
@@ -163,7 +165,7 @@ export class DataStoreService {
 
     // Now that new chunks are inserted delete old ones and embeddings
     await Promise.all([
-      this.kbDbService.deleteEmbeddingsByIdBulk(chunkIds),
+      this.embeddingsDbService.deleteEmbeddingsByIdBulkInPg(chunkIds),
       this.kbDbService.deleteChunksByIdBulk(chunkIds),
     ]);
   }
@@ -180,7 +182,7 @@ export class DataStoreService {
     const chunkIds = chunks.map((c) => c._id);
 
     // Delete embeddings for chunks
-    await this.kbDbService.deleteEmbeddingsByIdBulk(chunkIds);
+    await this.embeddingsDbService.deleteEmbeddingsByIdBulkInPg(chunkIds);
 
     // Delete chunks
     await this.kbDbService.deleteChunksByIdBulk(chunkIds);

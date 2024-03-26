@@ -20,6 +20,9 @@ export class KbEmbeddingsPg {
   createdAt: Date;
 
   @Column()
+  updatedAt: Date;
+
+  @Column()
   embeddingModel: string;
 
   @Column()

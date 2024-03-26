@@ -4,7 +4,7 @@ import { ObjectId } from 'mongodb';
 import { toSql } from 'pgvector/pg';
 import { Repository } from 'typeorm';
 import { KbEmbeddingsPg } from '../common/entity/kbEmbeddings.entity';
-import { TopChunksResponse } from './knowledgebase.schema';
+import { DataStoreType, TopChunksResponse } from './knowledgebase.schema';
 
 @Injectable()
 export class EmbeddingsDbService {
@@ -54,5 +54,53 @@ export class EmbeddingsDbService {
       similarity: chunk.similarity,
     }));
     return topChunks;
+  }
+
+  /**
+   * Updates the embeddings for a specific chunk.
+   * @param chunkId - The ID of the chunk to update.
+   * @param embeddings - The new embeddings to set for the chunk.
+   */
+  async updateEmbeddingsForChunkInPg(chunkId: ObjectId, embeddings: number[]) {
+    await this.pgEmbeddingsRepository.update(
+      { _id: chunkId.toString() },
+      {
+        embeddings: toSql(embeddings),
+        updatedAt: new Date(),
+      },
+    );
+  }
+
+  /**
+   * Deletes embeddings for a knowledge base in the PostgreSQL database.
+   * @param kbId - The ID of the knowledge base.
+   * @param type - The type of data store (optional).
+   * @returns A promise that resolves when the embeddings are deleted.
+   */
+  async deleteEmbeddingsForKbInPg(kbId: ObjectId, type?: DataStoreType) {
+    const criteria: { knowledgebaseId: string; type?: DataStoreType } = {
+      knowledgebaseId: kbId.toString(),
+    };
+    if (type) {
+      criteria.type = type;
+    }
+    await this.pgEmbeddingsRepository.delete(criteria);
+  }
+
+  /**
+   * Deletes embeddings for a chunk in the PostgreSQL database.
+   * @param chunkId - The ID of the chunk to delete embeddings for.
+   * @returns A promise that resolves when the embeddings are deleted.
+   */
+  async deleteEmbeddingsForChunkInPg(chunkId: ObjectId) {
+    await this.pgEmbeddingsRepository.delete({ _id: chunkId.toString() });
+  }
+
+  /**
+   * Deletes embeddings by their IDs in bulk from the PostgreSQL database.
+   * @param ids - An array of ObjectIds representing the IDs of the embeddings to be deleted.
+   */
+  async deleteEmbeddingsByIdBulkInPg(ids: ObjectId[]) {
+    await this.pgEmbeddingsRepository.delete(ids.map((id) => id.toString()));
   }
 }
