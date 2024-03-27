@@ -154,6 +154,7 @@ export interface KbEmbedding {
   knowledgebaseId: ObjectId;
   embeddings: number[];
   type: DataStoreType;
+  embeddingModel?: EmbeddingModel;
 }
 
 /*********************************************************

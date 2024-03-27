@@ -128,6 +128,7 @@ export class OpenaiChatbotService {
       knowledgebaseId: kbId,
       embeddings,
       type: chunk.type,
+      embeddingModel,
     });
     await this.kbDbService.updateChunkById(chunk._id, {
       status: ChunkStatus.EMBEDDING_GENERATED,
