@@ -272,7 +272,7 @@ export const ChatSessionsNew = ({ chatbotId, userId }: ChatSessionsProps) => {
                 }}
 
             />
-            <ChatWindow onChatReply={onChatReplyEvent} chatData={chatData} userData={chatData?.userData} messages={chatData?.messages} isMessagesLoading={isChatDataLoading} />
+            <ChatWindow onChatReply={onChatReplyEvent} chatData={chatData} userData={chatData?.userData} isMessagesLoading={isChatDataLoading} />
         </Flex>
     )
 }

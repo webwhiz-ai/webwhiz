@@ -173,7 +173,7 @@ export interface MessageList {
     qTokens: number;
     ts: string;
     msg: string
-    type: 'MANUAL' | 'BOT'
+    type: 'MANUAL' | 'BOT' | 'DIVIDER'
     id: string;
     sessionId: string;
 }
