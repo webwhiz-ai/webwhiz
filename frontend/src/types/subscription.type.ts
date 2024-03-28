@@ -1,10 +1,13 @@
 export type SubscriptionType =
+    | 'FREE'
     | 'Base'
     | 'Standard'
     | 'Premium'
-    | 'Enterprise';
+    | 'Enterprise'
+    | 'DEMO'
+    | 'Self Hosted';
 
-    export type SubscriptionTypeLTD =
+export type SubscriptionTypeLTD =
     | 'AppSumo tier 1'
     | 'AppSumo tier 2'
     | 'AppSumo tier 3'
@@ -45,7 +48,7 @@ export interface SubscriptionData {
     pageCount: PageCount;
     tokenSize: TokenSize;
     projectCount: ProjectCount;
-    messagecount: messageCount;
+    messageCount: messageCount;
 
 }
 
@@ -54,7 +57,7 @@ export interface SubscriptionDataLTD {
     pageCount: PageCountLTD;
     tokenSize: TokenSizeLTD;
     projectCount: ProjectCountLTD;
-    messagecount: messageCountLTD;
+    messageCount: messageCountLTD;
 }
 
 export interface DiscoutData {

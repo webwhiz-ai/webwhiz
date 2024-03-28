@@ -185,7 +185,7 @@ export const PricingCard = ({
 				</ListItem>
                 <ListItem whiteSpace="nowrap">
                     <ListIcon boxSize={22} as={CheckCircleBlueIconMd} color={isPopular ? "white" : "blue.500"} />
-                    {subscriptionData.messagecount} message/mo
+                    {subscriptionData.messageCount} messages/mo
 				</ListItem>
                 <ListItem>
                     <ListIcon boxSize={22} as={CheckCircleBlueIconMd} color={isPopular ? "white" : "blue.500"} />

@@ -49,7 +49,7 @@ export const FreeComponent = ({ currentSubscription, discountData, userEmail,  a
                 subscriptionData={{
                     type: 'AppSumo tier 1',
                     pageCount: 2000,
-                    messagecount: '1k',
+                    messageCount: '1k',
                     tokenSize: '1M',
                     projectCount: 20,
                 }}
@@ -64,7 +64,7 @@ export const FreeComponent = ({ currentSubscription, discountData, userEmail,  a
                 subscriptionData={{
                     type: 'AppSumo tier 2',
                     pageCount: 5000,
-                    messagecount: '2.5k',
+                    messageCount: '2.5k',
                     tokenSize: '2.5M',
                     projectCount: 50,
                 }}
@@ -79,7 +79,7 @@ export const FreeComponent = ({ currentSubscription, discountData, userEmail,  a
                 subscriptionData={{
                     type: 'AppSumo tier 3',
                     pageCount: 10000,
-                    messagecount: '5K',
+                    messageCount: '5K',
                     tokenSize: '5M',
                     projectCount: 'Unlimited',
                 }}
@@ -218,7 +218,7 @@ export const FreeComponent = ({ currentSubscription, discountData, userEmail,  a
                                 pageCount: 100,
                                 tokenSize: '400K',
                                 projectCount: 5,
-                                messagecount: '4K',
+                                messageCount: '4K',
                             }}
                             discountData={discountData}
                             isCurrentSubscription={isCurrentPlan('Base')}
@@ -231,7 +231,7 @@ export const FreeComponent = ({ currentSubscription, discountData, userEmail,  a
                                 pageCount: 1000,
                                 tokenSize: '1M',
                                 projectCount: 10,
-                                messagecount: '10k',
+                                messageCount: '10k',
                             }}
                             discountData={discountData}
                             isCurrentSubscription={isCurrentPlan('Standard')}
@@ -244,7 +244,7 @@ export const FreeComponent = ({ currentSubscription, discountData, userEmail,  a
                                 pageCount: 2500,
                                 tokenSize: '2.5M',
                                 projectCount: 100,
-                                messagecount: '25K',
+                                messageCount: '25K',
                             }}
                             discountData={discountData}
                             isCurrentSubscription={isCurrentPlan('Premium')}
@@ -258,7 +258,7 @@ export const FreeComponent = ({ currentSubscription, discountData, userEmail,  a
                                 pageCount: 10000,
                                 tokenSize: 'Unlimited',
                                 projectCount: 'Unlimited',
-                                messagecount: '1M',
+                                messageCount: '1M',
                             }}
                             discountData={discountData}
                             isCurrentSubscription={isCurrentPlan('Enterprise')}
