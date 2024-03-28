@@ -59,23 +59,23 @@ export const App = (props: AppProps) => {
 		try {	
 
 
-			let usage = (userData.monthUsage.msgCount * 100 ) / userData?.subscriptionData?.maxMessages;
+			let usage = (userData.monthUsage.weightedMsgCount * 100) / userData?.subscriptionData?.maxMessages;
 			
 			usage = parseFloat(usage.toFixed(2));
 
 			let isExceed = false;
 			
 			if(userData?.subscriptionData?.maxMessages !== undefined) {
-				isExceed = userData.monthUsage.msgCount >= userData?.subscriptionData?.maxMessages;
+				isExceed = userData.monthUsage.weightedMsgCount >= userData?.subscriptionData?.maxMessages;
 			}
 
 
 			return <Box className={classNames(styles.usageCont, {
 				[styles.usageContExceeded]: isExceed,
 			})}>
-				<Heading className={styles.usagePlan} size="h4" color="gray.500">{(userData?.subscriptionData?.name || '').toLowerCase().replace('app sumo', 'LTD')} plan</Heading>
+				<Heading className={styles.usagePlan} size="h4" color="gray.500">{(userData?.subscriptionData?.name || '').toLowerCase().replace('app sumo', 'LTD').replace(/\b\w/g, c => c.toUpperCase())} Plan</Heading>
 				<Box className={styles.usgaeNumbers}><Text as="span" fontWeight="bold">
-				{formatNumber(userData.monthUsage.msgCount)}</Text> / {formatNumber(userData?.subscriptionData?.maxMessages)}</Box>
+					{formatNumber(userData.monthUsage.weightedMsgCount)}</Text> / {formatNumber(userData?.subscriptionData?.maxMessages)}</Box>
 				<Text className={styles.usageLabel} fontSize="sm">Monthly usage limits</Text>
 				<Progress className={styles.progressbar} w="100%" value={usage} size='sm' colorScheme={isExceed ? 'red': 'blue'} borderRadius="md" />
 				{
