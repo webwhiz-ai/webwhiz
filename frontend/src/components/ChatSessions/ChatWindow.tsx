@@ -2,7 +2,7 @@ import React, { useRef, useEffect } from 'react';
 import { Box, Spinner, Flex, VStack, HStack, Text, Heading, Divider, AbsoluteCenter } from '@chakra-ui/react';
 import { MessageList, ChatSessionDetail } from '../../types/knowledgebase.type';
 import { ChatBubble } from './ChatBubble';
-import { getBrowserName } from '../../utils/commonUtils';
+import { getBrowserName, getLlmModelUsed } from '../../utils/commonUtils';
 import { format } from 'date-fns';
 import styles from "./ChatWindow.module.scss";
 import TextareaAutosize from 'react-textarea-autosize'
@@ -61,7 +61,7 @@ export const ChatWindow = ({
         return (
             <Box >
                 <VStack alignItems={"start"} className={styles.meta} spacing="3" pb="4" mb="4" borderBottom="1px solid" borderColor="gray.100">
-                    <HStack className={styles.metaItemGroup} fontSize="sm" color="gray.500">
+                    <HStack className={styles.metaItemGroup} fontSize="sm" color="gray.500" spacing={5}>
                         <Flex className={styles.metaItem}>
                             <svg
                                 width="18"
@@ -100,6 +100,26 @@ export const ChatWindow = ({
                             </svg>
 
                             <Text>{format(new Date(chatData.updatedAt), 'hh:mm aaa	')}</Text>
+                        </Flex>
+                        <Flex className={styles.metaItem}>
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="18"
+                                height="18"
+                                viewBox="0 0 24 24"
+                                fill='none'
+                            >
+                                <path
+                                    d="M13 1L6 14h6v9l7-13h-6V1z"
+                                    stroke="currentcolor"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    transform="matrix(.91 0 0 .91 12 12) translate(-12.5 -12)"
+                                ></path>
+                            </svg>
+
+                            <Text>{getLlmModelUsed(chatData.model)}</Text>
                         </Flex>
                     </HStack>
                     <HStack className={styles.metaItemGroup} fontSize="sm" color="gray.500">

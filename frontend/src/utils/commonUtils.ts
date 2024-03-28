@@ -56,6 +56,18 @@ export function getBrowserName(userAgent: string) {
   return 'Other';
 }
 
+export function getLlmModelUsed(modelName?: string) {
+  switch (modelName) {
+    case 'gpt-4-0613':
+      return 'GPT-4';
+    case 'gpt-4-turbo-preview':
+      return 'GPT-4 Turbo';
+    case 'gpt-3.5-turbo':
+    default:
+      return 'GPT-3.5 Turbo';
+  }
+}
+
 export const chatWidgetDefaultValues = {
 	backgroundColor: "#000",
 	heading: 'I am your AI assistant',

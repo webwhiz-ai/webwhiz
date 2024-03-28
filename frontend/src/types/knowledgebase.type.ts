@@ -218,6 +218,7 @@ export interface ChatSessionDetail {
     messages: MessageList[];
     userData: UserData;
     src: null;
+    model?: string;
 }
 
 export interface OfflineMessage {
