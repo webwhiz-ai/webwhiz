@@ -61,7 +61,7 @@ export const ChatWindow = ({
         return (
             <Box >
                 <VStack alignItems={"start"} className={styles.meta} spacing="3" pb="4" mb="4" borderBottom="1px solid" borderColor="gray.100">
-                    <HStack className={styles.metaItemGroup} fontSize="sm" color="gray.500" spacing={5}>
+                    <HStack className={styles.metaItemGroup} fontSize="sm" color="gray.500" spacing={4}>
                         <Flex className={styles.metaItem}>
                             <svg
                                 width="18"
@@ -122,7 +122,7 @@ export const ChatWindow = ({
                             <Text>{getLlmModelUsed(chatData.model)}</Text>
                         </Flex>
                     </HStack>
-                    <HStack className={styles.metaItemGroup} fontSize="sm" color="gray.500">
+                    <HStack className={styles.metaItemGroup} fontSize="sm" color="gray.500" spacing={4}>
                         <Flex className={styles.metaItem}>
                             <svg
                                 width="18"
