@@ -231,6 +231,11 @@ export class UserService {
       };
     }
 
+    // Since weightedMsgCount was newly added, set it to msgCount if not present
+    if (userData.monthUsage && !userData.monthUsage.weightedMsgCount) {
+      userData.monthUsage.weightedMsgCount = userData.monthUsage.msgCount;
+    }
+
     const subscriptionData = this.subsPlanService.getSubscriptionPlanInfo(
       user.activeSubscription,
     );
