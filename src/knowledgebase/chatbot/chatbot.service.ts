@@ -401,6 +401,8 @@ export class ChatbotService {
       sessionData.subscriptionData.maxTokens,
       sessionData.customKeys,
     );
+    const kbId = sessionData.knowledgebaseId;
+
     if (!allowUsage) {
       const answer = 'Sorry I cannot respond right now';
       const msg = {
@@ -416,7 +418,9 @@ export class ChatbotService {
         sender: null,
         sessionId: sessionId,
       };
-      this.webSocketChatGateway.server.emit('chat_broadcast', msg);
+      this.webSocketChatGateway.server
+        .to(kbId.toHexString())
+        .emit('chat_broadcast', msg);
       await this.updateSessionDataWithNewMsg(sessionData, msg);
       return of(answer);
     }
@@ -424,9 +428,6 @@ export class ChatbotService {
     //
     // Get top N matching chunks for current query
     //
-
-    const kbId = sessionData.knowledgebaseId;
-
     // Get top n chunks from knowledge base
     const topChunks = await this.openaiChatbotService.getTopNChunks(
       kbId,
@@ -464,7 +465,9 @@ export class ChatbotService {
           sender: null,
           sessionId: sessionId,
         };
-        this.webSocketChatGateway.server.emit('chat_broadcast', msg);
+        this.webSocketChatGateway.server
+          .to(kbId.toHexString())
+          .emit('chat_broadcast', msg);
         await this.updateSessionDataWithNewMsg(sessionData, msg);
 
         // Call webhook with msg
@@ -628,11 +631,18 @@ export class ChatbotService {
       sender: 'SYSTEM',
       sessionId: sessionId,
     };
-    this.webSocketChatGateway.server.emit('new_session', msgData);
+    this.webSocketChatGateway.server
+      .to(kbId.toHexString())
+      .emit('new_session', msgData);
 
     return sessionId.toString();
   }
 
+  /**
+   * Switches the current chat session to either manual or automated mode based on the provided flag.
+   * @param sessionId The unique identifier of the chat session to switch.
+   * @param isManual A boolean flag indicating whether to switch the session to manual mode (true) or automated mode (false).
+   */
   async switchChatSession(sessionId: string, isManual: boolean) {
     const sessionData = await this.getChatSessionDataFromCache(sessionId);
 
@@ -651,7 +661,6 @@ export class ChatbotService {
       sessionId: sessionId,
     };
 
-    this.webSocketChatGateway.server.emit('chat_broadcast', msg);
     const updatedSessionData: ChatSession = {
       ...sessionData,
       isManual: isManual,
@@ -663,6 +672,11 @@ export class ChatbotService {
       this.setChatSessionData(updatedSessionData),
       this.kbDbService.updateChatSession(sessionData._id, updatedSessionData),
     ]);
+
+    this.webSocketChatGateway.server
+      .to(sessionData.knowledgebaseId.toHexString())
+      .emit('chat_broadcast', msg);
+
     return sessionId;
   }
 
