@@ -25,9 +25,8 @@ import { WebhookModule } from './webhook/webhook.module';
 import { SlackBoltMiddleware } from './slack/slack-bolt.middleware';
 import { SlackModule } from './slack/slack.module';
 import { PublicApisModule } from './public-apis/public-apis.module';
-import { TypeOrmModule } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
-import { KbEmbeddingsPg } from './common/entity/kbEmbeddings.entity';
+import { PostgresModule } from './common/postgres/postgres.module';
 
 @Module({
   imports: [
@@ -36,16 +35,7 @@ import { KbEmbeddingsPg } from './common/entity/kbEmbeddings.entity';
       dsn: process.env.SENTRY_DSN,
       tracesSampleRate: 0.3,
     }),
-    TypeOrmModule.forRoot({
-      type: 'postgres',
-      host: process.env.POSTGRES_HOST,
-      port: parseInt(process.env.POSTGRES_PORT, 10),
-      username: process.env.POSTGRES_USER,
-      password: process.env.POSTGRES_PASSWORD,
-      database: process.env.POSTGRES_DB,
-      entities: [KbEmbeddingsPg],
-      synchronize: true, // TODO: Disable this in production
-    }),
+    PostgresModule,
     RedisModule,
     MongoModule,
     CeleryClientModule,

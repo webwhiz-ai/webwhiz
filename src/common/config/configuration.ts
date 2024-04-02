@@ -23,6 +23,11 @@ interface AppConfig {
   senderEmail: string;
   senderName: string;
   clientUrl: string;
+  postgresHost?: string;
+  postgresPort?: number;
+  postgresUsername: string;
+  postgresPassword: string;
+  postgresDatabaseName?: string;
 }
 
 const config = (): AppConfig => ({
@@ -52,6 +57,11 @@ const config = (): AppConfig => ({
   senderEmail: process.env.EMAIL_SENDER_EMAIL || 'hi@webwhiz.ai',
   senderName: process.env.EMAIL_SENDER_NAME || 'WebWhiz.ai',
   clientUrl: process.env.CLIENT_URL || 'https://app.webwhiz.ai',
+  postgresHost: process.env.POSTGRES_HOST || 'localhost',
+  postgresPort: parseInt(process.env.POSTGRES_PORT as string, 10) || 5432,
+  postgresUsername: process.env.POSTGRES_USER,
+  postgresPassword: process.env.POSTGRES_PASSWORD,
+  postgresDatabaseName: process.env.POSTGRES_DB || 'postgres',
 });
 
 export { AppConfig };

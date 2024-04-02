@@ -128,6 +128,7 @@ export class OpenaiChatbotService {
       embeddingModel: embeddingModel || EmbeddingModel.OPENAI_EMBEDDING_2,
     });
 
+    // TODO: remove this once we move to postgres
     // Add embedding for new chunk into embeddings collection
     await this.kbDbService.insertEmbeddingForChunk({
       _id: chunk._id,
