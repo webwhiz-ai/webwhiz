@@ -231,6 +231,10 @@ export class UserService {
       };
     }
 
+    if (userData.monthUsage && !userData.monthUsage.msgCount) {
+      userData.monthUsage.msgCount = 0;
+    }
+
     // Since weightedMsgCount was newly added, set it to msgCount if not present
     if (userData.monthUsage && !userData.monthUsage.weightedMsgCount) {
       userData.monthUsage.weightedMsgCount = userData.monthUsage.msgCount;
