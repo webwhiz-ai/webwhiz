@@ -31,7 +31,7 @@ export type PageCount = 100 | 1000 | 2500 | 10000;
 
 export type TokenSize = "400K" | "1M" | "2.5M" | "Unlimited";
 
-export type messageCount = "4K" | "10k" | "25K" | "1M";
+export type messageCount = "2K" | "5k" | "10K" | "40K";
 
 export type ProjectCount = 5 | 10 | 100 | "Unlimited";
 

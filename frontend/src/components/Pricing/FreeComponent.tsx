@@ -218,7 +218,7 @@ export const FreeComponent = ({ currentSubscription, discountData, userEmail,  a
                                 pageCount: 100,
                                 tokenSize: '400K',
                                 projectCount: 5,
-                                messageCount: '4K',
+                                messageCount: '2K',
                             }}
                             discountData={discountData}
                             isCurrentSubscription={isCurrentPlan('Base')}
@@ -231,7 +231,7 @@ export const FreeComponent = ({ currentSubscription, discountData, userEmail,  a
                                 pageCount: 1000,
                                 tokenSize: '1M',
                                 projectCount: 10,
-                                messageCount: '10k',
+                                messageCount: '5k',
                             }}
                             discountData={discountData}
                             isCurrentSubscription={isCurrentPlan('Standard')}
@@ -244,7 +244,7 @@ export const FreeComponent = ({ currentSubscription, discountData, userEmail,  a
                                 pageCount: 2500,
                                 tokenSize: '2.5M',
                                 projectCount: 100,
-                                messageCount: '25K',
+                                messageCount: '10K',
                             }}
                             discountData={discountData}
                             isCurrentSubscription={isCurrentPlan('Premium')}
@@ -258,7 +258,7 @@ export const FreeComponent = ({ currentSubscription, discountData, userEmail,  a
                                 pageCount: 10000,
                                 tokenSize: 'Unlimited',
                                 projectCount: 'Unlimited',
-                                messageCount: '1M',
+                                messageCount: '40K',
                             }}
                             discountData={discountData}
                             isCurrentSubscription={isCurrentPlan('Enterprise')}

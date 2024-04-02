@@ -34,7 +34,7 @@ export const subscriptionPlanData: Record<Subscription, SubscriptionPlanInfo> =
       maxTokens: 4000000,
       maxPages: 100,
       maxChunksPerPage: 100,
-      maxMessages: 4000,
+      maxMessages: 2000,
     },
     [Subscription.STANDARD_MONTHLY]: {
       name: 'Standard',
@@ -43,7 +43,7 @@ export const subscriptionPlanData: Record<Subscription, SubscriptionPlanInfo> =
       maxTokens: 10000000,
       maxPages: 1000,
       maxChunksPerPage: 100,
-      maxMessages: 10000,
+      maxMessages: 5000,
     },
     [Subscription.PREMIUM_MONTHLY]: {
       name: 'Premium',
@@ -52,7 +52,7 @@ export const subscriptionPlanData: Record<Subscription, SubscriptionPlanInfo> =
       maxTokens: 25000000,
       maxPages: 2500,
       maxChunksPerPage: 100,
-      maxMessages: 25000,
+      maxMessages: 10000,
     },
     [Subscription.ENTERPRISE_MONTHLY]: {
       name: 'Enterprise',
@@ -61,7 +61,7 @@ export const subscriptionPlanData: Record<Subscription, SubscriptionPlanInfo> =
       maxTokens: 95000000,
       maxPages: 10000,
       maxChunksPerPage: 100,
-      maxMessages: 100000,
+      maxMessages: 40000,
     },
     [Subscription.BASE_YEARLY]: {
       name: 'Base',
@@ -70,7 +70,7 @@ export const subscriptionPlanData: Record<Subscription, SubscriptionPlanInfo> =
       maxTokens: 4000000,
       maxPages: 100,
       maxChunksPerPage: 100,
-      maxMessages: 4000,
+      maxMessages: 2000,
     },
     [Subscription.STANDARD_YEARLY]: {
       name: 'Standard',
@@ -79,7 +79,7 @@ export const subscriptionPlanData: Record<Subscription, SubscriptionPlanInfo> =
       maxTokens: 10000000,
       maxPages: 1000,
       maxChunksPerPage: 100,
-      maxMessages: 10000,
+      maxMessages: 5000,
     },
     [Subscription.PREMIUM_YEARLY]: {
       name: 'Premium',
@@ -88,7 +88,7 @@ export const subscriptionPlanData: Record<Subscription, SubscriptionPlanInfo> =
       maxTokens: 25000000,
       maxPages: 2500,
       maxChunksPerPage: 100,
-      maxMessages: 25000,
+      maxMessages: 10000,
     },
     [Subscription.ENTERPRISE_YEARLY]: {
       name: 'Enterprise',
@@ -97,7 +97,7 @@ export const subscriptionPlanData: Record<Subscription, SubscriptionPlanInfo> =
       maxTokens: 95000000,
       maxPages: 10000,
       maxChunksPerPage: 100,
-      maxMessages: 100000,
+      maxMessages: 40000,
     },
     [Subscription.DEMO_ACCOUNT]: {
       name: 'DEMO',
