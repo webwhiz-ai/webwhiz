@@ -28,8 +28,8 @@ const STANDARD_MONTHLY_PRICING = 49;
 const STANDARD_YEARLY_PRICING = 41;
 const PREMIUM_MONTHLY_PRICING = 99;
 const PREMIUM_YEARLY_PRICING = 82;
-const ENTERPRICE_MONTHLY_PRICING = 349;
-const ENTERPRICE_YEARLY_PRICING = 291;
+const ENTERPRISE_MONTHLY_PRICING = 349;
+const ENTERPRISE_YEARLY_PRICING = 291;
 
 const LIFETIME_PLAN1_PRICING = 59;
 const LIFETIME_PLAN2_PRICING = 118;
@@ -81,7 +81,7 @@ export const PricingCard = ({
                     basePrice = PREMIUM_YEARLY_PRICING;
                     break;
                 case 'Enterprise':
-                    basePrice = ENTERPRICE_YEARLY_PRICING;
+                    basePrice = ENTERPRISE_YEARLY_PRICING;
                     break;
             }
         } else {
@@ -96,7 +96,7 @@ export const PricingCard = ({
                     basePrice = PREMIUM_MONTHLY_PRICING;
                     break;
                 case 'Enterprise':
-                    basePrice = ENTERPRICE_MONTHLY_PRICING;
+                    basePrice = ENTERPRISE_MONTHLY_PRICING;
                     break;
             }
         }
@@ -185,7 +185,7 @@ export const PricingCard = ({
 				</ListItem>
                 <ListItem whiteSpace="nowrap">
                     <ListIcon boxSize={22} as={CheckCircleBlueIconMd} color={isPopular ? "white" : "blue.500"} />
-                    {subscriptionData.tokenSize} tokens / mo
+                    {subscriptionData.messageCount} messages/mo
 				</ListItem>
                 <ListItem>
                     <ListIcon boxSize={22} as={CheckCircleBlueIconMd} color={isPopular ? "white" : "blue.500"} />

@@ -1,10 +1,13 @@
 export type SubscriptionType =
+    | 'FREE'
     | 'Base'
     | 'Standard'
     | 'Premium'
-    | 'Enterprise';
+    | 'Enterprise'
+    | 'DEMO'
+    | 'Self Hosted';
 
-    export type SubscriptionTypeLTD =
+export type SubscriptionTypeLTD =
     | 'AppSumo tier 1'
     | 'AppSumo tier 2'
     | 'AppSumo tier 3'
@@ -28,6 +31,8 @@ export type PageCount = 100 | 1000 | 2500 | 10000;
 
 export type TokenSize = "400K" | "1M" | "2.5M" | "Unlimited";
 
+export type messageCount = "2K" | "5k" | "10K" | "40K";
+
 export type ProjectCount = 5 | 10 | 100 | "Unlimited";
 
 export type PageCountLTD = 2000 | 5000 | 10000;
@@ -36,11 +41,15 @@ export type TokenSizeLTD = "1M" | "2.5M" | "5M";
 
 export type ProjectCountLTD = 20 | 50 | "Unlimited";
 
+export type messageCountLTD = "1k" | "2.5k" | "5K";
+
 export interface SubscriptionData {
     type: SubscriptionType;
     pageCount: PageCount;
     tokenSize: TokenSize;
     projectCount: ProjectCount;
+    messageCount: messageCount;
+
 }
 
 export interface SubscriptionDataLTD {
@@ -48,6 +57,7 @@ export interface SubscriptionDataLTD {
     pageCount: PageCountLTD;
     tokenSize: TokenSizeLTD;
     projectCount: ProjectCountLTD;
+    messageCount: messageCountLTD;
 }
 
 export interface DiscoutData {

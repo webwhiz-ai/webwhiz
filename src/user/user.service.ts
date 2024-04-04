@@ -222,18 +222,22 @@ export class UserService {
       userData?.monthUsage?.month === undefined ||
       userData?.monthUsage?.month !== currentMonth
     ) {
-      if (userData.monthUsage === undefined) {
-        userData.monthUsage = {
-          month: '',
-          count: 0,
-          msgCount: 0,
-          rawTokenCount: 0,
-        };
-      }
-      userData.monthUsage.month = currentMonth;
-      userData.monthUsage.count = 0;
+      userData.monthUsage = {
+        month: currentMonth,
+        count: 0,
+        msgCount: 0,
+        rawTokenCount: 0,
+        weightedMsgCount: 0,
+      };
+    }
+
+    if (userData.monthUsage && !userData.monthUsage.msgCount) {
       userData.monthUsage.msgCount = 0;
-      userData.monthUsage.rawTokenCount = 0;
+    }
+
+    // Since weightedMsgCount was newly added, set it to msgCount if not present
+    if (userData.monthUsage && !userData.monthUsage.weightedMsgCount) {
+      userData.monthUsage.weightedMsgCount = userData.monthUsage.msgCount;
     }
 
     const subscriptionData = this.subsPlanService.getSubscriptionPlanInfo(
@@ -416,6 +420,10 @@ export class UserService {
       { projection: { monthUsage: 1, tokenCredits: 1, activeSubscription: 1 } },
     );
 
+    if (usageData.monthUsage && !usageData.monthUsage.weightedMsgCount) {
+      usageData.monthUsage.weightedMsgCount = usageData.monthUsage.msgCount;
+    }
+
     return usageData;
   }
 
@@ -430,6 +438,7 @@ export class UserService {
     userId: ObjectId,
     n: number,
     rawTokenCount: number,
+    weightedMsgCount: number,
   ) {
     const messgCount = n > 0 ? 1 : 0;
     await this.userCollection.updateOne({ _id: userId }, [
@@ -470,6 +479,17 @@ export class UserService {
                     rawTokenCount,
                   ],
                 },
+                weightedMsgCount: {
+                  $add: [
+                    {
+                      $ifNull: [
+                        '$monthUsage.weightedMsgCount',
+                        '$monthUsage.msgCount',
+                      ],
+                    },
+                    weightedMsgCount,
+                  ],
+                },
               },
               else: {
                 month: {
@@ -486,6 +506,7 @@ export class UserService {
                 count: n,
                 msgCount: messgCount,
                 rawTokenCount: rawTokenCount,
+                weightedMsgCount: weightedMsgCount,
               },
             },
           },

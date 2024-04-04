@@ -658,7 +658,8 @@ export const ChatBotsCustomize = ({
 																		<option value="gpt-4-0613">GPT-4</option>
 																		<option value="gpt-4-turbo-preview">GPT-4-Turbo</option>
 																	</Select>
-																	<FormHelperText fontSize="sm">Token consumption will be 30 times higher for GPT-4 compared to GPT-3.5.</FormHelperText>
+																	<FormHelperText fontSize="sm"> Note: Credits consumption vary with model.
+																		Credits per message: 1 credit for GPT-3.5-Turbo, 10 credits for GPT-4-Turbo, and 20 credits for GPT-4.</FormHelperText>
 																</FormControl>
 															)}
 														</Field>

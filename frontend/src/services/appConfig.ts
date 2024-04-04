@@ -11,10 +11,19 @@ export interface User {
         maxChatbots :number
         maxChunksPerPage :number
         maxPages :number
-        maxTokens :number
+        maxMessages:number
         name : SubscriptionType
         type: "MONTHLY" | "YEARLY" | "LIFETIME"
-    }
+    },
+    monthUsage: UserMonthlyUsage,
+}
+
+export interface UserMonthlyUsage {
+  month: string
+  count: number
+  msgCount: number
+  rawTokenCount: number
+  weightedMsgCount: number; // Message count multiplied by model factor
 }
 
 export const CurrentUser: any = {
