@@ -155,7 +155,7 @@ export async function updateWebsiteData(id:string, data: WebsiteData): Promise<A
 	return await axios({
 		baseURL: baseURL,
 		method: 'put',
-		data: { ...data, useAlternateParser: true },
+		data: data,
 		url: `/knowledgebase/${id}/website_data`,
 	});
 }

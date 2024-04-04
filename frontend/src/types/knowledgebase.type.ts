@@ -173,7 +173,7 @@ export interface MessageList {
     qTokens: number;
     ts: string;
     msg: string
-    type: 'MANUAL' | 'BOT'
+    type: 'MANUAL' | 'BOT' | 'DIVIDER'
     id: string;
     sessionId: string;
 }
@@ -218,6 +218,7 @@ export interface ChatSessionDetail {
     messages: MessageList[];
     userData: UserData;
     src: null;
+    model?: string;
 }
 
 export interface OfflineMessage {

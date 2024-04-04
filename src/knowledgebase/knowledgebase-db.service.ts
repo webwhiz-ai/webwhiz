@@ -222,6 +222,7 @@ export class KnowledgebaseDbService {
     kbId: ObjectId,
     n: number,
     rawTokenCount: number,
+    weightedMsgCount: number,
   ) {
     const messgCount = n > 0 ? 1 : 0;
     await this.knowledgebaseCollection.updateOne({ _id: kbId }, [
@@ -262,6 +263,17 @@ export class KnowledgebaseDbService {
                     rawTokenCount,
                   ],
                 },
+                weightedMsgCount: {
+                  $add: [
+                    {
+                      $ifNull: [
+                        '$monthUsage.weightedMsgCount',
+                        '$monthUsage.msgCount',
+                      ],
+                    },
+                    weightedMsgCount,
+                  ],
+                },
               },
               else: {
                 month: {
@@ -278,6 +290,7 @@ export class KnowledgebaseDbService {
                 count: n,
                 msgCount: messgCount,
                 rawTokenCount: rawTokenCount,
+                weightedMsgCount: weightedMsgCount,
               },
             },
           },
@@ -543,6 +556,7 @@ export class KnowledgebaseDbService {
           startedAt: 1,
           updatedAt: 1,
           knowledgebaseId: 1,
+          model: 1,
         },
       },
     );

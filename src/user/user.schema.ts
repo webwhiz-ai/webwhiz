@@ -29,6 +29,7 @@ export interface UserMonthlyUsage {
   count: number; // Total token count (considering model used)
   msgCount: number;
   rawTokenCount: number; // Token count (not considering model used)
+  weightedMsgCount: number; // Message count multiplied by model factor
 }
 
 export interface SubscriptionData {

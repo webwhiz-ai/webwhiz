@@ -154,6 +154,7 @@ export interface KbEmbedding {
   knowledgebaseId: ObjectId;
   embeddings: number[];
   type: DataStoreType;
+  embeddingModel?: EmbeddingModel;
 }
 
 /*********************************************************
@@ -217,6 +218,7 @@ export type ChatSessionSparse = Pick<
   | 'userData'
   | 'startedAt'
   | 'updatedAt'
+  | 'model'
 >;
 
 export type ChatSessionMessageSparse = Pick<ChatSession, 'messages'>;

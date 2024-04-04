@@ -1,15 +1,14 @@
 import React, { useRef, useEffect } from 'react';
 import { Box, Spinner, Flex, VStack, HStack, Text, Heading, Divider, AbsoluteCenter } from '@chakra-ui/react';
-import { MessageList, ChatSessionDetail } from '../../types/knowledgebase.type';
+import { ChatSessionDetail } from '../../types/knowledgebase.type';
 import { ChatBubble } from './ChatBubble';
-import { getBrowserName } from '../../utils/commonUtils';
+import { getBrowserName, getLlmModelUsed } from '../../utils/commonUtils';
 import { format } from 'date-fns';
 import styles from "./ChatWindow.module.scss";
 import TextareaAutosize from 'react-textarea-autosize'
 import { NoDataChatSessions } from '../Icons/noData/NoDataChatSessions';
 import { permissions } from '../../services/appConfig';
 type ChatWindowProps = {
-    messages?: MessageList[];
     isMessagesLoading?: boolean;
     userData: any;
     chatData?: ChatSessionDetail;
@@ -18,7 +17,6 @@ type ChatWindowProps = {
 
 export const ChatWindow = ({
     chatData,
-    messages,
     isMessagesLoading,
     userData,
     onChatReply
@@ -49,7 +47,7 @@ export const ChatWindow = ({
         if (chatListRef.current) {
             chatListRef.current.scrollTop = chatListRef.current.scrollHeight;
         }
-    }, [messages]);
+    }, [chatData?.messages]);
 
     useEffect(() => {
         if (!chatData?._id) return
@@ -61,7 +59,7 @@ export const ChatWindow = ({
         return (
             <Box >
                 <VStack alignItems={"start"} className={styles.meta} spacing="3" pb="4" mb="4" borderBottom="1px solid" borderColor="gray.100">
-                    <HStack className={styles.metaItemGroup} fontSize="sm" color="gray.500">
+                    <HStack className={styles.metaItemGroup} fontSize="sm" color="gray.500" spacing={4}>
                         <Flex className={styles.metaItem}>
                             <svg
                                 width="18"
@@ -101,8 +99,28 @@ export const ChatWindow = ({
 
                             <Text>{format(new Date(chatData.updatedAt), 'hh:mm aaa	')}</Text>
                         </Flex>
+                        <Flex className={styles.metaItem}>
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="18"
+                                height="18"
+                                viewBox="0 0 24 24"
+                                fill='none'
+                            >
+                                <path
+                                    d="M13 1L6 14h6v9l7-13h-6V1z"
+                                    stroke="currentcolor"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    transform="matrix(.91 0 0 .91 12 12) translate(-12.5 -12)"
+                                ></path>
+                            </svg>
+
+                            <Text>{getLlmModelUsed(chatData.model)}</Text>
+                        </Flex>
                     </HStack>
-                    <HStack className={styles.metaItemGroup} fontSize="sm" color="gray.500">
+                    <HStack className={styles.metaItemGroup} fontSize="sm" color="gray.500" spacing={4}>
                         <Flex className={styles.metaItem}>
                             <svg
                                 width="18"
@@ -171,6 +189,9 @@ export const ChatWindow = ({
         }
     }, []);
 
+    const isManualChat = chatData?.messages?.at(-1)?.type === 'MANUAL' ||
+        (chatData?.messages?.at(-1)?.type === 'DIVIDER' && chatData?.messages?.at(-1)?.msg === 'Chat with the Team');
+
     if (!isMessagesLoading && !chatData?._id) {
         return (
             <VStack
@@ -221,8 +242,8 @@ export const ChatWindow = ({
             )}
             <Box ref={chatListRef} h="100%" overflowX="hidden" overflowY="auto" p={4} position={'relative'} pb={'100px'}>
                 {getChatHeader()}
-                {messages &&
-                    messages.map((message) => {
+                {chatData?.messages &&
+                    chatData?.messages.map((message) => {
                         return (
                             <Box key={message.ts.toString()}>
                                 {renderMessage(message)}
@@ -230,7 +251,7 @@ export const ChatWindow = ({
                         );
                     })}
             </Box>
-            {chatData && (permissions.get().isOwner || permissions.get().isAdmin || permissions.get().isEditor) ? <Box className="chat-input-wrap" style={{ position: 'absolute' }} w={'100%'} bottom={0} bgColor={'white'} overflow={'hidden'} >
+            {chatData && isManualChat && (permissions.get().isOwner || permissions.get().isAdmin || permissions.get().isEditor) ? <Box className="chat-input-wrap" style={{ position: 'absolute' }} w={'100%'} bottom={0} bgColor={'white'} overflow={'hidden'} >
                 <TextareaAutosize ref={inputRef} autoFocus value={question} onChange={handleChatChange} onKeyDown={handleKeyDown} rows={1} className="chat-input textarea js-auto-size" id="chat-input" placeholder="Type your message" />
                 <button onClick={handleSubmit} className="chat-submit-btn" type="submit"><svg width="16" height="16" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path fillRule="evenodd" clipRule="evenodd" d="M4.394 14.7L13.75 9.3c1-.577 1-2.02 0-2.598L4.394 1.299a1.5 1.5 0 00-2.25 1.3v3.438l4.059 1.088c.494.132.494.833 0 .966l-4.06 1.087v4.224a1.5 1.5 0 002.25 1.299z" style={{ fill: '#000' }}></path>
