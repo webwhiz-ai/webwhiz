@@ -118,6 +118,7 @@ export class OpenaiChatbotService {
       embeddingModel,
     );
 
+    // Add embedding for new chunk into embeddings collection
     await this.pgEmbeddingsdbService.insertEmbeddingsToPg({
       _id: chunk._id.toString(),
       knowledgebaseId: kbId.toString(),
@@ -128,14 +129,6 @@ export class OpenaiChatbotService {
       embeddingModel: embeddingModel || EmbeddingModel.OPENAI_EMBEDDING_2,
     });
 
-    // TODO: remove this once we move to postgres
-    // Add embedding for new chunk into embeddings collection
-    await this.kbDbService.insertEmbeddingForChunk({
-      _id: chunk._id,
-      knowledgebaseId: kbId,
-      embeddings,
-      type: chunk.type,
-    });
     await this.kbDbService.updateChunkById(chunk._id, {
       status: ChunkStatus.EMBEDDING_GENERATED,
     });
