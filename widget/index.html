@@ -312,6 +312,19 @@
         }
 
 
+        function resetChatHistory() {
+            const chatMessages = document.getElementById('chat-messages');
+            chatMessages.innerHTML = '';
+            sessionId = '';
+            isManualChat = false;
+            if (enableHumanChat) {
+                chatWithHumanButton.style.display = 'flex';
+                chatWithBotButton.style.display = 'none';
+            }
+            notifyClearHistory();
+        }
+
+
         autosize(document.querySelector('#chat-input'));
 
         // toggle class on chat widget on chat-launcher-btn
@@ -336,17 +349,7 @@
             chatWidget.classList.toggle('widget-maximize');
             notifyParentWidgetMinimize();
         });
-        chatClearHistoryBtn.addEventListener('click', () => {
-            const chatMessages = document.getElementById('chat-messages');
-            chatMessages.innerHTML = '';
-            sessionId = '';
-            isManualChat = false;
-            if (enableHumanChat) {
-                chatWithHumanButton.style.display = 'flex';
-                chatWithBotButton.style.display = 'none';
-            }
-            notifyClearHistory();
-        });
+        chatClearHistoryBtn.addEventListener('click', resetChatHistory);
 
         function expandWidget() {
             chatWidget.classList.add('widget-open');
@@ -398,53 +401,57 @@
         }
 
 
-    async function getWidgetMessages() {
-        const url = `${baseURL}/chatbot/session/${sessionId}/messages`;
-        try {
-            const response = await fetch(url, {
-                method: 'GET',
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json',
-                },
-                referrerPolicy: 'no-referrer',
-            });
+        async function getWidgetMessages() {
+            const url = `${baseURL}/chatbot/session/${sessionId}/messages`;
+            try {
+                const response = await fetch(url, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                    },
+                    referrerPolicy: 'no-referrer',
+                });
 
-            if (response.status === 200) {
-                const { messages: _messages } = await response.json();
+                if (response.status === 200) {
+                    const { messages: _messages } = await response.json();
 
-                const messages = _messages.map(({ role, content, id }) => ({
-                    role: role === 'admin' || role === 'bot' ? 'assistant' : role,
-                    content,
-                    id,
-                }));
+                    const messages = _messages.map(({ role, content, id }) => ({
+                        role: role === 'admin' || role === 'bot' ? 'assistant' : role,
+                        content,
+                        id,
+                    }));
 
-                if (messages.length > 0) {
-                    isFirstMessage = false;
-                }
-
-                const msgHTML = messages.map(msg => {
-                    let msgContent = msg.content.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/<br\/>/g, '\n');
-                    const markdownRes = marked.parse(msgContent);
-
-                    if (msg.role === 'divider') {
-                        return createChatWithDivider(msgContent);
+                    if (messages.length > 0) {
+                        isFirstMessage = false;
                     }
 
-                    const type = msg.role === 'user' ? 'user' : 'chatbot';
-                    return `<div class="chat-message ${type}"><div class="chat-message-text">${markdownRes}</div></div>`;
-                }).join('');
+                    const msgHTML = messages.map(msg => {
+                        let msgContent = msg.content.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/<br\/>/g, '\n');
+                        const markdownRes = marked.parse(msgContent);
 
-                const chatMessages = document.getElementById('chat-messages');
-                chatMessages.insertAdjacentHTML("beforeend", msgHTML);
-                chatMessages.scrollTop = chatMessages.scrollHeight;
-            } else {
-                console.error('Failed to fetch messages: Status', response.status);
+                        if (msg.role === 'divider') {
+                            return createChatWithDivider(msgContent);
+                        }
+
+                        const type = msg.role === 'user' ? 'user' : 'chatbot';
+                        return `<div class="chat-message ${type}"><div class="chat-message-text">${markdownRes}</div></div>`;
+                    }).join('');
+
+                    const chatMessages = document.getElementById('chat-messages');
+                    chatMessages.insertAdjacentHTML("beforeend", msgHTML);
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                } else {
+                    console.error('Failed to fetch messages: Status', response.status);
+                }
+
+                if (response.status === 404) {
+                    resetChatHistory()
+                }
+            } catch (error) {
+                console.error('Error fetching messages:', error);
             }
-        } catch (error) {
-            console.error('Error fetching messages:', error);
         }
-    }
 
         async function initSocketConnection(sessionId) {
             var socket = io(`${baseURL}`, { transports: ["websocket"], query: { id: sessionId, knowledgeBaseId: knowledgebaseId } });
