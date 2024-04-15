@@ -1,12 +1,16 @@
 import { Injectable, Logger } from '@nestjs/common';
-import axios from 'axios';
-import { Configuration, CreateChatCompletionRequest, OpenAIApi } from 'openai';
+import OpenAI from 'openai';
 import { RateLimiterMemory } from 'rate-limiter-flexible';
 import { Subject } from 'rxjs';
 import { AppConfigService } from '../common/config/appConfig.service';
 import * as tiktoken from '@dqbd/tiktoken';
 import { createHash } from 'node:crypto';
 import { EmbeddingModel } from '../knowledgebase/knowledgebase.schema';
+import {
+  ChatCompletionCreateParams,
+  ChatCompletionCreateParamsNonStreaming,
+  ChatCompletionCreateParamsStreaming,
+} from 'openai/resources/chat/completions';
 
 const TOKENIZERS = {
   chatgtp: tiktoken.encoding_for_model('gpt-3.5-turbo'),
@@ -21,18 +25,18 @@ export interface ChatGTPResponse {
   };
 }
 
-export type ChatGptPromptMessages = CreateChatCompletionRequest['messages'];
+// export type ChatGptPromptMessages = CreateChatCompletionRequest['messages'];
+export type ChatGptPromptMessages = ChatCompletionCreateParams['messages'];
 
-function getOpenAiClient(keys: string[]): [OpenAIApi, string, string] {
+function getOpenAiClient(keys: string[]): [OpenAI, string, string] {
   // Select random key from the given list of keys
   const randomKeyIdx = Math.floor(Math.random() * keys.length);
   const selectedKey = keys[randomKeyIdx];
   const selectedKeyHash = createHash('md5').update(selectedKey).digest('hex');
 
-  const config = new Configuration({
+  const client = new OpenAI({
     apiKey: selectedKey,
   });
-  const client = new OpenAIApi(config);
   return [client, selectedKey, selectedKeyHash];
 }
 
@@ -93,14 +97,14 @@ export class OpenaiService {
 
     // API Call
     try {
-      const res = await openAiClient.createEmbedding({
+      const embeddingsResponse = await openAiClient.embeddings.create({
         input,
-        model: model,
+        model,
       });
-      return res.data.data?.[0].embedding;
+      return embeddingsResponse.data[0].embedding;
     } catch (err) {
       this.logger.error('OpenAI Embedding API error', err);
-      this.logger.error('Error reponse', err?.response?.data);
+      this.logger.error('Error response', err?.error);
       console.log(err);
       throw err;
     }
@@ -112,7 +116,7 @@ export class OpenaiService {
    * @returns
    */
   async getChatGptCompletion(
-    data: CreateChatCompletionRequest,
+    data: ChatCompletionCreateParamsNonStreaming,
     keys?: string[],
   ): Promise<ChatGTPResponse> {
     // Get openAi client from the given keys
@@ -123,24 +127,24 @@ export class OpenaiService {
     try {
       await this.rateLimiter.consume(`openai-req-${openAiKeyHash}`, 1);
     } catch (err) {
-      this.logger.error('OpenAI ChatCompletion Request exeeced rate limiting');
+      this.logger.error('OpenAI ChatCompletion Request exceeded rate limiting');
       throw new Error('Requests exceeded maximum rate');
     }
 
     // API Call
     try {
-      const res = await openAiClient.createChatCompletion(data);
+      const res = await openAiClient.chat.completions.create(data);
       return {
-        response: res.data.choices[0].message.content,
+        response: res.choices[0].message.content,
         tokenUsage: {
-          prompt: res.data.usage?.prompt_tokens,
-          completion: res.data.usage?.completion_tokens,
-          total: res.data.usage?.total_tokens,
+          prompt: res.usage?.prompt_tokens,
+          completion: res.usage?.completion_tokens,
+          total: res.usage?.total_tokens,
         },
       };
     } catch (err) {
       this.logger.error('OpenAI ChatCompletion API error', err);
-      this.logger.error('Error reponse', err?.response?.data);
+      this.logger.error('Error response', err?.error);
       throw err;
     }
   }
@@ -152,22 +156,20 @@ export class OpenaiService {
    * @returns
    */
   async getChatGptCompletionStream(
-    data: CreateChatCompletionRequest,
+    data: ChatCompletionCreateParamsStreaming,
     completeCb?: (
       answer: string,
       usage: ChatGTPResponse['tokenUsage'],
     ) => Promise<void>,
     keys?: string[],
   ) {
-    // Get openAi client from the given keys
     keys = keys || this.defaultKeys;
-    const [_, openAiKey, openAiKeyHash] = getOpenAiClient(keys);
+    const [openAiClient, _, openAiKeyHash] = getOpenAiClient(keys);
 
-    // Rate limiter check
     try {
       await this.rateLimiter.consume(`openai-req-${openAiKeyHash}`, 1);
     } catch (err) {
-      this.logger.error('OpenAI ChatCompletion Request exeeced rate limiting');
+      this.logger.error('OpenAI ChatCompletion Request exceeded rate limiting');
       throw new Error('Requests exceeded maximum rate');
     }
 
@@ -177,69 +179,44 @@ export class OpenaiService {
       data.messages.map((m) => m.content).join(' '),
     );
 
-    try {
-      const res = await axios.post(
-        'https://api.openai.com/v1/chat/completions',
-        { ...data, stream: true },
-        {
-          responseType: 'stream',
-          headers: {
-            Authorization: `Bearer ${openAiKey}`,
-          },
-        },
-      );
+    let answer = '';
 
-      const stream = res.data;
+    (async () => {
+      // Wrap the async loop in an IIFE to handle asynchronously
+      try {
+        const completion = await openAiClient.chat.completions.create(data);
 
-      let answer = '';
-      let buffer = '';
-
-      stream.on('data', (data) => {
-        const dataStr = buffer.length
-          ? buffer + data.toString()
-          : data.toString();
-        const responses = dataStr.split('\n\n').filter((c) => c.length > 0);
-
-        for (const res of responses) {
+        for await (const chunk of completion) {
           try {
-            if (res === 'data: [DONE]') continue;
-            const content = JSON.parse(res.replace('data: ', '')).choices[0]
-              ?.delta?.content;
-            if (content !== undefined) {
+            if (chunk.choices[0]?.delta?.content) {
+              const content = chunk.choices[0].delta.content;
               observable.next(JSON.stringify({ content }));
               answer += content;
             }
-            buffer = '';
-          } catch {
-            console.log('Error', res);
-            buffer += res;
+          } catch (chunkError) {
+            this.logger.error('Error processing chunk', chunkError);
+            // Handle individual chunk errors here, if required
           }
         }
-      });
 
-      stream.on('end', () => {
         observable.next('[DONE]');
         observable.complete();
+
         const completionTokens = this.getTokenCount(answer);
-        completeCb?.(answer, {
-          prompt: promptTokens,
-          completion: completionTokens,
-          total: promptTokens + completionTokens,
-        });
-      });
-    } catch (err) {
-      this.logger.error('OpenAI ChatCompletion API error', err);
-      let errorString = '';
-      err.response.data.setEncoding('utf8');
-      err.response.data
-        .on('data', (utf8Chunk) => {
-          errorString += utf8Chunk;
-        })
-        .on('end', () => {
-          this.logger.error('Error response', errorString);
-        });
-      throw err;
-    }
+        if (completeCb) {
+          await completeCb(answer, {
+            prompt: promptTokens,
+            completion: completionTokens,
+            total: promptTokens + completionTokens,
+          });
+        }
+      } catch (err) {
+        this.logger.error('OpenAI ChatCompletion API error', err);
+        this.logger.error('Error response', err.error);
+        observable.error(err);
+        // throw err;
+      }
+    })();
 
     return observable;
   }
