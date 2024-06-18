@@ -240,7 +240,7 @@ export const ChatWindow = ({
                     <Spinner />
                 </Flex>
             )}
-            <Box ref={chatListRef} h="100%" overflowX="hidden" overflowY="auto" p={4} position={'relative'} pb={'100px'}>
+            <Box ref={chatListRef} h="100%" overflowX="hidden" overflowY="auto" p={4} position={'relative'} pb={isManualChat ? '100px' : '10px'}>
                 {getChatHeader()}
                 {chatData?.messages &&
                     chatData?.messages.map((message) => {

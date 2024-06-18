@@ -608,6 +608,7 @@ export class KnowledgebaseDbService {
 
     const filter = {
       knowledgebaseId: kbId,
+      messages: { $exists: true, $ne: [] },
     };
 
     const response = await getLimitOffsetPaginatedResponse(
