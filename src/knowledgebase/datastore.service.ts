@@ -46,8 +46,8 @@ export class DataStoreService {
    *********************************************************/
 
   async generateChunksAndEmbeddingsForDataStoreItem(dsItem: KbDataStore) {
-    // If already trained do nothing and return
-    if (dsItem.status === DataStoreStatus.TRAINED) {
+    // If already trained or content is empty, then do nothing and return
+    if (dsItem.status === DataStoreStatus.TRAINED || !dsItem.content) {
       return;
     }
 
