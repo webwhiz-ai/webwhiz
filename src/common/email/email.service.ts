@@ -93,7 +93,7 @@ export class EmailService {
     return res;
   }
 
-  async sendToken80ExhaustedEmail(email: string) {
+  sendToken80ExhaustedEmail = async (email: string) => {
     if (!this.isSgInitialized) return;
 
     const msg = {
@@ -104,9 +104,9 @@ export class EmailService {
 
     const res = await sgMail.send(msg);
     return res;
-  }
+  };
 
-  async sendToken100ExhaustedEmail(email: string) {
+  sendToken100ExhaustedEmail = async (email: string) => {
     if (!this.isSgInitialized) return;
 
     const msg = {
@@ -117,7 +117,7 @@ export class EmailService {
 
     const res = await sgMail.send(msg);
     return res;
-  }
+  };
 
   async sendInviteUserEmail(
     email: string,
