@@ -15,6 +15,9 @@ RUN npm install
 # Copying all the files in our project
 COPY . .
 
+# If you get `Allocation failed`, lower this https://nodejs.org/api/cli.html#cli_max_old_space_size_size_in_megabytes
+ENV NODE_OPTIONS --max-old-space-size=8192
+
 # Building our application
 RUN npm run build
 
