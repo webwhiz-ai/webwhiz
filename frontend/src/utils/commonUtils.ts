@@ -62,6 +62,8 @@ export function getLlmModelUsed(modelName?: string) {
       return 'GPT-4';
     case 'gpt-4-turbo-preview':
       return 'GPT-4 Turbo';
+    case 'gpt-4o':
+      return 'GPT-4o';
     case 'gpt-3.5-turbo':
     default:
       return 'GPT-3.5 Turbo';
@@ -101,7 +103,7 @@ export const chatWidgetDefaultValues = {
     id: 'icon1', 
     svgElement: LauncherIconsSVGs.get('icon1') 
   },
-  offlineMsgHeading: "Offlne message",
+  offlineMsgHeading: "Offline message",
   offlineMsgDescription: "Please fill out the form below and we will get back to you as soon as possible.",
   nameFieldLabel: "Name",
   nameFieldPlaceholder: "Enter your name",

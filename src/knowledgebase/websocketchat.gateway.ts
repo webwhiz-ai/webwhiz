@@ -60,13 +60,13 @@ export class WebSocketChatGateway
     this.redisClient.hset(SESSION_KB_MAPPING, sessionId, knowledgeBaseId);
 
     if (query.isAdmin) {
-      this.logger.log('Admin joined:', query);
+      // this.logger.log('Admin joined:', query);
       // set online admins in redis
       this.redisClient.hset(`onlineAdmins_${knowledgeBaseId}`, sessionId, 1);
       // join knowledgeBase room
       socket.join(knowledgeBaseId);
     } else {
-      this.logger.log('New client joined:', query);
+      // this.logger.log('New client joined:', query);
       // join session chat room
       socket.join(sessionId);
 
@@ -83,15 +83,15 @@ export class WebSocketChatGateway
       const knowledgeBaseId = query.knowledgeBaseId;
       // remove online admin from redis
       this.redisClient.hdel(`onlineAdmins_${knowledgeBaseId}`, sessionId);
-      this.logger.log('Admin disconnected:', query);
+      // this.logger.log('Admin disconnected:', query);
     } else {
-      this.logger.log('Client disconnected:', query);
+      // this.logger.log('Client disconnected:', query);
     }
   }
 
   @SubscribeMessage('admin_chat')
   async onAdminChat(client: Socket, msgData: ChatQueryAnswer) {
-    this.logger.log('New admin chat message:', msgData);
+    // this.logger.log('New admin chat message:', msgData);
 
     client.to(msgData.sessionId).emit('user_chat', msgData);
     const kbId = await this.redisClient.hget(
@@ -107,7 +107,7 @@ export class WebSocketChatGateway
 
   @SubscribeMessage('user_chat')
   async onUserChat(client: Socket, msgData: ChatQueryAnswer) {
-    this.logger.log('New user chat message:', msgData);
+    // this.logger.log('New user chat message:', msgData);
 
     const kbId = await this.redisClient.hget(
       SESSION_KB_MAPPING,
@@ -131,7 +131,7 @@ export class WebSocketChatGateway
 
       if (Object.keys(onlineAdmins).length === 0) {
         // send email if the admin is offline
-        this.logger.log('No online admins online!!!!');
+        // this.logger.log('No online admins online!!!!');
         this.offlineMsgService.sendEmailForOfflineManualMessage(
           knowledgeBaseId,
           msgData.sessionId,
