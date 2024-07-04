@@ -4,6 +4,7 @@ import {
   Injectable,
   Inject,
   forwardRef,
+  Logger,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { AppConfigService } from '../common/config/appConfig.service';
@@ -18,13 +19,17 @@ import { KnowledgebaseService } from '../knowledgebase/knowledgebase.service';
 
 @Injectable()
 export class AuthService {
+  private readonly logger: Logger;
+
   constructor(
     private jwtService: JwtService,
     private userService: UserService,
     private appConfig: AppConfigService,
     private emailService: EmailService,
     private knowledgebaseService: KnowledgebaseService,
-  ) {}
+  ) {
+    this.logger = new Logger(AuthService.name);
+  }
 
   /**
    * Generates the jet token
@@ -99,7 +104,11 @@ export class AuthService {
       data.email,
       user._id,
     );
-    await this.emailService.sendWelcomeEmail(user.email);
+    try {
+      await this.emailService.sendWelcomeEmail(user.email);
+    } catch (error) {
+      this.logger.error('Error sending welcome email', error);
+    }
     const token = await this.getJwtTokenForUser(user);
     return {
       ...user,
@@ -150,7 +159,11 @@ export class AuthService {
       userProfile.email,
       newUser._id,
     );
-    await this.emailService.sendWelcomeEmail(newUser.email);
+    try {
+      await this.emailService.sendWelcomeEmail(newUser.email);
+    } catch (error) {
+      this.logger.error('Error sending welcome email', error);
+    }
     return this.getJwtTokenForUser(newUser);
   }
 
