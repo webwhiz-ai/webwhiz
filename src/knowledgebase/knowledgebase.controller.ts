@@ -347,4 +347,11 @@ export class KnowledgebaseController {
 
     return this.kbService.deleteUserFromKnowledgeBase(user, kbId, userId);
   }
+
+  @Get('/:id/accept_invite')
+  async acceptInvite(@Req() req: RequestWithUser, @Param('id') id: string) {
+    const { user } = req;
+
+    return this.kbService.inviteUserAccept(user, id);
+  }
 }

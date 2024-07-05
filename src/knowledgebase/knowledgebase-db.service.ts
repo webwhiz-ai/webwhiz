@@ -147,6 +147,7 @@ export class KnowledgebaseDbService {
         {
           $match: {
             'participants.id': userId,
+            'participants.status': 'Active',
           },
         },
         {
