@@ -14,6 +14,8 @@ COPY --chown=node:node . .
 
 # Set NODE_ENV environment variable
 ENV NODE_ENV production
+# If you get `Allocation failed`, lower this https://nodejs.org/api/cli.html#cli_max_old_space_size_size_in_megabytes
+ENV NODE_OPTIONS --max-old-space-size=8192
 
 # Run the build command which creates the production bundle
 RUN yarn run build
