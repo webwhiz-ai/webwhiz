@@ -696,7 +696,7 @@ export class KnowledgebaseService {
     await this.emailService.sendInviteUserEmail(
       data.email,
       user.email,
-      kb.name,
+      kb._id.toString(),
       userExist,
     );
 
