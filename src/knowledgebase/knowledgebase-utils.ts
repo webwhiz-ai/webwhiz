@@ -10,6 +10,11 @@ export enum UserPermissions {
   DELETE_USER = 'delete_user',
 }
 
+export enum InviteStatus {
+  PENDING = 'Pending',
+  ACTIVE = 'Active',
+}
+
 const rolePermissions = {
   [UserRoles.READER]: [UserPermissions.READ],
   [UserRoles.EDITOR]: [UserPermissions.READ, UserPermissions.EDIT],

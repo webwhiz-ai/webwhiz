@@ -326,6 +326,12 @@ export class KnowledgebaseController {
     return this.kbService.createKnowledgebase(user, data);
   }
 
+  @Get('/participant/list')
+  async getKnowledgeBasesForParticipants(@Req() req: RequestWithUser) {
+    const { user } = req;
+    return this.kbService.getKnowledgeBasesForParticipants(user);
+  }
+
   @Post('/:id/invite_user')
   async inviteUser(
     @Req() req: RequestWithUser,
@@ -346,5 +352,12 @@ export class KnowledgebaseController {
     const { user } = req;
 
     return this.kbService.deleteUserFromKnowledgeBase(user, kbId, userId);
+  }
+
+  @Get('/:id/accept_invite')
+  async acceptInvite(@Req() req: RequestWithUser, @Param('id') id: string) {
+    const { user } = req;
+
+    return this.kbService.inviteUserAccept(user, id);
   }
 }

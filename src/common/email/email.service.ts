@@ -122,7 +122,7 @@ export class EmailService {
   async sendInviteUserEmail(
     email: string,
     ownerEmail: string,
-    kbName: string,
+    kbId: string,
     userExist: boolean,
   ) {
     if (!this.isSgInitialized) return;
@@ -131,6 +131,8 @@ export class EmailService {
       ? `${this.clientUrl}/login`
       : `${this.clientUrl}/sign-up`;
 
+    const acceptUrl = `${this.clientUrl}/knowledgebase/kbId/accept_invite`;
+
     const msg = {
       to: email,
       from: { email: this.senderEmail, name: this.senderName },
@@ -138,7 +140,7 @@ export class EmailService {
       dynamicTemplateData: {
         owner_email: ownerEmail,
         user_name: ownerEmail,
-        kb_name: kbName,
+        accept_url: acceptUrl,
         website_url: websiteUrl,
       },
     };

@@ -15,6 +15,7 @@ import { KnowledgebaseDbService } from './knowledgebase-db.service';
 import {
   checkUserPermissionForKb,
   UserPermissions,
+  InviteStatus,
 } from './knowledgebase-utils';
 import {
   CreateKnowledgebaseDTO,
@@ -163,6 +164,7 @@ export class KnowledgebaseService {
       id: user._id,
       role: UserRoles.ADMIN,
       email: user.email,
+      status: InviteStatus.ACTIVE,
     };
     // Create a new Kb in db
     const ts = new Date();
@@ -344,6 +346,21 @@ export class KnowledgebaseService {
         kbs.push(kb);
       }
     });
+    return kbs;
+  }
+
+  /**
+   * Get all knowledgebases for a participant
+   * @param user
+   * @returns
+   */
+  async getKnowledgeBasesForParticipants(user: UserSparse) {
+    // Fetch all the knowledgebase for a user who participates
+    const kbs =
+      await this.kbDbService.getAllTheParticipatedKnowledgeBaseForUser(
+        user._id,
+      );
+
     return kbs;
   }
 
@@ -602,6 +619,7 @@ export class KnowledgebaseService {
     kbId: ObjectId,
     role: string,
     email: string,
+    status: string,
     kb,
   ) {
     let updatedParticipants;
@@ -614,6 +632,7 @@ export class KnowledgebaseService {
             id: userId,
             role: role,
             email: email,
+            status: status,
           };
         }
         return owner;
@@ -626,10 +645,17 @@ export class KnowledgebaseService {
         )
       ) {
         // Add the new invitation for the user
-        updatedParticipants.push({ id: userId, role: role, email: email });
+        updatedParticipants.push({
+          id: userId,
+          role: role,
+          email: email,
+          status: status,
+        });
       }
     } else {
-      updatedParticipants = [{ id: userId, role: role, email: email }];
+      updatedParticipants = [
+        { id: userId, role: role, email: email, status: status },
+      ];
     }
 
     if (updatedParticipants) {
@@ -668,6 +694,7 @@ export class KnowledgebaseService {
         kbId,
         data.role,
         data.email,
+        InviteStatus.PENDING,
         kb,
       );
       userExist = true;
@@ -684,7 +711,7 @@ export class KnowledgebaseService {
     await this.emailService.sendInviteUserEmail(
       data.email,
       user.email,
-      kb.name,
+      kb._id.toString(),
       userExist,
     );
 
@@ -705,6 +732,7 @@ export class KnowledgebaseService {
             kb._id,
             invitedData.role,
             email,
+            InviteStatus.PENDING,
             kb,
           );
           await this.userService.deleteFromInvitedEmail(email, kb._id);
@@ -739,6 +767,38 @@ export class KnowledgebaseService {
       updatedParticipants,
     );
 
+    return;
+  }
+
+  async inviteUserAccept(user: UserSparse, id: string) {
+    const kbId = new ObjectId(id);
+    const kb = await this.kbDbService.getKnowledgebaseSparseById(kbId);
+
+    if (user._id.toString() === kb.owner.toString()) {
+      throw new HttpException(
+        'knowledgebase owner cannot accept the invite request!',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    let updatedParticipants;
+    if (kb.participants && Array.isArray(kb.participants)) {
+      updatedParticipants = kb.participants.map((owner) => {
+        if (owner.id.toString() === user._id.toString()) {
+          // Update the existing invitation for the user
+          owner.status = InviteStatus.ACTIVE;
+        }
+        return owner;
+      });
+      if (updatedParticipants) {
+        await this.kbDbService.updateKnowledgebaseParticipants(
+          kbId,
+          updatedParticipants,
+        );
+      }
+    } else {
+      throw new HttpException('Invalid request!', HttpStatus.BAD_REQUEST);
+    }
     return;
   }
 }
