@@ -688,4 +688,14 @@ export class KnowledgebaseDbService {
   async deletePrompt(id: ObjectId) {
     await this.promptCollection.deleteOne({ _id: id });
   }
+
+  async getAllTheParticipatedKnowledgeBaseForUser(userId: ObjectId) {
+    const query = { 'participants.id': userId };
+    const projection = { name: 1, 'participants.$': 1 };
+    const result = await this.knowledgebaseCollection
+      .find(query)
+      .project(projection)
+      .toArray();
+    return result;
+  }
 }

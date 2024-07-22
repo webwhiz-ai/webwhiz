@@ -350,6 +350,21 @@ export class KnowledgebaseService {
   }
 
   /**
+   * Get all knowledgebases for a participant
+   * @param user
+   * @returns
+   */
+  async getKnowledgeBasesForParticipants(user: UserSparse) {
+    // Fetch all the knowledgebase for a user who participates
+    const kbs =
+      await this.kbDbService.getAllTheParticipatedKnowledgeBaseForUser(
+        user._id,
+      );
+
+    return kbs;
+  }
+
+  /**
    * Get knowledgebase detail data
    * @param user
    * @param id
