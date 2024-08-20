@@ -13,6 +13,7 @@ interface AppConfig {
   redisUrl?: string;
   openaiKey: string;
   openaiKey2: string;
+  openaaiUrl: string;
   googleClientId: string;
   lemonSqueezyApiKey: string;
   lemonSqueezySignSecret: string;
@@ -40,6 +41,7 @@ const config = (): AppConfig => ({
   redisUrl: process.env.REDIS_URL,
   openaiKey: process.env.OPENAI_KEY || '',
   openaiKey2: process.env.OPENAI_KEY_2 || '',
+  openaaiUrl: process.env.OPENAI_URL || 'https://api.openai.com',
   googleClientId: process.env.GOOGLE_CLIENT_ID || '',
   lemonSqueezyApiKey: process.env.LEMON_SQUEEZY_API_KEY || '',
   lemonSqueezySignSecret: process.env.LEMON_SQUEEZY_SIGN_SECRET || '',
