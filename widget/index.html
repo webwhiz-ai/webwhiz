@@ -1365,8 +1365,16 @@
         }
 
     </script>
-    <script defer type="text/javascript" src="https://api.pirsch.io/pirsch.js" id="pirschjs"
-        data-code="VEW6587Xat8LXjE7ejokwXUked6s7udc"></script>
+    <script type="module">
+        const pirsch_key = process.env.PIRSCH_KEY
+        if (pirsch_key) {
+            let script = document.createElement("script");
+            script.setAttribute("src", "https://api.pirsch.io/pirsch.js");
+            script.setAttribute("id", "pirschjs");
+            script.setAttribute("defer", "");
+            script.setAttribute("data-code", pirsch_key);
+        }
+    </script>
 </body>
 
 

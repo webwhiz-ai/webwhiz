@@ -43,7 +43,10 @@ services:
       - web
 
   widget:
-    build: ./widget
+    build:
+      context: ./widget
+      args:
+         - PIRSCH_KEY
     ports:
       - "3031:80"
     depends_on:
