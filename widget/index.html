@@ -187,11 +187,8 @@
         integrity="sha384-mZLF4UVrpi/QTWPA7BjNPEnkIfRFn4ZEO3Qt/HFklTJBj/gBOV8G3HcKn4NfQblz"
         crossorigin="anonymous"></script>
 
-
-
-    <script>
+    <script type="module">
         const STREAM_RESPONSE = true;
-
 
         // message format
 
@@ -236,6 +233,13 @@
         }
         if (urlParams.get('hide-chat-actions') === 'true') {
             chatWidget.classList.add('hide-chat-actions');
+        }
+
+        // Open links in a new tab
+        const baseTag = document.querySelector('head base');
+        const baseTarget = process.env.BASE_TARGET;
+        if (baseTarget) {
+            baseTag.setAttribute('target', baseTarget);
         }
 
         /**
@@ -1368,6 +1372,5 @@
     <script defer type="text/javascript" src="https://api.pirsch.io/pirsch.js" id="pirschjs"
         data-code="VEW6587Xat8LXjE7ejokwXUked6s7udc"></script>
 </body>
-
 
 </html>
