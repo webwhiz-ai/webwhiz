@@ -179,7 +179,7 @@ export class OpenaiService {
 
     try {
       const res = await axios.post(
-        this.appConfig.get('openaaiUrl') + '/v1/chat/completions',
+        'https://api.openai.com/v1/chat/completions',
         { ...data, stream: true },
         {
           responseType: 'stream',
