@@ -109,6 +109,10 @@ docker-compose down
 sudo docker-compose up --build --force-recreate
 ```
 
+3. Configure `widget/nginx-variables.conf`.
+
+`set $FRAME_ANCESTORS "https://your.domain"`, to allow iframing of the widget on `your.domain`.
+
 ### 🛃 Manual
 
 WebWhiz is designed to be used as a production grade Chatbot that can be scaled up or down to handle any volume of data.
@@ -152,6 +156,10 @@ The following variables as mandatory
 2. Inside the workers folder create a copy of the `.env.sample` and rename as `.env`.
 
 Set the value for the following variables - `MONGO_URI`, `MONGO_DBNAME`, `REDIS_HOST`, `REDIS_PORT`
+
+3. Configure `widget/nginx-variables.conf`.
+
+`set $FRAME_ANCESTORS "https://your.domain"`, to allow iframing of the widget on `your.domain`.
 
 #### Installing dependencies and running app
 
