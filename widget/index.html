@@ -237,10 +237,8 @@
 
         // Open links in a new tab
         const baseTag = document.querySelector('head base');
-        const baseTarget = process.env.BASE_TARGET;
-        if (baseTarget) {
-            baseTag.setAttribute('target', baseTarget);
-        }
+        const baseTarget = process.env.BASE_TARGET || "_parent";
+        baseTag.setAttribute('target', baseTarget);
 
         /**
          * Iframe communications
