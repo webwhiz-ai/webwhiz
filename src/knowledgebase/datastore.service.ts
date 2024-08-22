@@ -21,6 +21,7 @@ import {
   DataStoreType,
   KbDataStore,
 } from './knowledgebase.schema';
+import { EmbeddingsDbService } from './embeddings-db.service';
 
 function getEmbeddingsCacheKey(kbId: ObjectId): string {
   return `e_${kbId.toHexString()}`;
@@ -30,6 +31,7 @@ function getEmbeddingsCacheKey(kbId: ObjectId): string {
 export class DataStoreService {
   constructor(
     private kbDbService: KnowledgebaseDbService,
+    private embeddingsDbService: EmbeddingsDbService,
     private openaiChatbotService: OpenaiChatbotService,
     private readonly userService: UserService,
     private readonly customKeyService: CustomKeyService,
@@ -163,7 +165,7 @@ export class DataStoreService {
 
     // Now that new chunks are inserted delete old ones and embeddings
     await Promise.all([
-      this.kbDbService.deleteEmbeddingsByIdBulk(chunkIds),
+      this.embeddingsDbService.deleteEmbeddingsByIdBulkInPg(chunkIds),
       this.kbDbService.deleteChunksByIdBulk(chunkIds),
     ]);
   }
@@ -180,7 +182,7 @@ export class DataStoreService {
     const chunkIds = chunks.map((c) => c._id);
 
     // Delete embeddings for chunks
-    await this.kbDbService.deleteEmbeddingsByIdBulk(chunkIds);
+    await this.embeddingsDbService.deleteEmbeddingsByIdBulkInPg(chunkIds);
 
     // Delete chunks
     await this.kbDbService.deleteChunksByIdBulk(chunkIds);

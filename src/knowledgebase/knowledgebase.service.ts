@@ -33,12 +33,14 @@ import {
 import { CustomKeyService } from './custom-key.service';
 import { UserService } from '../user/user.service';
 import { EmailService } from '../common/email/email.service';
+import { EmbeddingsDbService } from './embeddings-db.service';
 
 @Injectable()
 export class KnowledgebaseService {
   constructor(
     @Inject(CELERY_CLIENT) private celeryClient: CeleryClientService,
     private kbDbService: KnowledgebaseDbService,
+    private pgEmbeddingsDbService: EmbeddingsDbService,
     private subPlanInfoService: SubscriptionPlanInfoService,
     private customKeyService: CustomKeyService,
     private readonly userService: UserService,
@@ -237,7 +239,8 @@ export class KnowledgebaseService {
         kbId,
         DataStoreType.WEBPAGE,
       ),
-      this.kbDbService.deleteKbEmbeddingsForKnowledgebase(
+
+      this.pgEmbeddingsDbService.deleteEmbeddingsForKbInPg(
         kbId,
         DataStoreType.WEBPAGE,
       ),
@@ -399,7 +402,7 @@ export class KnowledgebaseService {
       this.kbDbService.deleteKnowledgebase(kbId),
       this.kbDbService.deleteKbDataStoreItemsForKnowledgebase(kbId),
       this.kbDbService.deleteChunksForKnowledgebase(kbId),
-      this.kbDbService.deleteKbEmbeddingsForKnowledgebase(kbId),
+      this.pgEmbeddingsDbService.deleteEmbeddingsForKbInPg(kbId),
     ]);
   }
 

@@ -2,7 +2,6 @@ import { Inject, Injectable, Logger } from '@nestjs/common';
 import { ObjectId } from 'mongodb';
 import {
   CELERY_CLIENT,
-  CeleryClientQueue,
   CeleryClientService,
 } from '../../common/celery/celery-client.module';
 import { retryWithBackoff } from '../../common/utils';
@@ -23,13 +22,7 @@ import {
 import { PromptService } from '../prompt/prompt.service';
 import { DEFAULT_CHATGPT_PROMPT } from './openaiChatbot.constant';
 import { CustomKeyService } from '../custom-key.service';
-
-interface CosineSimilarityWorkerResponse {
-  chunkId: {
-    $oid: string;
-  };
-  similarity: number;
-}
+import { EmbeddingsDbService } from '../embeddings-db.service';
 
 interface ChunkForCompletion extends Chunk {
   content: string;
@@ -43,6 +36,7 @@ export class OpenaiChatbotService {
   constructor(
     private openaiService: OpenaiService,
     private kbDbService: KnowledgebaseDbService,
+    private pgEmbeddingsDbService: EmbeddingsDbService,
     private readonly promptService: PromptService,
     private readonly customKeyService: CustomKeyService,
     @Inject(CELERY_CLIENT) private celeryClient: CeleryClientService,
@@ -123,13 +117,14 @@ export class OpenaiChatbotService {
     );
 
     // Add embedding for new chunk into embeddings collection
-    await this.kbDbService.insertEmbeddingForChunk({
-      _id: chunk._id,
-      knowledgebaseId: kbId,
-      embeddings,
+    await this.pgEmbeddingsDbService.insertEmbeddingsToPg({
+      _id: chunk._id.toHexString(),
+      knowledgebaseId: kbId.toHexString(),
+      embeddings: embeddings,
       type: chunk.type,
-      embeddingModel,
+      embeddingModel: embeddingModel || EmbeddingModel.OPENAI_EMBEDDING_2,
     });
+
     await this.kbDbService.updateChunkById(chunk._id, {
       status: ChunkStatus.EMBEDDING_GENERATED,
     });
@@ -148,7 +143,11 @@ export class OpenaiChatbotService {
     );
 
     // Add embedding for new chunk into embeddings collection
-    await this.kbDbService.updateEmbeddingForChunk(chunk._id, embeddings);
+    await this.pgEmbeddingsDbService.updateEmbeddingsForChunkInPg(
+      chunk._id,
+      embeddings,
+    );
+
     await this.kbDbService.updateChunkById(chunk._id, {
       status: ChunkStatus.EMBEDDING_GENERATED,
     });
@@ -175,12 +174,12 @@ export class OpenaiChatbotService {
       embeddingModel,
     );
 
-    const client = this.celeryClient.get(CeleryClientQueue.DEFAULT);
-    const task = client.createTask('worker.get_top_n_chunks');
-
-    const topChunks: CosineSimilarityWorkerResponse[] = JSON.parse(
-      await task.applyAsync([queryEmbedding, kbId.toString(), 3]).get(),
-    );
+    const topChunks =
+      await this.pgEmbeddingsDbService.getTopNChunksForEmbedding(
+        queryEmbedding,
+        kbId,
+        3,
+      );
 
     const filteredChunks =
       topChunks.length > 2

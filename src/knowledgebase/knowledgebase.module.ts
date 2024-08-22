@@ -21,10 +21,13 @@ import { TaskModule } from '../task/task.module';
 import { CustomKeyService } from './custom-key.service';
 import { WebhookModule } from '../webhook/webhook.module';
 import { WebSocketChatGateway } from './websocketchat.gateway';
+import { EmbeddingsDbService } from './embeddings-db.service';
+import { TypeOrmModule } from '@nestjs/typeorm';
 
 @Module({
   imports: [
     MongoModule,
+    TypeOrmModule.forFeature(),
     RedisModule,
     OpenaiModule,
     CeleryClientModule,
@@ -50,6 +53,7 @@ import { WebSocketChatGateway } from './websocketchat.gateway';
     PromptService,
     CustomKeyService,
     WebSocketChatGateway,
+    EmbeddingsDbService,
   ],
   exports: [
     KnowledgebaseDbService,
