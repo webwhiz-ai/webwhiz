@@ -20,6 +20,7 @@ import { WebhookModule } from './webhook/webhook.module';
 import { SlackBoltMiddleware } from './slack/slack-bolt.middleware';
 import { SlackModule } from './slack/slack.module';
 import { PublicApisModule } from './public-apis/public-apis.module';
+import { PostgresModule } from './common/postgres/postgres.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { PublicApisModule } from './public-apis/public-apis.module';
     }),
     RedisModule,
     MongoModule,
+    PostgresModule,
     CeleryClientModule,
     TaskModule,
     OpenaiModule,
