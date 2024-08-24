@@ -27,6 +27,7 @@ import {
   EmbeddingModel,
 } from './knowledgebase.schema';
 import { PgEmbeddingsDbService } from './pgEmbeddingsDb.service';
+import { AppConfigService } from '../common/config/appConfig.service';
 
 @Injectable()
 export class KnowledgebaseDbService {
@@ -41,6 +42,7 @@ export class KnowledgebaseDbService {
   constructor(
     @Inject(MONGODB) private db: Db,
     private pgEmbeddingsDbService: PgEmbeddingsDbService,
+    private readonly appConfigService: AppConfigService,
   ) {
     this.knowledgebaseCollection = this.db.collection<Knowledgebase>(
       KNOWLEDGEBASE_COLLECTION,
@@ -56,7 +58,9 @@ export class KnowledgebaseDbService {
       CHAT_SESSION_COLLECTION,
     );
     this.promptCollection = this.db.collection<Prompt>(PROMPT_COLLECTION);
-    this.insertEmbeddingsToPg = true; // TODO: Read from config
+    this.insertEmbeddingsToPg = this.appConfigService.getFeatureFlag(
+      'save_embeddings_to_pg',
+    );
   }
 
   /*********************************************************

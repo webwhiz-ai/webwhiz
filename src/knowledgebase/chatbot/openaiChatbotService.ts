@@ -25,6 +25,7 @@ import { PromptService } from '../prompt/prompt.service';
 import { DEFAULT_CHATGPT_PROMPT } from './openaiChatbot.constant';
 import { CustomKeyService } from '../custom-key.service';
 import { PgEmbeddingsDbService } from '../pgEmbeddingsDb.service';
+import { AppConfigService } from '../../common/config/appConfig.service';
 
 interface ChunkForCompletion extends Chunk {
   content: string;
@@ -42,10 +43,13 @@ export class OpenaiChatbotService {
     private pgEmbeddingsDbService: PgEmbeddingsDbService,
     private readonly promptService: PromptService,
     private readonly customKeyService: CustomKeyService,
+    private readonly appConfigService: AppConfigService,
     @Inject(CELERY_CLIENT) private celeryClient: CeleryClientService,
   ) {
     this.logger = new Logger(OpenaiChatbotService.name);
-    this.fetchTopNChunksFromPg = false; // TODO: Set this from config
+    this.fetchTopNChunksFromPg = this.appConfigService.getFeatureFlag(
+      'fetch_embeddings_from_pg',
+    );
   }
 
   private getCustomKeys(customKeys?: CustomKeyData): string[] | undefined {
