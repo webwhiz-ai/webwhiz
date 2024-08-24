@@ -19,6 +19,8 @@ import { DataSource } from 'typeorm';
         database: appConfig.get('postgresDbName'),
         entities: [__dirname + '/../../**/*.entity{.ts,.js}'],
         synchronize: false, // Set this to false in production
+        migrations: [__dirname + '/../../pg-migrations/*{.ts,.js}'],
+        migrationsRun: true, // Run migrations at application startup
       }),
     }),
   ],
@@ -37,8 +39,10 @@ export class PostgresModule implements OnModuleInit {
    * @returns A Promise that resolves when the initialization is complete.
    */
   async onModuleInit(): Promise<void> {
-    await this.initializePgVector();
-    await this.createKbEmbeddingsTable();
+    // Postgres db initialization is now moved to the migration file, so this is no longer needed
+    // await this.initializePgVector();
+    // await this.createKbEmbeddingsTable();
+    // await this.createKnowledgebaseIdIndex();
     // await this.createVectorIndex();
   }
 
@@ -78,6 +82,27 @@ export class PostgresModule implements OnModuleInit {
     }
   }
 
+  /**
+   * Creates a knowledgebase ID index in the PostgreSQL database.
+   * If the index already exists, it will not be created again.
+   */
+  private async createKnowledgebaseIdIndex() {
+    try {
+      await this.dataSource.query(`
+        CREATE INDEX IF NOT EXISTS kb_embeddings_knowledgebase_id_idx 
+        ON kb_embeddings_pg (knowledgebase_id);
+      `);
+      this.logger.log('Knowledgebase ID index created successfully');
+    } catch (error) {
+      this.logger.error('Failed to create Knowledgebase ID index:', error);
+    }
+  }
+
+  /**
+   * Creates a vector index for kb_embeddings_pg table using ivfflat algorithm.
+   * The index is created on the 'embeddings' column and supports vector cosine similarity operations.
+   * @returns {Promise<void>} A promise that resolves when the index is created successfully.
+   */
   private async createVectorIndex() {
     try {
       await this.dataSource.query(`
