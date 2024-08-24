@@ -2,16 +2,20 @@ import { Injectable, Logger } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { ObjectId } from 'mongodb';
 import { toSql } from 'pgvector/pg';
-import { DataStoreType, TopChunksResponse } from './knowledgebase.schema';
+import {
+  DataStoreType,
+  EmbeddingModel,
+  TopChunksResponse,
+} from './knowledgebase.schema';
 
 /**
  * Service for interacting with the Postgres vector database.
  */
 @Injectable()
-export class EmbeddingsDbService {
+export class PgEmbeddingsDbService {
   private readonly logger;
   constructor(private dataSource: DataSource) {
-    this.logger = new Logger(EmbeddingsDbService.name);
+    this.logger = new Logger(PgEmbeddingsDbService.name);
   }
 
   /**
@@ -23,8 +27,8 @@ export class EmbeddingsDbService {
     _id: string;
     knowledgebaseId: string;
     embeddings: number[];
-    embeddingModel: string;
-    type: string;
+    embeddingModel: EmbeddingModel;
+    type: DataStoreType;
   }) {
     const query = `
       INSERT INTO kb_embeddings_pg (_id, knowledgebase_id, embeddings, embedding_model, type, created_at, updated_at)

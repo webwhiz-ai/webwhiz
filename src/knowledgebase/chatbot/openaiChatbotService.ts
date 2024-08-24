@@ -2,6 +2,7 @@ import { Inject, Injectable, Logger } from '@nestjs/common';
 import { ObjectId } from 'mongodb';
 import {
   CELERY_CLIENT,
+  CeleryClientQueue,
   CeleryClientService,
 } from '../../common/celery/celery-client.module';
 import { retryWithBackoff } from '../../common/utils';
@@ -18,11 +19,12 @@ import {
   ChunkStatus,
   CustomKeyData,
   EmbeddingModel,
+  TopChunksResponse,
 } from '../knowledgebase.schema';
 import { PromptService } from '../prompt/prompt.service';
 import { DEFAULT_CHATGPT_PROMPT } from './openaiChatbot.constant';
 import { CustomKeyService } from '../custom-key.service';
-import { EmbeddingsDbService } from '../embeddings-db.service';
+import { PgEmbeddingsDbService } from '../pgEmbeddingsDb.service';
 
 interface ChunkForCompletion extends Chunk {
   content: string;
@@ -32,16 +34,18 @@ interface ChunkForCompletion extends Chunk {
 @Injectable()
 export class OpenaiChatbotService {
   private readonly logger: Logger;
+  private fetchTopNChunksFromPg: boolean;
 
   constructor(
     private openaiService: OpenaiService,
     private kbDbService: KnowledgebaseDbService,
-    private pgEmbeddingsDbService: EmbeddingsDbService,
+    private pgEmbeddingsDbService: PgEmbeddingsDbService,
     private readonly promptService: PromptService,
     private readonly customKeyService: CustomKeyService,
     @Inject(CELERY_CLIENT) private celeryClient: CeleryClientService,
   ) {
     this.logger = new Logger(OpenaiChatbotService.name);
+    this.fetchTopNChunksFromPg = false; // TODO: Set this from config
   }
 
   private getCustomKeys(customKeys?: CustomKeyData): string[] | undefined {
@@ -117,12 +121,12 @@ export class OpenaiChatbotService {
     );
 
     // Add embedding for new chunk into embeddings collection
-    await this.pgEmbeddingsDbService.insertEmbeddingsToPg({
-      _id: chunk._id.toHexString(),
-      knowledgebaseId: kbId.toHexString(),
-      embeddings: embeddings,
+    await this.kbDbService.insertEmbeddingForChunk({
+      _id: chunk._id,
+      knowledgebaseId: kbId,
+      embeddings,
       type: chunk.type,
-      embeddingModel: embeddingModel || EmbeddingModel.OPENAI_EMBEDDING_2,
+      embeddingModel,
     });
 
     await this.kbDbService.updateChunkById(chunk._id, {
@@ -143,11 +147,7 @@ export class OpenaiChatbotService {
     );
 
     // Add embedding for new chunk into embeddings collection
-    await this.pgEmbeddingsDbService.updateEmbeddingsForChunkInPg(
-      chunk._id,
-      embeddings,
-    );
-
+    await this.kbDbService.updateEmbeddingForChunk(chunk._id, embeddings);
     await this.kbDbService.updateChunkById(chunk._id, {
       status: ChunkStatus.EMBEDDING_GENERATED,
     });
@@ -174,12 +174,21 @@ export class OpenaiChatbotService {
       embeddingModel,
     );
 
-    const topChunks =
-      await this.pgEmbeddingsDbService.getTopNChunksForEmbedding(
+    let topChunks: TopChunksResponse[] = [];
+    if (this.fetchTopNChunksFromPg) {
+      topChunks = await this.pgEmbeddingsDbService.getTopNChunksForEmbedding(
         queryEmbedding,
         kbId,
         3,
       );
+    } else {
+      const client = this.celeryClient.get(CeleryClientQueue.DEFAULT);
+      const task = client.createTask('worker.get_top_n_chunks');
+
+      topChunks = JSON.parse(
+        await task.applyAsync([queryEmbedding, kbId.toString(), 3]).get(),
+      );
+    }
 
     const filteredChunks =
       topChunks.length > 2

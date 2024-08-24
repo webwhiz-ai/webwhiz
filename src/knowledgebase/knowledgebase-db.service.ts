@@ -24,7 +24,9 @@ import {
   ChatSessionSparse,
   ChatAnswerFeedbackType,
   ChatSessionMessageSparse,
+  EmbeddingModel,
 } from './knowledgebase.schema';
+import { PgEmbeddingsDbService } from './pgEmbeddingsDb.service';
 
 @Injectable()
 export class KnowledgebaseDbService {
@@ -34,8 +36,12 @@ export class KnowledgebaseDbService {
   private readonly kbEmbeddingCollection: Collection<KbEmbedding>;
   private readonly chatSessionCollection: Collection<ChatSession>;
   private readonly promptCollection: Collection<Prompt>;
+  private insertEmbeddingsToPg: boolean;
 
-  constructor(@Inject(MONGODB) private db: Db) {
+  constructor(
+    @Inject(MONGODB) private db: Db,
+    private pgEmbeddingsDbService: PgEmbeddingsDbService,
+  ) {
     this.knowledgebaseCollection = this.db.collection<Knowledgebase>(
       KNOWLEDGEBASE_COLLECTION,
     );
@@ -50,6 +56,7 @@ export class KnowledgebaseDbService {
       CHAT_SESSION_COLLECTION,
     );
     this.promptCollection = this.db.collection<Prompt>(PROMPT_COLLECTION);
+    this.insertEmbeddingsToPg = true; // TODO: Read from config
   }
 
   /*********************************************************
@@ -474,46 +481,130 @@ export class KnowledgebaseDbService {
    * KNOWLEDGEBASE EMBEDDING COLLECTION
    *********************************************************/
 
+  /**
+   * Inserts an embedding for a chunk of knowledgebase data.
+   *
+   * @param data - The embedding data to be inserted.
+   * @returns The inserted embedding data.
+   */
   async insertEmbeddingForChunk(data: KbEmbedding) {
-    const res = await this.kbEmbeddingCollection.insertOne(data);
+    const mongoPromise = this.kbEmbeddingCollection.insertOne(data);
+    const promises = [mongoPromise];
+
+    // Insert to Postgres only if enabled
+    if (this.insertEmbeddingsToPg) {
+      const pgPromise = this.pgEmbeddingsDbService.insertEmbeddingsInPg({
+        ...data,
+        _id: data._id.toHexString(),
+        knowledgebaseId: data.knowledgebaseId.toHexString(),
+        embeddingModel:
+          data.embeddingModel || EmbeddingModel.OPENAI_EMBEDDING_2,
+      });
+      promises.push(pgPromise);
+    }
+
+    await Promise.all(promises);
 
     return {
-      _id: res.insertedId,
       ...data,
     };
   }
 
   /**
-   * Update embeedding for chunk in embeddings for KB
+   * Update embeddings for chunk in embeddings for KB
    * @param knowledgebaseId
    * @param embedding
    */
   async updateEmbeddingForChunk(chunkId: ObjectId, embeddings: number[]) {
-    await this.kbEmbeddingCollection.updateOne(
+    const mongoPromise = this.kbEmbeddingCollection.updateOne(
       {
         _id: chunkId,
       },
       { $set: { embeddings } },
     );
+
+    const promises: Promise<any>[] = [mongoPromise];
+
+    // Insert to Postgres only if enabled
+    if (this.insertEmbeddingsToPg) {
+      const pgPromise = this.pgEmbeddingsDbService.updateEmbeddingsForChunkInPg(
+        chunkId,
+        embeddings,
+      );
+      promises.push(pgPromise);
+    }
+
+    await Promise.all(promises);
   }
 
+  /**
+   * Deletes the embeddings associated with a knowledgebase.
+   * @param kbId - The ID of the knowledgebase.
+   * @param type - Optional. The type of embeddings to delete.
+   */
   async deleteKbEmbeddingsForKnowledgebase(
     kbId: ObjectId,
     type?: DataStoreType,
   ) {
     const filter: any = { knowledgebaseId: kbId };
     if (type) filter.type = type;
-    await this.kbEmbeddingCollection.deleteMany(filter);
+    const mongoPromise = this.kbEmbeddingCollection.deleteMany(filter);
+
+    const promises: Promise<any>[] = [mongoPromise];
+
+    // Insert to Postgres only if enabled
+    if (this.insertEmbeddingsToPg) {
+      const pgPromise = this.pgEmbeddingsDbService.deleteEmbeddingsForKbInPg(
+        kbId,
+        type,
+      );
+      promises.push(pgPromise);
+    }
+
+    await Promise.all(promises);
   }
 
+  /**
+   * Deletes an embedding for a given chunk ID.
+   * @param chunkId - The ID of the chunk to delete the embedding for.
+   */
   async deleteEmbeddingForChunk(chunkId: ObjectId) {
-    await this.kbEmbeddingCollection.deleteOne({
+    const mongoPromise = this.kbEmbeddingCollection.deleteOne({
       _id: chunkId,
     });
+
+    const promises: Promise<any>[] = [mongoPromise];
+
+    // Insert to Postgres only if enabled
+    if (this.insertEmbeddingsToPg) {
+      const pgPromise =
+        this.pgEmbeddingsDbService.deleteEmbeddingsForChunkInPg(chunkId);
+      promises.push(pgPromise);
+    }
+
+    await Promise.all(promises);
   }
 
+  /**
+   * Deletes multiple embeddings from the knowledgebase collection by their IDs.
+   * @param ids - An array of ObjectIds representing the IDs of the embeddings to be deleted.
+   * @returns A promise that resolves when the embeddings are successfully deleted.
+   */
   async deleteEmbeddingsByIdBulk(ids: ObjectId[]) {
-    await this.kbEmbeddingCollection.deleteMany({ _id: { $in: ids } });
+    const mongoPromise = this.kbEmbeddingCollection.deleteMany({
+      _id: { $in: ids },
+    });
+
+    const promises: Promise<any>[] = [mongoPromise];
+
+    // Insert to Postgres only if enabled
+    if (this.insertEmbeddingsToPg) {
+      const pgPromise =
+        this.pgEmbeddingsDbService.deleteEmbeddingsByIdBulkInPg(ids);
+      promises.push(pgPromise);
+    }
+
+    await Promise.all(promises);
   }
 
   /*********************************************************

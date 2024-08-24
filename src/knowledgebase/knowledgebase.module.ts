@@ -21,7 +21,7 @@ import { TaskModule } from '../task/task.module';
 import { CustomKeyService } from './custom-key.service';
 import { WebhookModule } from '../webhook/webhook.module';
 import { WebSocketChatGateway } from './websocketchat.gateway';
-import { EmbeddingsDbService } from './embeddings-db.service';
+import { PgEmbeddingsDbService } from './pgEmbeddingsDb.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 @Module({
@@ -53,7 +53,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
     PromptService,
     CustomKeyService,
     WebSocketChatGateway,
-    EmbeddingsDbService,
+    PgEmbeddingsDbService,
   ],
   exports: [
     KnowledgebaseDbService,
