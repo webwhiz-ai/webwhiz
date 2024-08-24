@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { ObjectId } from 'mongodb';
 import { toSql } from 'pgvector/pg';
@@ -9,14 +9,17 @@ import { DataStoreType, TopChunksResponse } from './knowledgebase.schema';
  */
 @Injectable()
 export class EmbeddingsDbService {
-  constructor(private dataSource: DataSource) {}
+  private readonly logger;
+  constructor(private dataSource: DataSource) {
+    this.logger = new Logger(EmbeddingsDbService.name);
+  }
 
   /**
    * Inserts embeddings data into the PostgreSQL database.
    * @param data - The embeddings data to be inserted.
    * @returns A Promise that resolves to the result of the insertion operation.
    */
-  async insertEmbeddingsToPg(data: {
+  async insertEmbeddingsInPg(data: {
     _id: string;
     knowledgebaseId: string;
     embeddings: number[];
@@ -34,7 +37,14 @@ export class EmbeddingsDbService {
       data.embeddingModel,
       data.type,
     ];
-    return this.dataSource.query(query, params);
+    try {
+      return await this.dataSource.query(query, params);
+    } catch (error) {
+      this.logger.error(
+        `Failed to insert embeddings: ${error.message}`,
+        error.stack,
+      );
+    }
   }
 
   /**
@@ -56,16 +66,24 @@ export class EmbeddingsDbService {
       ORDER BY similarity DESC
       LIMIT $3
     `;
-    const result = await this.dataSource.query(query, [
-      toSql(queryEmbedding),
-      kbId.toHexString(),
-      n,
-    ]);
 
-    return result.map((chunk) => ({
-      chunkId: { $oid: chunk._id },
-      similarity: parseFloat(chunk.similarity),
-    }));
+    try {
+      const result = await this.dataSource.query(query, [
+        toSql(queryEmbedding),
+        kbId.toHexString(),
+        n,
+      ]);
+
+      return result.map((chunk) => ({
+        chunkId: { $oid: chunk._id },
+        similarity: parseFloat(chunk.similarity),
+      }));
+    } catch (error) {
+      this.logger.error(
+        `Failed to get top chunks for embedding: ${error.message}`,
+        error.stack,
+      );
+    }
   }
 
   /**
@@ -79,10 +97,17 @@ export class EmbeddingsDbService {
       SET embeddings = $1::vector, updated_at = NOW()
       WHERE _id = $2
     `;
-    return this.dataSource.query(query, [
-      toSql(embeddings),
-      chunkId.toHexString(),
-    ]);
+    try {
+      await this.dataSource.query(query, [
+        toSql(embeddings),
+        chunkId.toHexString(),
+      ]);
+    } catch (error) {
+      this.logger.error(
+        `Failed to update embeddings: ${error.message}`,
+        error.stack,
+      );
+    }
   }
 
   /**
@@ -103,7 +128,14 @@ export class EmbeddingsDbService {
       params.push(type);
     }
 
-    return this.dataSource.query(query, params);
+    try {
+      await this.dataSource.query(query, params);
+    } catch (error) {
+      this.logger.error(
+        `Failed to delete embeddings for KB: ${error.message}`,
+        error.stack,
+      );
+    }
   }
 
   /**
@@ -116,7 +148,14 @@ export class EmbeddingsDbService {
       DELETE FROM kb_embeddings_pg
       WHERE _id = $1
     `;
-    return this.dataSource.query(query, [chunkId.toHexString()]);
+    try {
+      await this.dataSource.query(query, [chunkId.toHexString()]);
+    } catch (error) {
+      this.logger.error(
+        `Failed to delete embeddings for chunk: ${error.message}`,
+        error.stack,
+      );
+    }
   }
 
   /**
@@ -128,6 +167,13 @@ export class EmbeddingsDbService {
       DELETE FROM kb_embeddings_pg
       WHERE _id = ANY($1)
     `;
-    return this.dataSource.query(query, [ids.map((id) => id.toHexString())]);
+    try {
+      await this.dataSource.query(query, [ids.map((id) => id.toHexString())]);
+    } catch (error) {
+      this.logger.error(
+        `Failed to delete embeddings in bulk: ${error.message}`,
+        error.stack,
+      );
+    }
   }
 }
