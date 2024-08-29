@@ -77,7 +77,7 @@ const config = (): AppConfig => {
     postgresPort: parseInt(process.env.POSTGRES_PORT as string, 10) || 5432,
     postgresUser: process.env.POSTGRES_USER || 'postgres',
     postgresPassword: process.env.POSTGRES_PASSWORD || 'password',
-    postgresDbName: process.env.POSTGRES_DBNAME || 'sitemine',
+    postgresDbName: process.env.POSTGRES_DBNAME || 'webwhiz',
     featureFlags,
   };
 };
