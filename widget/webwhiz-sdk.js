@@ -271,7 +271,6 @@ function __WEBWHIZ__getWidgetURL() {
 function __WEBWHIZ__getBaseURL() {
   const scriptEl = document.getElementById("__webwhizSdk__");
   const baseURL = scriptEl.getAttribute('baseUrl') || scriptEl.getAttribute('data-base-url');
-  console.log(baseURL);
   return baseURL || 'https://api.webwhiz.ai';
 }
 
