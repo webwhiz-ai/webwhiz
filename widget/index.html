@@ -187,11 +187,8 @@
         integrity="sha384-mZLF4UVrpi/QTWPA7BjNPEnkIfRFn4ZEO3Qt/HFklTJBj/gBOV8G3HcKn4NfQblz"
         crossorigin="anonymous"></script>
 
-
-
-    <script>
+    <script type="module">
         const STREAM_RESPONSE = true;
-
 
         // message format
 
@@ -237,6 +234,11 @@
         if (urlParams.get('hide-chat-actions') === 'true') {
             chatWidget.classList.add('hide-chat-actions');
         }
+
+        // Open links in a new tab
+        const baseTag = document.querySelector('head base');
+        const baseTarget = process.env.BASE_TARGET || "_parent";
+        baseTag.setAttribute('target', baseTarget);
 
         /**
          * Iframe communications
@@ -1366,6 +1368,5 @@
 
 </script>
 </body>
-
 
 </html>

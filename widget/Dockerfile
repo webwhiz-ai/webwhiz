@@ -3,6 +3,7 @@ FROM node:14-alpine AS builder_widget
 
 # Declaring env
 ENV NODE_ENV production
+ARG BASE_TARGET _parent
 
 # Setting up the work directory
 WORKDIR /app
