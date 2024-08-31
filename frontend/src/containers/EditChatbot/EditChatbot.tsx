@@ -510,7 +510,7 @@ console.log(permissions.get(), 'permissionspermissions')
 
 
 
-		return <VStack spacing={12} alignItems="start">
+		return <VStack spacing={12} alignItems="start" p={2}>
 			<VStack alignItems="start">
 				<Heading fontSize="md">Chatbot with Launcher Icon</Heading>
 				<Text color="gray.500" fontSize="sm">A launcher icon will be displayed at the corner of your website. Once clicked, the full chat interface will appear.</Text>
