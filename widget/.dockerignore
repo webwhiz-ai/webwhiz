@@ -4,3 +4,4 @@ Dockerfile
 dist
 node_modules
 *.log
+.parcel-cache

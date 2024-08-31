@@ -264,13 +264,13 @@ function __WEBWHIZ__getChatbotId() {
 
 function __WEBWHIZ__getWidgetURL() {
   const scriptEl = document.getElementById("__webwhizSdk__");
-  const baseURL = scriptEl.getAttribute('widgetUrl') || scriptEl.getAttribute('data-widget-url');
+  const baseURL = scriptEl.getAttribute('widgetUrl') || scriptEl.getAttribute('data-widget-url') || process.env.WW_WIDGET_URL;
   return baseURL || 'https://widget.webwhiz.ai/';
 }
 
 function __WEBWHIZ__getBaseURL() {
   const scriptEl = document.getElementById("__webwhizSdk__");
-  const baseURL = scriptEl.getAttribute('baseUrl') || scriptEl.getAttribute('data-base-url');
+  const baseURL = scriptEl.getAttribute('baseUrl') || scriptEl.getAttribute('data-base-url') || process.env.WW_BASE_URL;
   return baseURL || 'https://api.webwhiz.ai';
 }
 
