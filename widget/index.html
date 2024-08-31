@@ -189,7 +189,7 @@
 
 
 
-    <script>
+    <script type="module">
         const STREAM_RESPONSE = true;
 
 
@@ -228,7 +228,7 @@
         const urlParams = new URLSearchParams(window.location.search);
 
         let knowledgebaseId;
-        const baseURL = urlParams.get('baseUrl') || 'https://api.webwhiz.ai';
+        const baseURL = urlParams.get('baseUrl') || process.env.WW_BASE_URL || 'https://api.webwhiz.ai';
         const chatWidget = document.querySelector('.chat-wrap');
 
         if (urlParams.get('embed') === 'true') {

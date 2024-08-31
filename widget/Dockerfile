@@ -14,6 +14,7 @@ RUN npm install
 
 # Copying all the files in our project
 COPY . .
+COPY .env.docker .env
 
 # Building our application
 RUN npm run build
