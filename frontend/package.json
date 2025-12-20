@@ -18,6 +18,7 @@
     "@uiw/react-md-editor": "^3.23.5",
     "axios": "^0.21.4",
     "chakra-ui-markdown-renderer": "^4.1.0",
+    "classnames": "^2.5.1",
     "country-code-emoji": "^2.3.0",
     "date-fns": "^2.28.0",
     "formik": "^2.2.9",

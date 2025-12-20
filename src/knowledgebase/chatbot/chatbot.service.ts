@@ -45,6 +45,7 @@ import {
 } from '../knowledgebase.schema';
 import { PromptTestDTO, UpdateChatbotSessionDTO } from './chatbot.dto';
 import { OpenaiChatbotService } from './openaiChatbotService';
+import { MultiProviderChatbotService } from './multi-provider-chatbot.service';
 import { WebSocketChatGateway } from '../websocketchat.gateway';
 
 const CHAT_SESION_EXPIRY_TIME = 5 * 60;
@@ -57,6 +58,7 @@ export class ChatbotService {
     private userService: UserService,
     private kbDbService: KnowledgebaseDbService,
     private openaiChatbotService: OpenaiChatbotService,
+    private multiProviderChatbotService: MultiProviderChatbotService,
     private subPlanInfoService: SubscriptionPlanInfoService,
     private emailService: EmailService,
     private taskService: TaskService,
@@ -66,7 +68,7 @@ export class ChatbotService {
     @Inject(REDIS) private redis: Redis,
     @Inject(forwardRef(() => WebSocketChatGateway))
     private webSocketChatGateway: WebSocketChatGateway,
-  ) { }
+  ) {}
 
   private async putChatSessionDataToCache(sessionData: ChatSession) {
     return this.redis.set(
@@ -115,16 +117,21 @@ export class ChatbotService {
     session.messages.push(msg);
 
     // Calculate total tokens based on the model used and update the monthly usage for user and kb
-    const totalTokens = this.calculateTotalTokens(
+    const totalTokens = this.multiProviderChatbotService.calculateTotalTokens(
       msg.qTokens,
       msg.aTokens,
       session.model,
+      session.modelProvider,
     );
 
     const messageCount = totalTokens > 0 ? 1 : 0;
     const weightedMsgCount =
       messageCount > 0
-        ? this.calculateMsgCountBasedOnModel(messageCount, session.model)
+        ? this.multiProviderChatbotService.calculateMsgCountBasedOnModel(
+            messageCount,
+            session.model,
+            session.modelProvider,
+          )
         : 0;
 
     return Promise.all([
@@ -143,26 +150,6 @@ export class ChatbotService {
         weightedMsgCount,
       ),
     ]);
-  }
-
-  // TODO: Recheck the logic for calculating the message count based on the model
-  /**
-   * Calculates the message count based on the specified model.
-   * @param messageCount The number of messages.
-   * @param model The model to calculate the message count for.
-   * @returns The calculated message count.
-   */
-  calculateMsgCountBasedOnModel(messageCount: number, model: string) {
-    switch (model) {
-      case 'gpt-4-0613': // GPT-4
-        return messageCount * 20;
-      case 'gpt-4-turbo-preview': // GPT-4-Turbo
-        return messageCount * 10;
-      case 'gpt-3.5-turbo': // GPT-3.5-Turbo
-      case 'gpt-4o': // GPT-4o
-      default:
-        return messageCount;
-    }
   }
 
   private async updateSessionDataWithNewManualMsg(
@@ -371,7 +358,7 @@ export class ChatbotService {
     // Get answer from chatgpt
     const prevMessages = sessionData.messages.slice(-2);
 
-    const answer = await this.openaiChatbotService.getAiAnswer(
+    const answer = await this.multiProviderChatbotService.getAiAnswer(
       sessionData.kbName,
       query,
       topChunks,
@@ -380,6 +367,7 @@ export class ChatbotService {
       sessionData.prompt,
       sessionData.customKeys,
       sessionData.model,
+      sessionData.modelProvider,
       debug,
     );
 
@@ -520,54 +508,56 @@ export class ChatbotService {
     //
     // Get answer for query
     //
-    const answerStream = await this.openaiChatbotService.getAiAnswerStream(
-      sessionData.kbName,
-      query,
-      topChunks,
-      prevMessages,
-      async (answer, usage) => {
-        const msg = {
-          id: uuidv4(),
-          type: MessageType.BOT,
-          q: query,
-          a: answer,
-          qTokens: usage.prompt,
-          aTokens: usage.completion,
-          ts: new Date(),
-          read: true,
-          msg: null,
-          sender: null,
-          sessionId: sessionId,
-        };
-        this.webSocketChatGateway.server
-          .to(kbId.toHexString())
-          .emit('chat_broadcast', msg);
-        await this.updateSessionDataWithNewMsg(sessionData, msg);
+    const answerStream =
+      await this.multiProviderChatbotService.getAiAnswerStream(
+        sessionData.kbName,
+        query,
+        topChunks,
+        prevMessages,
+        async (answer, usage) => {
+          const msg = {
+            id: uuidv4(),
+            type: MessageType.BOT,
+            q: query,
+            a: answer,
+            qTokens: usage.prompt,
+            aTokens: usage.completion,
+            ts: new Date(),
+            read: true,
+            msg: null,
+            sender: null,
+            sessionId: sessionId,
+          };
+          this.webSocketChatGateway.server
+            .to(kbId.toHexString())
+            .emit('chat_broadcast', msg);
+          await this.updateSessionDataWithNewMsg(sessionData, msg);
 
-        // Call webhook with msg
-        this.webhookService.callWebhook(sessionData.userId, {
-          event: WebhookEventType.CHATBOT_MSG,
-          payload: {
-            q: msg.q,
-            a: msg.a,
-            ts: msg.ts,
-            session: {
-              id: sessionData._id.toHexString(),
-              kbName: sessionData.kbName,
-              knowledgebaseId: sessionData.knowledgebaseId.toHexString(),
-              src: sessionData.src,
-              userData: sessionData.userData,
-              startedAt: sessionData.startedAt,
-              updatedAt: sessionData.updatedAt,
+          // Call webhook with msg
+          this.webhookService.callWebhook(sessionData.userId, {
+            event: WebhookEventType.CHATBOT_MSG,
+            payload: {
+              q: msg.q,
+              a: msg.a,
+              ts: msg.ts,
+              session: {
+                id: sessionData._id.toHexString(),
+                kbName: sessionData.kbName,
+                knowledgebaseId: sessionData.knowledgebaseId.toHexString(),
+                src: sessionData.src,
+                userData: sessionData.userData,
+                startedAt: sessionData.startedAt,
+                updatedAt: sessionData.updatedAt,
+              },
             },
-          },
-        });
-      },
-      sessionData.defaultAnswer,
-      sessionData.prompt,
-      sessionData.model,
-      sessionData.customKeys,
-    );
+          });
+        },
+        sessionData.defaultAnswer,
+        sessionData.prompt,
+        sessionData.model,
+        sessionData.modelProvider,
+        sessionData.customKeys,
+      );
 
     const sources = topChunks
       .filter((c) => c.score > SOURCES_FILTER_THRESHOLD)
@@ -577,7 +567,7 @@ export class ChatbotService {
     return answerStream.pipe(
       map((value) => {
         const newVal: MessageEvent = {
-          data: value,
+          data: value as string | object,
         };
 
         return newVal;
@@ -677,6 +667,7 @@ export class ChatbotService {
       kbName: `${kb.name} assistant`,
       defaultAnswer: kb.defaultAnswer,
       model: kb.model || 'gpt-3.5-turbo',
+      modelProvider: kb.modelProvider,
       prompt,
       isDemo: kb.isDemo,
       isManual: false,
@@ -785,11 +776,11 @@ export class ChatbotService {
       data.query,
       data.context.map(
         (c) =>
-        ({
-          content: c,
-          score: 0.9,
-          url: 'http://test',
-        } as any),
+          ({
+            content: c,
+            score: 0.9,
+            url: 'http://test',
+          } as any),
       ),
       data.prevMessages as any,
       data.defaultAnswer,
@@ -1005,30 +996,6 @@ export class ChatbotService {
       );
     } catch {
       throw new HttpException('Invalid Session', HttpStatus.NOT_FOUND);
-    }
-  }
-
-  /**
-   * Calculates the total number of tokens based on the number of question tokens, answer tokens, and the model.
-   *
-   * Input token usage ratio for gpt-3.5 : gpt-4 : gpt-4-turbo = 1 : 60 : 20
-   * Output token usage ratio for gpt-3.5 : gpt-4 : gpt-4-turbo = 1 : 40 : 20
-   *
-   * @param qTokens The number of question tokens.
-   * @param aTokens The number of answer tokens.
-   * @param model The model used for token calculation.
-   * @returns The total number of tokens.
-   */
-  calculateTotalTokens(qTokens: number, aTokens: number, model: string) {
-    switch (model) {
-      case 'gpt-4-0613': // GPT-4
-        return qTokens * 60 + aTokens * 40;
-      case 'gpt-4-turbo-preview': // GPT-4-Turbo
-        return qTokens * 20 + aTokens * 20;
-      case 'gpt-3.5-turbo': // GPT-3.5
-      case 'gpt-4o': // GPT-4o
-      default:
-        return qTokens + aTokens;
     }
   }
 }

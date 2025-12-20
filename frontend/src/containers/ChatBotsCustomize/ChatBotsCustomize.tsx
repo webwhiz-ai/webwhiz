@@ -36,7 +36,7 @@ import { RiDeleteBin5Line } from "react-icons/ri"
 
 import styles from "./ChatBotsCustomize.module.scss";
 
-import { chatWidgetDefaultValues } from "../../utils/commonUtils";
+import { chatWidgetDefaultValues, AVAILABLE_MODELS, MODEL_PROVIDERS } from "../../utils/commonUtils";
 import { SectionTitle } from "../../components/SectionTitle/SectionTitle";
 import { ChatBotCustomizeData, launcherIcon } from "../../types/knowledgebase.type";
 import ChatBotLauncher from "../ChatBotLauncher/ChatBotLauncher";
@@ -654,13 +654,29 @@ export const ChatBotsCustomize = ({
 																		</Badge>
 																	</Flex>
 																	<Select {...field} isDisabled={subscriptionName === "FREE"} cursor="pointer">
-																		<option value="gpt-3.5-turbo">GPT-3.5-Turbo</option>
-																		<option value="gpt-4-0613">GPT-4</option>
-																		<option value="gpt-4-turbo-preview">GPT-4-Turbo</option>
-																		<option value="gpt-4o">GPT-4o</option>
+																		<optgroup label="OpenAI">
+																			<option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+																			<option value="gpt-4-0613">GPT-4</option>
+																			<option value="gpt-4-turbo-preview">GPT-4 Turbo</option>
+																			<option value="gpt-4o">GPT-4o</option>
+																		</optgroup>
+																		<optgroup label="Anthropic">
+																			<option value="claude-3-haiku-20240307">Claude 3 Haiku</option>
+																			<option value="claude-3-sonnet-20240229">Claude 3 Sonnet</option>
+																			<option value="claude-3-opus-20240229">Claude 3 Opus</option>
+																		</optgroup>
 																	</Select>
-																	<FormHelperText fontSize="sm"> Note: Credits consumption vary with model.
-																		Credits per message: 1 credit for GPT-3.5-Turbo, 10 credits for GPT-4-Turbo, and 20 credits for GPT-4.</FormHelperText>
+																	<FormHelperText fontSize="sm"> 
+																		Note: Credits consumption vary with model.
+																		{(() => {
+																			const selectedModel = AVAILABLE_MODELS.find(m => m.value === form.values.model);
+																			return selectedModel ? (
+																				<> Credits per message: {selectedModel.creditMultiplier} credit{selectedModel.creditMultiplier !== 1 ? 's' : ''}.</>
+																			) : (
+																				<> Credits per message: 1 credit for basic models, 5-20 credits for advanced models.</>
+																			);
+																		})()}
+																	</FormHelperText>
 																</FormControl>
 															)}
 														</Field>

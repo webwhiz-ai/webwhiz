@@ -65,10 +65,69 @@ export function getLlmModelUsed(modelName?: string) {
     case 'gpt-4o':
       return 'GPT-4o';
     case 'gpt-3.5-turbo':
+      return 'GPT-3.5 Turbo';
+    case 'claude-3-haiku-20240307':
+      return 'Claude 3 Haiku';
+    case 'claude-3-sonnet-20240229':
+      return 'Claude 3 Sonnet';
+    case 'claude-3-opus-20240229':
+      return 'Claude 3 Opus';
     default:
       return 'GPT-3.5 Turbo';
   }
 }
+
+export const MODEL_PROVIDERS = {
+  OPENAI: 'openai',
+  ANTHROPIC: 'anthropic',
+} as const;
+
+export const AVAILABLE_MODELS = [
+  // OpenAI Models
+  {
+    provider: MODEL_PROVIDERS.OPENAI,
+    value: 'gpt-3.5-turbo',
+    label: 'GPT-3.5 Turbo',
+    creditMultiplier: 1,
+  },
+  {
+    provider: MODEL_PROVIDERS.OPENAI,
+    value: 'gpt-4-0613',
+    label: 'GPT-4',
+    creditMultiplier: 20,
+  },
+  {
+    provider: MODEL_PROVIDERS.OPENAI,
+    value: 'gpt-4-turbo-preview',
+    label: 'GPT-4 Turbo',
+    creditMultiplier: 10,
+  },
+  {
+    provider: MODEL_PROVIDERS.OPENAI,
+    value: 'gpt-4o',
+    label: 'GPT-4o',
+    creditMultiplier: 1,
+  },
+  // Anthropic Models
+  {
+    provider: MODEL_PROVIDERS.ANTHROPIC,
+    value: 'claude-3-haiku-20240307',
+    label: 'Claude 3 Haiku',
+    creditMultiplier: 1,
+  },
+  {
+    provider: MODEL_PROVIDERS.ANTHROPIC,
+    value: 'claude-3-sonnet-20240229',
+    label: 'Claude 3 Sonnet',
+    creditMultiplier: 5,
+  },
+  {
+    provider: MODEL_PROVIDERS.ANTHROPIC,
+    value: 'claude-3-opus-20240229',
+    label: 'Claude 3 Opus',
+    creditMultiplier: 20,
+  },
+] as const;
 
 export const chatWidgetDefaultValues = {
 	backgroundColor: "#000",

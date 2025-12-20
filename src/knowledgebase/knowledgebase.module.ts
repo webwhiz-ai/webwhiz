@@ -3,6 +3,7 @@ import { CeleryClientModule } from '../common/celery/celery-client.module';
 import { MongoModule } from '../common/mongo/mongo.module';
 import { RedisModule } from '../common/redis/redis.module';
 import { OpenaiModule } from '../openai/openai.module';
+import { LLMProvidersModule } from '../llm-providers/llm-providers.module';
 import { SubscriptionModule } from '../subscription/subscription.module';
 import { UserModule } from '../user/user.module';
 import { ChatbotController } from './chatbot/chatbot.controller';
@@ -11,6 +12,7 @@ import { KnowledgebaseController } from './knowledgebase.controller';
 import { KnowledgebaseService } from './knowledgebase.service';
 import { KnowledgebaseDbService } from './knowledgebase-db.service';
 import { OpenaiChatbotService } from './chatbot/openaiChatbotService';
+import { MultiProviderChatbotService } from './chatbot/multi-provider-chatbot.service';
 import { OfflineMsgService } from './offline-msg/offline-msg.service';
 import { OfflineMessageController } from './offline-msg/offline-msg.controller';
 import { PromptsController } from './prompt/prompt.controller';
@@ -27,6 +29,7 @@ import { WebSocketChatGateway } from './websocketchat.gateway';
     MongoModule,
     RedisModule,
     OpenaiModule,
+    LLMProvidersModule,
     CeleryClientModule,
     UserModule,
     SubscriptionModule,
@@ -46,6 +49,7 @@ import { WebSocketChatGateway } from './websocketchat.gateway';
     DataStoreService,
     ChatbotService,
     OpenaiChatbotService,
+    MultiProviderChatbotService,
     OfflineMsgService,
     PromptService,
     CustomKeyService,
