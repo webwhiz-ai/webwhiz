@@ -157,6 +157,16 @@ export interface KbEmbedding {
   embeddingModel?: EmbeddingModel;
 }
 
+/**
+ * Represents the response for top chunks.
+ */
+export interface TopChunksResponse {
+  chunkId: {
+    $oid: string; // Same as chunkId
+  };
+  similarity: number;
+}
+
 /*********************************************************
  * CHAT SESSION
  *********************************************************/

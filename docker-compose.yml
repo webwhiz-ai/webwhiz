@@ -13,6 +13,17 @@ services:
     expose:
       - "27017"
 
+  postgres:
+    image: pgvector/pgvector:pg16 
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: sitemine 
+    volumes:
+      - pg-db-data:/var/lib/postgresql/data
+    expose:
+      - "5432"
+
   web:
     build: .
     command: node dist/main.js
@@ -21,6 +32,7 @@ services:
     depends_on:
       - redis
       - mongodb
+      - postgres
 
   nodejs_worker:
     build: .
@@ -28,6 +40,7 @@ services:
     depends_on:
       - redis
       - mongodb
+      - postgres
 
   python_worker:
     build: ./workers
@@ -51,3 +64,4 @@ services:
 
 volumes:
   db-data:
+  pg-db-data:
