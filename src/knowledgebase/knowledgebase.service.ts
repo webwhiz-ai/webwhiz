@@ -49,6 +49,31 @@ export class KnowledgebaseService {
    * KNOWLEDGEBASE CREATION AND CRAWLING
    *********************************************************/
 
+  /**
+   * Helper method to determine if a URL is a parent path of another URL
+   * @param parentPath The potential parent path
+   * @param childPath The potential child path
+   * @returns boolean True if parentPath is a parent of childPath
+   */
+  private isParentPath(parentPath: string, childPath: string): boolean {
+    // Ensure paths have consistent formatting (starting with / and no trailing /)
+    const normalizePathForComparison = (p: string) => {
+      if (!p.startsWith('/')) p = '/' + p;
+      return p.replace(/\/+$/, '');
+    };
+
+    const normalizedParent = normalizePathForComparison(parentPath);
+    const normalizedChild = normalizePathForComparison(childPath);
+
+    // A path is a parent if:
+    // 1. The child path starts with the parent path
+    // 2. The child path is longer than the parent path
+    // 3. The character after the parent path in the child path is a '/'
+    return normalizedChild.startsWith(normalizedParent) &&
+           normalizedChild.length > normalizedParent.length &&
+           normalizedChild.charAt(normalizedParent.length) === '/';
+  }
+
   private async crawlWebsiteForKb(
     kbId: ObjectId,
     websiteData: Knowledgebase['websiteData'],
@@ -59,20 +84,42 @@ export class KnowledgebaseService {
 
     const includeUrlsForInit = websiteData.include.map((u) => `${baseUrl}${u}`);
 
+    // Process inclusion and exclusion patterns with proper precedence
+    const includePatterns = websiteData.include.flatMap((u) => [
+      `${baseUrl}${u}`,
+      `${baseUrl}${u}/**/*`,
+    ]);
+
+    // Generate explicit exclusion patterns for each excluded path
+    let excludePatterns = [];
+
+    // First add the specific exclusion patterns defined by the user
+    websiteData.exclude.forEach((excludePath) => {
+      // Check if this exclusion path is a subdirectory of any included path
+      const isSubdirOfIncludedPath = websiteData.include.some((includePath) =>
+        this.isParentPath(includePath, excludePath)
+      );
+
+      // Add explicit exclusion patterns for this path
+      excludePatterns.push(`${baseUrl}${excludePath}`);
+      excludePatterns.push(`${baseUrl}${excludePath}/**/*`);
+
+      // If this is a subdirectory of an included path, add more specific exclusion patterns
+      // to ensure it's properly excluded even when its parent is included
+      if (isSubdirOfIncludedPath) {
+        excludePatterns.push(`${baseUrl}${excludePath}/*`);
+        excludePatterns.push(`${baseUrl}${excludePath}/**`);
+      }
+    });
+
     const data: CrawlConfig = {
       urls: [
         websiteData.websiteUrl,
         ...websiteData.urls,
         ...includeUrlsForInit,
       ],
-      include: websiteData.include.flatMap((u) => [
-        `${baseUrl}${u}`,
-        `${baseUrl}${u}/**/*`,
-      ]),
-      exclude: websiteData.exclude.flatMap((u) => [
-        `${baseUrl}${u}`,
-        `${baseUrl}${u}/**/*`,
-      ]),
+      include: includePatterns,
+      exclude: excludePatterns,
       maxPages,
     };
 
