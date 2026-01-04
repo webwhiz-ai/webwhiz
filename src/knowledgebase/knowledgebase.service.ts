@@ -15,6 +15,8 @@ import { KnowledgebaseDbService } from './knowledgebase-db.service';
 import {
   checkUserPermissionForKb,
   UserPermissions,
+  validateAndFixChatWidgetData,
+  getModelProviderFromModel,
 } from './knowledgebase-utils';
 import {
   CreateKnowledgebaseDTO,
@@ -26,6 +28,7 @@ import {
   DataStoreType,
   EmbeddingModel,
   Knowledgebase,
+  ModelProvider,
   KnowledgebaseStatus,
   ParticipantsData,
   UserRoles,
@@ -223,6 +226,7 @@ export class KnowledgebaseService {
       updatedAt: ts,
       embeddingModel: EmbeddingModel.OPENAI_EMBEDDING_3,
       model: 'gpt-3.5-turbo',
+      modelProvider: ModelProvider.OPENAI,
     };
     const kbData = await this.kbDbService.insertKnowledgebase(kb);
 
@@ -461,7 +465,10 @@ export class KnowledgebaseService {
     const kb = await this.kbDbService.getKnowledgebaseSparseById(kbId);
     checkUserPermissionForKb(user, kb, [UserPermissions.EDIT]);
 
-    await this.kbDbService.setKnowledgebaseChatWidgetData(kbId, data);
+    // Validate and fix the chatWidgetData to ensure model and modelProvider are consistent
+    const validatedData = validateAndFixChatWidgetData(data);
+
+    await this.kbDbService.setKnowledgebaseChatWidgetData(kbId, validatedData);
   }
 
   /**
@@ -619,8 +626,38 @@ export class KnowledgebaseService {
         HttpStatus.BAD_REQUEST,
       );
     }
+    
+    // Automatically set the correct modelProvider based on the model
+    const modelProvider = getModelProviderFromModel(model);
+    
     await this.kbDbService.updateKnowledgebase(kbId, {
       model,
+      modelProvider,
+    });
+
+    return 'Done';
+  }
+
+  /**
+   * Set model provider for a knowledgebase
+   */
+  async setModelProvider(user: UserSparse, id: string, modelProvider: ModelProvider) {
+    const kbId = new ObjectId(id);
+    const kb = await this.kbDbService.getKnowledgebaseSparseById(kbId);
+    checkUserPermissionForKb(user, kb, [UserPermissions.EDIT]);
+
+    const subscriptionData: SubscriptionPlanInfo =
+      this.getUserSubscriptionData(user);
+
+    if (subscriptionData.name === 'FREE') {
+      throw new HttpException(
+        'You need to upgrade to a paid plan for using this feature',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    await this.kbDbService.updateKnowledgebase(kbId, {
+      modelProvider,
     });
 
     return 'Done';

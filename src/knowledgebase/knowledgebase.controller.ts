@@ -24,6 +24,7 @@ import {
   SetCustomDomainDTO,
   SetKnowledgebaseDefaultAnswerDTO,
   SetModelNameDTO,
+  SetModelProviderDTO,
   SetPromptDTO,
   UpdateKnowledgebaseWebsiteDataDTO,
   InviteUserDTO,
@@ -121,7 +122,7 @@ export class KnowledgebaseController {
   }
 
   /**
-   * Set OpenAI model to use
+   * Set LLM model to use
    */
   @Put('/:id/model')
   async setModelName(
@@ -131,6 +132,19 @@ export class KnowledgebaseController {
   ) {
     const { user } = req;
     return this.kbService.setModelName(user, id, data.model);
+  }
+
+  /**
+   * Set LLM model provider to use
+   */
+  @Put('/:id/model_provider')
+  async setModelProvider(
+    @Req() req: RequestWithUser,
+    @Param('id') id: string,
+    @Body() data: SetModelProviderDTO,
+  ) {
+    const { user } = req;
+    return this.kbService.setModelProvider(user, id, data.modelProvider);
   }
 
   /**

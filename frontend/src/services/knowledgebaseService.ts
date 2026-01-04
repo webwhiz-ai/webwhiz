@@ -140,6 +140,17 @@ export async function updateModelName(id: string, modelName: string): Promise<Ax
 	});
 }
 
+export async function updateModelProvider(id: string, modelProvider: string): Promise<AxiosResponse<Knowledgebase[]>> {
+	return await axios({
+		baseURL: baseURL,
+		method: 'put',
+		data: {
+			modelProvider: modelProvider
+		},
+		url: `knowledgebase/${id}/model_provider`,
+	});
+}
+
 export async function updateChatbotName(id: string, chatbotName: string): Promise<AxiosResponse<string>> {
 	return await axios({
 		baseURL: baseURL,

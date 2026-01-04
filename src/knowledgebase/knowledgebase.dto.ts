@@ -3,11 +3,13 @@ import {
   IsArray,
   IsBoolean,
   IsEmail,
+  IsEnum,
   IsNotEmpty,
   IsOptional,
   IsString,
 } from 'class-validator';
 import { IsObjectId } from '../common/custom-class-validators';
+import { ModelProvider } from './knowledgebase.schema';
 
 export class CreateKnowledgebaseDTO {
   @IsNotEmpty()
@@ -103,6 +105,12 @@ export class SetModelNameDTO {
   @IsNotEmpty()
   @IsString()
   model: string;
+}
+
+export class SetModelProviderDTO {
+  @IsNotEmpty()
+  @IsEnum(ModelProvider)
+  modelProvider: ModelProvider;
 }
 
 export class SetCustomDomainDTO {

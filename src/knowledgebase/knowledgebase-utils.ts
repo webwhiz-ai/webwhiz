@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus } from '@nestjs/common';
 import { UserSparse } from '../user/user.schema';
-import { KnowledgebaseSparse, UserRoles } from './knowledgebase.schema';
+import { KnowledgebaseSparse, UserRoles, ModelProvider } from './knowledgebase.schema';
 
 export enum UserPermissions {
   READ = 'read',
@@ -59,4 +59,43 @@ export function checkUserPermissionForKb(
       throw new HttpException('Unauthorised', HttpStatus.UNAUTHORIZED);
     }
   }
+}
+
+/**
+ * Determines the correct model provider based on the model name
+ */
+export function getModelProviderFromModel(model: string): ModelProvider {
+  if (!model) {
+    return ModelProvider.OPENAI; // Default fallback
+  }
+  
+  // Claude models
+  if (model.includes('claude')) {
+    return ModelProvider.ANTHROPIC;
+  }
+  
+  // OpenAI models (including GPT variants)
+  if (model.includes('gpt') || model.includes('text-davinci') || model.includes('text-curie')) {
+    return ModelProvider.OPENAI;
+  }
+  
+  // Default to OpenAI for unknown models (backward compatibility)
+  return ModelProvider.OPENAI;
+}
+
+/**
+ * Validates and fixes chatWidgetData to ensure model and modelProvider are consistent
+ */
+export function validateAndFixChatWidgetData(chatWidgetData: any): any {
+  if (!chatWidgetData || typeof chatWidgetData !== 'object') {
+    return chatWidgetData;
+  }
+  
+  // If model is present but modelProvider is missing or incorrect, fix it
+  if (chatWidgetData.model) {
+    const correctProvider = getModelProviderFromModel(chatWidgetData.model);
+    chatWidgetData.modelProvider = correctProvider;
+  }
+  
+  return chatWidgetData;
 }

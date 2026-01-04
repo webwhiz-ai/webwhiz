@@ -30,6 +30,11 @@ export enum EmbeddingModel {
   'OPENAI_EMBEDDING_3' = 'text-embedding-3-small',
 }
 
+export enum ModelProvider {
+  OPENAI = 'openai',
+  ANTHROPIC = 'anthropic',
+}
+
 export interface CustomKeyData {
   useOwnKey: boolean;
   keys?: string[];
@@ -65,6 +70,7 @@ export interface Knowledgebase {
   updatedAt: Date;
   // Custom prompt fields
   model?: string;
+  modelProvider?: ModelProvider;
   defaultAnswer?: string;
   prompt?: string;
   // Custom domain
@@ -195,6 +201,7 @@ export interface ChatSession {
   defaultAnswer?: string;
   prompt?: string;
   model?: string;
+  modelProvider?: ModelProvider;
   isDemo?: boolean;
   src?: string;
   isManual?: boolean;

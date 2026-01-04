@@ -31,10 +31,10 @@ import { ChatBot } from "../../components/ChatBot/ChatBot";
 import { NoDataFineTuneIcon } from "../../components/Icons/noData/NoDataFineTuneIcon";
 import { SectionTitle } from "../../components/SectionTitle/SectionTitle";
 import { CurrentUser, permissions, User } from "../../services/appConfig";
-import { addTrainingDoc, customizeWidget, deleteTrainingData, fetchKnowledgebaseCrawlData, fetchKnowledgebaseCrawlDataForDocs, fetchKnowledgebaseDetails, fetcKnowledgebase, generateEmbeddings, getOfflineMessages, getTrainingData, getTrainingDataDetails, updateAdminEmail, updateDefaultAnswer, updateModelName, updatePrompt, updateWebsiteData } from "../../services/knowledgebaseService";
+import { addTrainingDoc, customizeWidget, deleteTrainingData, fetchKnowledgebaseCrawlData, fetchKnowledgebaseCrawlDataForDocs, fetchKnowledgebaseDetails, fetcKnowledgebase, generateEmbeddings, getOfflineMessages, getTrainingData, getTrainingDataDetails, updateAdminEmail, updateDefaultAnswer, updateModelName, updateModelProvider, updatePrompt, updateWebsiteData } from "../../services/knowledgebaseService";
 import { getUserProfile } from "../../services/userServices";
 import { ChatBotCustomizeData, CustomDataPagination, DocsKnowledgeData, Knowledgebase, OfflineMessagePagination, ProductSetupData, TrainingData } from "../../types/knowledgebase.type";
-import { chatWidgetDefaultValues } from "../../utils/commonUtils";
+import { chatWidgetDefaultValues, AVAILABLE_MODELS } from "../../utils/commonUtils";
 import { Paginator } from "../../widgets/Paginator/Paginator";
 import { AddTrainingData } from "../AddTrainingData/AddTrainingData";
 import { AddTrainingDataForm } from "../AddTrainingDataForm/AddTrainingDataForm";
@@ -794,6 +794,7 @@ console.log(permissions.get(), 'permissionspermissions')
 			formSendAgainBtnLabel: chatBot.chatWidgeData?.formSendAgainBtnLabel || chatWidgetDefaultValues.formSendAgainBtnLabel,
 			formTryAgainBtnLabel: chatBot.chatWidgeData?.formTryAgainBtnLabel || chatWidgetDefaultValues.formTryAgainBtnLabel,
 			model: chatBot.model || chatWidgetDefaultValues.model,
+			modelProvider: chatBot.modelProvider || 'openai',
 		};
 	}, [chatBot]);
 
@@ -876,6 +877,12 @@ console.log(permissions.get(), 'permissionspermissions')
 																// Limit Change model only for paid users
 																if (user.activeSubscription !== 'FREE' && formData.model !== chatBot.model) {
 																	updatePromiseList.push(updateModelName(chatBot._id, formData.model));
+																	
+																	// Also update model provider based on the selected model
+																	const selectedModel = AVAILABLE_MODELS.find(m => m.value === formData.model);
+																	if (selectedModel && selectedModel.provider !== chatBot.modelProvider) {
+																		updatePromiseList.push(updateModelProvider(chatBot._id, selectedModel.provider));
+																	}
 																}
 																if (formData.prompt !== chatBot.prompt) {
 																	updatePromiseList.push(updatePrompt(chatBot._id, formData.prompt || ''));
