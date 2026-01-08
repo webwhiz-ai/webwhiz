@@ -22,6 +22,7 @@ import { CustomKeyService } from './custom-key.service';
 import { WebhookModule } from '../webhook/webhook.module';
 import { WebSocketChatGateway } from './websocketchat.gateway';
 import { PgEmbeddingsDbService } from './pgEmbeddingsDb.service';
+import { PgChunksDbService } from './pgChunksDb.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 @Module({
@@ -54,6 +55,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
     CustomKeyService,
     WebSocketChatGateway,
     PgEmbeddingsDbService,
+    PgChunksDbService,
   ],
   exports: [
     KnowledgebaseDbService,
