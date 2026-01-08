@@ -19,17 +19,13 @@ import {
   ChunkStatus,
   CustomKeyData,
   EmbeddingModel,
+  TopChunksResponse,
 } from '../knowledgebase.schema';
 import { PromptService } from '../prompt/prompt.service';
 import { DEFAULT_CHATGPT_PROMPT } from './openaiChatbot.constant';
 import { CustomKeyService } from '../custom-key.service';
-
-interface CosineSimilarityWorkerResponse {
-  chunkId: {
-    $oid: string;
-  };
-  similarity: number;
-}
+import { PgEmbeddingsDbService } from '../pgEmbeddingsDb.service';
+import { AppConfigService } from '../../common/config/appConfig.service';
 
 interface ChunkForCompletion extends Chunk {
   content: string;
@@ -39,15 +35,21 @@ interface ChunkForCompletion extends Chunk {
 @Injectable()
 export class OpenaiChatbotService {
   private readonly logger: Logger;
+  private fetchTopNChunksFromPg: boolean;
 
   constructor(
     private openaiService: OpenaiService,
     private kbDbService: KnowledgebaseDbService,
+    private pgEmbeddingsDbService: PgEmbeddingsDbService,
     private readonly promptService: PromptService,
     private readonly customKeyService: CustomKeyService,
+    private readonly appConfigService: AppConfigService,
     @Inject(CELERY_CLIENT) private celeryClient: CeleryClientService,
   ) {
     this.logger = new Logger(OpenaiChatbotService.name);
+    this.fetchTopNChunksFromPg = this.appConfigService.getFeatureFlag(
+      'fetch_embeddings_from_pg',
+    );
   }
 
   private getCustomKeys(customKeys?: CustomKeyData): string[] | undefined {
@@ -130,6 +132,7 @@ export class OpenaiChatbotService {
       type: chunk.type,
       embeddingModel,
     });
+
     await this.kbDbService.updateChunkById(chunk._id, {
       status: ChunkStatus.EMBEDDING_GENERATED,
     });
@@ -175,12 +178,21 @@ export class OpenaiChatbotService {
       embeddingModel,
     );
 
-    const client = this.celeryClient.get(CeleryClientQueue.DEFAULT);
-    const task = client.createTask('worker.get_top_n_chunks');
+    let topChunks: TopChunksResponse[] = [];
+    if (this.fetchTopNChunksFromPg) {
+      topChunks = await this.pgEmbeddingsDbService.getTopNChunksForEmbedding(
+        queryEmbedding,
+        kbId,
+        3,
+      );
+    } else {
+      const client = this.celeryClient.get(CeleryClientQueue.DEFAULT);
+      const task = client.createTask('worker.get_top_n_chunks');
 
-    const topChunks: CosineSimilarityWorkerResponse[] = JSON.parse(
-      await task.applyAsync([queryEmbedding, kbId.toString(), 3]).get(),
-    );
+      topChunks = JSON.parse(
+        await task.applyAsync([queryEmbedding, kbId.toString(), 3]).get(),
+      );
+    }
 
     const filteredChunks =
       topChunks.length > 2

@@ -284,6 +284,7 @@ export class KnowledgebaseService {
         kbId,
         DataStoreType.WEBPAGE,
       ),
+
       this.kbDbService.deleteKbEmbeddingsForKnowledgebase(
         kbId,
         DataStoreType.WEBPAGE,

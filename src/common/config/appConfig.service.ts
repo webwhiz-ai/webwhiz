@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { AppConfig } from './configuration';
+import { AppConfig, FeatureFlags } from './configuration';
 
 @Injectable()
 class AppConfigService {
@@ -21,6 +21,20 @@ class AppConfigService {
 
   get isTest(): boolean {
     return this.configService.get('nodeEnv', { infer: true }) === 'test';
+  }
+
+  /**
+   * Retrieves the value of a feature flag.
+   *
+   * @param name - The name of the feature flag.
+   * @returns The value of the feature flag. Returns `false` if the feature flag is not found.
+   */
+  getFeatureFlag(name: keyof FeatureFlags): boolean {
+    return (
+      this.configService.get(`featureFlags.${name}`, {
+        infer: true,
+      }) || false
+    );
   }
 }
 

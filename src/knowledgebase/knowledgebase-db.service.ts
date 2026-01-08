@@ -24,7 +24,11 @@ import {
   ChatSessionSparse,
   ChatAnswerFeedbackType,
   ChatSessionMessageSparse,
+  EmbeddingModel,
 } from './knowledgebase.schema';
+import { PgEmbeddingsDbService } from './pgEmbeddingsDb.service';
+import { PgChunksDbService } from './pgChunksDb.service';
+import { AppConfigService } from '../common/config/appConfig.service';
 
 @Injectable()
 export class KnowledgebaseDbService {
@@ -34,8 +38,16 @@ export class KnowledgebaseDbService {
   private readonly kbEmbeddingCollection: Collection<KbEmbedding>;
   private readonly chatSessionCollection: Collection<ChatSession>;
   private readonly promptCollection: Collection<Prompt>;
+  private insertEmbeddingsToPg: boolean;
+  private insertChunksToPg: boolean;
+  private fetchChunksFromPg: boolean;
 
-  constructor(@Inject(MONGODB) private db: Db) {
+  constructor(
+    @Inject(MONGODB) private db: Db,
+    private pgEmbeddingsDbService: PgEmbeddingsDbService,
+    private pgChunksDbService: PgChunksDbService,
+    private readonly appConfigService: AppConfigService,
+  ) {
     this.knowledgebaseCollection = this.db.collection<Knowledgebase>(
       KNOWLEDGEBASE_COLLECTION,
     );
@@ -50,6 +62,14 @@ export class KnowledgebaseDbService {
       CHAT_SESSION_COLLECTION,
     );
     this.promptCollection = this.db.collection<Prompt>(PROMPT_COLLECTION);
+    this.insertEmbeddingsToPg = this.appConfigService.getFeatureFlag(
+      'save_embeddings_to_pg',
+    );
+    this.insertChunksToPg =
+      this.appConfigService.getFeatureFlag('save_chunks_to_pg');
+    this.fetchChunksFromPg = this.appConfigService.getFeatureFlag(
+      'fetch_chunks_from_pg',
+    );
   }
 
   /*********************************************************
@@ -414,40 +434,92 @@ export class KnowledgebaseDbService {
   }
 
   async insertChunksBulk(data: Chunk[]): Promise<ObjectId[]> {
+    // Always write to MongoDB first (source of truth during migration)
     const res = await this.chunkColleciton.insertMany(data);
-    return Object.values(res.insertedIds);
+    const insertedIds = Object.values(res.insertedIds);
+
+    // Dual-write to PostgreSQL if enabled
+    if (this.insertChunksToPg) {
+      try {
+        // Attach MongoDB IDs to chunks for PG insert
+        const chunksWithIds = data.map((chunk, idx) => ({
+          ...chunk,
+          _id: insertedIds[idx],
+        }));
+
+        await this.pgChunksDbService.insertChunksBulkInPg(chunksWithIds);
+      } catch (error) {
+        console.error('Failed to dual-write chunks to PG:', error.message);
+        // Don't fail - MongoDB is source of truth
+      }
+    }
+
+    return insertedIds;
   }
 
   getChunksForKnowledgebase(
     knowledgebaseId: ObjectId,
     status?: ChunkStatus,
-  ): FindCursor<WithId<Chunk>> {
-    const filter: any = { knowledgebaseId };
-    if (status) {
-      filter.status = status;
+  ): FindCursor<WithId<Chunk>> | AsyncGenerator<Chunk> {
+    // Return iterator from PG if flag enabled, otherwise MongoDB cursor
+    if (this.fetchChunksFromPg) {
+      return this.pgChunksDbService.getChunksForKnowledgebaseInPg(
+        knowledgebaseId,
+        status,
+      );
+    } else {
+      const filter: any = { knowledgebaseId };
+      if (status) {
+        filter.status = status;
+      }
+      const chunks = this.chunkColleciton.find(filter);
+      return chunks;
     }
-    const chunks = this.chunkColleciton.find(filter);
-    return chunks;
   }
 
   async getChunkByIdBulk(ids: ObjectId[]) {
-    const chunks = this.chunkColleciton.find({ _id: { $in: ids } }).toArray();
-    return chunks;
+    // Read from PG if flag enabled, otherwise MongoDB
+    if (this.fetchChunksFromPg) {
+      return this.pgChunksDbService.getChunkByIdBulkInPg(ids);
+    } else {
+      const chunks = this.chunkColleciton.find({ _id: { $in: ids } }).toArray();
+      return chunks;
+    }
   }
 
   async getChunksForDataStoreItem(dId: ObjectId) {
-    const res: Pick<Chunk, '_id'>[] = await this.chunkColleciton
-      .find({ dataStoreId: dId }, { projection: { _id: 1 } })
-      .toArray();
-    return res;
+    // Read from PG if flag enabled, otherwise MongoDB
+    if (this.fetchChunksFromPg) {
+      return this.pgChunksDbService.getChunksForDataStoreItemInPg(dId);
+    } else {
+      const res: Pick<Chunk, '_id'>[] = await this.chunkColleciton
+        .find({ dataStoreId: dId }, { projection: { _id: 1 } })
+        .toArray();
+      return res;
+    }
   }
 
   async updateChunkById(id: ObjectId, chunk: Partial<Chunk>) {
     delete chunk._id;
+
+    // Always update MongoDB first
     await this.chunkColleciton.updateOne(
       { _id: id },
       { $set: { ...chunk, updatedAt: new Date() } },
     );
+
+    // Dual-write to PostgreSQL if enabled
+    if (this.insertChunksToPg) {
+      try {
+        await this.pgChunksDbService.updateChunkByIdInPg(id, chunk);
+      } catch (error) {
+        console.error(
+          'Failed to dual-write chunk update to PG:',
+          error.message,
+        );
+        // Don't fail - MongoDB is source of truth
+      }
+    }
   }
 
   async deleteChunkInKnowledgebase(
@@ -461,59 +533,172 @@ export class KnowledgebaseDbService {
   }
 
   async deleteChunksByIdBulk(ids: ObjectId[]) {
+    // Always delete from MongoDB first
     await this.chunkColleciton.deleteMany({ _id: { $in: ids } });
+
+    // Dual-write delete to PostgreSQL if enabled
+    if (this.insertChunksToPg) {
+      try {
+        await this.pgChunksDbService.deleteChunksByIdBulkInPg(ids);
+      } catch (error) {
+        console.error(
+          'Failed to dual-write chunk deletion to PG:',
+          error.message,
+        );
+        // Don't fail - MongoDB is source of truth
+      }
+    }
   }
 
   async deleteChunksForKnowledgebase(id: ObjectId, type?: DataStoreType) {
     const filter: any = { knowledgebaseId: id };
     if (type) filter.type = type;
+
+    // Always delete from MongoDB first
     await this.chunkColleciton.deleteMany(filter);
+
+    // Dual-write delete to PostgreSQL if enabled
+    if (this.insertChunksToPg) {
+      try {
+        await this.pgChunksDbService.deleteChunksForKnowledgebaseInPg(id, type);
+      } catch (error) {
+        console.error(
+          'Failed to dual-write KB chunk deletion to PG:',
+          error.message,
+        );
+        // Don't fail - MongoDB is source of truth
+      }
+    }
   }
 
   /*********************************************************
    * KNOWLEDGEBASE EMBEDDING COLLECTION
    *********************************************************/
 
+  /**
+   * Inserts an embedding for a chunk of knowledgebase data.
+   *
+   * @param data - The embedding data to be inserted.
+   * @returns The inserted embedding data.
+   */
   async insertEmbeddingForChunk(data: KbEmbedding) {
-    const res = await this.kbEmbeddingCollection.insertOne(data);
+    const mongoPromise = this.kbEmbeddingCollection.insertOne(data);
+    const promises = [mongoPromise];
+
+    // Insert to Postgres only if enabled
+    if (this.insertEmbeddingsToPg) {
+      const pgPromise = this.pgEmbeddingsDbService.insertEmbeddingsInPg({
+        ...data,
+        _id: data._id.toHexString(),
+        knowledgebaseId: data.knowledgebaseId.toHexString(),
+        embeddingModel:
+          data.embeddingModel || EmbeddingModel.OPENAI_EMBEDDING_2,
+      });
+      promises.push(pgPromise);
+    }
+
+    await Promise.all(promises);
 
     return {
-      _id: res.insertedId,
       ...data,
     };
   }
 
   /**
-   * Update embeedding for chunk in embeddings for KB
+   * Update embeddings for chunk in embeddings for KB
    * @param knowledgebaseId
    * @param embedding
    */
   async updateEmbeddingForChunk(chunkId: ObjectId, embeddings: number[]) {
-    await this.kbEmbeddingCollection.updateOne(
+    const mongoPromise = this.kbEmbeddingCollection.updateOne(
       {
         _id: chunkId,
       },
       { $set: { embeddings } },
     );
+
+    const promises: Promise<any>[] = [mongoPromise];
+
+    // Insert to Postgres only if enabled
+    if (this.insertEmbeddingsToPg) {
+      const pgPromise = this.pgEmbeddingsDbService.updateEmbeddingsForChunkInPg(
+        chunkId,
+        embeddings,
+      );
+      promises.push(pgPromise);
+    }
+
+    await Promise.all(promises);
   }
 
+  /**
+   * Deletes the embeddings associated with a knowledgebase.
+   * @param kbId - The ID of the knowledgebase.
+   * @param type - Optional. The type of embeddings to delete.
+   */
   async deleteKbEmbeddingsForKnowledgebase(
     kbId: ObjectId,
     type?: DataStoreType,
   ) {
     const filter: any = { knowledgebaseId: kbId };
     if (type) filter.type = type;
-    await this.kbEmbeddingCollection.deleteMany(filter);
+    const mongoPromise = this.kbEmbeddingCollection.deleteMany(filter);
+
+    const promises: Promise<any>[] = [mongoPromise];
+
+    // Insert to Postgres only if enabled
+    if (this.insertEmbeddingsToPg) {
+      const pgPromise = this.pgEmbeddingsDbService.deleteEmbeddingsForKbInPg(
+        kbId,
+        type,
+      );
+      promises.push(pgPromise);
+    }
+
+    await Promise.all(promises);
   }
 
+  /**
+   * Deletes an embedding for a given chunk ID.
+   * @param chunkId - The ID of the chunk to delete the embedding for.
+   */
   async deleteEmbeddingForChunk(chunkId: ObjectId) {
-    await this.kbEmbeddingCollection.deleteOne({
+    const mongoPromise = this.kbEmbeddingCollection.deleteOne({
       _id: chunkId,
     });
+
+    const promises: Promise<any>[] = [mongoPromise];
+
+    // Insert to Postgres only if enabled
+    if (this.insertEmbeddingsToPg) {
+      const pgPromise =
+        this.pgEmbeddingsDbService.deleteEmbeddingsForChunkInPg(chunkId);
+      promises.push(pgPromise);
+    }
+
+    await Promise.all(promises);
   }
 
+  /**
+   * Deletes multiple embeddings from the knowledgebase collection by their IDs.
+   * @param ids - An array of ObjectIds representing the IDs of the embeddings to be deleted.
+   * @returns A promise that resolves when the embeddings are successfully deleted.
+   */
   async deleteEmbeddingsByIdBulk(ids: ObjectId[]) {
-    await this.kbEmbeddingCollection.deleteMany({ _id: { $in: ids } });
+    const mongoPromise = this.kbEmbeddingCollection.deleteMany({
+      _id: { $in: ids },
+    });
+
+    const promises: Promise<any>[] = [mongoPromise];
+
+    // Insert to Postgres only if enabled
+    if (this.insertEmbeddingsToPg) {
+      const pgPromise =
+        this.pgEmbeddingsDbService.deleteEmbeddingsByIdBulkInPg(ids);
+      promises.push(pgPromise);
+    }
+
+    await Promise.all(promises);
   }
 
   /*********************************************************

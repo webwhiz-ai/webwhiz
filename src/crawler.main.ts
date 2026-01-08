@@ -27,11 +27,13 @@ import { TaskModule } from './task/task.module';
 import { ChatbotService } from './knowledgebase/chatbot/chatbot.service';
 import { AppConfigService } from './common/config/appConfig.service';
 import { MaxJobQueue } from './common/max-job-queue';
+import { PostgresModule } from './common/postgres/postgres.module';
 
 @Module({
   imports: [
     AppConfigModule,
     MongoModule,
+    PostgresModule,
     OpenaiModule,
     KnowledgebaseModule,
     ImportersModule,
