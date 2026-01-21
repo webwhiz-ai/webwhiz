@@ -39,6 +39,7 @@ export interface ParticipantsData {
   id: ObjectId;
   role: UserRoles;
   email: string;
+  status: string;
 }
 
 export interface Knowledgebase {
