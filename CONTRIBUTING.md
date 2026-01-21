@@ -83,6 +83,10 @@ The following variables as mandatory
 
 Set the value for the following variables - `MONGO_URI`, `MONGO_DBNAME`, `REDIS_HOST`, `REDIS_PORT`
 
+3. Configure `widget/nginx-variables.conf`.
+
+`set $FRAME_ANCESTORS "http:"`, to allow unencrypted iframing of the widget in your development environment.
+
 ## Installing dependencies and running app
 
 From the root folder run the following commands
